@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
-import { compileScreens } from '../scanner.js'
+import { compileScreens } from '@/cli/compiler'
+
 
 export async function buildCommand() {
   const cwd = process.cwd()
@@ -15,7 +16,7 @@ export async function buildCommand() {
   console.log('🔨 Building for production...\n')
   
   try {
-    const compiledFiles = await compileScreens(appDir, outDir)
+    const compiledFiles = await compileScreens(appDir, outDir, true)
     
     if (compiledFiles.length === 0) {
       console.error('No screen files found in src/app/')

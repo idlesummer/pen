@@ -1,7 +1,8 @@
 import path from 'path'
 import fs from 'fs'
 import chokidar from 'chokidar'
-import { loadAppFiles } from '../scanner.js'
+import { loadAppFiles } from '@/cli/loader'
+
 
 export async function devCommand() {
   const cwd = process.cwd()
