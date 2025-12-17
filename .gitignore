@@ -1,8 +1,0 @@
-node_modules/
-dist/
-.pen/
-*.log
-.DS_Store
-examples/**/node_modules
-examples/**/.pen
-examples/**/dist
