@@ -1,9 +1,10 @@
 import js from '@eslint/js'
+import { defineConfig } from 'eslint/config'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
-import { defineConfig } from 'eslint/config'
+import globals from 'globals'
 
 const eslintConfig = defineConfig([
   js.configs.recommended,
@@ -15,6 +16,9 @@ const eslintConfig = defineConfig([
         ecmaVersion: 2024,
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        ...globals.node,
       },
     },
     plugins: {
