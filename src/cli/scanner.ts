@@ -49,7 +49,7 @@ export async function compileScreens(appDir: string, outDir: string, isProd = fa
 
   // Return compiled JS file paths
   const tsxPattern = /\.(tsx|jsx|ts)$/
-  return screenFiles.map(file => {
+  return screenFiles.map((file) => {
     const relativePath = path.relative(appDir, file)
     const jsPath = relativePath.replace(tsxPattern, '.js')
     return path.join(outDir, jsPath)
