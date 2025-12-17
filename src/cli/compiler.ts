@@ -9,17 +9,17 @@ export async function compileScreens(appDir: string, outDir: string, isProd = fa
     return screenFiles
   
   await esbuild.build({
-    entryPoints: screenFiles,
-    outdir: outDir,
+    entryPoints: screenFiles, // All screen.tsx files
+    outdir: outDir,           // .pen/app/ or dist/app/
     outbase: appDir,
     platform: 'node',
     format: 'esm',
     target: 'node24',
-    jsx: 'automatic',
+    jsx: 'automatic',         // react automatic JSX runtime
     jsxImportSource: 'react',
-    bundle: false,
-    minify: isProd,
-    sourcemap: !isProd,
+    bundle: false,            // don't bundle dependencies
+    minify: isProd,           // minify if production
+    sourcemap: !isProd,       // source maps for dev only
   })
 
   // Return compiled JS file paths
