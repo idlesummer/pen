@@ -1,24 +1,16 @@
 import { defineConfig } from 'tsup'
 
-const tsupConfig = defineConfig([
-  // Runtime library (what users import)
-  {
-    entry: ['src/index.ts'],
-    format: ['esm'],
-    dts: true,
-    clean: true,
-    sourcemap: true,
-    external: ['react', 'ink'],
+const tsupConfig = defineConfig({
+  entry: {
+    'index': 'src/index.ts',
+    'cli/index': 'src/cli/index.ts',
   },
-  // CLI commands
-  {
-    entry: ['src/cli/index.ts'],
-    format: ['esm'],
-    outDir: 'dist/cli',
-    clean: false,
-    sourcemap: true,
-    external: ['esbuild', 'chokidar'],
-  },
-])
+  format: ['esm'],
+  dts: true,
+  splitting: false,
+  sourcemap: true,
+  clean: true,
+  shims: true,
+})
 
 export default tsupConfig
