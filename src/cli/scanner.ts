@@ -1,9 +1,11 @@
 import fs from 'fs/promises'
 import path from 'path'
 import url from 'url'
+import esbuild from 'esbuild'
+
 
 export async function getScreenFiles(rootDir: string) {
-  const screenPattern = /^screen\.(tsx|jsx)$/i
+  const screenPattern = /^screen\.(tsx|jsx|ts|js)$/i
   const files: string[] = []
   const queue: string[] = [rootDir]
   
@@ -26,11 +28,38 @@ export async function getScreenFiles(rootDir: string) {
   return files
 }
 
-export async function loadAppFiles(appDir: string) {
-  const filePaths = await getScreenFiles(appDir)
+export async function compileScreens(appDir: string, outDir: string) {
+  const screenFiles = await getScreenFiles(appDir)
+  if (!screenFiles.length)
+    return screenFiles
+  
+  await esbuild.build({
+    entryPoints: screenFiles,
+    outdir: outDir,
+    format: 'esm',
+    platform: 'node',
+    target: 'node24',
+    bundle: false,
+    outbase: appDir,
+    jsx: 'automatic',
+    jsxImportSource: 'react',
+  })
+
+  // Return compiled JS file paths
+  const tsxPattern = /\.(tsx|jsx|ts)$/
+  return screenFiles.map(file => {
+    const relativePath = path.relative(appDir, file)
+    const jsPath = relativePath.replace(tsxPattern, '.js')
+    return path.join(outDir, jsPath)
+  })
+}
+
+
+export async function loadAppFiles(appDir: string, tempDir: string) {
+  const compiledFiles = await compileScreens(appDir, tempDir)
   const modules = []
   
-  for (const filePath of filePaths) {
+  for (const filePath of compiledFiles) {
     const fileUrl = url.pathToFileURL(filePath).href + `?t=${Date.now()}`
     const module = await import(fileUrl)
     
@@ -39,7 +68,6 @@ export async function loadAppFiles(appDir: string) {
     
     if (module.default)
       console.log(`  ${module.default}`)
-    
     modules.push(module)
   }
   
