@@ -28,7 +28,7 @@ export async function getScreenFiles(rootDir: string) {
   return files
 }
 
-export async function compileScreens(appDir: string, outDir: string) {
+export async function compileScreens(appDir: string, outDir: string, isProd = false) {
   const screenFiles = await getScreenFiles(appDir)
   if (!screenFiles.length)
     return screenFiles
@@ -36,13 +36,15 @@ export async function compileScreens(appDir: string, outDir: string) {
   await esbuild.build({
     entryPoints: screenFiles,
     outdir: outDir,
-    format: 'esm',
-    platform: 'node',
-    target: 'node24',
-    bundle: false,
     outbase: appDir,
+    platform: 'node',
+    format: 'esm',
+    target: 'node24',
     jsx: 'automatic',
     jsxImportSource: 'react',
+    bundle: false,
+    minify: isProd,
+    sourcemap: !isProd,
   })
 
   // Return compiled JS file paths
@@ -53,7 +55,6 @@ export async function compileScreens(appDir: string, outDir: string) {
     return path.join(outDir, jsPath)
   })
 }
-
 
 export async function loadAppFiles(appDir: string, tempDir: string) {
   const compiledFiles = await compileScreens(appDir, tempDir)
