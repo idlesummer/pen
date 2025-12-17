@@ -1,5 +1,5 @@
 {
-  "name": "route-groups",
+  "name": "with-layouts",
   "version": "1.0.0",
   "type": "module",
   "private": true,
@@ -9,10 +9,6 @@
     "start": "node ../../dist/cli/index.js start"
   },
   "devDependencies": {
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3"
-  },
-  "dependencies": {
-    "react-dom": "^19.2.3"
+    "@types/react": "^19.0.0"
   }
 }
