@@ -3,6 +3,7 @@ import path from 'path'
 import url from 'url'
 
 export async function getScreenFiles(rootDir: string) {
+  const screenPattern = /^screen\.(tsx|jsx)$/i
   const files: string[] = []
   const queue: string[] = [rootDir]
   
@@ -17,7 +18,7 @@ export async function getScreenFiles(rootDir: string) {
         if (!dirent.name.startsWith('_'))
           queue.push(filePath)
       }
-      else if (dirent.isFile() && /\.(ts|js)$/.test(dirent.name))
+      else if (dirent.isFile() && screenPattern.test(dirent.name))
         files.push(filePath)
     }
   }
@@ -36,13 +37,8 @@ export async function loadAppFiles(appDir: string) {
     const relativePath = filePath.replace(appDir, '').replace(/^[/\\]/, '')
     console.log(`Loaded: ${relativePath}`)
     
-    if (module.default) {
-      if (typeof module.default === 'function') {
-        module.default()
-      } else {
-        console.log(`  ${module.default}`)
-      }
-    }
+    if (module.default)
+      console.log(`  ${module.default}`)
     
     modules.push(module)
   }

@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { existsSync } from 'fs'
-import { getAllFiles } from '../scanner.js'
+import { getScreenFiles } from '../scanner.js'
 
 export async function startCommand() {
   const cwd = process.cwd()
@@ -16,7 +16,7 @@ export async function startCommand() {
   console.log('🚀 Starting application...\n')
   
   // Load all built files from dist/app/
-  const filePaths = await getAllFiles(distAppDir)
+  const filePaths = await getScreenFiles(distAppDir)
   
   for (const filePath of filePaths) {
     const fileUrl = pathToFileURL(filePath).href

@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { existsSync } from 'fs'
 import * as esbuild from 'esbuild'
-import { getAllFiles } from '../scanner.js'
+import { getScreenFiles } from '../scanner.js'
 
 export async function buildCommand() {
   const cwd = process.cwd()
@@ -16,7 +16,7 @@ export async function buildCommand() {
   console.log('🔨 Building for production...\n')
   
   // Get all app files
-  const filePaths = await getAllFiles(appDir)
+  const filePaths = await getScreenFiles(appDir)
   
   if (filePaths.length === 0) {
     console.error('No files found in src/app/')
