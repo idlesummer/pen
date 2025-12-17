@@ -1,0 +1,22 @@
+# Source files (we only want the built dist/)
+src/
+tsconfig.json
+
+# Development files
+node_modules/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests (if you add them later)
+test/
+*.test.ts
+*.spec.ts

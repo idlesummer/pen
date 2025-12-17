@@ -1,21 +1,21 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsup'
 
-export default defineConfig({
-  entry: {
-    'index': 'src/index.ts',
-    'cli/index': 'src/cli/index.ts',
-    'cli/scanner': 'src/cli/scanner.ts',
-    'runtime/dev-server': 'src/runtime/dev-server.tsx',
-  },
+const tsupConfig = defineConfig({
+  entry: ['src/cli/index.ts', 'src/runtime/index.ts'],
   format: ['esm'],
-  dts: true,
-  splitting: false,
+  target: 'node24',
+  bundle: true,
+  splitting: true,
   sourcemap: true,
   clean: true,
-  shims: true,
-  external: ['ink', 'react'],
-  esbuildOptions(options) {
-    options.jsx = 'automatic';
-    options.jsxImportSource = 'react';
+  dts: true,
+  external: ['commander', 'esbuild', 'chokidar'],
+  esbuildOptions: (options) => {
+    options.alias = {
+      ...options.alias,
+      '@': './src',
+    }
   },
-});
+})
+
+export default tsupConfig
