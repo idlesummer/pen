@@ -9,7 +9,7 @@ const tsupConfig = defineConfig({
   sourcemap: true,
   clean: true,
   dts: true,
-  external: ['commander', 'esbuild', 'chokidar'],
+  external: ['commander', 'esbuild', 'chokidar', 'react', 'react-dom'],
   esbuildOptions: (options) => {
     options.alias = {
       ...options.alias,
