@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import url from 'url'
 
-export async function getAllFiles(rootDir: string) {
+export async function getScreenFiles(rootDir: string) {
   const files: string[] = []
   const queue: string[] = [rootDir]
   
@@ -26,7 +26,7 @@ export async function getAllFiles(rootDir: string) {
 }
 
 export async function loadAppFiles(appDir: string) {
-  const filePaths = await getAllFiles(appDir)
+  const filePaths = await getScreenFiles(appDir)
   const modules = []
   
   for (const filePath of filePaths) {
