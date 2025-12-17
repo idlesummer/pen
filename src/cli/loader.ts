@@ -26,13 +26,8 @@ export async function loadAppFiles(appDir: string, tempDir: string) {
     // Get layouts for this route
     const layouts = getLayoutsForRoute(routePath, layoutFiles, tempDir)
     
-    // Compose layouts from innermost to outermost
+    // Screen must export a React component
     let content = screenModule.default
-    
-    // If screen exports a string, wrap in React element
-    if (typeof content === 'string') {
-      content = React.createElement('div', null, content)
-    }
     
     // Wrap with layouts (innermost first)
     for (let i = layouts.length - 1; i >= 0; i--) {

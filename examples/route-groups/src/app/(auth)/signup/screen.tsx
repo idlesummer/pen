@@ -1,1 +1,3 @@
-export default 'Signup Screen'
+export default function SignupScreen() {
+  return <>Signup Screen</>
+}

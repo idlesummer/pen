@@ -1,1 +1,3 @@
-export default 'Dashboard Home'
+export default function HomeScreen() {
+  return <>Home Screen Content</>
+}

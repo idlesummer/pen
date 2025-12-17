@@ -1,1 +1,3 @@
-export default 'Settings Screen'
+export default function SettingsScreen() {
+  return <>Settings Screen Content</>
+}
