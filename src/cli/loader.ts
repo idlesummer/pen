@@ -3,12 +3,13 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { compileAll } from '@/cli/compiler'
 import { getRoutePath, getLayoutsForRoute } from '@/cli/scanner'
+import type { ComponentType, PropsWithChildren } from 'react'
 
 export async function loadAppFiles(appDir: string, tempDir: string) {
   const { screenFiles, layoutFiles } = await compileAll(appDir, tempDir)
   
   // Import all layouts
-  const layoutModules = new Map<string, any>()
+  const layoutModules = new Map<string, ComponentType<PropsWithChildren>>()
   for (const layoutFile of layoutFiles) {
     const fileUrl = url.pathToFileURL(layoutFile).href + `?t=${Date.now()}`
     const module = await import(fileUrl)
@@ -31,11 +32,9 @@ export async function loadAppFiles(appDir: string, tempDir: string) {
     
     // Wrap with layouts (innermost first)
     for (let i = layouts.length - 1; i >= 0; i--) {
-      const layoutModule = layoutModules.get(layouts[i])
-      if (layoutModule?.default) {
-        const Layout = layoutModule.default
+      const Layout = layoutModules.get(layouts[i])
+      if (Layout)
         content = React.createElement(Layout, null, content)
-      }
     }
     
     // Render to string
