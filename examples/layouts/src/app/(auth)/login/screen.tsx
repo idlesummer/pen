@@ -1,1 +1,3 @@
-export default 'Login Screen Content'
+export default function LoginScreen() {
+  return <>Login Screen Content</>
+}

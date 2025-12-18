@@ -1,1 +1,3 @@
-export default 'Signup Screen Content'
+export default function LoginScreen() {
+  return <>Signup Screen Content</>
+}

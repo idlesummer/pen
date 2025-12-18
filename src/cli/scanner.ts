@@ -51,28 +51,63 @@ export async function getLayoutFiles(rootDir: string) {
   return files
 }
 
+// Get route path with route groups stripped (for display)
 export function getRoutePath(filePath: string, appDir: string): string {
   const relativePath = path.relative(appDir, filePath)
   const dirPath = path.dirname(relativePath)
+  
+  // Handle current directory case
+  if (dirPath === '.' || dirPath === '') {
+    return '/'
+  }
   
   // Remove route groups from path
   const segments = dirPath.split(path.sep).filter((segment) => {
     return !ROUTE_GROUP_PATTERN.test(segment)
   })
   
+  // Handle empty segments (all were route groups)
+  if (segments.length === 0 || (segments.length === 1 && segments[0] === '.')) {
+    return '/'
+  }
+  
   return '/' + segments.join('/')
 }
 
-// Get layouts for a specific route path (in order from root to leaf)
-export function getLayoutsForRoute(routePath: string, layoutFiles: string[], appDir: string): string[] {
+// Get file path with route groups kept (for layout matching)
+function getFilePathWithGroups(filePath: string, appDir: string): string {
+  const relativePath = path.relative(appDir, filePath)
+  
+  if (relativePath === '.' || relativePath === '') {
+    return '/'
+  }
+  
+  const segments = relativePath.split(path.sep).filter(s => s && s !== '.')
+  
+  if (segments.length === 0) {
+    return '/'
+  }
+  
+  return '/' + segments.join('/')
+}
+
+// Get layouts for a specific screen file (in order from root to leaf)
+export function getLayoutsForScreen(screenFile: string, layoutFiles: string[], appDir: string): string[] {
   const layouts: Array<{ path: string, depth: number }> = []
   
+  // Get the screen's directory path (with route groups kept)
+  const screenDir = path.dirname(screenFile)
+  const screenPath = getFilePathWithGroups(screenDir, appDir)
+  
   for (const layoutFile of layoutFiles) {
-    const layoutRoutePath = getRoutePath(path.dirname(layoutFile), appDir)
+    const layoutDir = path.dirname(layoutFile)
+    const layoutPath = getFilePathWithGroups(layoutDir, appDir)
     
-    // Check if this layout applies to the route
-    if (routePath.startsWith(layoutRoutePath) || layoutRoutePath === '/') {
-      const depth = layoutRoutePath === '/' ? 0 : layoutRoutePath.split('/').length
+    // A layout applies if the screen path starts with the layout path
+    if (screenPath === layoutPath ||
+        screenPath.startsWith(layoutPath + '/') ||
+        layoutPath === '/') {
+      const depth = layoutPath === '/' ? 0 : layoutPath.split('/').filter(Boolean).length
       layouts.push({ path: layoutFile, depth })
     }
   }

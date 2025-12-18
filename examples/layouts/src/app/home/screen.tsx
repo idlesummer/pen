@@ -1,1 +1,3 @@
-export default 'Home Screen Content'
+export default function HomeScreen() {
+  return <>Home Screen Content</>
+}
