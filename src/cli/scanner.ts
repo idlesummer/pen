@@ -1,6 +1,6 @@
 import { readdirSync, statSync, type Dirent } from 'fs'
 import { resolve, basename, join } from 'path'
-import { buildTreeBFS } from '../lib/tree-builder'
+import { buildTreeBFS } from '@/lib/tree-builder'
 
 export type FileTreeNode = { 
   name: string              // entry name (file or directory)

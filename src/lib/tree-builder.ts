@@ -21,3 +21,26 @@ export function buildTreeBFS<TNode, TRaw>(options: TreeBuildOptions<TNode, TRaw>
   }
   return root
 }
+
+export function buildTreeDFS<TNode, TRaw>(options: TreeBuildOptions<TNode, TRaw>): TNode {
+  const { root, expand, createChild, attach, shouldTraverse } = options
+  const stack = [root]
+
+  while (stack.length) {
+    const node = stack.pop()!
+    const rawChildren = expand(node)
+    const len = rawChildren.length
+    
+    // Process in reverse to maintain left-to-right order when popping from stack
+    for (let i = len-1; i >= 0; i--) {
+      const raw = rawChildren[i]
+      const child = createChild(raw, node)
+      attach(child, node)
+      
+      if (shouldTraverse?.(child, raw) ?? true)
+        stack.push(child)
+    }
+  }
+  
+  return root
+}
