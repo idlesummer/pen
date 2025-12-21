@@ -235,7 +235,7 @@ def build_route_tree(file_tree: FileTreeNode) -> RouteNode | None:
         parent.children.append(child)
       
     # Step 6: Define when to traverse deeper
-    def shouldTraverse(_: RouteNode, file_node: FileTreeNode) -> bool:
+    def should_traverse(_: RouteNode, file_node: FileTreeNode) -> bool:
         return file_node.children is not None
 
     # Step 7: Build the tree!
@@ -244,7 +244,7 @@ def build_route_tree(file_tree: FileTreeNode) -> RouteNode | None:
         expand=expand,
         create_child=create_child,
         attach=attach,
-        should_traverse=shouldTraverse
+        should_traverse=should_traverse
     ))
 
 
