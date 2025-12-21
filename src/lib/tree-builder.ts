@@ -1,46 +1,45 @@
-export type TreeBuildOptions<TNode, TRaw> = {
+export type TreeBuildOptions<TNode, TSource> = {
   root: TNode
-  expand: (node: TNode) => TRaw[]                       // Returns raw data for node's children
-  createChild: (raw: TRaw, parent: TNode) => TNode      // Transform raw data into child nodes
-  attach: (child: TNode, parent: TNode) => void         // Attach child to parent (side effect)
-  shouldTraverse?: (child: TNode, raw: TRaw) => boolean // Raw lets you check original data without storing it in the node
+  expand:      (node: TNode) => TSource[]                     // Returns source data for node's children
+  createChild: (source: TSource, parent: TNode) => TNode      // Transform source data into child nodes
+  attach:      (child: TNode, parent: TNode) => void          // Attach child to parent (side effect)
+  shouldTraverse?: (child: TNode, source: TSource) => boolean  // Source to check original data w/o storing it in node
 }
 
-export function buildTreeBFS<TNode, TRaw>(options: TreeBuildOptions<TNode, TRaw>): TNode {
+export function buildTreeBFS<TNode, TSource>(options: TreeBuildOptions<TNode, TSource>): TNode {
   const { root, expand, createChild, attach, shouldTraverse } = options
   const queue = [root]
 
   for (const node of queue) {
-    for (const raw of expand(node)) {
-      const child = createChild(raw, node)      // raw = data to transform; node = parent context
+    for (const source of expand(node)) {
+      const child = createChild(source, node)      // source = data to transform; node = parent context
       attach(child, node)
-      
-      if (shouldTraverse?.(child, raw) ?? true) // raw = check metadata without storing it
+
+      if (shouldTraverse?.(child, source) ?? true) // source = check metadata without storing it
         queue.push(child)
     }
   }
   return root
 }
 
-export function buildTreeDFS<TNode, TRaw>(options: TreeBuildOptions<TNode, TRaw>): TNode {
+export function buildTreeDFS<TNode, TSource>(options: TreeBuildOptions<TNode, TSource>): TNode {
   const { root, expand, createChild, attach, shouldTraverse } = options
   const stack = [root]
 
   while (stack.length) {
     const node = stack.pop()!
-    const rawChildren = expand(node)
-    const len = rawChildren.length
-    
+    const sources = expand(node)
+    const len = sources.length
+
     // Process in reverse to maintain left-to-right order when popping from stack
     for (let i = len-1; i >= 0; i--) {
-      const raw = rawChildren[i]
-      const child = createChild(raw, node)
+      const source = sources[i]
+      const child = createChild(source, node)
       attach(child, node)
-      
-      if (shouldTraverse?.(child, raw) ?? true)
+
+      if (shouldTraverse?.(child, source) ?? true)
         stack.push(child)
     }
   }
-  
   return root
 }

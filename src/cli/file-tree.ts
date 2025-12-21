@@ -8,44 +8,6 @@ export type FileTreeNode = {
   children?: FileTreeNode[] // present only for directories
 }
 
-export function scanDirTree(inputPath: string): FileTreeNode {
-  const rootPath = resolve(inputPath)
-  const stat = statSync(rootPath, { throwIfNoEntry: false })
-
-  // Validation phase
-  if (!stat)               throw new Error(`scanDirTree: path does not exist: ${rootPath}`)
-  if (!stat.isDirectory()) throw new Error(`scanDirTree: expected directory, got non-directory: ${rootPath}`)
-
-  // Breadth-first traversal of the directory tree
-  const root: FileTreeNode = { name: basename(rootPath), path: rootPath, children: [] }
-  const queue = [root]
-
-  // Use index-based loop to avoid O(n) shift cost
-  for (let head = 0; head < queue.length; head++) {
-    const node = queue[head]
-    const children = node.children! // directory nodes always have children
-
-    // Read directory contents at node.path
-    const dirents = readdirSync(node.path, { withFileTypes: true })
-    dirents.sort((a, b) => a.name.localeCompare(b.name))
-
-    for (const d of dirents) {
-      const p = join(node.path, d.name)
-
-      if (d.isFile())
-        children.push({ name: d.name, path: p })
-
-      else if (d.isDirectory()) {
-        const child: FileTreeNode = { name: d.name, path: p, children: [] }
-        children.push(child)
-        queue.push(child)
-      }
-    }
-  }
-
-  return root
-}
-
 export function buildFileTree(inputPath: string): FileTreeNode {
   const rootPath = resolve(inputPath)
   const stat = statSync(rootPath, { throwIfNoEntry: false })

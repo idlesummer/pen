@@ -34,8 +34,8 @@
 //   return routeNode
 // }
 
-import type { FileTreeNode } from './scanner'
-import { buildTreeDFS } from '../lib/tree-builder'
+import { buildTreeDFS } from '@/lib/tree-builder'
+import type { FileTreeNode } from './file-tree'
 
 export type RouteNode = {
   name: string
@@ -49,14 +49,13 @@ export type RouteConfig = {
 export function buildRouteTree(fileTree: FileTreeNode, config: RouteConfig): RouteNode | null {
   if (!fileTree.children) return null
   if (config.ignore?.test(fileTree.name)) return null
-
-  // Map to track RouteNode → FileTreeNode correspondence
-  const sourceMap = new Map<RouteNode, FileTreeNode>()
+  
   
   const root: RouteNode = { name: fileTree.name }
+  const sourceMap = new Map<RouteNode, FileTreeNode>()  // Map to track RouteNode → FileTreeNode correspondence
   sourceMap.set(root, fileTree)
 
-  buildTreeDFS<RouteNode, FileTreeNode>({
+  return buildTreeDFS<RouteNode, FileTreeNode>({
     root,
     
     expand: (routeNode) => {
@@ -64,7 +63,7 @@ export function buildRouteTree(fileTree: FileTreeNode, config: RouteConfig): Rou
       return fileNode.children || []
     },
     
-    createChild: (fileNode, parent) => {
+    createChild: (fileNode) => {
       const child: RouteNode = { name: fileNode.name }
       sourceMap.set(child, fileNode)
       return child
@@ -76,8 +75,6 @@ export function buildRouteTree(fileTree: FileTreeNode, config: RouteConfig): Rou
     },
     
     shouldTraverse: (child, fileNode) =>
-      !!fileNode.children && !config.ignore?.test(fileNode.name)
+      !!fileNode.children && !config.ignore?.test(fileNode.name),
   })
-  
-  return root
 }
