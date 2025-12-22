@@ -21,7 +21,7 @@ import json
    ├─ layout.tsx
    └─ screen.tsx
    
-file_tree = {
+path_tree = {
   "name": "app",
   "path": "/project/app",
   "children": [
@@ -87,7 +87,7 @@ class PathNode:
         return json.dumps(serialize(self), indent=2)
 
 
-file_tree = PathNode(
+path_tree = PathNode(
     name='app',
     path='/project/app',
     children=[
@@ -199,7 +199,7 @@ class RouteNode:
         return json.dumps(self._to_dict(), indent=2)
     
 
-def build_route_tree(file_tree: PathNode) -> RouteNode | None:
+def build_route_tree(path_tree: PathNode) -> RouteNode | None:
     """
     Transform PathNode → RouteNode using DFS.
     
@@ -207,15 +207,15 @@ def build_route_tree(file_tree: PathNode) -> RouteNode | None:
     via closure, allowing expand to access source PathNode data.
     """
 
-    if not file_tree.children: 
+    if not path_tree.children: 
         return None
 
     # Step 1: Create root RouteNode
-    root = RouteNode(segment=file_tree.name, children=[])
+    root = RouteNode(segment=path_tree.name, children=[])
     
     # Step 2: Track RouteNode → PathNode mapping (captured by closure)
     route_to_path: dict[RouteNode, PathNode] = {}
-    route_to_path[root] = file_tree
+    route_to_path[root] = path_tree
 
     # Step 3: Expand node into child RouteNodes
     def expand(route_node: RouteNode) -> list[RouteNode] | None:
@@ -262,8 +262,8 @@ def build_route_tree(file_tree: PathNode) -> RouteNode | None:
 
 
 def main():
-    result = build_route_tree(file_tree)
-    print(f'file_tree = {file_tree}\n')
+    result = build_route_tree(path_tree)
+    print(f'path_tree = {path_tree}\n')
     print(f'route_tree = {result}')
 
 
