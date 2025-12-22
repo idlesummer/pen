@@ -26,7 +26,7 @@ export function buildRouteTree(pathTree: PathNode): RouteNode | null {
 
     // Step 3: Expand node into child RouteNodes
     expand: (routeNode) => {
-      const pathNode = routeToPath.get(routeNode)!
+      const pathNode = routeToPath.get(routeNode)!  // Always
       const pathChildren = pathNode?.children
       if (!pathChildren) return
 

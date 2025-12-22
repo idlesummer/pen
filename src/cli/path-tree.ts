@@ -9,7 +9,7 @@ export type PathNode = {
 }
 
 export function buildFileTree(inputPath: string): PathNode {
-  const rootPath = resolve(inputPath)
+  const rootPath = resolve(inputPath) // Get absolute path
   const stat = statSync(rootPath, { throwIfNoEntry: false })
   if (!stat)               throw new Error(`buildFileTree: path does not exist: ${rootPath}`)
   if (!stat.isDirectory()) throw new Error(`buildFileTree: expected directory, got: ${rootPath}`)
