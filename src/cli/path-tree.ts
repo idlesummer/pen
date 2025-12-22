@@ -18,7 +18,7 @@ export function buildFileTree(inputPath: string): PathNode {
     // Starting node
     root: { name: basename(rootPath), path: rootPath, children: [] },
 
-    // Read directory and create child PathNodes
+    // Get source PathNode via closure
     expand: (node) => {
       return readdirSync(node.path, { withFileTypes: true })
         .filter(d => d.isFile() || d.isDirectory())
