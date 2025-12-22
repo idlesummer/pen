@@ -1,9 +1,12 @@
-import { buildTreeDFS } from '@/lib/tree-builder'
-import type { PathNode } from '@/cli/path-tree'
+import { traverseDepthFirst } from '@/lib/tree'
+import type { PathNode } from '@/routing/path-tree'
 
 export type RouteNode = {
   segment: string
   children?: RouteNode[]
+
+  // Metadata
+  isGroup?: boolean
 
   // Special files
   view?: string
@@ -13,7 +16,7 @@ export type RouteNode = {
 export function buildRouteTree(pathTree: PathNode): RouteNode | null {
   if (!pathTree.children) 
     return null
-  
+
   // Step 1: Create root RouteNode
   const root: RouteNode = { segment: pathTree.name, children: [] }
 
@@ -21,12 +24,12 @@ export function buildRouteTree(pathTree: PathNode): RouteNode | null {
   const routeToPath = new Map<RouteNode, PathNode>()
   routeToPath.set(root, pathTree)
 
-  return buildTreeDFS({
+  return traverseDepthFirst({
     root,
 
     // Step 3: Expand node into child RouteNodes
     expand: (routeNode) => {
-      const pathNode = routeToPath.get(routeNode)!  // Always
+      const pathNode = routeToPath.get(routeNode)!  // Always defined
       const pathChildren = pathNode?.children
       if (!pathChildren) return
 
@@ -42,9 +45,16 @@ export function buildRouteTree(pathTree: PathNode): RouteNode | null {
           continue
         }
         // Create RouteNode for directory
-        const routeChild: RouteNode = { segment: pathChild.name, children: [] }
-        routeToPath.set(routeChild, pathChild)
+        const segment = pathChild.name
+        const isGroup = segment.startsWith('(') && segment.endsWith(')')
+        const routeChild: RouteNode = { segment, children: [] }
+
+        // Attach metadata
+        if (isGroup) routeChild.isGroup = true
+        // if (isMeta) routechild.meta = true
+
         routeChildren.push(routeChild)
+        routeToPath.set(routeChild, pathChild)
       }
 
       routeChildren.sort((a, b) => a.segment.localeCompare(b.segment))

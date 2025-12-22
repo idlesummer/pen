@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from 'fs'
 import { resolve, basename, join } from 'path'
-import { buildTreeBFS } from '@/lib/tree-builder'
+import { traverseBreadthFirst } from '@/lib/tree'
 
 export type PathNode = { 
   name: string            // entry name (file or directory)
@@ -14,7 +14,7 @@ export function buildFileTree(inputPath: string): PathNode {
   if (!stat)               throw new Error(`buildFileTree: path does not exist: ${rootPath}`)
   if (!stat.isDirectory()) throw new Error(`buildFileTree: expected directory, got: ${rootPath}`)
 
-  return buildTreeBFS<PathNode>({
+  return traverseBreadthFirst<PathNode>({
     // Starting node
     root: { name: basename(rootPath), path: rootPath, children: [] },
 

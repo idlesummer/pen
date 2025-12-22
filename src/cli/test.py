@@ -145,13 +145,13 @@ path_tree = PathNode(
 TNode = TypeVar('TNode')
 
 @dataclass
-class TreeBuildOptions(Generic[TNode]):
+class TraversalOptions(Generic[TNode]):
     root: TNode
     expand: Callable[[TNode], list[TNode] | None]   # Returns child nodes
     attach: Callable[[TNode, TNode], None]          # Attach child to parent
     filter: Callable[[TNode], bool] | None = None   # True = traverse child, False = attach only (don't traverse)
 
-def build_tree_dfs(options: TreeBuildOptions[TNode]) -> TNode:
+def build_tree_dfs(options: TraversalOptions[TNode]) -> TNode:
     root = options.root
     expand = options.expand
     attach = options.attach
@@ -249,7 +249,7 @@ def build_route_tree(path_tree: PathNode) -> RouteNode | None:
         parent.children.append(child)
 
     # Step 7: Build the tree!
-    return build_tree_dfs(TreeBuildOptions(
+    return build_tree_dfs(TraversalOptions(
         root=root,
         expand=expand,
         attach=attach,
