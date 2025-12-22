@@ -73,13 +73,13 @@ file_tree = {
 
 
 @dataclass
-class FileTreeNode:
+class PathNode:
     name: str
     path: str
-    children: list['FileTreeNode'] | None = field(default=None)
+    children: list['PathNode'] | None = field(default=None)
     
     def __str__(self) -> str:
-        def serialize(node: "FileTreeNode") -> dict:
+        def serialize(node: "PathNode") -> dict:
             data: dict[str, Any] = { 'name': node.name, 'path': node.path }
             if node.children is not None:
                 data['children'] = [serialize(child) for child in node.children]
@@ -87,31 +87,31 @@ class FileTreeNode:
         return json.dumps(serialize(self), indent=2)
 
 
-file_tree = FileTreeNode(
+file_tree = PathNode(
     name='app',
     path='/project/app',
     children=[
-        FileTreeNode(
+        PathNode(
             name='layout.tsx',
             path='/project/app/layout.tsx'
         ),
-        FileTreeNode(
+        PathNode(
             name='screen.tsx',
             path='/project/app/screen.tsx'
         ),
-        FileTreeNode(
+        PathNode(
             name='(marketing)',
             path='/project/app/(marketing)',
             children=[
-                FileTreeNode(
+                PathNode(
                     name='layout.tsx',
                     path='/project/app/(marketing)/layout.tsx'
                 ),
-                FileTreeNode(
+                PathNode(
                     name='about',
                     path='/project/app/(marketing)/about',
                     children=[
-                        FileTreeNode(
+                        PathNode(
                             name='screen.tsx',
                             path='/project/app/(marketing)/about/screen.tsx'
                         )
@@ -119,15 +119,15 @@ file_tree = FileTreeNode(
                 )
             ]
         ),
-        FileTreeNode(
+        PathNode(
             name='blog',
             path='/project/app/blog',
             children=[
-                FileTreeNode(
+                PathNode(
                     name='layout.tsx',
                     path='/project/app/blog/layout.tsx'
                 ),
-                FileTreeNode(
+                PathNode(
                     name='screen.tsx',
                     path='/project/app/blog/screen.tsx'
                 )
@@ -143,34 +143,28 @@ file_tree = FileTreeNode(
 
 
 TNode = TypeVar('TNode')
-TSource = TypeVar('TSource')
 
 @dataclass
-class TreeBuildOptions(Generic[TNode, TSource]):
+class TreeBuildOptions(Generic[TNode]):
     root: TNode
-    expand: Callable[[TNode], list[TSource]]          # returns source data for node's children
-    create_child: Callable[[TSource, TNode], TNode]   # (source, parent) -> child node
-    attach: Callable[[TNode, TNode], None]            # (child, parent) side-effect attach
-    should_traverse: Callable[[TNode, TSource], bool] | None = None  # (child, source) -> bool
+    expand: Callable[[TNode], list[TNode] | None]   # Returns child nodes
+    attach: Callable[[TNode, TNode], None]          # Attach child to parent
+    filter: Callable[[TNode], bool] | None = None   # True = traverse child, False = attach only (don't traverse)
 
-
-def build_tree_dfs(options: TreeBuildOptions[TNode, TSource]) -> TNode:
+def build_tree_dfs(options: TreeBuildOptions[TNode]) -> TNode:
     root = options.root
     expand = options.expand
-    create_child = options.create_child
     attach = options.attach
-    should_traverse = options.should_traverse
+    filter = options.filter
 
     stack = [root]
     while stack:
         node = stack.pop()
-        sources = expand(node)
+        children = expand(node)
         
-        for source in reversed(sources):
-            child = create_child(source, node)
+        for child in reversed(children or []):
             attach(child, node)
-
-            if should_traverse is None or should_traverse(child, source):
+            if filter is None or filter(child):     # Add to stack conditionally
                 stack.append(child)
 
     return root
@@ -205,46 +199,60 @@ class RouteNode:
         return json.dumps(self._to_dict(), indent=2)
     
 
-def build_route_tree(file_tree: FileTreeNode) -> RouteNode | None:
+def build_route_tree(file_tree: PathNode) -> RouteNode | None:
+    """
+    Transform PathNode → RouteNode using DFS.
+    
+    Pattern: route_to_path maintains RouteNode → PathNode correspondence
+    via closure, allowing expand to access source PathNode data.
+    """
+
     if not file_tree.children: 
         return None
 
     # Step 1: Create root RouteNode
-    root = RouteNode(segment=file_tree.name)
+    root = RouteNode(segment=file_tree.name, children=[])
     
-    # Step 2: Track RouteNode → FileTreeNode mapping
-    source_map: dict[RouteNode, FileTreeNode] = {}
-    source_map[root] = file_tree
+    # Step 2: Track RouteNode → PathNode mapping (captured by closure)
+    route_to_path: dict[RouteNode, PathNode] = {}
+    route_to_path[root] = file_tree
 
-    # Step 3: Define how to get children
-    def expand(route_node: RouteNode) -> list[FileTreeNode]:
-        file_node = source_map[route_node]
-        sources = file_node.children or []
-        return sorted(sources, key=lambda c: c.name)
+    # Step 3: Expand node into child RouteNodes
+    def expand(route_node: RouteNode) -> list[RouteNode] | None:
+        # Get source PathNode via closure
+        path_node = route_to_path[route_node]
+        path_children = path_node.children
+        if path_children is None:
+            return None
+        
+        # Detect special files and populate route_node metadata
+        for path_child in path_children:
+            match path_child.name:
+                case 'layout.tsx': route_node.layout = path_child.path
+                case 'screen.tsx': route_node.screen = path_child.path
+        
+        # Create and return child RouteNodes (directories only)
+        route_children = []
+        for path_child in path_children:
+            if path_child.children is None: 
+                continue
+            
+            route_child = RouteNode(segment=path_child.name, children=[])
+            route_to_path[route_child] = path_child
+            route_children.append(route_child)
+            
+        return sorted(route_children, key=lambda c: c.segment)
       
-    # Step 4: Define how to create a child RouteNdoe
-    def create_child(file_node: FileTreeNode, _: RouteNode) -> RouteNode:
-        child = RouteNode(segment=file_node.name)
-        source_map[child] = file_node
-        return child
-
     # Step 5: Define how to attach children      
     def attach(child: RouteNode, parent: RouteNode):
-        if parent.children is None:
-            parent.children = []
+        assert parent.children is not None
         parent.children.append(child)
-      
-    # Step 6: Define when to traverse deeper
-    def should_traverse(_: RouteNode, file_node: FileTreeNode) -> bool:
-        return file_node.children is not None
 
     # Step 7: Build the tree!
     return build_tree_dfs(TreeBuildOptions(
         root=root,
         expand=expand,
-        create_child=create_child,
         attach=attach,
-        should_traverse=should_traverse
     ))
 
 
@@ -255,7 +263,8 @@ def build_route_tree(file_tree: FileTreeNode) -> RouteNode | None:
 
 def main():
     result = build_route_tree(file_tree)
-    print(result)
+    print(f'file_tree = {file_tree}\n')
+    print(f'route_tree = {result}')
 
 
 if __name__ == '__main__':
