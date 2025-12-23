@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from math import exp
-from typing import Any, Callable, Generic, Iterable, TypeVar
+from typing import Any, Callable, Generic, Literal, TypeVar
 import json
 
 
@@ -12,16 +12,16 @@ import json
 """
 /project/app
 ├─ layout.tsx
-├─ view.tsx
+├─ screen.tsx
 ├─ (marketing)/
 │  ├─ layout.tsx
 │  └─ about/
-│     └─ view.tsx
+│     └─ screen.tsx
 └─ blog/
    ├─ layout.tsx
-   └─ view.tsx
+   └─ screen.tsx
    
-path_tree = {
+file_tree = {
   "name": "app",
   "path": "/project/app",
   "children": [
@@ -30,8 +30,8 @@ path_tree = {
       "path": "/project/app/layout.tsx"
     },
     {
-      "name": "view.tsx",
-      "path": "/project/app/view.tsx"
+      "name": "screen.tsx",
+      "path": "/project/app/screen.tsx"
     },
     {
       "name": "(marketing)",
@@ -46,8 +46,8 @@ path_tree = {
           "path": "/project/app/(marketing)/about",
           "children": [
             {
-              "name": "view.tsx",
-              "path": "/project/app/(marketing)/about/view.tsx"
+              "name": "screen.tsx",
+              "path": "/project/app/(marketing)/about/screen.tsx"
             }
           ]
         }
@@ -62,8 +62,8 @@ path_tree = {
           "path": "/project/app/blog/layout.tsx"
         },
         {
-          "name": "view.tsx",
-          "path": "/project/app/blog/view.tsx"
+          "name": "screen.tsx",
+          "path": "/project/app/blog/screen.tsx"
         }
       ]
     }
@@ -73,12 +73,12 @@ path_tree = {
 route_tree = {
   "segment": "app",
   "layout": "/project/app/layout.tsx",
-  "view": "/project/app/view.tsx",
+  "screen": "/project/app/screen.tsx",
   "children": [
     {
       "segment": "blog",
       "layout": "/project/app/blog/layout.tsx",
-      "view": "/project/app/blog/view.tsx"
+      "screen": "/project/app/blog/screen.tsx"
     },
     {
       "segment": "(marketing)",
@@ -87,7 +87,7 @@ route_tree = {
       "children": [
         {
           "segment": "about",
-          "view": "/project/app/(marketing)/about/view.tsx"
+          "screen": "/project/app/(marketing)/about/screen.tsx"
         }
       ]
     }
@@ -99,7 +99,7 @@ route_manifest = {
     "path": "/",
     "segment": "app",
     "layouts": ["/project/app/layout.tsx"],
-    "view": "/project/app/view.tsx"
+    "screen": "/project/app/screen.tsx"
   },
   "/blog": {
     "path": "/blog",
@@ -108,7 +108,7 @@ route_manifest = {
       "/project/app/layout.tsx",           # ← Inherited from app
       "/project/app/blog/layout.tsx"       # ← Own layout
     ],
-    "view": "/project/app/blog/view.tsx"
+    "screen": "/project/app/blog/screen.tsx"
   },
   "/about": {
     "path": "/about",                       # ← Note: no (marketing) in path!
@@ -117,7 +117,7 @@ route_manifest = {
       "/project/app/layout.tsx",           # ← Inherited from app
       "/project/app/(marketing)/layout.tsx" # ← Inherited from (marketing) group
     ],
-    "view": "/project/app/(marketing)/about/view.tsx"
+    "screen": "/project/app/(marketing)/about/screen.tsx"
   }
 }
 """
@@ -129,13 +129,13 @@ route_manifest = {
 
 
 @dataclass
-class PathNode:
+class FileNode:
     name: str
     path: str
-    children: list['PathNode'] | None = field(default=None)
+    children: list['FileNode'] | None = field(default=None)
     
     def __str__(self) -> str:
-        def serialize(node: "PathNode") -> dict:
+        def serialize(node: "FileNode") -> dict:
             data: dict[str, Any] = {'name': node.name, 'path': node.path}
             if node.children is not None:
                 data['children'] = [serialize(child) for child in node.children]
@@ -143,32 +143,32 @@ class PathNode:
         return json.dumps(serialize(self), indent=2)
 
 
-path_tree = PathNode(
+file_tree = FileNode(
     name='app',
     path='/project/app',
     children=[
-        PathNode(name='layout.tsx', path='/project/app/layout.tsx'),
-        PathNode(name='view.tsx', path='/project/app/view.tsx'),
-        PathNode(
+        FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
+        FileNode(name='screen.tsx', path='/project/app/screen.tsx'),
+        FileNode(
             name='(marketing)',
             path='/project/app/(marketing)',
             children=[
-                PathNode(name='layout.tsx', path='/project/app/(marketing)/layout.tsx'),
-                PathNode(
+                FileNode(name='layout.tsx', path='/project/app/(marketing)/layout.tsx'),
+                FileNode(
                     name='about',
                     path='/project/app/(marketing)/about',
                     children=[
-                        PathNode(name='view.tsx', path='/project/app/(marketing)/about/view.tsx')
+                        FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.tsx')
                     ]
                 )
             ]
         ),
-        PathNode(
+        FileNode(
             name='blog',
             path='/project/app/blog',
             children=[
-                PathNode(name='layout.tsx', path='/project/app/blog/layout.tsx'),
-                PathNode(name='view.tsx', path='/project/app/blog/view.tsx')
+                FileNode(name='layout.tsx', path='/project/app/blog/layout.tsx'),
+                FileNode(name='screen.tsx', path='/project/app/blog/screen.tsx')
             ]
         )
     ]
@@ -258,84 +258,103 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
 # route-tree.py
 # ====================
 
-@dataclass
+
+@dataclass(eq=False)
 class RouteNode:
     segment: str
-    children: list['RouteNode'] | None = None
-    
-    # Metadata
-    is_group: bool = False
-    
-    # Special files
-    view: str | None = None
+    url: str
+    children: list['RouteNode'] = field(default_factory=list)
     layout: str | None = None
-    
+
     def __hash__(self):
         return id(self)
-    
-    def __eq__(self, other: 'RouteNode'): 
+
+    def __eq__(self, other: object):
         return self is other
-      
-    def _to_dict(self) -> dict:
-        result: dict[str, Any] = {'segment': self.segment}
-        if self.is_group:
-            result['isGroup'] = self.is_group
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {'segment': self.segment, 'url': self.url, 'type': getattr(self, 'type')}
         if self.layout is not None:
-            result['layout'] = self.layout
-        if self.view is not None:
-            result['view'] = self.view
+            result["layout"] = self.layout
+
+        # page-only
+        if getattr(self, "type") == "page":
+            screen = getattr(self, "screen", None)
+            if screen is not None:
+                result["screen"] = screen
+
         if self.children:
-            result['children'] = [child._to_dict() for child in self.children]
+            result["children"] = [c.to_dict() for c in self.children]
         return result
-      
+
     def __str__(self):
-        return json.dumps(self._to_dict(), indent=2)
+        return json.dumps(self.to_dict(), indent=2)
 
 
-def build_route_tree(path_tree: PathNode) -> RouteNode | None:
+@dataclass(eq=False)
+class GroupRouteNode(RouteNode):
+    type: Literal["group"] = "group"
+
+
+@dataclass(eq=False)
+class PageRouteNode(RouteNode):
+    type: Literal["page"] = "page"
+    screen: str | None = None
+
+
+def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     """
-    Transform PathNode → RouteNode using DFS.
+    Transform FileNode → RouteNode using DFS.
     
-    Pattern: route_to_path maintains RouteNode → PathNode correspondence
-    via closure, allowing expand to access source PathNode data.
+    Pattern: route_to_file maintains RouteNode → FileNode correspondence
+    via closure, allowing expand to access source FileNode data.
     """
-    if not path_tree.children:
+    if not file_tree.children:
         return None
 
     # Create root RouteNode
-    root = RouteNode(segment=path_tree.name, children=[])
+    root = PageRouteNode(segment=file_tree.name, url='/', children=[])
     
-    # Track RouteNode → PathNode mapping (captured by closure)
-    route_to_path: dict[RouteNode, PathNode] = {}
-    route_to_path[root] = path_tree
+    # Track RouteNode → FileNode mapping (captured by closure)
+    route_to_file: dict[RouteNode, FileNode] = {}
+    route_to_file[root] = file_tree
 
     # Expand node into child RouteNodes
     def expand(route_node: RouteNode) -> list[RouteNode] | None:
-        path_node = route_to_path[route_node]
-        path_children = path_node.children
+        file_node = route_to_file[route_node]
+        path_children = file_node.children
         if path_children is None:
             return None
-        
+
         # Detect special files and populate route_node metadata
         for path_child in path_children:
             match path_child.name:
                 case 'layout.tsx': route_node.layout = path_child.path
-                case 'view.tsx':   route_node.view = path_child.path
-                case 'view.tsx': route_node.view = path_child.path  # Alias for view
+                case 'screen.tsx': 
+                    if not isinstance(route_node, PageRouteNode):
+                        raise ValueError(f'Invalid route: group "{route_node.segment}" cannot have screen.tsx ({path_child.path})')
+                    route_node.screen = path_child.path
         
         # Create child RouteNodes (directories only)
-        route_children = []
+        route_children: list[RouteNode] = []
         for path_child in path_children:
-            if path_child.children is None:
+            if path_child.children is None: # Skip if file
                 continue
-            
+                    
             segment = path_child.name
-            is_group = segment.startswith('(') and segment.endswith(')')
-            route_child = RouteNode(segment=segment, children=[])
-            if is_group:
-                route_child.is_group = True
             
-            route_to_path[route_child] = path_child
+            # Compute url here
+            is_group = segment.startswith('(') and segment.endswith(')')
+            parent_url = route_node.url  # invariant: always ends with "/"
+            child_url  = parent_url if is_group else f'{parent_url}{segment}/'
+            
+            # Create route node here
+            route_child: RouteNode = \
+                GroupRouteNode(segment=segment, url=child_url) \
+                if is_group else \
+                PageRouteNode(segment=segment, url=child_url)
+            
+            route_to_file[route_child] = path_child
             route_children.append(route_child)
             
         return sorted(route_children, key=lambda c: c.segment)
@@ -362,7 +381,7 @@ class RouteMetadata:
     path: str           # URL path
     segment: str        # Last segment
     layouts: list[str]  # Inherited layout chain
-    view: str | None = None
+    screen: str | None = None
     
     def to_dict(self) -> dict:
         result = {
@@ -370,31 +389,59 @@ class RouteMetadata:
             'segment': self.segment,
             'layouts': self.layouts
         }
-        if self.view is not None:
-            result['view'] = self.view
+        if self.screen is not None:
+            result['screen'] = self.screen
         return result
-    
+         
     def __str__(self):
         return json.dumps(self.to_dict(), indent=2)
 
 
-def build_route_manifest(route_tree: RouteNode) -> dict[str, dict]:
-    """Build route manifest from route tree."""
-    manifest: dict[str, dict] = {}
-    
-    def visit(node: RouteNode):
-        if node.view:
-            manifest[node.segment] = {
-                'segment': node.segment,
-                'view': node.view,
-            }
+@dataclass
+class RouteManifest:
+    routes: dict[str, RouteMetadata] = field(default_factory=dict)
+
+    def __getitem__(self, key: str) -> RouteMetadata:
+        return self.routes[key]
+
+    def __setitem__(self, key: str, value: RouteMetadata) -> None:
+        self.routes[key] = value
+        
+    def __contains__(self, key: str) -> bool:
+        return key in self.routes
+
+    def to_dict(self) -> dict[str, dict]:
+        return {path: meta.to_dict() for path, meta in self.routes.items()}
+
+    def __str__(self) -> str:
+        return json.dumps(self.to_dict(), indent=2)
+
+
+def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
+    """Flatten route tree into a dict keyed by segment (no layouts/path yet)."""
+    manifest = RouteManifest()
+
+    def visit(node: RouteNode) -> None:
+        # Only page nodes can emit routes (have screens)
+        if not isinstance(node, PageRouteNode): return
+        if not node.screen: return
+
+        key = node.url
+        if key in manifest:raise ValueError(f"Duplicate key in manifest: {key}")
+
+        manifest[key] = RouteMetadata(
+            path=key,              # ✅ set to URL
+            segment=node.segment,
+            layouts=[],            # placeholder until you compute layouts
+            screen=node.screen,
+        )
 
     traverse_depth_first(TraversalOptions(
         root=route_tree,
-        expand=lambda node: node.children,
+        expand=lambda node: node.children or [],
         visit=visit
     ))
-    
+
     return manifest
 
 
@@ -405,10 +452,10 @@ def build_route_manifest(route_tree: RouteNode) -> dict[str, dict]:
 
 def main():
     print('=== Path Tree ===')
-    print(path_tree)
+    print(file_tree)
     print()
     
-    route_tree = build_route_tree(path_tree)
+    route_tree = build_route_tree(file_tree)
     print('=== Route Tree ===')
     print(route_tree)
     print()
@@ -416,12 +463,7 @@ def main():
     if route_tree:
         manifest = build_route_manifest(route_tree)
         print('=== Route Manifest ===')
-        print(json.dumps(manifest, indent=2))
-        # manifest_dict = {
-        #     path: metadata.to_dict() 
-        #     for path, metadata in manifest.items()
-        # }
-        # print(json.dumps(manifest_dict, indent=2))
+        print(json.dumps(manifest.to_dict(), indent=2))
         print()
 
 
