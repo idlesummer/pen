@@ -9,7 +9,7 @@ export type RouteNode = {
   isGroup?: boolean
 
   // Special files
-  view?: string
+  screen?: string
   layout?: string
 }
 
@@ -40,7 +40,7 @@ export function buildRouteTree(pathTree: PathNode): RouteNode | null {
           // Populate metadata from special files
           switch (pathChild.name) {
             case 'layout.tsx': routeNode.layout = pathChild.path; break
-            case 'view.tsx':   routeNode.view = pathChild.path; break
+            case 'screen.tsx': routeNode.screen = pathChild.path; break
           }
           continue
         }

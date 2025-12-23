@@ -5,7 +5,7 @@ export type RouteMetadata = {
   path: string      // URL path: '/', '/about', '/blog',  
   segment: string   // Last segment: 'app', 'about', 'blog
   layouts: string[] // Inherited layout chain
-  view?: string     // View component path
+  screen?: string     // View component path
 }
 
 export type RouteManifest = Record<string, RouteMetadata>
@@ -32,20 +32,16 @@ export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
       const currentLayouts = layoutMap.get(node)!
       
       // Validate: route groups can't have views
-      if (node.isGroup && node.view) {
-        throw new Error(
-          `Invalid route: Route group "${node.segment}" cannot have a view. ` +
-          `Found: ${node.view}`,
-        )
-      }
+      if (node.isGroup && node.screen)
+        throw new Error(`Invalid route: Route group "${node.segment}" cannot have a screen. Found: ${node.screen}`)
       
-      // Add to manifest if has view
-      if (node.view) {
+      // Add to manifest if has screen
+      if (node.screen) {
         manifest[currentPath] = {
           path: currentPath,
           segment: node.segment,
           layouts: currentLayouts,
-          view: node.view,
+          screen: node.screen,
         }
       }
       
