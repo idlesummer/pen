@@ -1,4 +1,4 @@
-import { traverseDepthFirst } from '@/lib/tree'
+import { traverseDepthFirst } from '@/lib/traversal'
 import type { PathNode } from '@/routing/path-tree'
 
 export type RouteNode = {

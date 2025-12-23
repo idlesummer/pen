@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from 'fs'
 import { resolve, basename, join } from 'path'
-import { traverseBreadthFirst } from '@/lib/tree'
+import { traverseBreadthFirst } from '@/lib/traversal'
 
 export type PathNode = { 
   name: string            // entry name (file or directory)
