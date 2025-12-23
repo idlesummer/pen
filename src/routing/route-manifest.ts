@@ -26,7 +26,6 @@ export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
   traverseDepthFirst<RouteNode>({
     root: routeTree,
     expand: (node) => node.children,
-
     visit: (node) => {
       const currentPath = pathMap.get(node)!
       const currentLayouts = layoutMap.get(node)!
@@ -62,6 +61,5 @@ export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
       }
     },
   })
-
   return manifest
 }
