@@ -319,22 +319,26 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     route_to_file: dict[RouteNode, FileNode] = {}
     route_to_file[root] = file_tree
 
-    # Expand node into child RouteNodes
-    def expand(route_node: RouteNode) -> list[RouteNode] | None:
+    def visit(route_node: RouteNode):
         file_node = route_to_file[route_node]
         path_children = file_node.children
-        if path_children is None:
-            return None
-
-        # Detect special files and populate route_node metadata
+        if not path_children: return
+        
+        # Detect and populate metadata (side effect)
         for path_child in path_children:
             match path_child.name:
                 case 'layout.tsx': route_node.layout = path_child.path
                 case 'screen.tsx': 
                     if not isinstance(route_node, PageRouteNode):
-                        raise ValueError(f'Invalid route: group "{route_node.segment}" cannot have screen.tsx ({path_child.path})')
+                        raise ValueError(...)
                     route_node.screen = path_child.path
-        
+
+    # Expand node into child RouteNodes
+    def expand(route_node: RouteNode) -> list[RouteNode] | None:
+        file_node = route_to_file[route_node]
+        path_children = file_node.children
+        if not path_children: return
+
         # Create child RouteNodes (directories only)
         route_children: list[RouteNode] = []
         for path_child in path_children:
@@ -367,6 +371,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     # Build the tree
     return traverse_depth_first(TraversalOptions(
         root=root,
+        visit=visit,
         expand=expand,
         attach=attach,
     ))
@@ -375,6 +380,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 # ====================
 # route-manifest.py
 # ====================
+
 
 @dataclass
 class RouteMetadata:
@@ -418,30 +424,42 @@ class RouteManifest:
 
 
 def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
-    """Flatten route tree into a dict keyed by segment (no layouts/path yet)."""
+    """Build route manifest with layout inheritance."""
+
+    # Initialize root
+    root_layouts = [route_tree.layout] if route_tree.layout else []
+    layout_map = {route_tree: root_layouts} # Track layouts for each node (via closure)
     manifest = RouteManifest()
-
+    
     def visit(node: RouteNode) -> None:
-        # Only page nodes can emit routes (have screens)
-        if not isinstance(node, PageRouteNode): return
-        if not node.screen: return
-
-        key = node.url
-        if key in manifest:raise ValueError(f"Duplicate key in manifest: {key}")
-
-        manifest[key] = RouteMetadata(
-            path=key,              # ✅ set to URL
-            segment=node.segment,
-            layouts=[],            # placeholder until you compute layouts
-            screen=node.screen,
-        )
-
+        current_layouts = layout_map[node]
+        
+        # Only page nodes can emit routes
+        if isinstance(node, PageRouteNode) and node.screen:
+            manifest[node.url] = RouteMetadata(
+                path=node.url,
+                segment=node.segment,
+                layouts=current_layouts,  # ← Use tracked layouts!
+                screen=node.screen,
+            )
+        
+        # Compute layouts for children
+        if node.children:
+            for child in node.children:
+                # Inherit parent layouts + add own layout if exists
+                child_layouts = (
+                    [*current_layouts, child.layout] 
+                    if child.layout
+                    else current_layouts
+                )
+                layout_map[child] = child_layouts
+    
     traverse_depth_first(TraversalOptions(
         root=route_tree,
+        visit=visit,
         expand=lambda node: node.children or [],
-        visit=visit
     ))
-
+    
     return manifest
 
 
