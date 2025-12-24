@@ -261,10 +261,12 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
 
 @dataclass(eq=False)
 class RouteNode:
-    segment: str
     url: str
-    children: list['RouteNode'] = field(default_factory=list)
+    type: Literal['page', 'group']
+    segment: str
+    children: list['RouteNode'] | None = None
     layout: str | None = None
+    screen: str | None = None
 
     def __hash__(self):
         return id(self)
@@ -273,33 +275,18 @@ class RouteNode:
         return self is other
 
     def to_dict(self) -> dict[str, Any]:
-        result: dict[str, Any] = {'segment': self.segment, 'url': self.url, 'type': getattr(self, 'type')}
-        if self.layout is not None:
-            result["layout"] = self.layout
-
-        # page-only
-        if getattr(self, "type") == "page":
-            screen = getattr(self, "screen", None)
-            if screen is not None:
-                result["screen"] = screen
-
-        if self.children:
-            result["children"] = [c.to_dict() for c in self.children]
+        result: dict[str, Any] = {
+            'segment': self.segment,
+            'url': self.url,
+            'type': self.type
+        }
+        if self.layout:   result['layout'] = self.layout
+        if self.screen:   result['screen'] = self.screen
+        if self.children: result['children'] = [c.to_dict() for c in self.children]
         return result
 
     def __str__(self):
         return json.dumps(self.to_dict(), indent=2)
-
-
-@dataclass(eq=False)
-class GroupRouteNode(RouteNode):
-    type: Literal["group"] = "group"
-
-
-@dataclass(eq=False)
-class PageRouteNode(RouteNode):
-    type: Literal["page"] = "page"
-    screen: str | None = None
 
 
 def build_route_tree(file_tree: FileNode) -> RouteNode | None:
@@ -313,8 +300,13 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         return None
 
     # Create root RouteNode
-    root = PageRouteNode(segment=file_tree.name, url='/', children=[])
-    
+    root = RouteNode(
+        url='/', 
+        type='page',
+        segment=file_tree.name, 
+        children=[],
+    )
+
     # Track RouteNode → FileNode mapping (captured by closure)
     route_to_file: dict[RouteNode, FileNode] = {}
     route_to_file[root] = file_tree
@@ -328,10 +320,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         for path_child in path_children:
             match path_child.name:
                 case 'layout.tsx': route_node.layout = path_child.path
-                case 'screen.tsx': 
-                    if not isinstance(route_node, PageRouteNode):
-                        raise ValueError(...)
-                    route_node.screen = path_child.path
+                case 'screen.tsx': route_node.screen = path_child.path
 
     # Expand node into child RouteNodes
     def expand(route_node: RouteNode) -> list[RouteNode] | None:
@@ -351,13 +340,15 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
             is_group = segment.startswith('(') and segment.endswith(')')
             parent_url = route_node.url  # invariant: always ends with "/"
             child_url  = parent_url if is_group else f'{parent_url}{segment}/'
-            
+
             # Create route node here
-            route_child: RouteNode = \
-                GroupRouteNode(segment=segment, url=child_url) \
-                if is_group else \
-                PageRouteNode(segment=segment, url=child_url)
-            
+            route_child = RouteNode(
+                url=child_url,
+                type='group' if is_group else 'page',
+                segment=segment,
+                children=[] # ← Always [] because we filtered out file nodes
+            )
+
             route_to_file[route_child] = path_child
             route_children.append(route_child)
             
@@ -435,7 +426,7 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
         current_layouts = layout_map[node]
         
         # Only page nodes can emit routes
-        if isinstance(node, PageRouteNode) and node.screen:
+        if isinstance(node, RouteNode) and node.screen:
             manifest[node.url] = RouteMetadata(
                 path=node.url,
                 segment=node.segment,
@@ -457,7 +448,7 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
     traverse_depth_first(TraversalOptions(
         root=route_tree,
         visit=visit,
-        expand=lambda node: node.children or [],
+        expand=lambda node: node.children,
     ))
     
     return manifest
