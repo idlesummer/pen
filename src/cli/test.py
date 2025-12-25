@@ -158,7 +158,7 @@ file_tree = FileNode(
         ),        
         
         FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
-        FileNode(name='screen.tsx', path='/project/app/screen.tsx'),
+        # FileNode(name='screen.tsx', path='/project/app/screen.tsx'),
         FileNode(
             name='(marketing)',
             path='/project/app/(marketing)',
@@ -320,9 +320,12 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     # Track RouteNode → FileNode mapping (captured by closure)
     route_to_file: dict[RouteNode, FileNode] = {}
     route_to_file[root] = file_tree
+    
+    # Global tracking of all routes with screens
+    screen_routes: dict[str, str] = {}  # url → file path
 
     def visit(route_node: RouteNode):
-        file_node = route_to_file[route_node]
+        file_node = route_to_file[route_node]   # Already populated inside expand
         path_children = file_node.children
         if not path_children: return
         
@@ -331,7 +334,17 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
             match path_child.name:
                 case 'layout.tsx': route_node.layout = path_child.path
                 case 'screen.tsx': route_node.screen = path_child.path
+        
+        # Check if this node's screen conflicts with existing routes
+        if not route_node.screen: return
+        if existing := screen_routes.get(route_node.url):
+            raise ValueError(
+                f'Duplicate route detected at {route_node.url}:\n'
+                f'  - {existing}\n'
+                f'  - {file_node.path}')
 
+        screen_routes[route_node.url] = file_node.path
+            
     # Expand node into child RouteNodes
     def expand(route_node: RouteNode) -> list[RouteNode] | None:
         file_node = route_to_file[route_node]
@@ -340,7 +353,6 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
         # Create child RouteNodes (directories only)
         route_children: list[RouteNode] = []
-        seen_urls: dict[str, str] = {} # ← Track URL → file path
 
         # Create children here
         for path_child in path_children:
@@ -349,15 +361,6 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
             segment = path_child.name
             is_group = segment.startswith('(') and segment.endswith(')')
             url = route_node.url if is_group else f'{route_node.url}{segment}/'
-
-            if existing_path := seen_urls.get(url):
-                raise ValueError(
-                    f'Duplicate route detected at {url}:\n'
-                    f'  - {existing_path}\n'
-                    f'  - {path_child.path}')
-            
-            # Remember seen url
-            seen_urls[url] = path_child.path
 
             # Create route node here
             route_child = RouteNode(
