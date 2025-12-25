@@ -348,13 +348,10 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
         # Create children here
         for file in file_children:
-            # Skip if file
-            if not file.children: continue
-
-            # Skip if private
+            if not file.children: continue          # Skip if file
+            if file.name.startswith('_'): continue  # Skip if private
+         
             segment = file.name       
-            if segment.startswith('_'): continue
-            
             is_group = segment.startswith('(') and segment.endswith(')')
             url = route.url if is_group else f'{route.url}{segment}/'
 
