@@ -147,28 +147,30 @@ file_tree = FileNode(
     name='app',
     path='/project/app',
     children=[
-        FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
+        # FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
         FileNode(name='screen.tsx', path='/project/app/screen.tsx'),  # ← Root screen at /
         
         # Deeply nested route groups
         FileNode(
-            name='(marketing)',
-            path='/project/app/(marketing)',
+            name='marketing',
+            path='/project/app/marketing',
             children=[
-                FileNode(
-                    name='(special)',
-                    path='/project/app/(marketing)/(special)',
-                    children=[
-                        FileNode(
-                            name='(promo)',
-                            path='/project/app/(marketing)/(special)/(promo)',
-                            children=[
-                                # ← This also maps to / (all groups!)
-                                FileNode(name='screen.tsx', path='/project/app/(marketing)/(special)/(promo)/screen.tsx')
-                            ]
-                        )
-                    ]
-                )
+                FileNode(name='layout.tsx', path='/project/app/(marketing)/(special)/(promo)/layout.tsx'),
+                FileNode(name='screen.tsx', path='/project/app/(marketing)/(special)/(promo)/screen.tsx'),
+                # FileNode(
+                #     name='(special)',
+                #     path='/project/app/(marketing)/(special)',
+                #     children=[
+                #         FileNode(
+                #             name='(promo)',
+                #             path='/project/app/(marketing)/(special)/(promo)',
+                #             children=[
+                #                 # ← This also maps to / (all groups!)
+                #                 FileNode(name='screen.tsx', path='/project/app/(marketing)/(special)/(promo)/screen.tsx')
+                #             ]
+                #         )
+                #     ]
+                # )
             ]
         ),
     ]
@@ -389,19 +391,15 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
 @dataclass
 class RouteMetadata:
-    path: str           # URL path
-    segment: str        # Last segment
-    layouts: list[str]  # Inherited layout chain
-    screen: str | None = None
-    
+    path: str                           # URL path
+    segment: str                        # Last segment
+    screen: str | None = None           # Screen file
+    layouts: list[str] | None = None    # Inherited layout chain
+
     def to_dict(self) -> dict:
-        result = {
-            'path': self.path,
-            'segment': self.segment,
-            'layouts': self.layouts
-        }
-        if self.screen is not None:
-            result['screen'] = self.screen
+        result: dict[str, Any] = {'path': self.path, 'segment': self.segment}
+        if self.screen is not None:  result['screen'] = self.screen
+        if self.layouts is not None: result['layouts'] = self.layouts
         return result
   
     def __str__(self):
@@ -444,8 +442,8 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
             manifest[route.url] = RouteMetadata(
                 path=route.url,
                 segment=route.segment,
-                layouts=current_layouts,
-                screen=route.screen)
+                screen=route.screen,
+                layouts=current_layouts or None)
 
         # Compute layouts for children
         for child in (route.children or []):
