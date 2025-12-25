@@ -348,10 +348,14 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         route_children: list[RouteNode] = []
 
         # Create children here
-        for path_child in path_children:
-            if not path_child.children: continue    # Skip if file
+        for path in path_children:
+            # Skip if file
+            if not path.children: continue
 
-            segment = path_child.name
+            # Skip if private
+            segment = path.name       
+            if path.name.startswith('_'): continue
+            
             is_group = segment.startswith('(') and segment.endswith(')')
             url = route.url if is_group else f'{route.url}{segment}/'
 
@@ -363,7 +367,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
                 children=[] # ← Always [] because we filtered out file nodes
             )
 
-            route_to_file[route_child] = path_child
+            route_to_file[route_child] = path
             route_children.append(route_child)
             
         return sorted(route_children, key=lambda c: c.segment)
