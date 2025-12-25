@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from math import exp
+from multiprocessing import Value
 from typing import Any, Callable, Generic, Literal, TypeVar
 import json
 
@@ -147,6 +148,15 @@ file_tree = FileNode(
     name='app',
     path='/project/app',
     children=[
+        # ✅ Add these two conflicting route groups:
+        FileNode(
+            name='(dashboard)',
+            path='/project/app/(dashboard)',
+            children=[
+                FileNode(name='screen.tsx', path='/project/app/(dashboard)/screen.tsx')
+            ]
+        ),        
+        
         FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
         FileNode(name='screen.tsx', path='/project/app/screen.tsx'),
         FileNode(
@@ -330,20 +340,28 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
         # Create child RouteNodes (directories only)
         route_children: list[RouteNode] = []
+        seen_urls: dict[str, str] = {} # ← Track URL → file path
+
+        # Create children here
         for path_child in path_children:
-            if path_child.children is None: # Skip if file
-                continue
-                    
+            if not path_child.children: continue    # Skip if file
+
             segment = path_child.name
-            
-            # Compute url here
             is_group = segment.startswith('(') and segment.endswith(')')
-            parent_url = route_node.url  # invariant: always ends with "/"
-            child_url  = parent_url if is_group else f'{parent_url}{segment}/'
+            url = route_node.url if is_group else f'{route_node.url}{segment}/'
+
+            if existing_path := seen_urls.get(url):
+                raise ValueError(
+                    f'Duplicate route detected at {url}:\n'
+                    f'  - {existing_path}\n'
+                    f'  - {path_child.path}')
+            
+            # Remember seen url
+            seen_urls[url] = path_child.path
 
             # Create route node here
             route_child = RouteNode(
-                url=child_url,
+                url=url,
                 type='group' if is_group else 'page',
                 segment=segment,
                 children=[] # ← Always [] because we filtered out file nodes
@@ -389,7 +407,7 @@ class RouteMetadata:
         if self.screen is not None:
             result['screen'] = self.screen
         return result
-         
+  
     def __str__(self):
         return json.dumps(self.to_dict(), indent=2)
 
@@ -417,40 +435,33 @@ class RouteManifest:
 def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
     """Build route manifest with layout inheritance."""
 
-    # Initialize root
+    # Initialize root layout
     root_layouts = [route_tree.layout] if route_tree.layout else []
-    layout_map = {route_tree: root_layouts} # Track layouts for each node (via closure)
+    layout_map = {route_tree: root_layouts}
     manifest = RouteManifest()
-    
-    def visit(node: RouteNode) -> None:
+
+    def visit(node: RouteNode):
         current_layouts = layout_map[node]
         
-        # Only page nodes can emit routes
-        if isinstance(node, RouteNode) and node.screen:
+        # Only create a manifest if route has a screen
+        if node.screen:
             manifest[node.url] = RouteMetadata(
                 path=node.url,
                 segment=node.segment,
-                layouts=current_layouts,  # ← Use tracked layouts!
-                screen=node.screen,
-            )
-        
+                layouts=current_layouts,
+                screen=node.screen)
+
         # Compute layouts for children
-        if node.children:
-            for child in node.children:
-                # Inherit parent layouts + add own layout if exists
-                child_layouts = (
-                    [*current_layouts, child.layout] 
-                    if child.layout
-                    else current_layouts
-                )
-                layout_map[child] = child_layouts
-    
+        for child in (node.children or []):
+            child_layouts = [*current_layouts, child.layout] if child.layout else current_layouts
+            layout_map[child] = child_layouts
+
     traverse_depth_first(TraversalOptions(
         root=route_tree,
         visit=visit,
         expand=lambda node: node.children,
     ))
-    
+
     return manifest
 
 
