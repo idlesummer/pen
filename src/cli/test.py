@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from math import exp
-from multiprocessing import Value
 from typing import Any, Callable, Generic, Literal, TypeVar
 import json
 
@@ -317,38 +316,38 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
     def visit(route: RouteNode):
         file = route_to_file[route]   # Already populated inside expand
-        path_children = file.children
-        if not path_children: return
+        file_children = file.children
+        if not file_children: return
         
         # Detect and populate metadata (side effect)
-        for path in path_children:
-            match path.name:
-                case 'layout.tsx': route.layout = path.path
-                case 'screen.tsx': route.screen = path.path
+        for file in file_children:
+            match file.name:
+                case 'layout.tsx': route.layout = file.path
+                case 'screen.tsx': route.screen = file.path
         
         # Check if this node's screen conflicts with existing routes
-        if not route.screen: return
-        if existing := screen_routes.get(route.url):
-            raise ValueError(
-                f'Conflicting screen routes found at "{route.url}":\n'
-                f'  1. {existing}/screen.tsx\n'
-                f'  2. {file.path}/screen.tsx\n\n'
-                f'Multiple screen.tsx files cannot map to the same URL.\n'
-                f'Remove one of the screen.tsx files, or use different route segments.')
+        if route.screen:
+            if existing := screen_routes.get(route.url):
+                raise ValueError(
+                    f'Conflicting screen routes found at "{route.url}":\n'
+                    f'  1. {existing}/screen.tsx\n'
+                    f'  2. {file.path}/screen.tsx\n\n'
+                    f'Multiple screen.tsx files cannot map to the same URL.\n'
+                    f'Remove one of the screen.tsx files, or use different route segments.')
 
-        screen_routes[route.url] = file.path
-            
+            screen_routes[route.url] = file.path
+
     # Expand node into child RouteNodes
     def expand(route: RouteNode) -> list[RouteNode] | None:
         file = route_to_file[route]
-        path_children = file.children
-        if not path_children: return
+        file_children = file.children
+        if not file_children: return
 
         # Create child RouteNodes (directories only)
         route_children: list[RouteNode] = []
 
         # Create children here
-        for path in path_children:
+        for path in file_children:
             # Skip if file
             if not path.children: continue
 
