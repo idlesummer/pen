@@ -148,39 +148,30 @@ file_tree = FileNode(
     name='app',
     path='/project/app',
     children=[
-        # ✅ Add these two conflicting route groups:
-        FileNode(
-            name='(dashboard)',
-            path='/project/app/(dashboard)',
-            children=[
-                FileNode(name='screen.tsx', path='/project/app/(dashboard)/screen.tsx')
-            ]
-        ),        
-        
         FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
-        # FileNode(name='screen.tsx', path='/project/app/screen.tsx'),
+        FileNode(name='screen.tsx', path='/project/app/screen.tsx'),  # ← Root screen at /
+        
+        # Deeply nested route groups
         FileNode(
             name='(marketing)',
             path='/project/app/(marketing)',
             children=[
-                FileNode(name='layout.tsx', path='/project/app/(marketing)/layout.tsx'),
                 FileNode(
-                    name='about',
-                    path='/project/app/(marketing)/about',
+                    name='(special)',
+                    path='/project/app/(marketing)/(special)',
                     children=[
-                        FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.tsx')
+                        FileNode(
+                            name='(promo)',
+                            path='/project/app/(marketing)/(special)/(promo)',
+                            children=[
+                                # ← This also maps to / (all groups!)
+                                FileNode(name='screen.tsx', path='/project/app/(marketing)/(special)/(promo)/screen.tsx')
+                            ]
+                        )
                     ]
                 )
             ]
         ),
-        FileNode(
-            name='blog',
-            path='/project/app/blog',
-            children=[
-                FileNode(name='layout.tsx', path='/project/app/blog/layout.tsx'),
-                FileNode(name='screen.tsx', path='/project/app/blog/screen.tsx')
-            ]
-        )
     ]
 )
 
@@ -324,31 +315,33 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     # Global tracking of all routes with screens
     screen_routes: dict[str, str] = {}  # url → file path
 
-    def visit(route_node: RouteNode):
-        file_node = route_to_file[route_node]   # Already populated inside expand
-        path_children = file_node.children
+    def visit(route: RouteNode):
+        file = route_to_file[route]   # Already populated inside expand
+        path_children = file.children
         if not path_children: return
         
         # Detect and populate metadata (side effect)
-        for path_child in path_children:
-            match path_child.name:
-                case 'layout.tsx': route_node.layout = path_child.path
-                case 'screen.tsx': route_node.screen = path_child.path
+        for path in path_children:
+            match path.name:
+                case 'layout.tsx': route.layout = path.path
+                case 'screen.tsx': route.screen = path.path
         
         # Check if this node's screen conflicts with existing routes
-        if not route_node.screen: return
-        if existing := screen_routes.get(route_node.url):
+        if not route.screen: return
+        if existing := screen_routes.get(route.url):
             raise ValueError(
-                f'Duplicate route detected at {route_node.url}:\n'
-                f'  - {existing}\n'
-                f'  - {file_node.path}')
+                f'Conflicting screen routes found at "{route.url}":\n'
+                f'  1. {existing}/screen.tsx\n'
+                f'  2. {file.path}/screen.tsx\n\n'
+                f'Multiple screen.tsx files cannot map to the same URL.\n'
+                f'Remove one of the screen.tsx files, or use different route segments.')
 
-        screen_routes[route_node.url] = file_node.path
+        screen_routes[route.url] = file.path
             
     # Expand node into child RouteNodes
-    def expand(route_node: RouteNode) -> list[RouteNode] | None:
-        file_node = route_to_file[route_node]
-        path_children = file_node.children
+    def expand(route: RouteNode) -> list[RouteNode] | None:
+        file = route_to_file[route]
+        path_children = file.children
         if not path_children: return
 
         # Create child RouteNodes (directories only)
@@ -360,7 +353,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
             segment = path_child.name
             is_group = segment.startswith('(') and segment.endswith(')')
-            url = route_node.url if is_group else f'{route_node.url}{segment}/'
+            url = route.url if is_group else f'{route.url}{segment}/'
 
             # Create route node here
             route_child = RouteNode(
@@ -443,19 +436,19 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
     layout_map = {route_tree: root_layouts}
     manifest = RouteManifest()
 
-    def visit(node: RouteNode):
-        current_layouts = layout_map[node]
-        
+    def visit(route: RouteNode):
+        current_layouts = layout_map[route]
+  
         # Only create a manifest if route has a screen
-        if node.screen:
-            manifest[node.url] = RouteMetadata(
-                path=node.url,
-                segment=node.segment,
+        if route.screen:
+            manifest[route.url] = RouteMetadata(
+                path=route.url,
+                segment=route.segment,
                 layouts=current_layouts,
-                screen=node.screen)
+                screen=route.screen)
 
         # Compute layouts for children
-        for child in (node.children or []):
+        for child in (route.children or []):
             child_layouts = [*current_layouts, child.layout] if child.layout else current_layouts
             layout_map[child] = child_layouts
 
