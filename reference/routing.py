@@ -1,5 +1,5 @@
 """
-Reference Implementation - Routing System (v0.2)
+Reference Implementation - Routing System
 
 Builds a routing system from filesystem structure:
   Filesystem → File Tree → Route Tree → Route Manifest
