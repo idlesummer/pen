@@ -1,67 +1,74 @@
-import { traverseDepthFirst } from '@/lib/traversal'
-import type { PathNode } from '@/routing/path-tree'
+  import { traverseDepthFirst } from '@/lib/traversal'
+  import type { FileNode } from '@/routing/file-tree'
 
-export type RouteNode = {
-  segment: string
-  children?: RouteNode[]
+  export type RouteNode = {
+    url: string             // full URL like '/blog/'
+    type: 'page' | 'group'  // binary type: 'page' or 'group'
+    segment: string         // directory name like 'blog'
+    screen?: string         // path to screen.tsx
+    layout?: string         // path to layout.tsx
+    children?: RouteNode[]
+  }
 
-  // Metadata
-  isGroup?: boolean
+  export function buildRouteTree(fileTree: FileNode): RouteNode | null {
+    if (!fileTree.children) return null
 
-  // Special files
-  screen?: string
-  layout?: string
-}
+    const root: RouteNode = {
+      url: '/',
+      type: 'page', 
+      segment: fileTree.name,
+      children: [],
+    }
+    const routeToFile = new Map([[root, fileTree]]) // map route → file
+    const screenRoutes: Record<string, string> = {} // track duplicate screens
 
-export function buildRouteTree(pathTree: PathNode): RouteNode | null {
-  if (!pathTree.children) 
-    return null
+    function visit(parentRoute: RouteNode) {
+      const parentFile = routeToFile.get(parentRoute)!  // Already populated inside expand
+      for (const file of parentFile.children ?? []) {   // Detect layout.tsx and screen.tsx
+        switch (file.name) {
+          case 'layout.tsx': parentRoute.layout = file.path; break
+          case 'screen.tsx': parentRoute.screen = file.path; break
+      }}
 
-  // Step 1: Create root RouteNode
-  const root: RouteNode = { segment: pathTree.name, children: [] }
+      // Skip duplicate screen validation if parent route has no screen
+      if (!parentRoute.screen) return
+      const existingPath = screenRoutes[parentRoute.url]
+      
+      // Check for duplicate screens
+      if (existingPath) throw new Error(
+        `Conflicting screen routes found at "${parentRoute.url}":\n` +
+        `  1. ${existingPath}/screen.tsx\n` +
+        `  2. ${parentFile.path}/screen.tsx\n\n` +
+        'Multiple screen.tsx files cannot map to the same URL.\n' +
+        'Remove one of the screen.tsx files, or use different route segments.',
+      )
+      screenRoutes[parentRoute.url] = parentFile.path // Add new screen to map
+    }
 
-  // Step 2: Track RouteNode → PathNode mapping (through closures)
-  const routeToPath = new Map<RouteNode, PathNode>()
-  routeToPath.set(root, pathTree)
+    function expand(parentRoute: RouteNode) {
+      const parentFile = routeToFile.get(parentRoute)!
+      if (!parentFile.children) return          // Skip expand if route has no children
+      const routes: RouteNode[] = []            // Create container for route children
 
-  return traverseDepthFirst({
-    root,
-
-    // Step 3: Expand node into child RouteNodes
-    expand: (routeNode) => {
-      const pathNode = routeToPath.get(routeNode)!  // Always defined
-      const pathChildren = pathNode?.children
-      if (!pathChildren) return
-
-      // Detect special files and create child RouteNodes
-      const routeChildren: RouteNode[] = []
-      for (const pathChild of pathChildren) {
-        if (!pathChild.children) {
-          // Populate metadata from special files
-          switch (pathChild.name) {
-            case 'layout.tsx': routeNode.layout = pathChild.path; break
-            case 'screen.tsx': routeNode.screen = pathChild.path; break
-          }
-          continue
-        }
-        // Create RouteNode for directory
-        const segment = pathChild.name
+      for (const file of parentFile.children) {
+        if (!file.children) continue            // Skip if file
+        if (file.name.startsWith('_')) continue // Skip if private directory
+        const segment = file.name
         const isGroup = segment.startsWith('(') && segment.endsWith(')')
-        const routeChild: RouteNode = { segment, children: [] }
+        const url = isGroup ? parentRoute.url : `${parentRoute.url}${segment}/`
+        const type = isGroup ? 'group' : 'page'
 
-        // Attach metadata
-        if (isGroup) routeChild.isGroup = true
-        // if (isMeta) routechild.meta = true
-
-        routeChildren.push(routeChild)
-        routeToPath.set(routeChild, pathChild)
+        // This route will always have children since we skipped files
+        const route: RouteNode = { url, type, segment, children: [] }
+        routeToFile.set(route, file)
+        routes.push(route)
       }
+      return routes.sort((a, b) => a.segment.localeCompare(b.segment))
+    }
 
-      routeChildren.sort((a, b) => a.segment.localeCompare(b.segment))
-      return routeChildren
-    },
+    function attach(child: RouteNode, parent: RouteNode) {
+      parent.children!.push(child)
+    }
 
-    // Step 4: Attach child to parent
-    attach: (child, parent) => parent.children!.push(child),
-  })
-}
+    return traverseDepthFirst({ root, visit, expand, attach })
+  }

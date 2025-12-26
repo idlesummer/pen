@@ -170,15 +170,15 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
     def visit(route: RouteNode):
         """Find special files and check for duplicates."""
-        file = route_to_file[route]   # Already populated inside expand
+        file = route_to_file[route]     # Already populated inside expand
         file_children = file.children
         if not file_children: return
         
         # Detect layout.tsx and screen.tsx
-        for file in file_children:
-            match file.name:
-                case 'layout.tsx': route.layout = file.path
-                case 'screen.tsx': route.screen = file.path
+        for child in file_children:
+            match child.name:
+                case 'layout.tsx': route.layout = child.path
+                case 'screen.tsx': route.screen = child.path
         
         # Check for duplicate screens
         if route.screen:
