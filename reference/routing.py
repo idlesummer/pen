@@ -1,130 +1,30 @@
+"""
+Reference Implementation - Routing System (v0.2)
+
+Builds a routing system from filesystem structure:
+  Filesystem → File Tree → Route Tree → Route Manifest
+
+Key concepts:
+- Route groups like (marketing) organize files without affecting URLs
+- Private folders starting with _ are ignored
+- Layouts inherit from parent to child
+- Only routes with screen.tsx appear in final manifest
+
+Example:
+  /app/(marketing)/about/screen.tsx
+  → URL: /about/
+  → Inherits layouts from: app and (marketing)
+
+See: src/ for the TypeScript implementation
+"""
+
 from dataclasses import dataclass, field
-from math import exp
 from typing import Any, Callable, Generic, Literal, TypeVar
 import json
 
 
 # ====================
-# Sample File Tree
-# ====================
-
-
-"""
-/project/app
-├─ layout.tsx
-├─ screen.tsx
-├─ (marketing)/
-│  ├─ layout.tsx
-│  └─ about/
-│     └─ screen.tsx
-└─ blog/
-   ├─ layout.tsx
-   └─ screen.tsx
-   
-file_tree = {
-  "name": "app",
-  "path": "/project/app",
-  "children": [
-    {
-      "name": "layout.tsx",
-      "path": "/project/app/layout.tsx"
-    },
-    {
-      "name": "screen.tsx",
-      "path": "/project/app/screen.tsx"
-    },
-    {
-      "name": "(marketing)",
-      "path": "/project/app/(marketing)",
-      "children": [
-        {
-          "name": "layout.tsx",
-          "path": "/project/app/(marketing)/layout.tsx"
-        },
-        {
-          "name": "about",
-          "path": "/project/app/(marketing)/about",
-          "children": [
-            {
-              "name": "screen.tsx",
-              "path": "/project/app/(marketing)/about/screen.tsx"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "blog",
-      "path": "/project/app/blog",
-      "children": [
-        {
-          "name": "layout.tsx",
-          "path": "/project/app/blog/layout.tsx"
-        },
-        {
-          "name": "screen.tsx",
-          "path": "/project/app/blog/screen.tsx"
-        }
-      ]
-    }
-  ]
-}
-
-route_tree = {
-  "segment": "app",
-  "layout": "/project/app/layout.tsx",
-  "screen": "/project/app/screen.tsx",
-  "children": [
-    {
-      "segment": "blog",
-      "layout": "/project/app/blog/layout.tsx",
-      "screen": "/project/app/blog/screen.tsx"
-    },
-    {
-      "segment": "(marketing)",
-      "isGroup": True,
-      "layout": "/project/app/(marketing)/layout.tsx",
-      "children": [
-        {
-          "segment": "about",
-          "screen": "/project/app/(marketing)/about/screen.tsx"
-        }
-      ]
-    }
-  ]
-}
-
-route_manifest = {
-  "/": {
-    "path": "/",
-    "segment": "app",
-    "layouts": ["/project/app/layout.tsx"],
-    "screen": "/project/app/screen.tsx"
-  },
-  "/blog": {
-    "path": "/blog",
-    "segment": "blog",
-    "layouts": [
-      "/project/app/layout.tsx",           # ← Inherited from app
-      "/project/app/blog/layout.tsx"       # ← Own layout
-    ],
-    "screen": "/project/app/blog/screen.tsx"
-  },
-  "/about": {
-    "path": "/about",                       # ← Note: no (marketing) in path!
-    "segment": "about",
-    "layouts": [
-      "/project/app/layout.tsx",           # ← Inherited from app
-      "/project/app/(marketing)/layout.tsx" # ← Inherited from (marketing) group
-    ],
-    "screen": "/project/app/(marketing)/about/screen.tsx"
-  }
-}
-"""
-
-
-# ====================
-# tree.py
+# File Tree
 # ====================
 
 
@@ -132,7 +32,7 @@ route_manifest = {
 class FileNode:
     name: str
     path: str
-    children: list['FileNode'] | None = field(default=None)
+    children: list['FileNode'] | None = None
     
     def __str__(self) -> str:
         def serialize(node: "FileNode") -> dict:
@@ -143,42 +43,8 @@ class FileNode:
         return json.dumps(serialize(self), indent=2)
 
 
-file_tree = FileNode(
-    name='app',
-    path='/project/app',
-    children=[
-        # FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
-        FileNode(name='screen.tsx', path='/project/app/screen.tsx'),  # ← Root screen at /
-        
-        # Deeply nested route groups
-        FileNode(
-            name='marketing',
-            path='/project/app/marketing',
-            children=[
-                FileNode(name='layout.tsx', path='/project/app/(marketing)/(special)/(promo)/layout.tsx'),
-                FileNode(name='screen.tsx', path='/project/app/(marketing)/(special)/(promo)/screen.tsx'),
-                # FileNode(
-                #     name='(special)',
-                #     path='/project/app/(marketing)/(special)',
-                #     children=[
-                #         FileNode(
-                #             name='(promo)',
-                #             path='/project/app/(marketing)/(special)/(promo)',
-                #             children=[
-                #                 # ← This also maps to / (all groups!)
-                #                 FileNode(name='screen.tsx', path='/project/app/(marketing)/(special)/(promo)/screen.tsx')
-                #             ]
-                #         )
-                #     ]
-                # )
-            ]
-        ),
-    ]
-)
-
-
 # ====================
-# tree.py
+# Traversal
 # ====================
 
 
@@ -194,10 +60,7 @@ class TraversalOptions(Generic[TNode]):
 
 
 def traverse_depth_first(options: TraversalOptions[TNode]) -> TNode:
-    """
-    Traverse tree depth-first with preorder traversal.
-    Processes parent before children, going deep before wide.
-    """
+    """Visit parent before children, go deep before wide."""
     root = options.root
     visit = options.visit
     expand = options.expand
@@ -224,10 +87,7 @@ def traverse_depth_first(options: TraversalOptions[TNode]) -> TNode:
 
 
 def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
-    """
-    Traverse tree breadth-first (level by level).
-    Processes all siblings before any children.
-    """
+    """Visit all siblings before any children."""
     root = options.root
     visit = options.visit
     expand = options.expand
@@ -251,18 +111,18 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
 
 
 # ====================
-# route-tree.py
+# Route Tree
 # ====================
 
 
 @dataclass(eq=False)
 class RouteNode:
-    url: str
-    type: Literal['page', 'group']
-    segment: str
+    url: str                                  # Full URL like "/blog/"
+    type: Literal['page', 'group']            # "page" or "group" 
+    segment: str                              # Directory name like "blog"
+    layout: str | None = None                 # Path to layout.tsx
+    screen: str | None = None                 # Path to screen.tsx
     children: list['RouteNode'] | None = None
-    layout: str | None = None
-    screen: str | None = None
 
     def __hash__(self):
         return id(self)
@@ -287,10 +147,12 @@ class RouteNode:
 
 def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     """
-    Transform FileNode → RouteNode using DFS.
+    Transform file tree into route tree.
     
-    Pattern: route_to_file maintains RouteNode → FileNode correspondence
-    via closure, allowing expand to access source FileNode data.
+    - Detects layout.tsx and screen.tsx files
+    - Computes URLs for each route
+    - Filters out private directories (_folder)
+    - Validates no duplicate screens at same URL
     """
     if not file_tree.children:
         return None
@@ -303,21 +165,22 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         children=[],
     )
 
-    route_to_file = {root: file_tree}   # Track RouteNode → FileNode mapping
-    screen_routes: dict[str, str] = {}  # url → file path   # Global tracking of all routes with screens
+    route_to_file = {root: file_tree}   # Map route → file
+    screen_routes: dict[str, str] = {}  # Track duplicate screens
 
     def visit(route: RouteNode):
+        """Find special files and check for duplicates."""
         file = route_to_file[route]   # Already populated inside expand
         file_children = file.children
         if not file_children: return
         
-        # Detect and populate metadata (side effect)
+        # Detect layout.tsx and screen.tsx
         for file in file_children:
             match file.name:
                 case 'layout.tsx': route.layout = file.path
                 case 'screen.tsx': route.screen = file.path
         
-        # Check if this node's screen conflicts with existing routes
+        # Check for duplicate screens
         if route.screen:
             if existing := screen_routes.get(route.url):
                 raise ValueError(
@@ -326,11 +189,11 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
                     f'  2. {file.path}/screen.tsx\n\n'
                     f'Multiple screen.tsx files cannot map to the same URL.\n'
                     f'Remove one of the screen.tsx files, or use different route segments.')
-
             screen_routes[route.url] = file.path
 
     # Expand node into child RouteNodes
     def expand(route: RouteNode) -> list[RouteNode] | None:
+        """Create child routes from directories."""
         file = route_to_file[route]
         file_children = file.children
         if not file_children: return
@@ -341,7 +204,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         # Create children here
         for file in file_children:
             if not file.children: continue          # Skip if file
-            if file.name.startswith('_'): continue  # Skip if private
+            if file.name.startswith('_'): continue  # Skip if private dirs
          
             segment = file.name       
             is_group = segment.startswith('(') and segment.endswith(')')
@@ -357,11 +220,10 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
             route_to_file[route_child] = file
             route_children.append(route_child)
-            
         return sorted(route_children, key=lambda c: c.segment)
     
-    # Attach child to parent
     def attach(child: RouteNode, parent: RouteNode):
+        """Add child to parent's children."""
         assert parent.children is not None
         parent.children.append(child)
 
@@ -375,16 +237,16 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
 
 # ====================
-# route-manifest.py
+# Route Manifest
 # ====================
 
 
 @dataclass
 class RouteMetadata:
-    path: str                           # URL path
-    segment: str                        # Last segment
-    screen: str | None = None           # Screen file
-    layouts: list[str] | None = None    # Inherited layout chain
+    path: str                           # URL path like "/blog/"
+    segment: str                        # Last segment like "blog"
+    screen: str | None = None           # Path to screen.tsx
+    layouts: list[str] | None = None    # Inherited layouts (root to leaf)
 
     def to_dict(self) -> dict:
         result: dict[str, Any] = {'path': self.path, 'segment': self.segment}
@@ -398,6 +260,7 @@ class RouteMetadata:
 
 @dataclass
 class RouteManifest:
+    """URL-to-metadata lookup table."""
     routes: dict[str, RouteMetadata] = field(default_factory=dict)
 
     def __getitem__(self, key: str) -> RouteMetadata:
@@ -417,7 +280,13 @@ class RouteManifest:
 
 
 def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
-    """Build route manifest with layout inheritance."""
+    """
+    Flatten route tree into manifest.
+    
+    - Creates URL-to-metadata lookup
+    - Computes layout inheritance chains
+    - Only includes routes with screens
+    """
 
     # Initialize root layout
     root_layouts = [route_tree.layout] if route_tree.layout else []
@@ -425,6 +294,7 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
     manifest = RouteManifest()
 
     def visit(route: RouteNode):
+        """Add routes with screens, compute child layouts."""
         current_layouts = layout_map[route]
   
         # Only create a manifest if route has a screen
@@ -450,8 +320,40 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
 
 
 # ====================
-# main.py
+# Example
 # ====================
+
+
+file_tree = FileNode(
+    name='app',
+    path='/project/app',
+    children=[
+        FileNode(name='layout.tsx', path='/project/app/layout.tsx'),
+        FileNode(name='screen.tsx', path='/project/app/screen.tsx'),
+        FileNode(
+            name='(marketing)',
+            path='/project/app/(marketing)',
+            children=[
+                FileNode(name='layout.tsx', path='/project/app/(marketing)/layout.tsx'),
+                FileNode(
+                    name='about',
+                    path='/project/app/(marketing)/about',
+                    children=[
+                        FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.tsx')
+                    ]
+                )
+            ]
+        ),
+        FileNode(
+            name='blog',
+            path='/project/app/blog',
+            children=[
+                FileNode(name='layout.tsx', path='/project/app/blog/layout.tsx'),
+                FileNode(name='screen.tsx', path='/project/app/blog/screen.tsx')
+            ]
+        )
+    ]
+)
 
 
 def main():
@@ -464,11 +366,11 @@ def main():
     print(route_tree)
     print()
     
-    if route_tree:
-        manifest = build_route_manifest(route_tree)
-        print('=== Route Manifest ===')
-        print(json.dumps(manifest.to_dict(), indent=2))
-        print()
+    if not route_tree: return
+    manifest = build_route_manifest(route_tree)
+    print('=== Route Manifest ===')
+    print(json.dumps(manifest.to_dict(), indent=2))
+    print()
 
 
 if __name__ == '__main__':
