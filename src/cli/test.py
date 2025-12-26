@@ -202,7 +202,6 @@ def traverse_depth_first(options: TraversalOptions[TNode]) -> TNode:
     visit = options.visit
     expand = options.expand
     attach = options.attach
-    filter_fn = options.filter
 
     stack = [root]
     while stack:
@@ -219,9 +218,7 @@ def traverse_depth_first(options: TraversalOptions[TNode]) -> TNode:
         for child in reversed(children):
             if attach:
                 attach(child, node)
-            
-            if filter_fn is None or filter_fn(child):
-                stack.append(child)
+            stack.append(child)
 
     return root
 
@@ -235,7 +232,6 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
     visit = options.visit
     expand = options.expand
     attach = options.attach
-    filter_fn = options.filter
 
     queue = [root]
     for node in queue:
@@ -249,9 +245,7 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
         for child in children:
             if attach:
                 attach(child, node)
-            
-            if filter_fn is None or filter_fn(child):
-                queue.append(child)
+            queue.append(child)
 
     return root
 
