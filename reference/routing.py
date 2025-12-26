@@ -303,12 +303,8 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         children=[],
     )
 
-    # Track RouteNode → FileNode mapping (captured by closure)
-    route_to_file: dict[RouteNode, FileNode] = {}
-    route_to_file[root] = file_tree
-    
-    # Global tracking of all routes with screens
-    screen_routes: dict[str, str] = {}  # url → file path
+    route_to_file = {root: file_tree}   # Track RouteNode → FileNode mapping
+    screen_routes: dict[str, str] = {}  # url → file path   # Global tracking of all routes with screens
 
     def visit(route: RouteNode):
         file = route_to_file[route]   # Already populated inside expand
