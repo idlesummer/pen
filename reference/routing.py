@@ -128,6 +128,12 @@ class RouteNode:
     screen: str | None = None                 # Path to screen.tsx
     children: list['RouteNode'] | None = None
 
+    def __setitem__(self, key: str, value: Any):
+        setattr(self, key, value)
+    
+    def __getitem__(self, key: str):
+        return getattr(self, key)
+
     def __hash__(self):
         return id(self)
 
@@ -147,6 +153,31 @@ class RouteNode:
 
     def __str__(self):
         return json.dumps(self.to_dict(), indent=2)
+
+
+T = TypeVar('T')
+def group_files(
+    entries: list[T], 
+    extensions: set[str], 
+    filenames: set[str], 
+    key: Callable[[T], str],
+):
+    """Group files by their base name (stem)."""
+    groups: dict[str, list[T]] = {}
+    
+    for entry in entries:
+        name = key(entry)
+        if '.' not in name: 
+            continue
+        
+        base_name, ext = name.rsplit('.', 1)
+        if ext not in extensions or base_name not in filenames: 
+            continue
+
+        if base_name not in groups:
+            groups[base_name] = []
+        groups[base_name].append(entry)    
+    return groups
 
 
 def build_route_tree(file_tree: FileNode) -> RouteNode | None:
@@ -174,25 +205,47 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
     def visit(parent_route: RouteNode):
         """Find special files and check for duplicates."""
-        parent_file = route_to_file[parent_route]   # Already populated inside expand
+        VALID_EXTENSIONS = {'tsx', 'ts', 'jsx', 'js'}  # Use set, not list
+        SPECIAL_FILES = {'layout', 'screen'}
         
-        # Detect layout.tsx and screen.tsx
-        for file in parent_file.children or []:
-            match file.name:
-                case 'layout.tsx': parent_route.layout = file.path
-                case 'screen.tsx': parent_route.screen = file.path
+        parent_file = route_to_file[parent_route]
         
-        # Check for duplicate screens
+        # Group files by base name
+        grouped = group_files(
+            entries=parent_file.children or [],
+            key=lambda file: file.name,
+            extensions=VALID_EXTENSIONS,
+            filenames=SPECIAL_FILES
+        )
+        
+        # Check for conflicts and collect errors
+        errors: list[str] = []
+        for file_type in SPECIAL_FILES:
+            files = grouped.get(file_type)
+            if not files or len(files) <= 1:
+                continue
+            errors.append(
+                f'Conflicting {file_type} files found in "{parent_file.path}":\n' +
+                '\n'.join(f'  - {f.path}' for f in files))  # Use .path
+        
+        if errors:
+            raise ValueError('\n\n'.join(errors) + '\n\nRemove the duplicate files.')
+        
+        # Assign special files
+        for file_type in SPECIAL_FILES:
+            if files := grouped.get(file_type):
+                parent_route[file_type] = files[0].path
+        
+        # Check for duplicate screen URLs
         if parent_route.screen:
             if existing_file := screen_routes.get(parent_route.url):
                 raise ValueError(
                     f'Conflicting screen routes found at "{parent_route.url}":\n'
-                    f'  1. {existing_file}/screen.tsx\n'
-                    f'  2. {parent_file.path}/screen.tsx\n\n'
-                    f'Multiple screen.tsx files cannot map to the same URL.\n'
-                    f'Remove one of the screen.tsx files, or use different route segments.')
+                    f'  1. {existing_file}\n'
+                    f'  2. {parent_file.path}\n\n'
+                    f'Multiple screen files cannot map to the same URL.')
             screen_routes[parent_route.url] = parent_file.path
-
+    
     # Expand node into child RouteNodes
     def expand(parent_route: RouteNode) -> list[RouteNode] | None:
         """Create child routes from directories."""
@@ -330,6 +383,7 @@ file_tree = FileNode(
                     name='about',
                     path='/project/app/(marketing)/about',
                     children=[
+                        FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.jsx'),
                         FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.tsx')
                     ]
                 )
