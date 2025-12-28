@@ -39,8 +39,8 @@ export function buildFileTree(appPath: string): FileNode {
     parent.children!.push(child)
   }
 
-  function filter(child: FileNode) {
-    return child.children !== undefined
+  function filter(file: FileNode) {
+    return file.children !== undefined
   }
 
   return traverseBreadthFirst({ root, expand, attach, filter })

@@ -1,5 +1,5 @@
   import { traverseDepthFirst } from '@/lib/traversal'
-  import type { FileNode } from '@/routing/file-tree'
+  import type { FileNode } from '@/build/file-tree'
 
   export type RouteNode = {
     url: string             // full URL like '/blog/'
@@ -12,7 +12,6 @@
 
   export function buildRouteTree(fileTree: FileNode): RouteNode | null {
     if (!fileTree.children) return null
-
     const root: RouteNode = {
       url: '/',
       type: 'page', 
