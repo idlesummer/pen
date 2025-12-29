@@ -346,7 +346,7 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
         screen = parent_route.screen
         metadata = RouteMetadata(url, screen)
         if len(parent_layouts): 
-            metadata.layouts = parent_layouts
+            metadata.layouts = list(reversed(parent_layouts))
 
         manifest[parent_route.url] = metadata
 

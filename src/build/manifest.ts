@@ -5,7 +5,6 @@ import type { RouteNode } from '@/build/route-tree'
 export type RouteManifest = Record<string, RouteMetadata>
 export type RouteMetadata = {
   url: string         // url path like '/blog/'
-  segment: string     // last segment like 'blog'
   screen?: string     // path to screen.tsx
   layouts?: string[]  // inherited layouts (routeTree to leaf)
 }
@@ -21,16 +20,14 @@ export function buildRouteManifest(routeTree: RouteNode) {
   function visit(parentRoute: RouteNode) {
     // Always available
     const parentLayouts = layoutMap.get(parentRoute)!
-
-    // Only create a manifest if this route has a screen
-    if (parentRoute.screen) {
-      const { url, segment, screen } = parentRoute
-      const metadata: RouteMetadata = { url, segment, screen }
-
-      if (parentLayouts.length) 
-        metadata.layouts = parentLayouts
-      manifest[parentRoute.url] = metadata
-    }
+    if (!parentRoute.screen) return // Only create manifest if this route has a screen
+    
+    const { url, screen } = parentRoute
+    const metadata: RouteMetadata = { url, screen }
+    
+    if (parentLayouts.length) 
+      metadata.layouts = parentLayouts.toReversed()
+    manifest[parentRoute.url] = metadata
   }
 
   /** Get children and compute their layouts */
