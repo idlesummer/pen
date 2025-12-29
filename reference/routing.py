@@ -179,7 +179,6 @@ def group_files(
         groups[base_name].append(entry)    
     return groups
 
-
 def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     """
     Transform file tree into route tree.
@@ -219,30 +218,25 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         )
         
         # Check for conflicts and collect errors
-        errors: list[str] = []
         for file_type in SPECIAL_FILES:
-            files = grouped.get(file_type)
-            if not files or len(files) <= 1:
-                continue
-            errors.append(
-                f'Conflicting {file_type} files found in "{parent_file.path}":\n' +
-                '\n'.join(f'  - {f.path}' for f in files))  # Use .path
-        
-        if errors:
-            raise ValueError('\n\n'.join(errors) + '\n\nRemove the duplicate files.')
-        
-        # Assign special files
-        for file_type in SPECIAL_FILES:
-            if files := grouped.get(file_type):
+            files = grouped.get(file_type, [])
+            if len(files) < 2:
                 parent_route[file_type] = files[0].path
+
+            else:            
+                file_list = '\n'.join(f'  - {f.path}' for f in files)
+                raise ValueError(
+                    f'Conflicting {file_type} files found in "{parent_file.path}":\n'
+                    f'{file_list}\n\n'
+                    f'Remove the duplicate files.')
         
         # Check for duplicate screen URLs
         if parent_route.screen:
             if existing_file := screen_routes.get(parent_route.url):
                 raise ValueError(
                     f'Conflicting screen routes found at "{parent_route.url}":\n'
-                    f'  1. {existing_file}\n'
-                    f'  2. {parent_file.path}\n\n'
+                    f'  - {existing_file}\n'
+                    f'  - {parent_file.path}\n\n'
                     f'Multiple screen files cannot map to the same URL.')
             screen_routes[parent_route.url] = parent_file.path
     
