@@ -229,7 +229,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
                     f'Conflicting {file_type} files found in "{parent_file.path}":\n'
                     f'{file_list}\n\n'
                     f'Only one {file_type} file is allowed per directory.\n'
-                    f'Keep one file and delete the others, or use different extensions.'
+                    f'Keep one file and remove the others.'
                 )
         
         # Check for duplicate screen URLs
