@@ -220,10 +220,10 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
         # Check for conflicts and collect errors
         for file_type in SPECIAL_FILES:
             files = grouped.get(file_type, [])
-            if len(files) < 2:
+            if len(files) == 1:
                 parent_route[file_type] = files[0].path
 
-            else:            
+            elif len(files) > 1:            
                 file_list = '\n'.join(f'  - {f.path}' for f in files)
                 raise ValueError(
                     f'Conflicting {file_type} files found in "{parent_file.path}":\n'
