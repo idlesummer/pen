@@ -203,8 +203,8 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     screen_routes: dict[str, str] = {}  # Track duplicate screens
     
     # Constants for route file detection
-    VALID_EXTENSIONS = {'tsx', 'ts', 'jsx', 'js'}  # Supported file extensions
-    ROUTE_FILES = {'layout', 'screen'}           # Special file basenames to detect
+    VALID_EXTENSIONS = {'tsx', 'ts', 'jsx', 'js'}   # Supported file extensions
+    ROUTE_FILES = {'layout', 'screen'}              # Special file basenames to detect
 
     def visit(parent_route: RouteNode):
         """Find special files and check for duplicates."""
@@ -383,7 +383,6 @@ file_tree = FileNode(
                     name='about',
                     path='/project/app/(marketing)/about',
                     children=[
-                        FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.jsx'),
                         FileNode(name='screen.tsx', path='/project/app/(marketing)/about/screen.tsx')
                     ]
                 )

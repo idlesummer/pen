@@ -10,6 +10,12 @@ export type RouteNode = {
   children?: RouteNode[]
 }
 
+/**
+ * Builds a route tree from a file system tree.
+ * 
+ * Detects layout and screen files, computes URLs, filters private directories,
+ * and validates no duplicate screens at the same URL.
+ */
 export function buildRouteTree(fileTree: FileNode): RouteNode | null {
   if (!fileTree.children) 
     return null
@@ -30,8 +36,8 @@ export function buildRouteTree(fileTree: FileNode): RouteNode | null {
   function visit(parentRoute: RouteNode) {
     const parentFile = routeToFile.get(parentRoute)!  // Already populated inside expand
 
+    // Assign route files
     if (parentFile.children) {
-      // Group files by base name
       const groupedFiles = groupFiles(parentFile.children, EXTENSIONS, ROUTE_FILES)
 
       for (const routeFile of ROUTE_FILES) {
@@ -45,13 +51,12 @@ export function buildRouteTree(fileTree: FileNode): RouteNode | null {
             `Conflicting ${routeFile} files found in "${parentFile.path}":\n` +
             `${fileList}\n\n` +
             `Only one ${routeFile} file is allowed per directory.\n` +
-            'Keep one file and remove the others.',
-          )
+            'Keep one file and remove the others.')
         }
       }
     }
 
-    // Check for duplicate screens
+    // Validate unique screen url
     if (parentRoute.screen) {
       const existingFile = screenRoutes[parentRoute.url]
       if (existingFile) {
@@ -60,8 +65,7 @@ export function buildRouteTree(fileTree: FileNode): RouteNode | null {
           `  - ${existingFile}\n` +
           `  - ${parentFile.path}\n\n` +
           'Each URL can only have one screen file.\n' +
-          'Move one screen to a different directory or rename the route segment.',
-        )
+          'Move one screen to a different directory or rename the route segment.')
       }
       screenRoutes[parentRoute.url] = parentFile.path
     }
@@ -95,6 +99,10 @@ export function buildRouteTree(fileTree: FileNode): RouteNode | null {
   return traverseDepthFirst({ root, visit, expand, attach })
 }
 
+/**
+ * Groups files by their base name (without extension).
+ * Only includes files matching the specified extensions and filenames.
+ */
 function groupFiles(
   files: FileNode[], 
   extensions: readonly string[], 
