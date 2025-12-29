@@ -2,12 +2,14 @@ import { traverseDepthFirst } from '@/lib/traversal'
 import type { RouteNode } from '@/build/route-tree'
 
 
+export type RouteManifest = Record<string, RouteMetadata>
 export type RouteMetadata = {
   url: string         // url path like '/blog/'
   segment: string     // last segment like 'blog'
   screen?: string     // path to screen.tsx
   layouts?: string[]  // inherited layouts (routeTree to leaf)
 }
+
 
 export function buildRouteManifest(routeTree: RouteNode) {
   // Initialize routeTree layout

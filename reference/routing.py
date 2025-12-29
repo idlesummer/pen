@@ -19,7 +19,7 @@ See: src/ for the TypeScript implementation
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Generic, Literal, TypeVar
+from typing import Any, Callable, Generic, Literal, TypeVar, TypedDict
 import json
 
 
@@ -82,7 +82,7 @@ def traverse_depth_first(options: TraversalOptions[TNode]) -> TNode:
         for child in reversed(children):
             if attach:
                 attach(child, node)
-            if not filter or filter(node):
+            if not filter or filter(child):
                 stack.append(child)
 
     return root
@@ -108,7 +108,7 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
         for child in children:
             if attach:
                 attach(child, node)
-            if not filter or filter(node):
+            if not filter or filter(child):
                 queue.append(child)
 
     return root
@@ -122,7 +122,7 @@ def traverse_breadth_first(options: TraversalOptions[TNode]) -> TNode:
 @dataclass(eq=False)
 class RouteNode:
     url: str                                  # Full URL like "/blog/"
-    type: Literal['page', 'group']            # "page" or "group" 
+    type: Literal['screen', 'group']          # "screen" or "group" 
     segment: str                              # Directory name like "blog"
     layout: str | None = None                 # Path to layout.tsx
     screen: str | None = None                 # Path to screen.tsx
@@ -194,7 +194,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
     # Create root RouteNode
     root = RouteNode(
         url='/', 
-        type='page',
+        type='screen',
         segment=file_tree.name, 
         children=[],
     )
@@ -260,7 +260,7 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
             segment  = file.name       
             is_group = segment.startswith('(') and segment.endswith(')')
             url  = parent_route.url if is_group else f'{parent_route.url}{segment}/'
-            type = 'group' if is_group else 'page'
+            type = 'group' if is_group else 'screen'
 
              # Always children=[] because we filtered out file nodes
             route_child = RouteNode(url, type, segment, children=[])
@@ -286,12 +286,11 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 @dataclass
 class RouteMetadata:
     url: str                           # URL path like "/blog/"
-    segment: str                        # Last segment like "blog"
     screen: str | None = None           # Path to screen.tsx
     layouts: list[str] | None = None    # Inherited layouts (root to leaf)
 
     def to_dict(self) -> dict:
-        result: dict[str, Any] = {'path': self.url, 'segment': self.segment}
+        result: dict[str, Any] = {'url': self.url}
         if self.screen is not None:  result['screen'] = self.screen
         if self.layouts is not None: result['layouts'] = self.layouts
         return result
@@ -304,6 +303,9 @@ class RouteMetadata:
 class RouteManifest:
     """URL-to-metadata lookup table."""
     routes: dict[str, RouteMetadata] = field(default_factory=dict)
+    
+    def get(self, key: str) -> RouteMetadata | None:
+        return self.routes.get(key)
 
     def __getitem__(self, key: str) -> RouteMetadata:
         return self.routes[key]
@@ -341,9 +343,8 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
         if not parent_route.screen: return  # Only create manifest if this route has a screen
         
         url = parent_route.url
-        segment = parent_route.segment
         screen = parent_route.screen
-        metadata = RouteMetadata(url, segment, screen)
+        metadata = RouteMetadata(url, screen)
         if len(parent_layouts): 
             metadata.layouts = parent_layouts
 
@@ -362,6 +363,14 @@ def build_route_manifest(route_tree: RouteNode) -> RouteManifest:
     traverse_depth_first(TraversalOptions(route_tree, visit, expand))
     return manifest
 
+
+# ====================
+# Route Matcher
+# ====================
+
+def match_route(url: str, manifest: RouteManifest):
+    normalized_url = url if url.endswith('/') else f'{url}/'
+    return manifest.get(normalized_url)
 
 # ====================
 # Example
@@ -401,7 +410,7 @@ file_tree = FileNode(
 
 
 def main():
-    print('=== Path Tree ===')
+    print('=== File Tree ===')
     print(file_tree)
     print()
     
