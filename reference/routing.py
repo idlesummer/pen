@@ -201,11 +201,13 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
 
     route_to_file = {root: file_tree}   # Map route → file
     screen_routes: dict[str, str] = {}  # Track duplicate screens
+    
+    # Constants for route file detection
+    VALID_EXTENSIONS = {'tsx', 'ts', 'jsx', 'js'}  # Supported file extensions
+    ROUTE_FILES = {'layout', 'screen'}           # Special file basenames to detect
 
     def visit(parent_route: RouteNode):
         """Find special files and check for duplicates."""
-        VALID_EXTENSIONS = {'tsx', 'ts', 'jsx', 'js'}  # Use set, not list
-        SPECIAL_FILES = {'layout', 'screen'}
         
         parent_file = route_to_file[parent_route]
         
@@ -214,21 +216,21 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
             entries=parent_file.children or [],
             key=lambda file: file.name,
             extensions=VALID_EXTENSIONS,
-            filenames=SPECIAL_FILES
+            filenames=ROUTE_FILES
         )
         
         # Check for conflicts and collect errors
-        for file_type in SPECIAL_FILES:
-            files = grouped.get(file_type, [])
+        for route_file in ROUTE_FILES:
+            files = grouped.get(route_file, [])
             if len(files) == 1:
-                parent_route[file_type] = files[0].path
+                parent_route[route_file] = files[0].path
 
             elif len(files) > 1:            
                 file_list = '\n'.join(f'  - {f.path}' for f in files)
                 raise ValueError(
-                    f'Conflicting {file_type} files found in "{parent_file.path}":\n'
+                    f'Conflicting {route_file} files found in "{parent_file.path}":\n'
                     f'{file_list}\n\n'
-                    f'Only one {file_type} file is allowed per directory.\n'
+                    f'Only one {route_file} file is allowed per directory.\n'
                     f'Keep one file and remove the others.'
                 )
         

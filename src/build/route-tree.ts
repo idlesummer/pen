@@ -11,7 +11,9 @@ export type RouteNode = {
 }
 
 export function buildRouteTree(fileTree: FileNode): RouteNode | null {
-  if (!fileTree.children) return null
+  if (!fileTree.children) 
+    return null
+
   const root: RouteNode = {
     url: '/',
     type: 'page', 
@@ -20,28 +22,49 @@ export function buildRouteTree(fileTree: FileNode): RouteNode | null {
   }
   const routeToFile = new Map([[root, fileTree]]) // map route → file
   const screenRoutes: Record<string, string> = {} // track duplicate screens
+  
+  // Constants for route file detection
+  const EXTENSIONS = ['tsx', 'ts', 'jsx', 'js'] as const  // Supported file extensions
+  const ROUTE_FILES = ['layout', 'screen'] as const       // Route files to detect
 
   function visit(parentRoute: RouteNode) {
     const parentFile = routeToFile.get(parentRoute)!  // Already populated inside expand
-    for (const file of parentFile.children ?? []) {   // Detect layout.tsx and screen.tsx
-      switch (file.name) {
-        case 'layout.tsx': parentRoute.layout = file.path; break
-        case 'screen.tsx': parentRoute.screen = file.path; break
-    }}
 
-    // Skip duplicate screen validation if parent route has no screen
-    if (!parentRoute.screen) return
-    const existingPath = screenRoutes[parentRoute.url]
-    
+    if (parentFile.children) {
+      // Group files by base name
+      const groupedFiles = groupFiles(parentFile.children, EXTENSIONS, ROUTE_FILES)
+
+      for (const routeFile of ROUTE_FILES) {
+        const files = groupedFiles[routeFile] ?? []
+        if (files.length === 1)
+          parentRoute[routeFile] = files[0].path
+
+        else if (files.length > 1) {
+          const fileList = files.map(f => `  - ${f.path}`).join('\n')
+          throw Error(
+            `Conflicting ${routeFile} files found in "${parentFile.path}":\n` +
+            `${fileList}\n\n` +
+            `Only one ${routeFile} file is allowed per directory.\n` +
+            'Keep one file and remove the others.',
+          )
+        }
+      }
+    }
+
     // Check for duplicate screens
-    if (existingPath) throw new Error(
-      `Conflicting screen routes found at "${parentRoute.url}":\n` +
-      `  1. ${existingPath}/screen.tsx\n` +
-      `  2. ${parentFile.path}/screen.tsx\n\n` +
-      'Multiple screen.tsx files cannot map to the same URL.\n' +
-      'Remove one of the screen.tsx files, or use different route segments.',
-    )
-    screenRoutes[parentRoute.url] = parentFile.path // Add new screen to map
+    if (parentRoute.screen) {
+      const existingFile = screenRoutes[parentRoute.url]
+      if (existingFile) {
+        throw Error(
+          `Conflicting screen routes found at "${parentRoute.url}":\n` +
+          `  - ${existingFile}\n` +
+          `  - ${parentFile.path}\n\n` +
+          'Each URL can only have one screen file.\n' +
+          'Move one screen to a different directory or rename the route segment.',
+        )
+      }
+      screenRoutes[parentRoute.url] = parentFile.path
+    }
   }
 
   function expand(parentRoute: RouteNode) {
@@ -70,4 +93,31 @@ export function buildRouteTree(fileTree: FileNode): RouteNode | null {
   }
 
   return traverseDepthFirst({ root, visit, expand, attach })
+}
+
+function groupFiles(
+  files: FileNode[], 
+  extensions: readonly string[], 
+  filenames: readonly string[],
+) {
+  const groups: Record<string, FileNode[]> = {}
+
+  for (const file of files) {
+    const name = file.name
+    if (!name.includes('.'))
+      continue
+
+    const dot = name.lastIndexOf('.')
+    const ext = name.slice(dot + 1)
+    if (!extensions.includes(ext))
+      continue
+
+    const base = name.slice(0, dot)
+    if (!filenames.includes(base))
+      continue
+
+    groups[base] ??= []
+    groups[base].push(file)
+  }
+  return groups
 }
