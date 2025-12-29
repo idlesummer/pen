@@ -228,7 +228,9 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
                 raise ValueError(
                     f'Conflicting {file_type} files found in "{parent_file.path}":\n'
                     f'{file_list}\n\n'
-                    f'Remove the duplicate files.')
+                    f'Only one {file_type} file is allowed per directory.\n'
+                    f'Keep one file and delete the others, or use different extensions.'
+                )
         
         # Check for duplicate screen URLs
         if parent_route.screen:
@@ -237,7 +239,9 @@ def build_route_tree(file_tree: FileNode) -> RouteNode | None:
                     f'Conflicting screen routes found at "{parent_route.url}":\n'
                     f'  - {existing_file}\n'
                     f'  - {parent_file.path}\n\n'
-                    f'Multiple screen files cannot map to the same URL.')
+                    f'Each URL can only have one screen file.\n'
+                    f'Move one screen to a different directory or rename the route segment.'
+                )
             screen_routes[parent_route.url] = parent_file.path
     
     # Expand node into child RouteNodes
