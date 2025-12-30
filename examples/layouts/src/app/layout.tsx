@@ -1,5 +1,5 @@
+import React, { type PropsWithChildren } from 'react'
 import { Box, Text } from 'ink'
-import type { PropsWithChildren } from 'react'
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (

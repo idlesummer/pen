@@ -50,4 +50,4 @@ function App() {
   )
 }
 
-// render(<App />)
+render(<App />)
