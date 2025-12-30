@@ -1,6 +1,7 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import { join } from 'path'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { buildFileTree, buildRouteTree, buildManifest } from '@/core/build'
+import { buildComponentMap } from '@/cli/codegen'
 
 interface BuildOptions {
   dir?: string
@@ -50,27 +51,34 @@ export async function build(options: BuildOptions = {}) {
     const manifest = buildManifest(routeTree)
     
     // Step 4: Ensure output directory exists
-    if (!fs.existsSync(outputDir))
-      fs.mkdirSync(outputDir, { recursive: true })
+    if (!existsSync(outputDir))
+      mkdirSync(outputDir, { recursive: true })
     
     // Step 5: Write manifest.json
-    const manifestPath = path.join(outputDir, 'manifest.json')
+    const manifestPath = join(outputDir, 'manifest.json')
     const manifestJson = JSON.stringify(manifest, null, 2)
-    fs.writeFileSync(manifestPath, manifestJson, 'utf-8')
-    
+    writeFileSync(manifestPath, manifestJson, 'utf-8')
     console.log(`   ✓ Generated ${manifestPath}`)
     
-    // Step 6: Success summary
+    // Step 6: Generate component map
+    console.log('🗺️  Generating component map...')
+    const componentsCode = buildComponentMap(manifest)
+    const componentsPath = join(outputDir, 'components.ts')
+    writeFileSync(componentsPath, componentsCode, 'utf-8')
+    console.log(`   ✓ Generated ${componentsPath}`)
+
+    // Step 7: Success summary
     console.log()
     console.log('✅ Build complete!')
     console.log()
-    console.log('Manifest:')
-    console.log(manifestJson)
+    console.log('Generated files:')
+    console.log(`   ${manifestPath}`)
+    console.log(`   ${componentsPath}`)
     console.log()
     console.log('Routes:')
     for (const url of Object.keys(manifest))
       console.log(`   ${url}`)
-    
+  
   } catch (error) {
     console.error('❌ Build failed:', error)
     process.exit(1)
