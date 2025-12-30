@@ -1,11 +1,12 @@
 import { readdirSync, statSync } from 'fs'
-import { resolve, basename, join } from 'path'
+import { resolve, join, posix } from 'path'
 import { traverseBreadthFirst } from '@/core/lib/traversal'
 
 type FileTreeError = { error: 'NOT_FOUND' | 'NOT_DIRECTORY' }
+
 export type FileNode = { 
-  name: string            // entry name (parentFile or directory)
-  path: string            // absolute filesystem path
+  name: string            // entry name (file or directory)
+  path: string            // relative path like /app/home/screen.tsx
   children?: FileNode[]   // present only for directories
 }
 
@@ -14,23 +15,33 @@ export function buildFileTree(appPath: string): FileNode | FileTreeError {
   const stat = statSync(rootPath, { throwIfNoEntry: false })
   if (!stat)               return { error: 'NOT_FOUND' }
   if (!stat.isDirectory()) return { error: 'NOT_DIRECTORY' }
+  
+  // Track absolute paths internally for filesystem operations
+  const absPathMap: Record<string, string> = {}
+  absPathMap['/app'] = rootPath
 
+  // Root node
   const root: FileNode = { 
-    name: basename(rootPath), 
-    path: rootPath, 
+    name: 'app', 
+    path: '/app', 
     children: [],
   }
 
   function expand(parentFile: FileNode) {
-    const dirents = readdirSync(parentFile.path, { withFileTypes: true })
+    const parentAbsPath = absPathMap[parentFile.path]!  // Always populated
+    const dirents = readdirSync(parentAbsPath, { withFileTypes: true })
     const children: FileNode[] = []
 
     for (const dirent of dirents) {
       if (!dirent.isFile() && !dirent.isDirectory()) continue
-      const path = join(parentFile.path, dirent.name)
+
+      const relPath = posix.join(parentFile.path, dirent.name)
+      const absPath = join(parentAbsPath, dirent.name)
+      absPathMap[relPath] = absPath
+      
       const child: FileNode = dirent.isDirectory()
-        ? { name: dirent.name, path, children: [] }
-        : { name: dirent.name, path }
+        ? { name: dirent.name, path: relPath, children: [] }
+        : { name: dirent.name, path: relPath }
       children.push(child)
     }
     return children.sort((a, b) => a.name.localeCompare(b.name))

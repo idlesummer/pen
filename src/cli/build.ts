@@ -13,7 +13,7 @@ interface BuildOptions {
  */
 export async function build(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
-  const outputDir = options.output || './src/generated'
+  const outputDir = options.output || './.pen'
   
   console.log('🔨 Building routes...')
   console.log(`   App directory: ${appDir}`)
@@ -44,7 +44,7 @@ export async function build(options: BuildOptions = {}) {
       console.error('❌ Error: No routes found')
       process.exit(1)
     }
-    
+  
     // Step 3: Generate manifest
     console.log('📋 Generating manifest...')
     const manifest = buildManifest(routeTree)
