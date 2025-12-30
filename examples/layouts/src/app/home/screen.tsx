@@ -1,3 +1,5 @@
+import { Text } from 'ink'
+
 export default function HomeScreen() {
-  return <>Home Screen Content</>
+  return <Text>Home Screen Content</Text>
 }

@@ -1,11 +1,16 @@
-import React from 'react'
+import { Box, Text } from 'ink'
+import type { PropsWithChildren } from 'react'
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <>
-      <div>Header (from root layout)</div>
+    <Box flexDirection="column">
+      <Box marginBottom={1}>
+        <Text bold color="cyan">Header (from root layout)</Text>
+      </Box>
       {children}
-      <div>Footer (from root layout)</div>
-    </>
+      <Box marginTop={1}>
+        <Text dimColor>Footer (from root layout)</Text>
+      </Box>
+    </Box>
   )
 }

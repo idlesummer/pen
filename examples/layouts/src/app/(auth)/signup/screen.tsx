@@ -1,3 +1,5 @@
-export default function LoginScreen() {
-  return <>Signup Screen Content</>
+import { Text } from 'ink'
+
+export default function SignupScreen() {
+  return <Text>Signup Screen Content</Text>
 }

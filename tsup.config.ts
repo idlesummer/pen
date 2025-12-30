@@ -1,7 +1,13 @@
 import { defineConfig } from 'tsup'
 
 const tsupConfig = defineConfig({
-  entry: ['src/cli/index.ts', 'src/runtime/index.ts'],
+  entry: [
+    'src/cli/index.ts', 
+
+    // Temporary
+    'src/build/index.ts',
+    'src/router/index.ts',
+  ],
   format: ['esm'],
   target: 'node24',
   bundle: true,
@@ -11,10 +17,7 @@ const tsupConfig = defineConfig({
   dts: true,
   external: ['commander', 'esbuild', 'chokidar', 'react', 'react-dom'],
   esbuildOptions: (options) => {
-    options.alias = {
-      ...options.alias,
-      '@': './src',
-    }
+    options.alias = { ...options.alias, '@': './src' }
   },
 })
 

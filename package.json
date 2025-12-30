@@ -14,7 +14,9 @@
   "author": "idlesummer <09louisthebob@gmail.com> (https://github.com/idlesummer)",
   "type": "module",
   "exports": {
-    ".": "./dist/runtime/index.js"
+    ".": "./dist/runtime/index.js",
+    "./build": "./dist/build/index.js",
+    "./router": "./dist/router/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

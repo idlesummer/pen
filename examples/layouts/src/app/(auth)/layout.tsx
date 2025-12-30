@@ -1,11 +1,16 @@
-import React from 'react'
+import { Box, Text } from 'ink'
+import type { PropsWithChildren } from 'react'
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({ children }: PropsWithChildren) {
   return (
-    <>
-      <div>Auth Header (from auth layout)</div>
+    <Box flexDirection="column">
+      <Box marginBottom={1}>
+        <Text bold color="green">Auth Header (from auth layout)</Text>
+      </Box>
       {children}
-      <div>Auth Footer (from auth layout)</div>
-    </>
+      <Box marginTop={1}>
+        <Text dimColor>Auth Footer (from auth layout)</Text>
+      </Box>
+    </Box>
   )
 }

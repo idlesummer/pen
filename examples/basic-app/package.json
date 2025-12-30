@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "node ../../dist/cli/index.js dev",
     "build": "node ../../dist/cli/index.js build",
-    "start": "node ../../dist/cli/index.js start"
+    "start": "node ../../dist/cli/index.js start",
+    "test": "tsx src/index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }
