@@ -10,7 +10,7 @@ export type Route = {
 }
 
 
-export function buildRouteManifest(routeTree: RouteNode) {
+export function buildManifest(routeTree: RouteNode) {
   // Initialize routeTree layout
   const rootLayouts = routeTree.layout ? [routeTree.layout] : []
   const layoutMap = new Map([[routeTree, rootLayouts]])

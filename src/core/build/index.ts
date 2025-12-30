@@ -1,7 +1,3 @@
-export { buildFileTree } from './file-tree'
-export { buildRouteTree } from './route-tree'
-export { buildRouteManifest } from './manifest'
-
-export type { FileNode } from './file-tree'
-export type { RouteNode } from './route-tree'
-export type { Route, RouteManifest } from './manifest'
+export * from './file-tree'      // buildFileTree, FileNode
+export * from './route-tree'     // buildRouteTree, RouteNode
+export * from './manifest'       // buildManifest, Route, RouteManifest

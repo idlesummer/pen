@@ -2,17 +2,18 @@ import { readdirSync, statSync } from 'fs'
 import { resolve, basename, join } from 'path'
 import { traverseBreadthFirst } from '@/core/lib/traversal'
 
+type FileTreeError = { error: 'NOT_FOUND' | 'NOT_DIRECTORY' }
 export type FileNode = { 
   name: string            // entry name (parentFile or directory)
   path: string            // absolute filesystem path
   children?: FileNode[]   // present only for directories
 }
 
-export function buildFileTree(appPath: string): FileNode {
+export function buildFileTree(appPath: string): FileNode | FileTreeError {
   const rootPath = resolve(appPath)
   const stat = statSync(rootPath, { throwIfNoEntry: false })
-  if (!stat)               throw new Error(`buildFileTree: path does not exist: ${rootPath}`)
-  if (!stat.isDirectory()) throw new Error(`buildFileTree: expected directory, got: ${rootPath}`)
+  if (!stat)               return { error: 'NOT_FOUND' }
+  if (!stat.isDirectory()) return { error: 'NOT_DIRECTORY' }
 
   const root: FileNode = { 
     name: basename(rootPath), 
