@@ -1,4 +1,4 @@
-import { traverseDepthFirst } from '@/core/lib/traversal'
+import { traverseDepthFirst } from '@/lib/traversal'
 import type { RouteNode } from '@/core/build/route-tree'
 
 

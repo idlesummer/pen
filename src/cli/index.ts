@@ -1,6 +1,6 @@
 import { Command } from 'commander'
-import { build } from '@/cli/build'
-import { start } from '@/cli//start'
+import { build } from '@/cli/commands/build'
+import { start } from '@/cli/commands/start'
 
 const program = new Command()
 

@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from 'fs'
 import { resolve, join, posix } from 'path'
-import { traverseBreadthFirst } from '@/core/lib/traversal'
+import { traverseBreadthFirst } from '@/lib/traversal'
 
 type FileTreeError = { error: 'NOT_FOUND' | 'NOT_DIRECTORY' }
 
