@@ -40,7 +40,7 @@ const components = {
 } as unknown as Record<string, ComponentType>
 
 function App() {
-  const url = process.argv[2] || '/login/'
+  const url = process.argv[2] || '/logi/'
   return (
     <Router 
       url={url} 

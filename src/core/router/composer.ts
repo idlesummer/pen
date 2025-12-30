@@ -1,5 +1,5 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
-import { type Route } from '@/build/manifest'
+import { type Route } from '@/core/build/manifest'
 
 /**
  * Maps component file paths to their loaded React components.

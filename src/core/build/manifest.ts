@@ -1,5 +1,5 @@
-import { traverseDepthFirst } from '@/lib/traversal'
-import type { RouteNode } from '@/build/route-tree'
+import { traverseDepthFirst } from '@/core/lib/traversal'
+import type { RouteNode } from '@/core/build/route-tree'
 
 
 export type RouteManifest = Record<string, Route>

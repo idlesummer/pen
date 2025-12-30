@@ -1,5 +1,5 @@
-import { traverseDepthFirst } from '@/lib/traversal'
-import type { FileNode } from '@/build/file-tree'
+import { traverseDepthFirst } from '@/core/lib/traversal'
+import type { FileNode } from '@/core/build/file-tree'
 
 export type RouteNode = {
   url: string             // full URL like '/blog/'

@@ -1,4 +1,6 @@
 import { Command } from 'commander'
+import { build } from '@/cli/build'
+import { start } from '@/cli/start'
 
 const program = new Command()
 
@@ -9,16 +11,14 @@ program
 
 program
   .command('build')
-  .description('Build the manifest from your app/ directory')
-  .action(() => {
-    console.log('Hello from build! 🔨')
-  })
+  .description('Build and print the route manifest')
+  .option('-d, --dir <path>', 'App directory to scan', './src/app')
+  .action(build)
 
 program
   .command('start')
   .description('Start the application')
-  .action(() => {
-    console.log('Hello from start! 🚀')
-  })
+  .option('-u, --url <path>', 'Initial URL to render', '/')
+  .action(start)
 
 program.parse()
