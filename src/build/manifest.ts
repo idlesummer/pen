@@ -2,8 +2,8 @@ import { traverseDepthFirst } from '@/lib/traversal'
 import type { RouteNode } from '@/build/route-tree'
 
 
-export type RouteManifest = Record<string, RouteMetadata>
-export type RouteMetadata = {
+export type RouteManifest = Record<string, Route>
+export type Route = {
   url: string         // url path like '/blog/'
   screen?: string     // path to screen.tsx
   layouts?: string[]  // inherited layouts (routeTree to leaf)
@@ -14,7 +14,7 @@ export function buildRouteManifest(routeTree: RouteNode) {
   // Initialize routeTree layout
   const rootLayouts = routeTree.layout ? [routeTree.layout] : []
   const layoutMap = new Map([[routeTree, rootLayouts]])
-  const manifest: Record<string, RouteMetadata> = {}
+  const manifest: Record<string, Route> = {}
 
   /** Add routes with screens to manifest */
   function visit(parentRoute: RouteNode) {
@@ -23,7 +23,7 @@ export function buildRouteManifest(routeTree: RouteNode) {
     if (!parentRoute.screen) return // Only create manifest if this route has a screen
     
     const { url, screen } = parentRoute
-    const metadata: RouteMetadata = { url, screen }
+    const metadata: Route = { url, screen }
     
     if (parentLayouts.length) 
       metadata.layouts = parentLayouts.toReversed()

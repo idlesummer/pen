@@ -1,0 +1,26 @@
+import { createElement, type ComponentType, type ReactElement } from 'react'
+import { type Route } from '@/build/manifest'
+
+/**
+ * Maps component file paths to their loaded React components.
+ * Used to resolve screen and layout components during composition.
+ */
+export type ComponentMap = Record<string, ComponentType>
+
+/**
+ * Composes a route element by wrapping the screen with layouts.
+ * Returns a nested React element tree.
+ */
+export function composeRoute(route: Route, components: ComponentMap): ReactElement {
+  // Load and create the screen element
+  const Screen = components[route.screen!]
+  let element = createElement(Screen)
+  
+  // Wrap with layouts (leaf → root order)
+  for (const layoutPath of route.layouts ?? []) {
+    const Layout = components[layoutPath]
+    element = createElement(Layout, null, element)
+  }
+  
+  return element
+}
