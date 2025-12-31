@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander'
 import { buildCommand } from '@/cli/commands/build'
 import { startCommand } from '@/cli/commands/start'
@@ -24,4 +26,3 @@ program
   .action(startCommand)
 
 program.parse()
-

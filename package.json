@@ -43,8 +43,6 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.50.0",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -52,7 +50,8 @@
     "ink": "^6.5.1",
     "react": "^19.2.3",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.51.0"
   },
   "peerDependencies": {
     "ink": "^6.5.1",

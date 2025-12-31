@@ -57,7 +57,7 @@ export async function startCommand(options: StartOptions = {}) {
         components,
       })
     )
-    
+
   } catch (error) {
     console.error('❌ Start failed:', error)
     process.exit(1)
