@@ -15,7 +15,7 @@ interface BuildOptions {
  */
 export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
-  const outputDir = options.output || './.pen'
+  const outputDir = options.output || './.pen/build'
   
   console.log('🔨 Building routes...')
   console.log(`   App directory: ${appDir}`)

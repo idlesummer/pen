@@ -17,8 +17,8 @@ interface StartOptions {
  */
 export async function startCommand(options: StartOptions = {}) {
   const url = options.url || '/'
-  const manifestPath = options.manifest || './.pen/manifest.json'
-  const componentsPath = './.pen/components.js'
+  const manifestPath = options.manifest || './.pen/build/manifest.json'
+  const componentsPath = './.pen/build/components.js'
   
   console.log('🚀 Starting application...')
   console.log(`   URL: ${url}`)

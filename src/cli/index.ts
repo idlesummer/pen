@@ -11,16 +11,17 @@ program
 
 program
   .command('build')
-  .description('Build the route manifest')
+  .description('Build the route manifest and compile application')
   .option('-d, --dir <path>', 'App directory to scan', './src/app')
-  .option('-o, --output <path>', 'Output directory', './.pen')
+  .option('-o, --output <path>', 'Output directory', './.pen/build')  // ← Updated
   .action(buildCommand)
 
 program
   .command('start')
   .description('Start the application')
   .option('-u, --url <path>', 'Initial URL to render', '/')
-  .option('-m, --manifest <path>', 'Path to manifest.json', './.pen/manifest.json')
+  .option('-m, --manifest <path>', 'Path to manifest.json', './.pen/build/manifest.json')  // ← Updated
   .action(startCommand)
 
 program.parse()
+
