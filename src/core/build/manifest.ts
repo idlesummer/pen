@@ -1,18 +1,17 @@
+import { removeExtension } from '@/lib/path-utils'
 import { traverseDepthFirst } from '@/lib/traversal'
 import type { RouteNode } from '@/core/build/route-tree'
-
 
 export type RouteManifest = Record<string, Route>
 export type Route = {
   url: string         // url path like '/blog/'
-  screen?: string     // path to screen.tsx
-  layouts?: string[]  // inherited layouts (routeTree to leaf)
+  screen?: string     // path to screen (no extension)
+  layouts?: string[]  // inherited layouts (no extensions, root to leaf order)
 }
 
-
-export function buildManifest(routeTree: RouteNode) {
+export function buildManifest(routeTree: RouteNode): RouteManifest {
   // Initialize routeTree layout
-  const rootLayouts = routeTree.layout ? [routeTree.layout] : []
+  const rootLayouts = routeTree.layout ? [removeExtension(routeTree.layout)] : []
   const layoutMap = new Map([[routeTree, rootLayouts]])
   const manifest: Record<string, Route> = {}
 
@@ -23,7 +22,10 @@ export function buildManifest(routeTree: RouteNode) {
     if (!parentRoute.screen) return // Only create manifest if this route has a screen
     
     const { url, screen } = parentRoute
-    const metadata: Route = { url, screen }
+    const metadata: Route = { 
+      url, 
+      screen: removeExtension(screen),
+    }
     
     if (parentLayouts.length) 
       metadata.layouts = parentLayouts.toReversed()
@@ -37,7 +39,9 @@ export function buildManifest(routeTree: RouteNode) {
 
     // Compute layouts for children in layout map to use them later
     for (const route of parentRoute.children ?? []) {
-      const layouts = route.layout ? [...parentLayouts, route.layout] : parentLayouts
+      const layouts = route.layout 
+        ? [...parentLayouts, removeExtension(route.layout)] 
+        : parentLayouts
       layoutMap.set(route, layouts)
     }
     return parentRoute.children

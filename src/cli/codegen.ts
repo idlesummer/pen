@@ -28,9 +28,7 @@ export function buildComponentMap(manifest: RouteManifest) {
     const varName = `Component${i}`
     
     // Convert: /app/home/screen.tsx → ../src/app/home/screen
-    const importPath = componentPath
-      .replace('/app/', './app/')
-      .replace('.tsx', '.js')
+    const importPath = componentPath.replace('/app/', './app/') + '.js'
 
     imports.push(`import ${varName} from '${importPath}'`)
     exports.push(`  '${componentPath}': ${varName},`)
