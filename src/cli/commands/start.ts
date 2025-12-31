@@ -55,7 +55,7 @@ export async function startCommand(options: StartOptions = {}) {
         url,
         manifest,
         components,
-      })
+      }),
     )
 
   } catch (error) {
