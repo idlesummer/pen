@@ -1,5 +1,6 @@
 import { join } from 'path'
-import { existsSync, mkdirSync, writeFileSync } from 'fs'
+import { mkdirSync, writeFileSync, globSync } from 'fs'
+import { build } from 'esbuild'
 import { buildFileTree, buildRouteTree, buildManifest } from '@/core/build'
 import { buildComponentMap } from '@/cli/codegen'
 
@@ -10,9 +11,9 @@ interface BuildOptions {
 
 /**
  * Builds the route manifest from the app directory.
- * Generates manifest.json file.
+ * Generates manifest.json and compiles the application.
  */
-export async function build(options: BuildOptions = {}) {
+export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
   const outputDir = options.output || './.pen'
   
@@ -25,12 +26,13 @@ export async function build(options: BuildOptions = {}) {
     // Step 1: Scan filesystem
     console.log('📁 Scanning filesystem...')
     const fileTree = buildFileTree(appDir)
+
     if ('error' in fileTree) {
       if (fileTree.error === 'NOT_FOUND') {
         console.error('❌ Error: Directory not found:', appDir)
         console.error('   Make sure the path exists')
-
-      } else if (fileTree.error === 'NOT_DIRECTORY') {
+      } 
+      else if (fileTree.error === 'NOT_DIRECTORY') {
         console.error('❌ Error: Path is not a directory:', appDir)
         console.error('   Provide a directory containing your app/ routes')
       }
@@ -50,22 +52,37 @@ export async function build(options: BuildOptions = {}) {
     console.log('📋 Generating manifest...')
     const manifest = buildManifest(routeTree)
     
-    // Step 4: Ensure output directory exists
-    if (!existsSync(outputDir))
-      mkdirSync(outputDir, { recursive: true })
-    
-    // Step 5: Write manifest.json
+    // Step 4: Write manifest.json
     const manifestPath = join(outputDir, 'manifest.json')
     const manifestJson = JSON.stringify(manifest, null, 2)
+    mkdirSync(outputDir, { recursive: true })
     writeFileSync(manifestPath, manifestJson, 'utf-8')
     console.log(`   ✓ Generated ${manifestPath}`)
     
-    // Step 6: Generate component map
+    // Step 5: Generate component map
     console.log('🗺️  Generating component map...')
     const componentsCode = buildComponentMap(manifest)
-    const componentsPath = join(outputDir, 'components.ts')
+    const componentsPath = join(outputDir, 'components.js')
     writeFileSync(componentsPath, componentsCode, 'utf-8')
     console.log(`   ✓ Generated ${componentsPath}`)
+
+    // Step 6: Compile with esbuild
+    console.log('⚙️  Compiling application...')
+    
+    // Find all TypeScript files in app/
+    const appFiles = globSync(`${appDir}/**/*.{ts,tsx}`)
+    
+    await build({
+      entryPoints: appFiles,
+      outdir: join(outputDir, 'app'),
+      outbase: appDir,
+      format: 'esm',
+      platform: 'node',
+      target: 'node24',
+      bundle: false,
+    })
+    
+    console.log(`   ✓ Compiled to ${join(outputDir, 'app')}`)
 
     // Step 7: Success summary
     console.log()
@@ -74,6 +91,7 @@ export async function build(options: BuildOptions = {}) {
     console.log('Generated files:')
     console.log(`   ${manifestPath}`)
     console.log(`   ${componentsPath}`)
+    console.log(`   ${join(outputDir, 'app')}`)
     console.log()
     console.log('Routes:')
     for (const url of Object.keys(manifest))
