@@ -15,32 +15,32 @@ export interface BuildOptions {
 export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
   const outputDir = options.output || './.pen/build'
-  
+
   console.log('🔨 Building routes...')
   console.log(`   App directory: ${appDir}`)
   console.log(`   Output directory: ${outputDir}`)
   console.log()
-  
+
   try {
     // Step 1: Scan filesystem
     console.log('📁 Scanning filesystem...')
     const fileTree = buildFileTree(appDir)
-    
+
     // Step 2: Build route tree
     console.log('🌳 Building route tree...')
     const routeTree = buildRouteTree(fileTree)
-  
+
     // Step 3: Generate manifest
     console.log('📋 Generating manifest...')
     const manifest = buildRouteManifest(routeTree)
-    
+
     // Step 4: Write manifest.json
     const manifestPath = join(outputDir, 'manifest.json')
     const manifestJson = JSON.stringify(manifest, null, 2)
     mkdirSync(outputDir, { recursive: true })
     writeFileSync(manifestPath, manifestJson, 'utf-8')
     console.log(`   ✓ Generated ${manifestPath}`)
-    
+
     // Step 5: Generate component map
     console.log('🗺️  Generating component map...')
     const componentsCode = buildComponentMap(manifest)
@@ -50,10 +50,10 @@ export async function buildCommand(options: BuildOptions = {}) {
 
     // Step 6: Compile with esbuild
     console.log('⚙️  Compiling application...')
-    
+
     // Find all TypeScript files in app/
     const appFiles = globSync(`${appDir}/**/*.{ts,tsx}`)
-    
+
     await build({
       entryPoints: appFiles,
       outdir: join(outputDir, 'app'),
@@ -63,7 +63,7 @@ export async function buildCommand(options: BuildOptions = {}) {
       target: 'node24',
       bundle: false,
     })
-    
+
     console.log(`   ✓ Compiled to ${join(outputDir, 'app')}`)
 
     // Step 7: Success summary
@@ -78,16 +78,16 @@ export async function buildCommand(options: BuildOptions = {}) {
     console.log('Routes:')
     for (const url of Object.keys(manifest))
       console.log(`   ${url}`)
-  
+
   } catch (error) {
     console.error()
     console.error('❌ Build failed')
-    
+
     if (error instanceof Error)     // Standard errors (has message property)
       console.error(error.message)
     else                            // Non-standard throws (strings, objects, primitives, etc.)
       console.error(error)
-    
+
     console.error()
     process.exit(1)
   }
