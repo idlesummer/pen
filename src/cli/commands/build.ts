@@ -1,5 +1,7 @@
 import { join } from 'path'
-import { mkdirSync, writeFileSync, globSync } from 'fs'
+import { mkdirSync, writeFileSync } from 'fs'
+import ora from 'ora'
+import { globSync } from 'glob'
 import { build } from 'esbuild'
 import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
 
@@ -15,6 +17,7 @@ export interface BuildOptions {
 export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
   const outputDir = options.output || './.pen/build'
+  const spinner = ora()
 
   console.log('🔨 Building routes...')
   console.log(`   App directory: ${appDir}`)
@@ -22,36 +25,40 @@ export async function buildCommand(options: BuildOptions = {}) {
   console.log()
 
   try {
+    // Test spinner
+    spinner.start('Testing spinner...')
+    await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2 seconds
+    spinner.succeed('Spinner works!')
+
     // Step 1: Scan filesystem
-    console.log('📁 Scanning filesystem...')
+    spinner.start('Scanning filesystem...')
     const fileTree = buildFileTree(appDir)
+    spinner.succeed('Scanned filesystem')
 
     // Step 2: Build route tree
-    console.log('🌳 Building route tree...')
+    spinner.start('Building route tree...')
     const routeTree = buildRouteTree(fileTree)
+    spinner.succeed('Built route tree')
 
     // Step 3: Generate manifest
-    console.log('📋 Generating manifest...')
+    spinner.start('Generating manifest...')
     const manifest = buildRouteManifest(routeTree)
 
-    // Step 4: Write manifest.json
     const manifestPath = join(outputDir, 'manifest.json')
     const manifestJson = JSON.stringify(manifest, null, 2)
     mkdirSync(outputDir, { recursive: true })
     writeFileSync(manifestPath, manifestJson, 'utf-8')
-    console.log(`   ✓ Generated ${manifestPath}`)
+    spinner.succeed('Generated manifest')
 
-    // Step 5: Generate component map
-    console.log('🗺️  Generating component map...')
+    // Step 4: Generate component map
+    spinner.start('Generating component map...')
     const componentsCode = buildComponentMap(manifest)
     const componentsPath = join(outputDir, 'components.js')
     writeFileSync(componentsPath, componentsCode, 'utf-8')
-    console.log(`   ✓ Generated ${componentsPath}`)
+    spinner.succeed('Generated component map')
 
-    // Step 6: Compile with esbuild
-    console.log('⚙️  Compiling application...')
-
-    // Find all TypeScript files in app/
+    // Step 5: Compile
+    spinner.start('Compiling application...')
     const appFiles = globSync(`${appDir}/**/*.{ts,tsx}`)
 
     await build({
@@ -63,21 +70,16 @@ export async function buildCommand(options: BuildOptions = {}) {
       target: 'node24',
       bundle: false,
     })
+    spinner.succeed('Compiled application')
 
-    console.log(`   ✓ Compiled to ${join(outputDir, 'app')}`)
-
-    // Step 7: Success summary
+    // Success summary
     console.log()
     console.log('✅ Build complete!')
-    console.log()
-    console.log('Generated files:')
-    console.log(`   ${manifestPath}`)
-    console.log(`   ${componentsPath}`)
-    console.log(`   ${join(outputDir, 'app')}`)
     console.log()
     console.log('Routes:')
     for (const url of Object.keys(manifest))
       console.log(`   ${url}`)
+
 
   } catch (error) {
     console.error()
