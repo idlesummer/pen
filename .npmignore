@@ -1,10 +1,20 @@
-# Source files (we only want the built dist/)
+# Source files
 src/
 tsconfig.json
+tsup.config.ts
+eslint.config.mjs
 
 # Development files
 node_modules/
 *.log
+
+# Documentation
+docs/
+reference/
+examples/
+
+# Python reference implementations
+*.py
 
 # IDE
 .vscode/
@@ -16,7 +26,11 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Tests (if you add them later)
+# Git files
+.gitignore
+.gitattributes
+
+# Tests
 test/
 *.test.ts
 *.spec.ts
