@@ -4,12 +4,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node ../../dist/cli/index.js dev",
-    "build": "node ../../dist/cli/index.js build",
-    "start": "node ../../dist/cli/index.js start",
+    "build": "pen build",
+    "start": "pen start",
     "test": "tsx src/index.tsx"
   },
   "dependencies": {
+    "@idlesummer/pen": "file:../..",
     "ink": "^6.6.0",
     "react": "^19.2.3"
   },
