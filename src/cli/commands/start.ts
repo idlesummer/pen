@@ -29,11 +29,8 @@ export async function startCommand(options: StartOptions = {}) {
   try {
     // Check and load manifest
     const manifest = await log.task('Loading manifest', () => {
-      if (!existsSync(manifestPath))
-        throw new Error('Manifest not found. Run `pen build` first.')
-
-      if (!existsSync(componentsPath))
-        throw new Error('Component map not found. Run `pen build` first.')
+      if (!existsSync(manifestPath))   throw new Error('Manifest not found. Run `pen build` first.')
+      if (!existsSync(componentsPath)) throw new Error('Component map not found. Run `pen build` first.')
 
       const manifestJson = readFileSync(manifestPath, 'utf-8')
       return JSON.parse(manifestJson) as RouteManifest
@@ -41,8 +38,8 @@ export async function startCommand(options: StartOptions = {}) {
 
     // Load components
     const components = await log.task('Loading components', async () => {
-      const absPathComponents = resolve(process.cwd(), componentsPath)
-      const componentFileUrl = pathToFileURL(absPathComponents).href
+      const componentsAbsPath = resolve(process.cwd(), componentsPath)
+      const componentFileUrl = pathToFileURL(componentsAbsPath).href
       const { components } = await import(componentFileUrl)
       return components
     })
