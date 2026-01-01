@@ -4,11 +4,9 @@
   "description": "Next.js-inspired routing framework for building Ink terminal apps",
   "keywords": [
     "cli",
-    "framework",
     "ink",
     "react",
-    "routing",
-    "terminal"
+    "routing"
   ],
   "license": "MIT",
   "author": "idlesummer <09louisthebob@gmail.com> (https://github.com/idlesummer)",
@@ -16,8 +14,6 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "bin": {
     "pen": "./dist/cli/index.js"
   },
