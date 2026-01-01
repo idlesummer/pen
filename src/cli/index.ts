@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander'
-import { buildCommand } from '@/cli/build'
-import { startCommand } from '@/cli/start'
+import { buildCommand } from '@/cli/commands/build'
+import { startCommand } from '@/cli/commands/start'
 
 const program = new Command()
 
