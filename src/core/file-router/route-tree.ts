@@ -38,13 +38,8 @@ export function buildRouteTree(fileTree: FileNode): RouteNode {
   if (fileTree.children === undefined) 
     throw new RootIsFileError(fileTree.path)
 
-  const root: RouteNode = {
-    url: '/',     // Special case: Root node has "/" as url instead of "/app"
-    type: 'page',
-    segment: '',  // Special case: Root node has empty segment instead of "app"
-    children: [],
-  }
-  
+  // Special case: Root node has "/" as url instead of "/app", and empty segment instead of "app"
+  const root: RouteNode = { url: '/', type: 'page', segment: '', children: [] }
   if (!fileTree.children.length) // Early return if root has no children
     return root
 
@@ -59,29 +54,26 @@ export function buildRouteTree(fileTree: FileNode): RouteNode {
    */
   function visit(parentRoute: RouteNode) {
     const parentFile = routeToFile.get(parentRoute)!  // Already populated inside expand 
-    if (!parentFile.children)                         // Skip if theres no route files to detect
-      return  
+    if (parentFile.children === undefined) return  
 
     // Step 1: Assign route files
     const groupedFiles = groupFiles(parentFile.children, EXTENSIONS, ROUTE_FILES)
     for (const routeFile of ROUTE_FILES) {
-      const files = groupedFiles[routeFile] ?? []      
+      const files = groupedFiles[routeFile] ?? []
       if (files.length === 1)
         parentRoute[routeFile] = files[0].path
-      else if (files.length > 1) {
-        const filePaths = files.map(f => f.path)          
-        throw (routeFile === 'layout')
-          ? new DuplicateLayoutError(parentFile.path, filePaths)
-          : new DuplicateScreenFileError(parentFile.path, filePaths)
-    }}
 
-    if (!parentRoute.screen)                          // Skip if no screen was assigned
-      return
-    
+      else if (files.length > 1)
+        throw routeFile === 'layout'
+          ? new DuplicateLayoutError(parentFile.path, files.map(f => f.path))
+          : new DuplicateScreenFileError(parentFile.path, files.map(f => f.path))
+    }
+
     // Step 2: Validate unique screen url
-    const existingFile = screenRoutes[parentRoute.url]
-    if (existingFile)
-      throw new DuplicateScreenError(parentRoute.url, [existingFile, parentFile.path])
+    if (!parentRoute.screen) return
+    const existingFilePath = screenRoutes[parentRoute.url]
+    if (existingFilePath) 
+      throw new DuplicateScreenError(parentRoute.url, [existingFilePath, parentFile.path])
     screenRoutes[parentRoute.url] = parentFile.path
   }
 
