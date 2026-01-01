@@ -20,14 +20,11 @@ export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
     // Always available
     const parentLayouts = layoutMap.get(parentRoute)!
     if (!parentRoute.screen) return // Only create manifest if this route has a screen
-    
+
     const { url, screen } = parentRoute
-    const metadata: Route = { 
-      url, 
-      screen: removeExtension(screen),
-    }
-    
-    if (parentLayouts.length) 
+    const metadata: Route = { url, screen: removeExtension(screen) }
+
+    if (parentLayouts.length)
       metadata.layouts = parentLayouts.toReversed()
     manifest[parentRoute.url] = metadata
   }
@@ -39,8 +36,8 @@ export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
 
     // Compute layouts for children in layout map to use them later
     for (const route of parentRoute.children ?? []) {
-      const layouts = route.layout 
-        ? [...parentLayouts, removeExtension(route.layout)] 
+      const layouts = route.layout
+        ? [...parentLayouts, removeExtension(route.layout)]
         : parentLayouts
       layoutMap.set(route, layouts)
     }
