@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { type RouteManifest } from '@/core/build/manifest'
+import { type RouteManifest } from '@/core/file-router/route-manifest'
 import { composeRoute, type ComponentMap } from '@/core/router/composer'
 import { NotFoundScreen } from '@/core/router/errors'
 import { matchRoute } from '@/core/router/matcher'

@@ -1,10 +1,9 @@
 import { join } from 'path'
 import { mkdirSync, writeFileSync, globSync } from 'fs'
 import { build } from 'esbuild'
-import { buildFileTree, buildRouteTree, buildManifest } from '@/core/build'
-import { buildComponentMap } from '@/cli/codegen'
+import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
 
-interface BuildOptions {
+export interface BuildOptions {
   dir?: string
   output?: string
 }
@@ -26,31 +25,14 @@ export async function buildCommand(options: BuildOptions = {}) {
     // Step 1: Scan filesystem
     console.log('📁 Scanning filesystem...')
     const fileTree = buildFileTree(appDir)
-
-    if ('error' in fileTree) {
-      if (fileTree.error === 'NOT_FOUND') {
-        console.error('❌ Error: Directory not found:', appDir)
-        console.error('   Make sure the path exists')
-      } 
-      else if (fileTree.error === 'NOT_DIRECTORY') {
-        console.error('❌ Error: Path is not a directory:', appDir)
-        console.error('   Provide a directory containing your app/ routes')
-      }
-      process.exit(1)
-    }
     
     // Step 2: Build route tree
     console.log('🌳 Building route tree...')
     const routeTree = buildRouteTree(fileTree)
-    
-    if (!routeTree) {
-      console.error('❌ Error: No routes found')
-      process.exit(1)
-    }
   
     // Step 3: Generate manifest
     console.log('📋 Generating manifest...')
-    const manifest = buildManifest(routeTree)
+    const manifest = buildRouteManifest(routeTree)
     
     // Step 4: Write manifest.json
     const manifestPath = join(outputDir, 'manifest.json')
@@ -98,7 +80,15 @@ export async function buildCommand(options: BuildOptions = {}) {
       console.log(`   ${url}`)
   
   } catch (error) {
-    console.error('❌ Build failed:', error)
+    console.error()
+    console.error('❌ Build failed')
+    
+    if (error instanceof Error)     // Standard errors (has message property)
+      console.error(error.message)
+    else                            // Non-standard throws (strings, objects, primitives, etc.)
+      console.error(error)
+    
+    console.error()
     process.exit(1)
   }
 }

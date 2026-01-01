@@ -4,7 +4,7 @@ import { pathToFileURL } from 'url'  // ← Add this
 import { createElement } from 'react'
 import { render } from 'ink'
 import { Router } from '@/core/router/Router'
-import type { RouteManifest } from '@/core/build/manifest'
+import type { RouteManifest } from '@/core/file-router/route-manifest'
 
 interface StartOptions {
   url?: string

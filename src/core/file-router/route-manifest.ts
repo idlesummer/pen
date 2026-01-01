@@ -1,6 +1,6 @@
 import { removeExtension } from '@/lib/path-utils'
 import { traverseDepthFirst } from '@/lib/traversal'
-import type { RouteNode } from '@/core/build/route-tree'
+import type { RouteNode } from '@/core/file-router/route-tree'
 
 export type RouteManifest = Record<string, Route>
 export type Route = {
@@ -9,7 +9,7 @@ export type Route = {
   layouts?: string[]  // inherited layouts (no extensions, root to leaf order)
 }
 
-export function buildManifest(routeTree: RouteNode): RouteManifest {
+export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
   // Initialize routeTree layout
   const rootLayouts = routeTree.layout ? [removeExtension(routeTree.layout)] : []
   const layoutMap = new Map([[routeTree, rootLayouts]])

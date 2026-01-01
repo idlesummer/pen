@@ -1,4 +1,4 @@
-import type { RouteManifest } from '@/core/build/manifest'
+import type { RouteManifest } from '@/core/file-router/route-manifest'
 
 /**
  * Generates the component map TypeScript code.

@@ -1,8 +1,7 @@
 import { readdirSync, statSync } from 'fs'
 import { resolve, join, posix } from 'path'
 import { traverseBreadthFirst } from '@/lib/traversal'
-
-type FileTreeError = { error: 'NOT_FOUND' | 'NOT_DIRECTORY' }
+import { DirectoryNotFoundError, NotADirectoryError } from '@/core/file-router/errors'
 
 export type FileNode = { 
   name: string            // entry name (file or directory)
@@ -10,11 +9,24 @@ export type FileNode = {
   children?: FileNode[]   // present only for directories
 }
 
-export function buildFileTree(appPath: string): FileNode | FileTreeError {
+/**
+ * Builds a file tree from a directory path.
+ * 
+ * @param appPath - Path to the app directory
+ * @returns File tree structure
+ * @throws {DirectoryNotFoundError} If the directory doesn't exist
+ * @throws {NotADirectoryError} If the path is not a directory
+ */
+export function buildFileTree(appPath: string): FileNode {
   const rootPath = resolve(appPath)
   const stat = statSync(rootPath, { throwIfNoEntry: false })
-  if (!stat)               return { error: 'NOT_FOUND' }
-  if (!stat.isDirectory()) return { error: 'NOT_DIRECTORY' }
+  
+  // Validation
+  if (!stat)
+    throw new DirectoryNotFoundError(rootPath)
+
+  if (!stat.isDirectory()) 
+    throw new NotADirectoryError(rootPath)
   
   // Track absolute paths internally for filesystem operations
   const absPathMap: Record<string, string> = {}
@@ -33,7 +45,8 @@ export function buildFileTree(appPath: string): FileNode | FileTreeError {
     const children: FileNode[] = []
 
     for (const dirent of dirents) {
-      if (!dirent.isFile() && !dirent.isDirectory()) continue
+      if (!dirent.isFile() && !dirent.isDirectory()) 
+        continue
 
       const relPath = posix.join(parentFile.path, dirent.name)
       const absPath = join(parentAbsPath, dirent.name)
