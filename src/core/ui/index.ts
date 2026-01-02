@@ -44,12 +44,13 @@ export function files(filepaths: string[], cwd = process.cwd()) {
 
   for (const file of fileStats) {
     const sizeKB = (file.size / 1024).toFixed(2)
-    console.log(cyan(`i ${file.path.padEnd(50)} ${sizeKB.padStart(6)} kB`))
+    console.log(cyan(`  ${file.path.padEnd(50)} ${sizeKB.padStart(6)} kB`))
   }
 
   const totalSize = fileStats.reduce((sum, f) => sum + f.size, 0)
   const totalKB = (totalSize / 1024).toFixed(2)
-  console.log(cyan(`ℹ️ ${fileStats.length} files, total: ${totalKB} kB`))
+  const summary = `${fileStats.length} files, total:`
+  console.log(cyan(`  ${summary.padEnd(50)} ${totalKB.padStart(6)} kB`))
 }
 
 /** Display a tree structure */

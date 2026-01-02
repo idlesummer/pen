@@ -30,12 +30,11 @@ export async function startCommand(options: StartOptions = {}) {
 
   try {
     // Step 1: Verify build files exist
-    if (!existsSync(manifestPath)) {
+    if (!existsSync(manifestPath))
       throw new Error('Manifest not found. Run `pen build` first.')
-    }
-    if (!existsSync(componentsPath)) {
+
+    if (!existsSync(componentsPath))
       throw new Error('Component map not found. Run `pen build` first.')
-    }
 
     // Step 2: Load manifest
     spinner.text = 'Loading manifest'
@@ -52,8 +51,9 @@ export async function startCommand(options: StartOptions = {}) {
 
     // Show loaded routes
     const routes = Object.keys(manifest).sort()
-    ui.tree({ '': routes })  // ← Changed to unified shape
-
+    console.log('Routes:')
+    ui.tree({ '': routes })
+    console.log()
     ui.success('Application started!')
     console.log()
 
@@ -65,11 +65,10 @@ export async function startCommand(options: StartOptions = {}) {
     spinner.fail('Start failed')
     console.error()
 
-    if (error instanceof Error) {
+    if (error instanceof Error)
       ui.error(error.message)
-    } else {
+    else
       console.error(error)
-    }
 
     console.error()
     process.exit(1)

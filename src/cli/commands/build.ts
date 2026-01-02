@@ -71,6 +71,7 @@ export async function buildCommand(options: BuildOptions = {}) {
     // Show output files
     const outputFiles = globSync(`${outputDir}/**/*.{js,json}`)
     ui.files(outputFiles)
+    console.log()
     ui.success('Production build completed!')
 
     // Show routes
