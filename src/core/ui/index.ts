@@ -1,122 +1,99 @@
-// src/core/ui/index.ts
-import pc from 'picocolors'
-import ora, { Ora } from 'ora'
 import { statSync, readFileSync } from 'fs'
-import { gzipSync } from 'zlib'
 import { relative } from 'path'
+import ora from 'ora'
+import pc from 'picocolors'
+import { gzipSync } from 'zlib'
 
-// Box-drawing characters for tree formatting
-const TREE = {
-  branch: '├─',
-  leaf: '└─',
-  vertical: '│',
+const { bgCyan, bgGreen, bgYellow, bgRed, cyan, white, black, bold } = pc
+const TREE = { branch: '├─', leaf: '└─', vertical: '│' } as const
+
+/** Info message with cyan color */
+export function info(message: string) {
+  console.log(`${bgCyan(white(' INFO '))} ${message}`)
 }
 
-/**
- * Terminal UI utilities for CLI output.
- * Provides logging, spinners, file lists, and tree formatting.
- */
-export const log = {
-  /**
-   * Info message with cyan color
-   */
-  info(message: string) {
-    console.log(pc.cyan(`ℹ ${message}`))
-  },
+/** Success message with green color */
+export function success(message: string) {
+  console.log(`${bgGreen(white(' SUCCESS '))} ${message}`)
+}
 
-  /**
-   * Success message with green color
-   */
-  success(message: string) {
-    console.log(pc.green(`✔ ${message}`))
-  },
+/** Warning message with yellow color */
+export function warn(message: string) {
+  console.log(`${bgYellow(black(' WARN '))} ${message}`)
+}
 
-  /**
-   * Warning message with yellow color
-   */
-  warn(message: string) {
-    console.log(pc.yellow(`⚠ ${message}`))
-  },
+/** Error message with red color */
+export function error(message: string) {
+  console.log(`${bgRed(white(' ERROR '))} ${message}`)
+}
 
-  /**
-   * Error message with red color
-   */
-  error(message: string) {
-    console.log(pc.red(`✖ ${message}`))
-  },
+/** Create a spinner for long-running operations */
+export function spinner(text: string) {
+  return ora(text)
+}
 
-  /**
-   * Create a spinner for long-running operations
-   */
-  spinner(text: string): Ora {
-    return ora(text)
-  },
+/** Display files with sizes and gzipped sizes */
+export function files(filepaths: string[], cwd = process.cwd()) {
+  const fileStats = filepaths.map(filepath => {
+    const stat = statSync(filepath)
+    const content = readFileSync(filepath)
+    const gzipped = gzipSync(content)
 
-  /**
-   * Display files with sizes and gzipped sizes (like esbuild output)
-   */
-  files(files: string[], cwd: string = process.cwd()) {
-    const fileStats = files.map(file => {
-      const stat = statSync(file)
-      const content = readFileSync(file)
-      const gzipped = gzipSync(content)
-
-      return {
-        path: relative(cwd, file),
-        size: stat.size,
-        gzip: gzipped.length
-      }
-    })
-
-    // Sort by size (largest first)
-    fileStats.sort((a, b) => b.size - a.size)
-
-    // Print each file
-    for (const file of fileStats) {
-      const sizeKB = (file.size / 1024).toFixed(2)
-      const gzipKB = (file.gzip / 1024).toFixed(2)
-      console.log(
-        pc.cyan(`ℹ ${file.path.padEnd(50)} ${sizeKB.padStart(6)} kB │ gzip: ${gzipKB} kB`)
-      )
+    return {
+      path: relative(cwd, filepath),
+      size: stat.size,
+      gzip: gzipped.length,
     }
+  })
 
-    // Summary line
-    const totalSize = fileStats.reduce((sum, f) => sum + f.size, 0)
-    const totalKB = (totalSize / 1024).toFixed(2)
-    console.log(pc.cyan(`ℹ ${fileStats.length} files, total: ${totalKB} kB`))
-  },
+  fileStats.sort((a, b) => b.size - a.size)
 
-  /**
-   * Display a tree structure
-   * Can be a flat list or nested groups
-   */
-  tree(label: string, items: string[] | Record<string, string[]>) {
-    console.log(label)
+  for (const file of fileStats) {
+    const sizeKB = (file.size / 1024).toFixed(2)
+    const gzipKB = (file.gzip / 1024).toFixed(2)
+    console.log(cyan(`i ${file.path.padEnd(50)} ${sizeKB.padStart(6)} kB │ gzip: ${gzipKB} kB`))
+  }
 
-    // Simple flat list
-    if (Array.isArray(items)) {
-      items.forEach((item, i) => {
-        const isLast = i === items.length - 1
-        const symbol = isLast ? TREE.leaf : TREE.branch
-        console.log(`${symbol} ${item}`)
-      })
-      return
-    }
+  const totalSize = fileStats.reduce((sum, f) => sum + f.size, 0)
+  const totalKB = (totalSize / 1024).toFixed(2)
+  console.log(cyan(`i ${fileStats.length} files, total: ${totalKB} kB`))
+}
 
-    // Nested groups
-    const groupKeys = Object.keys(items)
-    groupKeys.forEach((group, i) => {
-      const isLastGroup = i === groupKeys.length - 1
-      const groupSymbol = isLastGroup ? TREE.leaf : TREE.branch
-      console.log(`${groupSymbol} ${pc.bold(group)}`)
+/** Display a tree structure (flat list or nested groups) */
+export function tree(label: string, items: string[] | Record<string, string[]>) {
+  console.log(label)
 
-      const groupItems = items[group]
-      groupItems.forEach((item, j) => {
-        const isLastItem = j === groupItems.length - 1
-        const prefix = isLastGroup ? '  ' : `${TREE.vertical} `
-        const itemSymbol = isLastItem ? TREE.leaf : TREE.branch
-        console.log(`${prefix}${itemSymbol} ${item}`)
-      })
-    })
+  if (Array.isArray(items))
+    printFlatTree(items)
+  else
+    printNestedTree(items)
+}
+
+function printFlatTree(items: string[]) {
+  for (let i = 0; i < items.length; i++) {
+    const symbol = i === items.length - 1 ? TREE.leaf : TREE.branch
+    console.log(`${symbol} ${items[i]}`)
+  }
+}
+
+function printNestedTree(groups: Record<string, string[]>) {
+  const groupKeys = Object.keys(groups)
+
+  for (let i = 0; i < groupKeys.length; i++) {
+    const group = groupKeys[i]
+    const isLastGroup = i === groupKeys.length - 1
+    const groupSymbol = isLastGroup ? TREE.leaf : TREE.branch
+
+    console.log(`${groupSymbol} ${bold(group)}`)
+    printGroupItems(groups[group], isLastGroup)
+  }
+}
+
+function printGroupItems(items: string[], isLastGroup: boolean) {
+  const prefix = isLastGroup ? '  ' : `${TREE.vertical} `
+
+  for (let i = 0; i < items.length; i++) {
+    const symbol = i === items.length - 1 ? TREE.leaf : TREE.branch
+    console.log(`${prefix}${symbol} ${items[i]}`)
   }
 }
