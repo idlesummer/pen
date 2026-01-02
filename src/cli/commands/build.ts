@@ -19,17 +19,16 @@ export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
   const outputDir = options.output || './.pen/build'
 
-  const spinner = ui.spinner('Creating optimized build').start()
+  // Show info BEFORE starting spinner
+  ui.info(`entry: ${appDir}`)
+  ui.info('target: node24')
+  ui.info(`output: ${outputDir}`)
   console.log()
 
-  try {
-    // Show build info
-    ui.info(`entry: ${appDir}`)
-    ui.info('target: node24')
-    ui.info(`output: ${outputDir}`)
+  const spinner = ui.spinner('Scanning filesystem').start()
 
+  try {
     // Step 1: Scan filesystem
-    spinner.text = 'Scanning filesystem'
     const fileTree = buildFileTree(appDir)
 
     // Step 2: Build route tree
@@ -69,22 +68,17 @@ export async function buildCommand(options: BuildOptions = {}) {
 
     spinner.stop()
 
-    // Show output files with sizes
+    // Show output files
     const outputFiles = globSync(`${outputDir}/**/*.{js,json}`)
     ui.files(outputFiles)
-
     ui.success('Production build completed!')
 
-    // Show routes as tree
+    // Show routes
     console.log()
-    const routeGroups: Record<string, string[]> = {}
-    for (const url of Object.keys(manifest)) {
-      const parts = url.split('/').filter(Boolean)
-      const group = parts[0] || 'root'
-      routeGroups[group] = routeGroups[group] || []
-      routeGroups[group].push(url)
-    }
-    ui.tree('Routes:', routeGroups)
+    const routes = Object.keys(manifest).sort()
+
+    console.log('Routes:')
+    ui.tree({ '': routes })
 
   } catch (error) {
     spinner.fail('Build failed')

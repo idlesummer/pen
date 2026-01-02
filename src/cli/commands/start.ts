@@ -22,15 +22,14 @@ export async function startCommand(options: StartOptions = {}) {
   const manifestPath = options.manifest || './.pen/build/manifest.json'
   const componentsPath = './.pen/build/components.js'
 
-  const spinner = ui.spinner('Starting application').start()
+  ui.info(`URL: ${url}`)
+  ui.info(`Manifest: ${manifestPath}`)
+  console.log()
+
+  const spinner = ui.spinner('Checking build files').start()
 
   try {
-    // Show start info
-    ui.info(`URL: ${url}`)
-    ui.info(`Manifest: ${manifestPath}`)
-
     // Step 1: Verify build files exist
-    spinner.text = 'Checking build files'
     if (!existsSync(manifestPath)) {
       throw new Error('Manifest not found. Run `pen build` first.')
     }
@@ -52,14 +51,8 @@ export async function startCommand(options: StartOptions = {}) {
     spinner.stop()
 
     // Show loaded routes
-    const routeGroups: Record<string, string[]> = {}
-    for (const routeUrl of Object.keys(manifest)) {
-      const parts = routeUrl.split('/').filter(Boolean)
-      const group = parts[0] || 'root'
-      routeGroups[group] = routeGroups[group] || []
-      routeGroups[group].push(routeUrl)
-    }
-    ui.tree('Routes:', routeGroups)
+    const routes = Object.keys(manifest).sort()
+    ui.tree({ '': routes })  // ← Changed to unified shape
 
     ui.success('Application started!')
     console.log()
