@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync } from 'fs'
 import { globSync } from 'glob'
 import { build } from 'esbuild'
 import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
-import { log } from '@/cli/utils/logger'
+import * as ui from '@/core/ui'
 
 export interface BuildOptions {
   dir?: string
@@ -19,13 +19,14 @@ export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
   const outputDir = options.output || './.pen/build'
 
-  const spinner = log.spinner('Creating optimized build').start()
+  const spinner = ui.spinner('Creating optimized build').start()
+  console.log()
 
   try {
     // Show build info
-    log.info(`entry: ${appDir}`)
-    log.info(`target: node24`)
-    log.info(`output: ${outputDir}`)
+    ui.info(`entry: ${appDir}`)
+    ui.info('target: node24')
+    ui.info(`output: ${outputDir}`)
 
     // Step 1: Scan filesystem
     spinner.text = 'Scanning filesystem'
@@ -70,10 +71,9 @@ export async function buildCommand(options: BuildOptions = {}) {
 
     // Show output files with sizes
     const outputFiles = globSync(`${outputDir}/**/*.{js,json}`)
-    log.fileList(outputFiles)
+    ui.files(outputFiles)
 
-    // Success message
-    log.success('Production build completed!')
+    ui.success('Production build completed!')
 
     // Show routes as tree
     console.log()
@@ -84,14 +84,14 @@ export async function buildCommand(options: BuildOptions = {}) {
       routeGroups[group] = routeGroups[group] || []
       routeGroups[group].push(url)
     }
-    log.nestedTree('Loaded routes:', routeGroups)
+    ui.tree('Routes:', routeGroups)
 
   } catch (error) {
     spinner.fail('Build failed')
     console.error()
 
     if (error instanceof Error) {
-      console.error(error.message)
+      ui.error(error.message)
     } else {
       console.error(error)
     }

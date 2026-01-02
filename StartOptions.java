@@ -82,3 +82,52 @@ export async function startCommand(options: StartOptions = {}) {
     process.exit(1)
   }
 }
+```
+
+## Example Output
+
+### Build Command
+```
+⠋ Creating optimized build
+ INFO  entry: ./src/app
+ INFO  target: node24
+ INFO  output: ./.pen/build
+⠋ Scanning filesystem
+⠋ Building route tree
+⠋ Generating manifest
+⠋ Writing manifest
+⠋ Generating component map
+⠋ Compiling application
+i .pen/build/components.js                          5.49 kB │ gzip: 2.10 kB
+i .pen/build/manifest.json                          3.18 kB │ gzip: 1.07 kB
+i .pen/build/app/screen.js                          1.91 kB │ gzip: 0.80 kB
+i 3 files, total: 10.58 kB
+ SUCCESS  Production build completed!
+
+Routes:
+├─ root
+│  └─ /
+├─ blog
+│  └─ /blog/
+└─ about
+   └─ /about/
+```
+
+### Start Command
+```
+⠋ Starting application
+ INFO  URL: /
+ INFO  Manifest: ./.pen/build/manifest.json
+⠋ Checking build files
+⠋ Loading manifest
+⠋ Loading components
+Routes:
+├─ root
+│  └─ /
+├─ blog
+│  └─ /blog/
+└─ about
+   └─ /about/
+ SUCCESS  Application started!
+
+[Your Ink app renders here]

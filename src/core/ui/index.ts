@@ -4,32 +4,32 @@ import ora from 'ora'
 import pc from 'picocolors'
 import { gzipSync } from 'zlib'
 
-const { bgCyan, bgGreen, bgYellow, bgRed, cyan, white, black, bold } = pc
+const { bgCyan, bgGreen, bgYellow, bgRed, cyan, white, bold } = pc
 const TREE = { branch: '├─', leaf: '└─', vertical: '│' } as const
 
 /** Info message with cyan color */
 export function info(message: string) {
-  console.log(`${bgCyan(white(' INFO '))} ${message}`)
+  console.log(`${bgCyan(white(bold(' [INFO] ')))} ${message}`)
 }
 
 /** Success message with green color */
 export function success(message: string) {
-  console.log(`${bgGreen(white(' SUCCESS '))} ${message}`)
+  console.log(`${bgGreen(white(bold(' [SUCCESS] ')))} ${message}`)
 }
 
 /** Warning message with yellow color */
 export function warn(message: string) {
-  console.log(`${bgYellow(black(' WARN '))} ${message}`)
+  console.log(`${bgYellow(white(bold(' [WARN] ')))} ${message}`)
 }
 
 /** Error message with red color */
 export function error(message: string) {
-  console.log(`${bgRed(white(' ERROR '))} ${message}`)
+  console.log(`${bgRed(white(bold(' [ERROR] ')))} ${message}`)
 }
 
 /** Create a spinner for long-running operations */
 export function spinner(text: string) {
-  return ora(text)
+  return ora(`${text}`)
 }
 
 /** Display files with sizes and gzipped sizes */
@@ -56,7 +56,7 @@ export function files(filepaths: string[], cwd = process.cwd()) {
 
   const totalSize = fileStats.reduce((sum, f) => sum + f.size, 0)
   const totalKB = (totalSize / 1024).toFixed(2)
-  console.log(cyan(`i ${fileStats.length} files, total: ${totalKB} kB`))
+  console.log(cyan(`ℹ️ ${fileStats.length} files, total: ${totalKB} kB`))
 }
 
 /** Display a tree structure (flat list or nested groups) */
