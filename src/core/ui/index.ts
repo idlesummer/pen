@@ -55,7 +55,7 @@ export const log = {
   /**
    * Display files with sizes and gzipped sizes (like esbuild output)
    */
-  fileList(files: string[], cwd: string = process.cwd()) {
+  files(files: string[], cwd: string = process.cwd()) {
     const fileStats = files.map(file => {
       const stat = statSync(file)
       const content = readFileSync(file)
