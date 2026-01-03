@@ -2,53 +2,48 @@
 
 import ora from 'ora'
 
-export interface Phase<TContext extends Record<string, unknown>> {
+type Context = Record<string, unknown>
+
+export interface Task<TContext extends Context> {
   name: string
-  task: (ctx: TContext) => Promise<Partial<TContext> | void>
+  run: (ctx: TContext) => Promise<Partial<TContext> | void>
   onSuccess?: (result: Partial<TContext> | void, ctx: TContext) => string
   skip?: (ctx: TContext) => boolean
 }
 
-export interface PipelineResult<TContext extends Record<string, unknown>> {
+export interface TaskResult<TContext extends Context> {
   context: TContext
   duration: number
 }
 
-export async function runPipeline<TContext extends Record<string, unknown>>(
-  phases: Phase<TContext>[],
-  initialContext: TContext,
-): Promise<PipelineResult<TContext>> {
+export async function runTasks<TContext extends Context>(
+  tasks: Task<TContext>[],
+  context: TContext,
+): Promise<TaskResult<TContext>> {
   const startTime = Date.now()
-  let context = { ...initialContext }
 
-  for (const phase of phases) {
-    if (phase.skip?.(context)) {
-      ora(phase.name).info(`${phase.name} (skipped)`)
+  for (const task of tasks) {
+    const spinner = ora(task.name)
+
+    if (task.skip?.(context)) {
+      spinner.info()  // Just show the task name with info icon
       continue
     }
 
-    const spinner = ora(phase.name).start()
-
     try {
-      const result = await phase.task(context)
-      const message = phase.onSuccess?.(result, context) || phase.name
-      spinner.succeed(message)
+      spinner.start()
+      const result = await task.run(context)
+      spinner.succeed(task.onSuccess?.(result, context) || task.name)
 
-      if (result && typeof result === 'object') {
+      if (result)
         context = { ...context, ...result }
-      }
-    } catch (error) {
-      spinner.fail(phase.name)
-
-      if (error instanceof Error) {
-        throw new Error(`Phase "${phase.name}" failed: ${error.message}`, {
-          cause: error,
-        })
-      }
-      throw error
+    }
+    catch (error) {
+      spinner.fail(task.name)
+      const message = `Task "${task.name}" failed: ${error instanceof Error ? error.message : String(error)}`
+      throw new Error(message, { cause: error })
     }
   }
 
-  const duration = Date.now() - startTime
-  return { context, duration }
+  return { context, duration: Date.now() - startTime }
 }

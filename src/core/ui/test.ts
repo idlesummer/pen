@@ -1,6 +1,6 @@
 // test.ts
 import pc from 'picocolors'
-import { runPipeline, type Phase } from './pipeline.ts'
+import { runTasks, type Task } from './pipeline.ts'
 import { formatSize, formatDuration } from './format.ts'
 
 // Define your context type
@@ -41,10 +41,10 @@ async function calculateSize(files: string[]) {
 }
 
 // Define the pipeline
-const pipeline: Phase<MyContext>[] = [
+const pipeline: Task<MyContext>[] = [
   {
     name: 'Scanning files',
-    task: async (ctx: MyContext) => {
+    run: async (ctx: MyContext) => {
       const count = await scanFiles(ctx.input)
       return { fileCount: count }
     },
@@ -56,7 +56,7 @@ const pipeline: Phase<MyContext>[] = [
 
   {
     name: 'Processing data',
-    task: async (ctx: MyContext) => {
+    run: async (ctx: MyContext) => {
       const data = await processData(ctx.fileCount!)
       return { processedData: data }
     },
@@ -68,7 +68,7 @@ const pipeline: Phase<MyContext>[] = [
 
   {
     name: 'Validating files',
-    task: async (ctx: MyContext) => {
+    run: async (ctx: MyContext) => {
       const isValid = await validateFiles(ctx.processedData!)
       return { validated: isValid }
     },
@@ -77,7 +77,7 @@ const pipeline: Phase<MyContext>[] = [
 
   {
     name: 'Calculating size',
-    task: async (ctx: MyContext) => {
+    run: async (ctx: MyContext) => {
       const size = await calculateSize(ctx.processedData!)
       return { totalSize: size }
     },
@@ -89,7 +89,7 @@ async function main() {
   console.log(pc.cyan('Starting pipeline...\n'))
 
   try {
-    const { context, duration } = await runPipeline(pipeline, { input: './my-directory' })
+    const { context, duration } = await runTasks(pipeline, { input: './my-directory' })
 
     // Display results
     console.log()
