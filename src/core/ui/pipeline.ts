@@ -21,7 +21,7 @@ export interface PipelineResult<TContext extends PipelineContext = PipelineConte
 // Runner
 export async function runPipeline<TContext extends PipelineContext>(
   phases: Phase<TContext>[],
-  initialContext: TContext
+  initialContext: TContext,
 ): Promise<PipelineResult<TContext>> {
   const startTime = Date.now()
   let context = { ...initialContext }
