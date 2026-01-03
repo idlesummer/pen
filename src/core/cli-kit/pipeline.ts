@@ -35,10 +35,13 @@ export async function runTasks<TContext extends Context>(tasks: Task<TContext>[]
     }
     catch (error) {
       spinner.fail(task.name)
-      const message = `Task "${task.name}" failed: ${error instanceof Error ? error.message : String(error)}`
+      const reason = error instanceof Error ? error.message : String(error)
+      const message = `Task "${task.name}" failed: ${reason}`
       throw new Error(message, { cause: error })
     }
   }
 
-  return { context, duration: Date.now() - startTime } as TaskResult<TContext>
+  const duration = Date.now() - startTime
+  const taskResult: TaskResult<TContext> = { context, duration }
+  return taskResult
 }
