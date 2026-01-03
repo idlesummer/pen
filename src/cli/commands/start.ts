@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 import { createElement } from 'react'
 import { render } from 'ink'
-import { Router } from '@/core/router/Router'
+import { Router } from '@/core/routing/Router'
 import * as ui from '@/core/cli-kit'
 import type { RouteManifest } from '@/core/file-router/route-manifest'
 

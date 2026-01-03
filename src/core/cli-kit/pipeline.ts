@@ -1,5 +1,3 @@
-// pipeline.ts
-
 import ora from 'ora'
 
 type Context = Record<string, unknown>
@@ -16,10 +14,7 @@ export interface TaskResult<TContext extends Context> {
   duration: number
 }
 
-export async function runTasks<TContext extends Context>(
-  tasks: Task<TContext>[],
-  context: TContext,
-): Promise<TaskResult<TContext>> {
+export async function runTasks<TContext extends Context>(tasks: Task<TContext>[], context: TContext) {
   const startTime = Date.now()
 
   for (const task of tasks) {
@@ -45,5 +40,5 @@ export async function runTasks<TContext extends Context>(
     }
   }
 
-  return { context, duration: Date.now() - startTime }
+  return { context, duration: Date.now() - startTime } as TaskResult<TContext>
 }
