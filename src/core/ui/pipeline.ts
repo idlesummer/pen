@@ -2,24 +2,19 @@
 
 import ora from 'ora'
 
-// Types
-export interface PipelineContext {
-  [key: string]: unknown
-}
-
-export interface Phase<TContext extends PipelineContext = PipelineContext> {
+export interface Phase<TContext extends Record<string, unknown>> {
   name: string
   task: (ctx: TContext) => Promise<Partial<TContext> | void>
   onSuccess?: (result: Partial<TContext> | void, ctx: TContext) => string
+  skip?: (ctx: TContext) => boolean
 }
 
-export interface PipelineResult<TContext extends PipelineContext = PipelineContext> {
+export interface PipelineResult<TContext extends Record<string, unknown>> {
   context: TContext
   duration: number
 }
 
-// Runner
-export async function runPipeline<TContext extends PipelineContext>(
+export async function runPipeline<TContext extends Record<string, unknown>>(
   phases: Phase<TContext>[],
   initialContext: TContext,
 ): Promise<PipelineResult<TContext>> {
@@ -27,22 +22,29 @@ export async function runPipeline<TContext extends PipelineContext>(
   let context = { ...initialContext }
 
   for (const phase of phases) {
+    if (phase.skip?.(context)) {
+      ora(phase.name).info(`${phase.name} (skipped)`)
+      continue
+    }
+
     const spinner = ora(phase.name).start()
 
     try {
       const result = await phase.task(context)
-
-      // Get success message
       const message = phase.onSuccess?.(result, context) || phase.name
       spinner.succeed(message)
 
-      // Merge result into context
       if (result && typeof result === 'object') {
         context = { ...context, ...result }
       }
-
     } catch (error) {
       spinner.fail(phase.name)
+
+      if (error instanceof Error) {
+        throw new Error(`Phase "${phase.name}" failed: ${error.message}`, {
+          cause: error,
+        })
+      }
       throw error
     }
   }
@@ -50,4 +52,3 @@ export async function runPipeline<TContext extends PipelineContext>(
   const duration = Date.now() - startTime
   return { context, duration }
 }
-
