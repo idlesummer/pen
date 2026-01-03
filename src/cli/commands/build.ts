@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync } from 'fs'
 import { globSync } from 'glob'
 import { build } from 'esbuild'
 import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
-import * as ui from '@/core/ui'
+import * as ui from '@/core/cli-kit'
 
 export interface BuildOptions {
   dir?: string
