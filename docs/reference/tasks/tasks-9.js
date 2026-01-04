@@ -1,3 +1,5 @@
+// onSkip
+
 import ora from 'ora'
 
 // Helper function to simulate work
@@ -13,22 +15,21 @@ async function runTasks(tasks, context) {
     const spinner = ora(task.name)
 
     if (task.skip?.(context)) {
-      spinner.info()
+      const message = task.onSkip?.(context) || task.name
+      spinner.info(message)
       continue
     }
 
     try {
       spinner.start()
-      const result = await task.run(context)
-
-      const taskDuration = Date.now() - taskStartTime
-      // Add duration to context before passing to onSuccess
-      const contextWithDuration = { ...context, duration: taskDuration }
-      const message = task.onSuccess?.(result, contextWithDuration) || task.name
+      const res = await task.run(context)
+      const duration = Date.now() - taskStartTime
+      const ctx = { ...context, duration }
+      const message = task.onSuccess?.(res, ctx) || task.name
       spinner.succeed(message)
 
-      if (result)
-        context = { ...context, ...result }
+      if (res)
+        context = { ...context, ...res }
     }
     catch (error) {
       spinner.fail()
@@ -40,34 +41,39 @@ async function runTasks(tasks, context) {
   return { context, duration }
 }
 
-// Usage:
+// Define your tasks
 const tasks = [
   {
     name: 'Fetching user',
-    onSuccess: (result, ctx) => `Found user ${result.userId} (${ctx.duration}ms)`,
+    onSuccess: (res, ctx) => `Found user ${res.userId} (${ctx.duration}ms)`,
     run: async () => {
       await delay(1000)
       return { userId: '123' }
-    },
+    }
   },
   {
     name: 'Loading profile',
-    onSuccess: (result, ctx) => `Loaded profile for ${result.username} (${ctx.duration}ms)`,
+    skip: (ctx) => !ctx.userId,
+    onSkip: (ctx) => `Skipped: No user ID found`,
+    onSuccess: (res, ctx) => `Loaded profile for ${res.username} (${ctx.duration}ms)`,
     run: async (ctx) => {
       await delay(1500)
       return { username: 'john_doe' }
-    },
+    }
   },
   {
     name: 'Sending email',
-    onSuccess: (result, ctx) => `Email sent in ${ctx.duration}ms`,
+    skip: (ctx) => ctx.emailAlreadySent,
+    onSkip: (ctx) => `Email already sent to ${ctx.username}`,
+    onSuccess: (res, ctx) => `Email sent in ${ctx.duration}ms`,
     run: async (ctx) => {
       await delay(800)
       return { emailSent: true }
-    },
+    }
   },
 ]
 
+// Run the pipeline
 async function main() {
   console.log('🚀 Starting pipeline...\n')
 
