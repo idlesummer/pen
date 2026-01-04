@@ -44,7 +44,7 @@ const tasks = [
       await delay(1000)
       return { userId: '123' }
     },
-    onSuccess: (result) => `Found user ${result.userId}`
+    onSuccess: (result) => `Found user ${result.userId}`,
   },
   {
     name: 'Loading profile',
@@ -52,7 +52,7 @@ const tasks = [
       await delay(1500)
       return { username: 'john_doe' }
     },
-    onSuccess: (result, ctx) => `Loaded profile for ${result.username}`
+    onSuccess: (result, ctx) => `Loaded profile for ${result.username}`,
   },
   {
     name: 'Sending email',
@@ -60,7 +60,7 @@ const tasks = [
       await delay(800)
       return { emailSent: true }
     },
-    skip: (ctx) => !ctx.userId // Skip if no userId
+    skip: (ctx) => !ctx.userId, // Skip if no userId
   },
 ]
 

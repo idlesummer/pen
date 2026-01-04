@@ -1,5 +1,3 @@
-// Step 7: Track total time
-
 import ora from 'ora'
 
 // Helper function to simulate work
@@ -11,6 +9,7 @@ async function runTasks(tasks, context) {
   const startTime = Date.now()
 
   for (const task of tasks) {
+    const taskStartTime = Date.now()
     const spinner = ora(task.name)
 
     if (task.skip?.(context)) {
@@ -21,7 +20,12 @@ async function runTasks(tasks, context) {
     try {
       spinner.start()
       const result = await task.run(context)
-      spinner.succeed(task.onSuccess?.(result, context) || task.name)
+
+      const taskDuration = Date.now() - taskStartTime
+      // Add duration to context before passing to onSuccess
+      const contextWithDuration = { ...context, duration: taskDuration }
+      const message = task.onSuccess?.(result, contextWithDuration) || task.name
+      spinner.succeed(message)
 
       if (result)
         context = { ...context, ...result }
@@ -36,7 +40,7 @@ async function runTasks(tasks, context) {
   return { context, duration }
 }
 
-// Define your tasks
+// Usage:
 const tasks = [
   {
     name: 'Fetching user',
@@ -44,7 +48,7 @@ const tasks = [
       await delay(1000)
       return { userId: '123' }
     },
-    onSuccess: (result) => `Found user ${result.userId}`
+    onSuccess: (result, ctx) => `Found user ${result.userId} (${ctx.duration}ms)`,
   },
   {
     name: 'Loading profile',
@@ -52,7 +56,7 @@ const tasks = [
       await delay(1500)
       return { username: 'john_doe' }
     },
-    onSuccess: (result, ctx) => `Loaded profile for ${result.username}`
+    onSuccess: (result, ctx) => `Loaded profile for ${result.username} (${ctx.duration}ms)`,
   },
   {
     name: 'Sending email',
@@ -60,11 +64,10 @@ const tasks = [
       await delay(800)
       return { emailSent: true }
     },
-    skip: (ctx) => !ctx.userId // Skip if no userId
+    onSuccess: (result, ctx) => `Email sent in ${ctx.duration}ms`,
   },
 ]
 
-// Run the pipeline
 async function main() {
   console.log('🚀 Starting pipeline...\n')
 
