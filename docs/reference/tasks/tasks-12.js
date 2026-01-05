@@ -51,7 +51,7 @@ function pipe(tasks) {
 
       const duration = Date.now() - startTime
       return { context, duration }
-    }
+    },
   }
 }
 
