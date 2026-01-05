@@ -113,7 +113,7 @@ export async function buildCommand(options: BuildOptions = {}) {
     console.log(format.fileList(outputFiles))
 
     console.log()
-    console.log(`${pc.green('√')} Built in ${pc.bold(format.duration(duration))}`)
+    console.log(`${pc.green('✓')} Built in ${pc.bold(format.duration(duration))}`)
     console.log()
   }
   catch (error) {
