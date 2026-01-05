@@ -5,19 +5,20 @@
     "module": "esnext",
     "lib": ["esnext"],  // Optional: if you need specific libs
     "jsx": "react-jsx",
-    
+
     // Module Resolution
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,            // Optional: if importing JSON
     "allowSyntheticDefaultImports": true, // Optional: better imports
-    
+    "allowImportingTsExtensions": true,   // Optional: for better DX
+
     // Path Mapping
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    
+
     // Emit
     "outDir": "./dist",
     "rootDir": "./src",
@@ -25,7 +26,7 @@
     "declaration": true,    // Optional: generate .d.ts files
     "declarationMap": true, // Optional: source maps for .d.ts
     "sourceMap": true,      // Optional: generate source maps
-    
+
     // Type Checking
     "strict": true,
     "noUnusedLocals": true,     // Optional: warn on unused variables
@@ -33,7 +34,7 @@
     "noImplicitReturns": true,  // Optional: functions must return
     "noFallthroughCasesInSwitch": true, // Optional: switch safety
     "forceConsistentCasingInFileNames": true,
-    
+
     // Advanced
     "skipLibCheck": true,  // Optional: faster compilation
     "allowJs": false  // Optional: only TypeScript files

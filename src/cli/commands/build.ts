@@ -1,97 +1,123 @@
-// cli/commands/build.ts
-import { join } from 'path'
 import { mkdirSync, writeFileSync } from 'fs'
+import { join } from 'path'
+
 import { globSync } from 'glob'
 import { build } from 'esbuild'
+import pc from 'picocolors'
+
+import { VERSION } from '@/core/constants'
+import { pipe } from '@/core/build-tools/pipeline'
+import * as format from '@/core/build-tools/format'
 import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
-import * as ui from '@/core/cli-kit'
+import type { FileNode, RouteNode, RouteManifest } from '@/core/file-router'
 
 export interface BuildOptions {
   dir?: string
   output?: string
 }
 
-/**
- * Builds the route manifest from the app directory.
- * Generates manifest.json and compiles the application.
- */
+interface BuildContext extends Record<string, unknown> {
+  appDir: string
+  outputDir: string
+  fileTree?: FileNode
+  routeTree?: RouteNode
+  manifest?: RouteManifest
+}
+
 export async function buildCommand(options: BuildOptions = {}) {
   const appDir = options.dir || './src/app'
   const outputDir = options.output || './.pen/build'
 
-  // Show info BEFORE starting spinner
-  ui.info(`entry: ${appDir}`)
-  ui.info('target: node24')
-  ui.info(`output: ${outputDir}`)
+  console.log(pc.cyan('  Starting production build...\n'))
+  console.log(pc.bold(`  ✎  pen v${VERSION}\n`))
+  console.log(pc.dim( `  entry:  ${appDir}`))
+  console.log(pc.dim( '  target: node24'))
+  console.log(pc.dim( `  output: ${outputDir}`))
   console.log()
 
-  const spinner = ui.spinner('Scanning filesystem').start()
-
   try {
-    // Step 1: Scan filesystem
-    const fileTree = buildFileTree(appDir)
+    const pipeline = pipe<BuildContext>([
+      {
+        name: 'Scanning filesystem',
+        onSuccess: (_, ctx) => `Scanned filesystem (${format.duration(ctx.duration)})`,
+        run: async (ctx) => {
+          const fileTree = buildFileTree(ctx.appDir)
+          return { fileTree }
+        },
+      },
+      {
+        name: 'Building route tree',
+        onSuccess: (_, ctx) => `Built route tree (${format.duration(ctx.duration)})`,
+        run: async (ctx) => {
+          const routeTree = buildRouteTree(ctx.fileTree!) // Safe: set by previous task
+          return { routeTree }
+        },
+      },
+      {
+        name: 'Generating manifest',
+        onSuccess: (_, ctx) => `Generated manifest (${format.duration(ctx.duration)})`,
+        run: async (ctx) => {
+          const manifest = buildRouteManifest(ctx.routeTree!) // Safe: set by previous task
+          return { manifest }
+        },
+      },
+      {
+        name: 'Writing manifest',
+        onSuccess: (_, ctx) => `Saved manifest (${format.duration(ctx.duration)})`,
+        run: async (ctx) => {
+          const manifestPath = join(ctx.outputDir, 'manifest.json')
+          const manifestJson = JSON.stringify(ctx.manifest, null, 2)
+          mkdirSync(ctx.outputDir, { recursive: true })
+          writeFileSync(manifestPath, manifestJson, 'utf-8')
+        },
+      },
+      {
+        name: 'Generating component map',
+        onSuccess: (_, ctx) => `Generated component map (${format.duration(ctx.duration)})`,
+        run: async (ctx) => {
+          const componentsCode = buildComponentMap(ctx.manifest!) // Safe: set by previous task
+          const componentsPath = join(ctx.outputDir, 'components.js')
+          writeFileSync(componentsPath, componentsCode, 'utf-8')
+        },
+      },
+      {
+        name: 'Compiling application',
+        onSuccess: (_, ctx) => `Compiled application (${format.duration(ctx.duration)})`,
+        onError: (err) => `Compilation failed: ${err.message}`,
+        run: async (ctx) => {
+          const appFiles = globSync(`${ctx.appDir}/**/*.{ts,tsx}`)
+          await build({
+            entryPoints: appFiles,
+            outdir: join(ctx.outputDir, 'app'),
+            outbase: ctx.appDir,
+            format: 'esm',
+            platform: 'node',
+            target: 'node24',
+            bundle: false,
+          })
+        },
+      },
+    ])
 
-    // Step 2: Build route tree
-    spinner.text = 'Building route tree'
-    const routeTree = buildRouteTree(fileTree)
-
-    // Step 3: Generate manifest
-    spinner.text = 'Generating manifest'
-    const manifest = buildRouteManifest(routeTree)
-
-    // Step 4: Write manifest.json
-    spinner.text = 'Writing manifest'
-    const manifestPath = join(outputDir, 'manifest.json')
-    const manifestJson = JSON.stringify(manifest, null, 2)
-    mkdirSync(outputDir, { recursive: true })
-    writeFileSync(manifestPath, manifestJson, 'utf-8')
-
-    // Step 5: Generate component map
-    spinner.text = 'Generating component map'
-    const componentsCode = buildComponentMap(manifest)
-    const componentsPath = join(outputDir, 'components.js')
-    writeFileSync(componentsPath, componentsCode, 'utf-8')
-
-    // Step 6: Compile with esbuild
-    spinner.text = 'Compiling application'
-    const appFiles = globSync(`${appDir}/**/*.{ts,tsx}`)
-
-    await build({
-      entryPoints: appFiles,
-      outdir: join(outputDir, 'app'),
-      outbase: appDir,
-      format: 'esm',
-      platform: 'node',
-      target: 'node24',
-      bundle: false,
-    })
-
-    spinner.stop()
-
-    // Show output files
+    const { duration } = await pipeline.run({ appDir, outputDir })
+    console.log()
     const outputFiles = globSync(`${outputDir}/**/*.{js,json}`)
-    ui.files(outputFiles)
+      .map(file => file.replace(`${outputDir}/`, ''))
+    console.log(format.fileList(outputFiles))
+
     console.log()
-    ui.success('Production build completed!')
-
-    // Show routes
+    console.log(`${pc.green('✓')} Built in ${pc.bold(format.duration(duration))}`)
     console.log()
-    const routes = Object.keys(manifest).sort()
+  }
+  catch (error) {
+    console.log()
+    console.error(`${pc.red('✗')} Build failed`)
+    console.log()
 
-    console.log('Routes:')
-    ui.tree({ '': routes })
+    if (error instanceof Error)
+      console.error(pc.red(error.message))
 
-  } catch (error) {
-    spinner.fail('Build failed')
-    console.error()
-
-    if (error instanceof Error) {
-      ui.error(error.message)
-    } else {
-      console.error(error)
-    }
-
-    console.error()
+    console.log()
     process.exit(1)
   }
 }

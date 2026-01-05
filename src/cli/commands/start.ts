@@ -5,7 +5,7 @@ import { pathToFileURL } from 'url'
 import { createElement } from 'react'
 import { render } from 'ink'
 import { Router } from '@/core/routing/Router'
-import * as ui from '@/core/cli-kit'
+import * as ui from '@/core/build-tools'
 import type { RouteManifest } from '@/core/file-router/route-manifest'
 
 export interface StartOptions {
