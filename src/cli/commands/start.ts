@@ -1,11 +1,11 @@
 // cli/commands/start.ts
-import { existsSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 import { createElement } from 'react'
 import { render } from 'ink'
+import pc from 'picocolors'
 import { Router } from '@/core/routing/Router'
-import * as ui from '@/core/build-tools'
 import type { RouteManifest } from '@/core/file-router/route-manifest'
 
 export interface StartOptions {
@@ -22,55 +22,24 @@ export async function startCommand(options: StartOptions = {}) {
   const manifestPath = options.manifest || './.pen/build/manifest.json'
   const componentsPath = './.pen/build/components.js'
 
-  ui.info(`URL: ${url}`)
-  ui.info(`Manifest: ${manifestPath}`)
-  console.log()
-
-  const spinner = ui.spinner('Checking build files').start()
-
   try {
-    // Step 1: Verify build files exist
-    if (!existsSync(manifestPath))
-      throw new Error('Manifest not found. Run `pen build` first.')
-
-    if (!existsSync(componentsPath))
-      throw new Error('Component map not found. Run `pen build` first.')
-
-    // Step 2: Load manifest
-    spinner.text = 'Loading manifest'
+    // Load everything silently
     const manifestJson = readFileSync(manifestPath, 'utf-8')
     const manifest = JSON.parse(manifestJson) as RouteManifest
 
-    // Step 3: Load components
-    spinner.text = 'Loading components'
     const componentsAbsPath = resolve(process.cwd(), componentsPath)
     const componentFileUrl = pathToFileURL(componentsAbsPath).href
     const { components } = await import(componentFileUrl)
 
-    spinner.stop()
-
-    // Show loaded routes
-    const routes = Object.keys(manifest).sort()
-    console.log('Routes:')
-    ui.tree({ '': routes })
-    console.log()
-    ui.success('Application started!')
-    console.log()
-
-    // Step 4: Render application
+    // Just render - no output
     const element = createElement(Router, { url, manifest, components })
     render(element)
+  }
 
-  } catch (error) {
-    spinner.fail('Start failed')
-    console.error()
-
+  catch (error) {
+    console.error(pc.red('✗') + ' Failed to start')
     if (error instanceof Error)
-      ui.error(error.message)
-    else
-      console.error(error)
-
-    console.error()
+      console.error(pc.red(error.message))
     process.exit(1)
   }
 }
