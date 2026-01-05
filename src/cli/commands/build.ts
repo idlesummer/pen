@@ -37,69 +37,6 @@ export async function buildCommand(options: BuildOptions = {}) {
   console.log()
 
   try {
-    // const pipeline = pipe<BuildContext>([
-    //   {
-    //     name: 'Scanning filesystem',
-    //     onSuccess: (_, ctx) => `Scanned filesystem (${format.duration(ctx.duration)})`,
-    //     run: async (ctx) => {
-    //       const fileTree = buildFileTree(ctx.appDir)
-    //       return { fileTree }
-    //     },
-    //   },
-    //   {
-    //     name: 'Building route tree',
-    //     onSuccess: (_, ctx) => `Built route tree (${format.duration(ctx.duration)})`,
-    //     run: async (ctx) => {
-    //       const routeTree = buildRouteTree(ctx.fileTree!) // Safe: set by previous task
-    //       return { routeTree }
-    //     },
-    //   },
-    //   {
-    //     name: 'Generating manifest',
-    //     onSuccess: (_, ctx) => `Generated manifest (${format.duration(ctx.duration)})`,
-    //     run: async (ctx) => {
-    //       const manifest = buildRouteManifest(ctx.routeTree!) // Safe: set by previous task
-    //       return { manifest }
-    //     },
-    //   },
-    //   {
-    //     name: 'Writing manifest',
-    //     onSuccess: (_, ctx) => `Saved manifest (${format.duration(ctx.duration)})`,
-    //     run: async (ctx) => {
-    //       const manifestPath = join(ctx.outputDir, 'manifest.json')
-    //       const manifestJson = JSON.stringify(ctx.manifest, null, 2)
-    //       mkdirSync(ctx.outputDir, { recursive: true })
-    //       writeFileSync(manifestPath, manifestJson, 'utf-8')
-    //     },
-    //   },
-    //   {
-    //     name: 'Generating component map',
-    //     onSuccess: (_, ctx) => `Generated component map (${format.duration(ctx.duration)})`,
-    //     run: async (ctx) => {
-    //       const componentsCode = buildComponentMap(ctx.manifest!) // Safe: set by previous task
-    //       const componentsPath = join(ctx.outputDir, 'components.js')
-    //       writeFileSync(componentsPath, componentsCode, 'utf-8')
-    //     },
-    //   },
-    //   {
-    //     name: 'Compiling application',
-    //     onSuccess: (_, ctx) => `Compiled application (${format.duration(ctx.duration)})`,
-    //     onError: (err) => `Compilation failed: ${err.message}`,
-    //     run: async (ctx) => {
-    //       const appFiles = globSync(`${ctx.appDir}/**/*.{ts,tsx}`)
-    //       await build({
-    //         entryPoints: appFiles,
-    //         outdir: join(ctx.outputDir, 'app'),
-    //         outbase: ctx.appDir,
-    //         format: 'esm',
-    //         platform: 'node',
-    //         target: 'node24',
-    //         bundle: false,
-    //       })
-    //     },
-    //   },
-    // ])
-
     const pipeline = pipe<BuildContext>([
       {
         name: 'Scanning filesystem',
@@ -176,7 +113,7 @@ export async function buildCommand(options: BuildOptions = {}) {
     console.log(format.fileList(outputFiles))
 
     console.log()
-    console.log(`${pc.green('✓')} Built in ${pc.bold(format.duration(duration))}`)
+    console.log(`${pc.green('√')} Built in ${pc.bold(format.duration(duration))}`)
     console.log()
   }
   catch (error) {
