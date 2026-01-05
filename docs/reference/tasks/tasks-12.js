@@ -26,9 +26,8 @@ function pipe(tasks) {
         try {
           spinner.start()
           const res = await task.run(context)
-
-          const taskDuration = Date.now() - taskStartTime
-          const ctx = { ...context, duration: taskDuration }
+          const duration = Date.now() - taskStartTime
+          const ctx = { ...context, duration }
           const message = task.onSuccess?.(res, ctx) || task.name
           spinner.succeed(message)
 
