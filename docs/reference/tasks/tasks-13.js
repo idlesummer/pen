@@ -23,7 +23,7 @@ function pipe(tasks) {
 }
 
 async function executeTask(task, context) {
-  const taskStartTime = Date.now()
+  const startTime = Date.now()
   const spinner = ora(task.name)
 
   if (task.skip?.(context)) {
@@ -35,17 +35,17 @@ async function executeTask(task, context) {
   try {
     spinner.start()
     const res = await task.run(context)
-    const duration = Date.now() - taskStartTime
+    const duration = Date.now() - startTime
     const ctx = { ...context, duration }
     const message = task.onSuccess?.(res, ctx) || task.name
     spinner.succeed(message)
 
-    return (res != null)
+    return res != null
       ? { ...context, ...res }
       : context
   }
   catch (error) {
-    const duration = Date.now() - taskStartTime
+    const duration = Date.now() - startTime
     const ctx = { ...context, duration }
     const message = task.onError?.(error, ctx) || task.name
     spinner.fail(message)
