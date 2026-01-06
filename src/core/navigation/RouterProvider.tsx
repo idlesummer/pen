@@ -1,3 +1,4 @@
+// src/core/navigation/RouterProvider.tsx
 import { createContext, useState, useCallback, type PropsWithChildren } from 'react'
 
 export interface RouterContextValue {
@@ -11,7 +12,7 @@ export interface RouterProviderProps extends PropsWithChildren {
 }
 
 // Step 1: Define what data exists on the channel
-const RouterContext = createContext<RouterContextValue | null>(null)
+export const RouterContext = createContext<RouterContextValue | null>(null)
 
 // Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
