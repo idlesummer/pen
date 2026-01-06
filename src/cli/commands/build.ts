@@ -42,7 +42,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         name: 'Scanning filesystem',
         onSuccess: (_, ctx) => `Scanned filesystem (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
-          await delay(800)  // Simulate work
+          // await delay(800)  // Simulate work
           const fileTree = buildFileTree(ctx.appDir)
           return { fileTree }
         },
@@ -51,7 +51,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         name: 'Building route tree',
         onSuccess: (_, ctx) => `Built route tree (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
-          await delay(600)  // Simulate work
+          // await delay(600)  // Simulate work
           const routeTree = buildRouteTree(ctx.fileTree!) // Safe: set by previous task
           return { routeTree }
         },
@@ -60,7 +60,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         name: 'Generating manifest',
         onSuccess: (_, ctx) => `Generated manifest (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
-          await delay(500)  // Simulate work
+          // await delay(500)  // Simulate work
           const manifest = buildRouteManifest(ctx.routeTree!) // Safe: set by previous task
           return { manifest }
         },
@@ -69,7 +69,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         name: 'Writing manifest',
         onSuccess: (_, ctx) => `Saved manifest (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
-          await delay(400)  // Simulate work
+          // await delay(400)  // Simulate work
           const manifestPath = join(ctx.outputDir, 'manifest.json')
           const manifestJson = JSON.stringify(ctx.manifest, null, 2)
           mkdirSync(ctx.outputDir, { recursive: true })
@@ -80,7 +80,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         name: 'Generating component map',
         onSuccess: (_, ctx) => `Generated component map (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
-          await delay(450)  // Simulate work
+          // await delay(450)  // Simulate work
           const componentsCode = buildComponentMap(ctx.manifest!) // Safe: set by previous task
           const componentsPath = join(ctx.outputDir, 'components.js')
           writeFileSync(componentsPath, componentsCode, 'utf-8')
@@ -91,7 +91,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         onSuccess: (_, ctx) => `Compiled application (${format.duration(ctx.duration)})`,
         onError: (err) => `Compilation failed: ${err.message}`,
         run: async (ctx) => {
-          await delay(1200)  // Simulate work
+          // await delay(1200)  // Simulate work
           const appFiles = globSync(`${ctx.appDir}/**/*.{ts,tsx}`)
           await build({
             entryPoints: appFiles,
