@@ -1,8 +1,9 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
-import { globSync } from 'glob'
 import { build } from 'esbuild'
+import { fdir } from 'fdir'
+
 import pc from 'picocolors'
 
 import { VERSION } from '@/core/constants'
@@ -10,7 +11,7 @@ import { pipe } from '@/core/build-tools/pipeline'
 import * as format from '@/core/build-tools/format'
 import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
 import type { FileNode, RouteNode, RouteManifest } from '@/core/file-router'
-import { delay } from '@/lib/delay'
+// import { delay } from '@/lib/delay'
 
 export interface BuildOptions {
   dir?: string
@@ -92,7 +93,12 @@ export async function buildCommand(options: BuildOptions = {}) {
         onError: (err) => `Compilation failed: ${err.message}`,
         run: async (ctx) => {
           // await delay(1200)  // Simulate work
-          const appFiles = globSync(`${ctx.appDir}/**/*.{ts,tsx}`)
+          // const appFiles = globSync(join(ctx.appDir, '/**/*.{js,jsx,ts,tsx}'))
+          const appFiles = new fdir()
+            .withFullPaths()
+            .glob('**/*.{js,jsx,ts,tsx}')
+            .crawl(ctx.appDir)
+            .sync()
           await build({
             entryPoints: appFiles,
             outdir: join(ctx.outputDir, 'app'),
@@ -108,10 +114,7 @@ export async function buildCommand(options: BuildOptions = {}) {
 
     const { duration } = await pipeline.run({ appDir, outputDir })
     console.log()
-    const outputFiles = globSync(`${outputDir}/**/*.{js,json}`)
-      .map(file => file.replace(`${outputDir}/`, ''))
-    console.log(format.fileList(outputFiles))
-
+    console.log(format.fileList(outputDir), '**/*.{js,json}')
     console.log()
     console.log(`${pc.green('✓')} Built in ${pc.bold(format.duration(duration))}`)
     console.log()

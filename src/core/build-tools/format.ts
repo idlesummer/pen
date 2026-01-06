@@ -1,4 +1,6 @@
 import { statSync } from 'fs'
+import { join } from 'path'
+import { fdir } from 'fdir'
 import pc from 'picocolors'
 import prettyBytes from 'pretty-bytes'
 import prettyMs from 'pretty-ms'
@@ -6,13 +8,25 @@ import prettyMs from 'pretty-ms'
 export const bytes = prettyBytes
 export const duration = prettyMs
 
-/** Display file paths in a two-column list with sizes and total */
-export function fileList(paths: string[]): string {
+/** Display a list of files in a directory with their sizes */
+export function fileList(baseDir: string, pattern = '**/*') {
   const WIDTH = 45
-  const stats = paths.map(path => ({
-    path: path.replace(/\\/g, '/'),
-    size: statSync(path).size,
-  }))
+
+  // Find all files matching the pattern
+  const files = new fdir()
+    .withRelativePaths()
+    .glob(pattern)
+    .crawl(baseDir)
+    .sync()
+
+  const stats = files.map(path => {
+    const fullPath = join(baseDir, path)
+    const displayPath = path.replace(/\\/g, '/')
+    return {
+      path: displayPath,
+      size: statSync(fullPath).size,
+    }
+  })
 
   const total = stats.reduce((sum, item) => sum + item.size, 0)
   const lines = stats.map(({ path, size }) => {
@@ -21,7 +35,7 @@ export function fileList(paths: string[]): string {
     return `  ${paddedPath}  ${formattedSize}`
   })
 
-  const footerLabel = `${paths.length} files, total:`.padEnd(WIDTH)
+  const footerLabel = `${files.length} files, total:`.padEnd(WIDTH)
   const footer = `  ${pc.dim(footerLabel)}  ${pc.dim(bytes(total))}`
   return [...lines, footer].join('\n')
 }
