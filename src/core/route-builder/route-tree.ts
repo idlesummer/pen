@@ -1,6 +1,5 @@
-// src/core/route-builder/route-tree.ts
 import { traverseDepthFirst } from '@/lib/traversal'
-import { type FileNode } from '@/core/route-builder/file-tree'
+import { type FileNode } from './file-tree'
 import {
   RootIsFileError,
   DuplicateScreenError,

@@ -1,2 +1,4 @@
 export * from './composer'
-export * from './Router'
+export * from './components/Router'
+export * from './components/NotFound'
+export * from './matcher'

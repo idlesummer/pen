@@ -1,6 +1,6 @@
 import { removeExtension } from '@/lib/path-utils'
 import { traverseDepthFirst } from '@/lib/traversal'
-import type { RouteNode } from '@/core/route-builder/route-tree'
+import type { RouteNode } from './route-tree'
 
 export type RouteManifest = Record<string, Route>
 export type Route = {

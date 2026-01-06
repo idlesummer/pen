@@ -5,7 +5,7 @@ import { pathToFileURL } from 'url'
 import { createElement } from 'react'
 import { render } from 'ink'
 import pc from 'picocolors'
-import { RouterProvider } from '@/core/navigation/RouterProvider'
+import { App } from '@/core/router/components/App'
 import type { RouteManifest } from '@/core/route-builder/route-manifest'
 
 export interface StartOptions {
@@ -31,8 +31,8 @@ export async function startCommand(options: StartOptions = {}) {
     const componentFileUrl = pathToFileURL(componentsAbsPath).href
     const { components } = await import(componentFileUrl)
 
-    // Render with RouterProvider instead of Router
-    const element = createElement(RouterProvider, {
+    // Render with App component
+    const element = createElement(App, {
       initialUrl: url,
       manifest,
       components,

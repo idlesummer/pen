@@ -1,5 +1,6 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
-import { type Route } from '@/core/route-builder/route-manifest'
+import { type Route } from '@/core/route-builder'
+import { MissingScreenError } from './errors'
 
 /**
  * Maps component file paths to their loaded React components.
@@ -12,6 +13,9 @@ export type ComponentMap = Record<string, ComponentType>
  * Returns a nested React element tree.
  */
 export function composeRoute(route: Route, components: ComponentMap): ReactElement {
+  if (!route.screen)
+    throw new MissingScreenError(route.url)
+
   // Load and create the screen element
   const Screen = components[route.screen!]
   let element = createElement(Screen)

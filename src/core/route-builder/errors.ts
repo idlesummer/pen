@@ -1,5 +1,3 @@
-// src/core/route-builder/errors.ts
-
 /**
  * Base error for all route-builder build errors
  */

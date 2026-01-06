@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { RouterContext } from '@/core/navigation/RouterContext'
+import { RouterContext } from './RouterContext'
 
 // Step 3: Tune into the channel and receive the broadcast
 export function useRouter() {
