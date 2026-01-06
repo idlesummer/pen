@@ -119,14 +119,14 @@ export async function buildCommand(options: BuildOptions = {}) {
     console.log(`${pc.green('✓')} Built in ${pc.bold(format.duration(duration))}`)
     console.log()
   }
+
   catch (error) {
     console.log()
     console.error(`${pc.red('✗')} Build failed`)
     console.log()
 
-    if (error instanceof Error)
-      console.error(pc.red(error.message))
-
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(pc.red(message))
     console.log()
     process.exit(1)
   }
