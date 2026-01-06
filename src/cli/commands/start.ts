@@ -1,4 +1,3 @@
-// cli/commands/start.ts
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
