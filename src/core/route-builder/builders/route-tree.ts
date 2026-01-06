@@ -5,7 +5,7 @@ import {
   DuplicateScreenError,
   DuplicateLayoutError,
   DuplicateScreenFileError,
-} from './errors'
+} from '../errors'
 
 export type RouteNode = {
   url: string             // full URL like '/blog/'

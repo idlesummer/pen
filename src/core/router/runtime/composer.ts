@@ -1,6 +1,6 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
 import { type Route } from '@/core/route-builder'
-import { MissingScreenError } from './errors'
+import { MissingScreenError } from '../errors'
 
 /**
  * Maps component file paths to their loaded React components.

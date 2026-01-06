@@ -1,4 +1,4 @@
-import type { Route, RouteManifest } from '@/core/route-builder/route-manifest'
+import type { Route, RouteManifest } from '@/core/route-builder'
 
 /**
  * Matches a URL against the route manifest.

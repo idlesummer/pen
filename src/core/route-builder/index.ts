@@ -1,4 +1,4 @@
-export * from './component-map'   // buildComponentMap
-export * from './file-tree'       // buildFileTree, FileNode
-export * from './route-tree'      // buildRouteTree, RouteNode
-export * from './route-manifest'  // buildManifest, Route, RouteManifest
+export * from './builders/component-map'   // buildComponentMap
+export * from './builders/file-tree'       // buildFileTree, FileNode
+export * from './builders/route-tree'      // buildRouteTree, RouteNode
+export * from './builders/route-manifest'  // buildManifest, Route, RouteManifest

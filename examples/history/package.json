@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pen build",
+    "dev": "pen build && pen start",
     "start": "pen start"
   },
   "dependencies": {
