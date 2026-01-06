@@ -1,34 +1,15 @@
-# Source files
+# Source files (npm-specific - dev files that should be gitignored but not published)
 src/
 tsconfig.json
 tsup.config.ts
 eslint.config.mjs
 
-# Development files
-node_modules/
-*.log
-
 # Documentation
 docs/
-reference/
 examples/
 
-# Python reference implementations
+# Python reference
 *.py
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Git files
-.gitignore
-.gitattributes
 
 # Tests
 test/
