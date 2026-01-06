@@ -5,25 +5,25 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 
 const eslintConfig = [
+  // Ignores
+  { ignores: ['**/node_modules', '**/dist', 'docs', 'examples', '**/*.js', '.pen'] },
+
   // Pre-packaged configs
   js.configs.recommended,
   ...tseslint.configs.recommended,
   react.configs.flat.recommended,
   react.configs.flat['jsx-runtime'],
-  
-  // Project setup and personal preferences
+
+  // Base config
   {
     languageOptions: { globals: globals.node },
     plugins: { 'react-hooks': reactHooks },
     settings: { react: { version: 'detect' } },
     rules: {
-      // React Hooks
       ...reactHooks.configs.recommended.rules,
-      
-      // Framework preferences
       '@typescript-eslint/no-unused-vars': 'warn',
       'react/prop-types': 'off',
-      
+
       // Personal style
       'comma-dangle': ['warn', 'always-multiline'],
       'eol-last': ['warn', 'always'],
@@ -33,9 +33,16 @@ const eslintConfig = [
       'semi': ['warn', 'never'],
     },
   },
-  
-  // Ignores
-  { ignores: ['node_modules/**', 'dist/**'] },
+
+  // Type-aware config for src/ TS files
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: { project: true, tsconfigRootDir: import.meta.dirname },
+    },
+    rules: { '@typescript-eslint/only-throw-error': 'error' },
+  },
 ]
 
 export default eslintConfig
