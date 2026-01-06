@@ -9,7 +9,6 @@ export default function Page1Screen() {
         <Text>You're on Page 1.</Text>
       </Box>
       <Box marginTop={1}>
-        <Text dimColor>{'Hi Iyah I love u sm heheheh <3 <3 <3'}</Text>
         <Text dimColor>Try using [b] back and [f] forward buttons!</Text>
       </Box>
     </Box>
