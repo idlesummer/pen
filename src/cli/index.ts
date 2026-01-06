@@ -15,14 +15,14 @@ program
   .command('build')
   .description('Build the route manifest and compile application')
   .option('-d, --dir <path>', 'App directory to scan', './src/app')
-  .option('-o, --output <path>', 'Output directory', './.pen/build')  // ← Updated
+  .option('-o, --output <path>', 'Output directory', './.pen/build')
   .action(buildCommand)
 
 program
   .command('start')
   .description('Start the application')
   .option('-u, --url <path>', 'Initial URL to render', '/')
-  .option('-m, --manifest <path>', 'Path to manifest.json', './.pen/build/manifest.json')  // ← Updated
+  .option('-m, --manifest <path>', 'Path to manifest.json', './.pen/build/manifest.json')
   .action(startCommand)
 
 program.parse()
