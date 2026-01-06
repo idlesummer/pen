@@ -99,6 +99,7 @@ export async function buildCommand(options: BuildOptions = {}) {
             .glob('**/*.{js,jsx,ts,tsx}')
             .crawl(ctx.appDir)
             .sync()
+
           await build({
             entryPoints: appFiles,
             outdir: join(ctx.outputDir, 'app'),
