@@ -114,7 +114,7 @@ export async function buildCommand(options: BuildOptions = {}) {
 
     const { duration } = await pipeline.run({ appDir, outputDir })
     console.log()
-    console.log(format.fileList(outputDir), '**/*.{js,json}')
+    console.log(format.fileList(outputDir, '**/*.{js,json}'))
     console.log()
     console.log(`${pc.green('✓')} Built in ${pc.bold(format.duration(duration))}`)
     console.log()
