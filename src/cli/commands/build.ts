@@ -54,6 +54,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         run: async (ctx) => {
           // await delay(600)  // Simulate work
           const routeTree = buildRouteTree(ctx.fileTree!) // Safe: set by previous task
+          // console.log(routeTree)
           return { routeTree }
         },
       },

@@ -11,14 +11,15 @@ export type RouteNode = {
   url: string             // full URL like '/blog/'
   type: 'page' | 'group'  // binary type: 'page' or 'group'
   segment: string         // directory name like 'blog'
-  screen?: string         // path to screen.tsx
-  layout?: string         // path to layout.tsx
+  screen?: string
+  layout?: string
+  error?:  string
   children?: RouteNode[]
 }
 
 // Constants for route file detection
 const EXTENSIONS = ['tsx', 'ts', 'jsx', 'js'] as const
-const ROUTE_FILES = ['layout', 'screen'] as const
+const ROUTE_FILES = ['layout', 'screen', 'error'] as const
 
 /**
  * Builds a route tree from a file system tree.
