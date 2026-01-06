@@ -1,4 +1,3 @@
-// core/router/components/App.tsx
 import { RouterProvider } from '@/core/navigation/RouterProvider'
 import { Router } from '@/core/router/components/Router'
 import type { RouteManifest } from '@/core/route-builder/route-manifest'
