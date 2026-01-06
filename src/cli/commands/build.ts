@@ -9,8 +9,8 @@ import pc from 'picocolors'
 import { VERSION } from '@/core/constants'
 import { pipe } from '@/core/build-tools/pipeline'
 import * as format from '@/core/build-tools/format'
-import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/file-router'
-import type { FileNode, RouteNode, RouteManifest } from '@/core/file-router'
+import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/route-builder'
+import type { FileNode, RouteNode, RouteManifest } from '@/core/route-builder'
 // import { delay } from '@/lib/delay'
 
 export interface BuildOptions {

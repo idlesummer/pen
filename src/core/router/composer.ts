@@ -1,5 +1,5 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
-import { type Route } from '@/core/file-router/route-manifest'
+import { type Route } from '@/core/route-builder/route-manifest'
 
 /**
  * Maps component file paths to their loaded React components.
@@ -15,12 +15,12 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
   // Load and create the screen element
   const Screen = components[route.screen!]
   let element = createElement(Screen)
-  
+
   // Wrap with layouts (leaf → root order)
   for (const path of route.layouts ?? []) {
     const Layout = components[path]
     element = createElement(Layout, null, element)
   }
-  
+
   return element
 }

@@ -1,7 +1,7 @@
-// src/core/file-router/errors.ts
+// src/core/route-builder/errors.ts
 
 /**
- * Base error for all file-router build errors
+ * Base error for all route-builder build errors
  */
 export class FileRouterError extends Error {
   constructor(message: string) {

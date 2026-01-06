@@ -1,8 +1,8 @@
 import { type ReactElement } from 'react'
-import { type RouteManifest } from '@/core/file-router/route-manifest'
-import { composeRoute, type ComponentMap } from '@/core/routing/composer'
-import { NotFoundScreen } from '@/core/routing/errors'
-import { matchRoute } from '@/core/routing/matcher'
+import { type RouteManifest } from '@/core/route-builder/route-manifest'
+import { composeRoute, type ComponentMap } from '@/core/router/composer'
+import { NotFoundScreen } from '@/core/router/errors'
+import { matchRoute } from '@/core/router/matcher'
 
 /**
  * Props for the Router component.

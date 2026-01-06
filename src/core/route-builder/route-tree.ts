@@ -1,10 +1,10 @@
-// src/core/file-router/route-tree.ts
+// src/core/route-builder/route-tree.ts
 import { traverseDepthFirst } from '@/lib/traversal'
-import { type FileNode } from '@/core/file-router/file-tree'
-import { 
+import { type FileNode } from '@/core/route-builder/file-tree'
+import {
   RootIsFileError,
-  DuplicateScreenError, 
-  DuplicateLayoutError, 
+  DuplicateScreenError,
+  DuplicateLayoutError,
   DuplicateScreenFileError,
 } from './errors'
 
@@ -23,10 +23,10 @@ const ROUTE_FILES = ['layout', 'screen'] as const
 
 /**
  * Builds a route tree from a file system tree.
- * 
+ *
  * Detects layout and screen files, computes URLs, filters private directories,
  * and validates no duplicate screens at the same URL.
- * 
+ *
  * @param fileTree - File system tree
  * @returns Route tree with computed URLs and validated structure
  * @throws {RootIsFileError} If the root is a file instead of a directory
@@ -35,7 +35,7 @@ const ROUTE_FILES = ['layout', 'screen'] as const
  * @throws {DuplicateScreenFileError} If multiple screen files exist in same directory
  */
 export function buildRouteTree(fileTree: FileNode): RouteNode {
-  if (fileTree.children === undefined) 
+  if (fileTree.children === undefined)
     throw new RootIsFileError(fileTree.path)
 
   // Special case: Root has "/" as url instead of "/app", and empty segment instead of "app"
@@ -47,8 +47,8 @@ export function buildRouteTree(fileTree: FileNode): RouteNode {
   const screenRoutes: Record<string, string> = {} // track duplicate screens
 
   function visit(parentRoute: RouteNode) {
-    const parentFile = routeToFile.get(parentRoute)!  // Already populated inside expand 
-    if (!parentFile.children?.length) return  
+    const parentFile = routeToFile.get(parentRoute)!  // Already populated inside expand
+    if (!parentFile.children?.length) return
 
     // Step 1: Assign route files (layout.tsx, screen.tsx) from filesystem
     const groupedFiles = groupFiles(parentFile.children, EXTENSIONS, ROUTE_FILES)
@@ -66,7 +66,7 @@ export function buildRouteTree(fileTree: FileNode): RouteNode {
     // Step 2: Validates that screen URLs are unique across the entire tree
     if (!parentRoute.screen) return
     const existingFilePath = screenRoutes[parentRoute.url]
-    if (existingFilePath) 
+    if (existingFilePath)
       throw new DuplicateScreenError(parentRoute.url, [existingFilePath, parentFile.path])
     screenRoutes[parentRoute.url] = parentFile.path
   }

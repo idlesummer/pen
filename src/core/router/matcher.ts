@@ -1,4 +1,4 @@
-import type { Route, RouteManifest } from '@/core/file-router/route-manifest'
+import type { Route, RouteManifest } from '@/core/route-builder/route-manifest'
 
 /**
  * Matches a URL against the route manifest.
@@ -7,7 +7,7 @@ import type { Route, RouteManifest } from '@/core/file-router/route-manifest'
 export function matchRoute(url: string, manifest: RouteManifest): Route | null {
   // Normalize URL (ensure trailing slash)
   const normalizedUrl = url.endsWith('/') ? url : `${url}/`
-  
+
   // Direct lookup
   return manifest[normalizedUrl] ?? null
 }
