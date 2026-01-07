@@ -55,32 +55,4 @@ export class DuplicateScreenError extends FileRouterError {
   }
 }
 
-export class DuplicateLayoutError extends FileRouterError {
-  constructor(
-    public path: string,
-    public files: string[],
-  ) {
-    super(
-      `Conflicting layout files found in "${path}":\n` +
-      files.map(f => `  - ${f}`).join('\n') + '\n\n' +
-      'Only one layout file is allowed per directory.\n' +
-      'Keep one file and remove the others.',
-    )
-    this.name = 'DuplicateLayoutError'
-  }
-}
 
-export class DuplicateScreenFileError extends FileRouterError {
-  constructor(
-    public path: string,
-    public files: string[],
-  ) {
-    super(
-      `Conflicting screen files found in "${path}":\n` +
-      files.map(f => `  - ${f}`).join('\n') + '\n\n' +
-      'Only one screen file is allowed per directory.\n' +
-      'Keep one file and remove the others.',
-    )
-    this.name = 'DuplicateScreenFileError'
-  }
-}
