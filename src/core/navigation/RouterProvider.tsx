@@ -1,6 +1,12 @@
 // src/core/navigation/RouterProvider.tsx
 import { createContext, useState, useCallback, type PropsWithChildren } from 'react'
 
+/** Internal navigation history state */
+interface NavigationHistory {
+  stack: string[]
+  index: number
+}
+
 export interface RouterContextValue {
   url: string
   history: readonly string[]  // Expose as readonly
@@ -20,7 +26,7 @@ export const RouterContext = createContext<RouterContextValue | null>(null)
 
 // Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
-  const [history, setHistory] = useState({ stack: [initialUrl], index: 0 })
+  const [history, setHistory] = useState<NavigationHistory>({ stack: [initialUrl], index: 0 })
   const url = history.stack[history.index]
 
   // Push new URL to history
