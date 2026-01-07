@@ -1,5 +1,5 @@
 export * from './components/ErrorBoundary'
-export * from './components/NotFound'
+export * from './components/NotFoundScreen'
 export * from './components/Router'
 export * from './runtime/composer'
 export * from './runtime/matcher'

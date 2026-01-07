@@ -3,7 +3,9 @@ import { type RouteManifest } from '@/core/route-builder'
 import { Router } from '@/core/router'
 import { ComponentMap } from '../runtime/composer'
 import { ErrorBoundary } from './ErrorBoundary'
-import { ErrorFallback } from './ErrorFallback'
+import { ErrorScreen } from './ErrorScreen'
+import { NotFoundScreen } from './NotFoundScreen'
+import { NotFoundBoundary } from './NotFoundBoundary'
 
 export interface AppProps {
   initialUrl: string
@@ -13,9 +15,11 @@ export interface AppProps {
 
 export function App({ initialUrl, manifest, components }: AppProps) {
   return (
-    <ErrorBoundary fallback={ErrorFallback}>
+    <ErrorBoundary fallback={ErrorScreen}>
       <RouterProvider initialUrl={initialUrl}>
-        <Router manifest={manifest} components={components} />
+        <NotFoundBoundary fallback={NotFoundScreen}>
+          <Router manifest={manifest} components={components} />
+        </NotFoundBoundary>
       </RouterProvider>
     </ErrorBoundary>
   )

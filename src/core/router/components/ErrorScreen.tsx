@@ -2,10 +2,10 @@
 import { Box, Text } from 'ink'
 import { useInput } from 'ink'
 import { useState } from 'react'
-import type { ErrorComponentProps } from './ErrorBoundary'
+import { type ErrorComponentProps } from './ErrorBoundary'
 
 /** Global error fallback that always wraps the app. */
-export function ErrorFallback({ error, reset }: ErrorComponentProps) {
+export function ErrorScreen({ error, reset }: ErrorComponentProps) {
   const [showStack, setShowStack] = useState(false)
 
   useInput((input) => {

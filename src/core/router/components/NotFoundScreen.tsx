@@ -1,15 +1,11 @@
-import { type ReactElement } from 'react'
 import { Text, Box } from 'ink'
-
-interface NotFoundProps {
-  url: string
-}
+import { type NotFoundComponentProps } from './NotFoundBoundary'
 
 /**
  * 404 error screen displayed when a route is not found.
  * Shows the URL that was attempted.
  */
-export function NotFoundScreen({ url }: NotFoundProps): ReactElement {
+export function NotFoundScreen({ url }: NotFoundComponentProps) {
   return (
     <Box flexDirection="column" padding={1}>
       <Text color="red" bold>

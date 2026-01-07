@@ -1,6 +1,7 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
 import { type Route } from '@/core/route-builder'
 import { ErrorBoundary, type ErrorComponentProps } from '../components/ErrorBoundary'
+import { NotFoundBoundary, NotFoundComponentProps } from '../components/NotFoundBoundary'
 import { MissingScreenError } from '../errors'
 
 /**
@@ -13,8 +14,9 @@ export type ComponentMap = Record<string, ComponentType>
  *
  * Composition order (inside to outside):
  * 1. Screen component
- * 2. Error boundary (wraps screen)
- * 3. Layouts (wrap error boundary)
+ * 2. Not found boundary (wraps screen)
+ * 2. Error boundary (wraps not found boundary)
+ * 4. Layouts (wrap error boundary)
  *
  * This ensures:
  * - Error boundary catches screen errors
@@ -29,13 +31,19 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
   const Screen = components[route.screen]
   let element = createElement(Screen)
 
-  // Step 2: Wrap screen with its error boundary (if exists)
-  if (route.error) {
-    const ErrorComponent = components[route.error] as ComponentType<ErrorComponentProps>
-    element = createElement(ErrorBoundary, { fallback: ErrorComponent, key: route.url }, element)
+  // Step 2: Wrap with not-found boundary (if exists)
+  if (route['not-found']) {
+    const NotFoundComponent = components[route['not-found']] as ComponentType<NotFoundComponentProps>
+    element = createElement(NotFoundBoundary, { key: route.url, fallback: NotFoundComponent }, element)
   }
 
-  // Step 3: Wrap with layouts (leaf → root order)
+  // Step 3: Wrap screen with its error boundary (if exists)
+  if (route.error) {
+    const ErrorComponent = components[route.error] as ComponentType<ErrorComponentProps>
+    element = createElement(ErrorBoundary, { key: route.url, fallback: ErrorComponent }, element)
+  }
+
+  // Step 4: Wrap with layouts (leaf → root order)
   for (const layoutPath of route.layouts ?? []) {
     const Layout = components[layoutPath]
     element = createElement(Layout, null, element)

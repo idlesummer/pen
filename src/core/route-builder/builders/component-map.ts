@@ -9,14 +9,13 @@ export function buildComponentMap(manifest: RouteManifest) {
   const componentPaths = new Set<string>()
 
   for (const route of Object.values(manifest)) {
-    if (route.screen)
-      componentPaths.add(route.screen)
+    if (route.screen) componentPaths.add(route.screen)
 
     for (const layout of route.layouts ?? [])
       componentPaths.add(layout)
 
-    if (route.error)
-      componentPaths.add(route.error)
+    if (route.error)        componentPaths.add(route.error)
+    if (route['not-found']) componentPaths.add(route['not-found'])
   }
 
   // Sort for consistent output

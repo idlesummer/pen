@@ -1,7 +1,9 @@
 import { type ReactElement } from 'react'
 import { type RouteManifest } from '@/core/route-builder'
-import { composeRoute, matchRoute, NotFoundScreen, type ComponentMap } from '@/core/router'
 import { useRouter } from '@/core/navigation'
+import { composeRoute, type ComponentMap } from '../runtime/composer'
+import { matchRoute } from '../runtime/matcher'
+import { NotFoundError } from '../errors'
 
 /**
  * Props for the Router component.
@@ -20,7 +22,7 @@ export function Router({ manifest, components }: RouterProps): ReactElement {
   const { url } = useRouter()
   const route = matchRoute(url, manifest)
 
-  return !route
-    ? <NotFoundScreen url={url} />
-    : composeRoute(route, components)
+  if (!route)
+    throw new NotFoundError(url)
+  return composeRoute(route, components)
 }
