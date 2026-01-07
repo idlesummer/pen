@@ -20,40 +20,49 @@ export const RouterContext = createContext<RouterContextValue | null>(null)
 
 // Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
-  const [history, setHistory] = useState([initialUrl])
-  const [index, setIndex] = useState(0)
-  const url = history[index]
+  const [history, setHistory] = useState({ stack: [initialUrl], index: 0 })
+  const url = history.stack[history.index]
 
   // Push new URL to history
   const push = useCallback((newUrl: string) => {
-    setHistory(prev => [...prev.slice(0, index + 1), newUrl])
-    setIndex(prev => prev + 1)
-  }, [index])
+    setHistory(prev => ({
+      stack: [...prev.stack.slice(0, prev.index + 1), newUrl],
+      index: prev.index + 1,
+    }))
+  }, [])
 
   // Replace current URL without adding to history
   const replace = useCallback((newUrl: string) => {
     setHistory(prev => {
-      const newHistory = [...prev]
-      newHistory[index] = newUrl
-      return newHistory
+      const newStack = [...prev.stack]
+      newStack[prev.index] = newUrl
+      return { ...prev, stack: newStack }
     })
-  }, [index])
+  }, [])
 
   // Navigate backwards
   const back = useCallback(() => {
-    if (index > 0) setIndex(prev => prev - 1)
-    }, [index])
+    setHistory(prev =>
+      prev.index > 0
+        ? { ...prev, index: prev.index - 1 }
+        : prev,
+      )
+  }, [])
 
   // Navigate forwards
-    const forward = useCallback(() => {
-      if (index < history.length - 1) setIndex(prev => prev  +  1)
-    }, [index, history.length])
+  const forward = useCallback(() => {
+    setHistory(prev =>
+      prev.index < prev.stack.length - 1
+        ? { ...prev, index: prev.index + 1 }
+        : prev,
+    )
+  }, [])
 
   return (
     <RouterContext.Provider value={{
       url,
-      history,  // Expose history
-      index,    // Expose index
+      history: history.stack,  // Expose history
+      index: history.index,    // Expose index
       push,
       replace,
       back,
