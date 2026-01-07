@@ -13,7 +13,6 @@ interface ErrorBoundaryProps extends PropsWithChildren {
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean
   error: Error | null
 }
 
@@ -34,35 +33,28 @@ interface ErrorBoundaryState {
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { error: null }
+    this.reset = this.reset.bind(this)  // Bind all methods that will be passed as callbacks
   }
 
-  /**
-   * Called when a child component throws during render.
-   * Updates state to trigger error UI on next render.
-   */
+  /** Called when a child component throws during render. */
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
+    return { error }
   }
 
-  /**
-   * Called after error is caught (for side effects like logging).
-   */
+  /** Called after error is caught (for side effects like logging). */
   componentDidCatch() {
     // Error is passed to error.tsx component via props
     // React automatically logs errors in development mode
   }
 
-  /**
-   * Resets error state and attempts to re-render children.
-   * Called when user clicks retry button in error UI.
-   */
-  reset = () => {
-    this.setState({ hasError: false, error: null })
+  /** Resets error state and attempts to re-render children. */
+  reset() {
+    this.setState({ error: null })
   }
 
   render() {
-    if (this.state.hasError && this.state.error) {
+    if (this.state.error) {
       const { ErrorComponent } = this.props
       return <ErrorComponent error={this.state.error} reset={this.reset} />
     }
