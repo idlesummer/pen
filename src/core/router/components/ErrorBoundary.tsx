@@ -29,6 +29,8 @@ interface ErrorBoundaryState {
  * - Errors in the error boundary itself
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState
+
   constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = { error: null }
@@ -40,10 +42,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { error }
   }
 
-  /** Called after error is caught (for side effects like logging). */
+  /** Called after error is caught. */
   componentDidCatch() {
     // Error is passed to error.tsx component via props
-    // React automatically logs errors in development mode
   }
 
   /** Resets error state and attempts to re-render children. */

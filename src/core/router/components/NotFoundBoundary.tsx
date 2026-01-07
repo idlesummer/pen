@@ -37,11 +37,13 @@ class NotFoundErrorBoundary extends Component<NotFoundErrorBoundaryProps, NotFou
     return error instanceof NotFoundError ? { url: error.url } : null
   }
 
+  /** Called after error is caught. */
   componentDidCatch(error: Error) {
     if (!(error instanceof NotFoundError))  // Only handle NotFoundError
       throw error                           // Re-throw other errors
   }
 
+  /** Called after updates. Clears the not-found state when the URL prop changes. */
   componentDidUpdate(prevProps: NotFoundErrorBoundaryProps) {
     if (prevProps.url !== this.props.url && this.state.url) // URL changed → clear not-found state
       this.setState({ url: null })
@@ -60,6 +62,10 @@ export interface NotFoundBoundaryProps extends PropsWithChildren {
   fallback: ComponentType<NotFoundComponentProps>
 }
 
+/**
+ * Router-aware wrapper for NotFoundErrorBoundary.
+ * Injects the current URL so the boundary can reset on navigation.
+ */
 export function NotFoundBoundary({ fallback, children }: NotFoundBoundaryProps) {
   const { url } = useRouter()
   return (
