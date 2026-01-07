@@ -5,7 +5,7 @@ import { createElement } from 'react'
 import { render } from 'ink'
 import pc from 'picocolors'
 import { App } from '@/core/router/components/App'
-import type { RouteManifest } from '@/core/route-builder/route-manifest'
+import type { RouteManifest } from '@/core/route-builder'
 
 export interface StartOptions {
   url?: string
