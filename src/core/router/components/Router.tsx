@@ -17,18 +17,10 @@ export interface RouterProps {
  * Returns the composed route element or 404 screen.
  */
 export function Router({ manifest, components }: RouterProps): ReactElement {
-  // Step 1: Get url from provider
   const { url } = useRouter()
-
-  // Guard against undefined URL
-  if (!url) return <NotFoundScreen url={url} />
-
-  // Step 2: Match the route
   const route = matchRoute(url, manifest)
 
-  // Step 3: Handle not found
-  if (!route) return <NotFoundScreen url={url} />
-
-  // Step 4: Compose and return
-  return composeRoute(route, components)
+  return !route
+    ? <NotFoundScreen url={url} />
+    : composeRoute(route, components)
 }
