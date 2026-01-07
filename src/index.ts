@@ -15,4 +15,5 @@
 // Navigation API
 export { useRouter, type RouterContextValue } from './core/navigation'
 
-// Note: Router, App, and build tools are internal and accessed via CLI
+// Error API
+export type { ErrorComponentProps } from './core/router'

@@ -14,6 +14,9 @@ export function buildComponentMap(manifest: RouteManifest) {
 
     for (const layout of route.layouts ?? [])
       componentPaths.add(layout)
+
+    if (route.error)
+      componentPaths.add(route.error)
   }
 
   // Sort for consistent output

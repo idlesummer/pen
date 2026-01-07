@@ -1,0 +1,15 @@
+{
+  "name": "error-simple",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pen build",
+    "start": "pen start"
+  },
+  "dependencies": {
+    "@idlesummer/pen": "*",
+    "ink": "^6.5.1",
+    "react": "^19.2.3"
+  }
+}

@@ -20,6 +20,9 @@ export function Router({ manifest, components }: RouterProps): ReactElement {
   // Step 1: Get url from provider
   const { url } = useRouter()
 
+  // Guard against undefined URL
+  if (!url) return <NotFoundScreen url={url} />
+
   // Step 2: Match the route
   const route = matchRoute(url, manifest)
 

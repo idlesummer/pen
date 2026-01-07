@@ -1,7 +1,7 @@
 import { RouterProvider } from '@/core/navigation/RouterProvider'
 import { Router } from '@/core/router/components/Router'
-import type { RouteManifest } from '@/core/route-builder/route-manifest'
-import type { ComponentMap } from '@/core/router'
+import type { RouteManifest } from '@/core/route-builder/builders/route-manifest'
+import { ComponentMap } from '../runtime/composer'
 
 export interface AppProps {
   initialUrl: string
