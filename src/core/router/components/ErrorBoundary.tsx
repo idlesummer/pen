@@ -1,15 +1,13 @@
 import { Component, type ComponentType, type PropsWithChildren } from 'react'
 
-/**
- * Props passed to error.tsx components
- */
+/** Props passed to error.tsx components */
 export interface ErrorComponentProps {
   error: Error
   reset: () => void
 }
 
 interface ErrorBoundaryProps extends PropsWithChildren {
-  ErrorComponent: ComponentType<ErrorComponentProps>
+  fallback: ComponentType<ErrorComponentProps>
 }
 
 interface ErrorBoundaryState {
@@ -55,7 +53,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render() {
     if (this.state.error) {
-      const { ErrorComponent } = this.props
+      const ErrorComponent = this.props.fallback
       return <ErrorComponent error={this.state.error} reset={this.reset} />
     }
     return this.props.children
