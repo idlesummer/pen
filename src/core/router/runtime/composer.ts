@@ -32,7 +32,7 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
   // Step 2: Wrap screen with its error boundary (if exists)
   if (route.error) {
     const ErrorComponent = components[route.error] as ComponentType<ErrorComponentProps>
-    element = createElement(ErrorBoundary, { ErrorComponent, key: route.url }, element)
+    element = createElement(ErrorBoundary, { fallback: ErrorComponent, key: route.url }, element)
   }
 
   // Step 3: Wrap with layouts (leaf → root order)

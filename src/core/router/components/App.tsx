@@ -1,9 +1,9 @@
-import { RouterProvider } from '@/core/navigation/RouterProvider'
-import { Router } from '@/core/router/components/Router'
-import type { RouteManifest } from '@/core/route-builder/builders/route-manifest'
+import { RouterProvider } from '@/core/navigation'
+import { type RouteManifest } from '@/core/route-builder'
+import { Router } from '@/core/router'
 import { ComponentMap } from '../runtime/composer'
 import { ErrorBoundary } from './ErrorBoundary'
-import { GlobalErrorFallback } from './GlobalErrorFallback'
+import { ErrorFallback } from './ErrorFallback'
 
 export interface AppProps {
   initialUrl: string
@@ -13,7 +13,7 @@ export interface AppProps {
 
 export function App({ initialUrl, manifest, components }: AppProps) {
   return (
-    <ErrorBoundary ErrorComponent={GlobalErrorFallback}>
+    <ErrorBoundary fallback={ErrorFallback}>
       <RouterProvider initialUrl={initialUrl}>
         <Router manifest={manifest} components={components} />
       </RouterProvider>

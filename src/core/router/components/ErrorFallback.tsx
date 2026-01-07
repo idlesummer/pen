@@ -5,7 +5,7 @@ import { useState } from 'react'
 import type { ErrorComponentProps } from './ErrorBoundary'
 
 /** Global error fallback that always wraps the app. */
-export function GlobalErrorFallback({ error, reset }: ErrorComponentProps) {
+export function ErrorFallback({ error, reset }: ErrorComponentProps) {
   const [showStack, setShowStack] = useState(false)
 
   useInput((input) => {
