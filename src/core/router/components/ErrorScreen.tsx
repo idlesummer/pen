@@ -1,6 +1,5 @@
 // src/core/router/components/GlobalErrorFallback.tsx
-import { Box, Text } from 'ink'
-import { useInput } from 'ink'
+import { Box, Text, useInput } from 'ink'
 import { useState } from 'react'
 import { type ErrorComponentProps } from './ErrorBoundary'
 
