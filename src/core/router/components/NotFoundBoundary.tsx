@@ -31,7 +31,8 @@ class NotFoundErrorBoundary extends Component<NotFoundErrorBoundaryProps, NotFou
     this.state = { url: null }
   }
 
-  static getDerivedStateFromError(error: Error): NotFoundBoundaryState | null {
+  /** Called when a child component throws during render. */
+  static getDerivedStateFromError(error: Error) {
     // Only catch NotFoundError, other errors bubble
     return error instanceof NotFoundError ? { url: error.url } : null
   }
