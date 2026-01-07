@@ -1,3 +1,4 @@
+export * from './components/App'
 export * from './components/ErrorBoundary'
 export * from './components/NotFoundScreen'
 export * from './components/Router'

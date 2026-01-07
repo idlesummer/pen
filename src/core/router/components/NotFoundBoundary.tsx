@@ -1,5 +1,5 @@
-// src/core/router/components/NotFoundBoundary.tsx
 import { Component, type ComponentType, type PropsWithChildren } from 'react'
+import { useRouter } from '@/core/navigation'
 import { NotFoundError } from '../errors'
 
 /** Props passed to not-found.tsx components */
@@ -7,8 +7,9 @@ export interface NotFoundComponentProps {
   url: string
 }
 
-interface NotFoundBoundaryProps extends PropsWithChildren {
+interface NotFoundErrorBoundaryProps extends PropsWithChildren {
   fallback: ComponentType<NotFoundComponentProps>
+  url: string
 }
 
 interface NotFoundBoundaryState {
@@ -22,10 +23,10 @@ interface NotFoundBoundaryState {
  * Does NOT catch:
  * - Non-NotFoundError errors (they bubble)
  */
-export class NotFoundBoundary extends Component<NotFoundBoundaryProps, NotFoundBoundaryState> {
+class NotFoundErrorBoundary extends Component<NotFoundErrorBoundaryProps, NotFoundBoundaryState> {
   state: NotFoundBoundaryState
 
-  constructor(props: NotFoundBoundaryProps) {
+  constructor(props: NotFoundErrorBoundaryProps) {
     super(props)
     this.state = { url: null }
   }
@@ -40,6 +41,11 @@ export class NotFoundBoundary extends Component<NotFoundBoundaryProps, NotFoundB
       throw error                           // Re-throw other errors
   }
 
+  componentDidUpdate(prevProps: NotFoundErrorBoundaryProps) {
+    if (prevProps.url !== this.props.url && this.state.url) // URL changed → clear not-found state
+      this.setState({ url: null })
+  }
+
   render() {
     if (this.state.url) {
       const NotFoundComponent = this.props.fallback
@@ -47,4 +53,17 @@ export class NotFoundBoundary extends Component<NotFoundBoundaryProps, NotFoundB
     }
     return this.props.children
   }
+}
+
+export interface NotFoundBoundaryProps extends PropsWithChildren {
+  fallback: ComponentType<NotFoundComponentProps>
+}
+
+export function NotFoundBoundary({ fallback, children }: NotFoundBoundaryProps) {
+  const { url } = useRouter()
+  return (
+    <NotFoundErrorBoundary fallback={fallback} url={url}>
+      {children}
+    </NotFoundErrorBoundary>
+  )
 }

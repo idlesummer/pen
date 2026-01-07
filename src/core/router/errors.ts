@@ -20,4 +20,3 @@ export class NotFoundError extends Error {
     this.url = url
   }
 }
-
