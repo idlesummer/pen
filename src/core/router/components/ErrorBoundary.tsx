@@ -58,7 +58,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       const { ErrorComponent } = this.props
       return <ErrorComponent error={this.state.error} reset={this.reset} />
     }
-
     return this.props.children
   }
 }
