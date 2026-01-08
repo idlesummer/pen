@@ -6,9 +6,9 @@ import { type FileNode } from './file-tree'
 export type SegmentRole = typeof SEGMENT_ROLES[number]
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
+  segment: string         // directory name like 'blog'
   url: string             // full URL like '/blog/'
   type: 'page' | 'group'  // binary type: 'page' or 'group'
-  segment: string         // directory name like 'blog'
   roles: SegmentRoles
   children?: SegmentNode[]
 }
@@ -35,9 +35,9 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
   // Special case: Root has "/" as url instead of "/app",
   // and empty segment instead of "app"
   const root: SegmentNode = {
+    segment: '',
     url: '/',
     type: 'page',
-    segment: '',
     roles: {},
     children: [],
   }
@@ -88,7 +88,7 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
       const type = isGroup ? 'group' : 'page'
 
       // This route will always have children since we skipped files
-      const route: SegmentNode = { url, type, segment, roles: {}, children: [] }
+      const route: SegmentNode = { segment, url, type, roles: {}, children: [] }
       segmentToFile.set(route, file)
       routes.push(route)
     }
