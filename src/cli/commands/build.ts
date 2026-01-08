@@ -9,8 +9,8 @@ import pc from 'picocolors'
 import { VERSION } from '@/core/constants'
 import { pipe } from '@/core/build-tools/pipeline'
 import * as format from '@/core/build-tools/format'
-import { buildFileTree, buildRouteTree, buildRouteManifest, buildComponentMap } from '@/core/route-builder'
-import type { FileNode, RouteNode, RouteManifest } from '@/core/route-builder'
+import { buildFileTree, buildSegmentTree, buildRouteManifest, buildComponentMap } from '@/core/route-builder'
+import type { FileNode, SegmentNode, RouteManifest } from '@/core/route-builder'
 // import { delay } from '@/lib/delay'
 
 export interface BuildOptions {
@@ -22,7 +22,7 @@ interface BuildContext extends Record<string, unknown> {
   appDir: string
   outputDir: string
   fileTree?: FileNode
-  routeTree?: RouteNode
+  routeTree?: SegmentNode
   manifest?: RouteManifest
 }
 
@@ -53,7 +53,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         onSuccess: (_, ctx) => `Built route tree (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
           // await delay(600)  // Simulate work
-          const routeTree = buildRouteTree(ctx.fileTree!) // Safe: set by previous task
+          const routeTree = buildSegmentTree(ctx.fileTree!) // Safe: set by previous task
           // console.log(routeTree)
           return { routeTree }
         },
