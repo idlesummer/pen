@@ -69,3 +69,41 @@ export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
   traverseDepthFirst<SegmentNode>({ root: segmentTree, visit, expand })
   return manifest
 }
+
+// export type Route = {
+//   url: string
+//   chain: SegmentRoles[]
+// }
+// export type RouteManifest = Record<string, Route>
+
+// export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
+//   const manifest: RouteManifest = {}
+
+//   // Track ancestor chain for each node
+//   const ancestorSegmentMap = new Map<SegmentNode, SegmentNode[]>()
+//   ancestorSegmentMap.set(segmentTree, [])
+
+//   function visit(segment: SegmentNode) {
+//     // Only create manifest entry if node has a screen
+//     if (!segment.roles.screen) return
+
+//     // Get parent chain and build full chain (parents + current node)
+//     const ancestorSegments = ancestorSegmentMap.get(segment)!
+//     const segmentPath = [...ancestorSegments, segment]
+
+//     // Convert each SegmentNode to SegmentRoles, removing extensions
+//     const segmentChain: SegmentRoles[] = segmentPath.map(segment => {
+//       const roles: SegmentRoles = {}
+
+//       if (segment.roles.layout)       roles['layout']    = removeExtension(segment.roles.layout)
+//       if (segment.roles.error)        roles['error']     = removeExtension(segment.roles.error)
+//       if (segment.roles['not-found']) roles['not-found'] = removeExtension(segment.roles['not-found'])
+//       if (segment.roles.screen)       roles['screen']    = removeExtension(segment.roles.screen)
+//       return roles
+//     })
+
+//   }
+
+//   traverseDepthFirst<SegmentNode>({ root: segmentTree, visit, expand })
+//   return manifest
+// }
