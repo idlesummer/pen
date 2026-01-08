@@ -53,10 +53,10 @@ export function composeRoute(route: RouteNode, components: ComponentMap): ReactE
 }
 
 /**
-Canonical Order:
-  screen
-  loading
-  not-found
-  error
-  layout
+for each route in segment_chain:
+  element = createElement(Screen)
+  element = createElement(Loading)
+  element = createElement(NotFound)
+  element = createElement(Error)
+  element = createElement(Layout)
 */
