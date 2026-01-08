@@ -1,5 +1,5 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
-import { type Route } from '@/core/route-builder'
+import { type RouteNode } from '@/core/route-builder'
 import { ErrorBoundary, type ErrorComponentProps } from '../components/ErrorBoundary'
 import { NotFoundBoundary, NotFoundComponentProps } from '../components/NotFoundBoundary'
 import { MissingScreenError } from '../errors'
@@ -23,7 +23,7 @@ export type ComponentMap = Record<string, ComponentType>
  * - Layouts remain visible when errors occur
  * - Matches Next.js behavior
  */
-export function composeRoute(route: Route, components: ComponentMap): ReactElement {
+export function composeRoute(route: RouteNode, components: ComponentMap): ReactElement {
   if (!route.screen)
     throw new MissingScreenError(route.url)
 
