@@ -3,25 +3,23 @@ import { traverseDepthFirst } from '@/lib/traversal'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 import { type FileNode } from './file-tree'
 
-// Constants for routes
-export const SEGMENT_EXTENSION = '.tsx' as const
-export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
+export type SegmentRoles = {
+  'layout'?: string
+  'screen'?: string
+  'error'?: string
+  'not-found'?: string
+}
 
-export type SegmentRole = typeof SEGMENT_ROLES[number]
-export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
-  segment: string         // directory name like 'blog'
-  url: string             // full URL like '/blog/'
-  type: 'page' | 'group'  // binary type: 'page' or 'group'
+  segment: string // directory name
+  url: string
+  type: 'page' | 'group'
   roles: SegmentRoles
   children?: SegmentNode[]
 }
 
 /**
- * Builds a route tree from a file system tree.
- *
- * Detects layout and screen files, computes URLs, filters private directories,
- * and validates no duplicate screens at the same URL.
+ * Builds a segment tree from a file system tree.
  *
  * @param fileTree - File system tree
  * @returns Segment tree with computed URLs and validated structure
@@ -52,21 +50,25 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
     const parentFile = segmentToFile.get(parentSegment)!  // Already populated inside expand
     if (!parentFile.children?.length) return
 
-    // Step 1: Assign route role files
+    // Step 1: Assign segment role files
     for (const file of parentFile.children) {
-      if (!file.name.endsWith(SEGMENT_EXTENSION)) // Skip non .tsx files
+      const { name, ext }  = parse(file.name)
+      if (ext !== '.tsx')
         continue
 
-      const { name } = parse(file.name) // Skip files that arent route roles
-      if (!isSegmentRole(name))
-        continue
-      parentSegment.roles[name] = file.path
+      switch (name) {
+        case 'screen': parentSegment.roles['screen'] = file.path; break
+        case 'not-found': parentSegment.roles['not-found'] = file.path; break
+        case 'error':  parentSegment.roles['error']  = file.path;  break
+        case 'layout': parentSegment.roles['layout'] = file.path; break
+      }
     }
 
     // Step 2: Validate that screen URLs are unique across the entire tree
     if (!parentSegment.roles.screen)
-      return
+      return  // No screen to validate
 
+    // Check if another screen already claimed this URL
     const existingFilePath = screenSegments[parentSegment.url]
     if (existingFilePath)
       throw new DuplicateScreenError(parentSegment.url, [existingFilePath, parentFile.path])
@@ -76,32 +78,26 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
 
   function expand(parentSegment: SegmentNode) {
     const parentFile = segmentToFile.get(parentSegment)!
-    if (!parentFile.children) return          // Skip expand if route has no children
-    const routes: SegmentNode[] = []            // Create container for route children
+    if (!parentFile.children) return  // Skip expand if route has no children
+
+    // Create container for route children
+    const segments: SegmentNode[] = []
 
     for (const file of parentFile.children) {
       if (!file.children) continue            // Skip if file
       if (file.name.startsWith('_')) continue // Skip if private directory
-      const segment = file.name
-      const isGroup = segment.startsWith('(') && segment.endsWith(')')
-      const url  = isGroup ? parentSegment.url : `${parentSegment.url}${segment}/`
+      const name = file.name
+      const isGroup = name.startsWith('(') && name.endsWith(')')
+      const url = isGroup ? parentSegment.url : `${parentSegment.url}${name}/`
       const type = isGroup ? 'group' : 'page'
 
-      // This route will always have children since we skipped files
-      const route: SegmentNode = { segment, url, type, roles: {}, children: [] }
-      segmentToFile.set(route, file)
-      routes.push(route)
+      // This segment will always have children since it is a dir (we already skipped files)
+      const segment: SegmentNode = { segment: name, url, type, roles: {}, children: [] }
+      segmentToFile.set(segment, file)
+      segments.push(segment)
     }
-    return routes.sort((a, b) => a.segment.localeCompare(b.segment))
+    return segments.sort((a, b) => a.segment.localeCompare(b.segment))
   }
 
-  function attach(child: SegmentNode, parent: SegmentNode) {
-    parent.children!.push(child)
-  }
-
-  return traverseDepthFirst({ root, visit, expand, attach })
-}
-
-function isSegmentRole(name: string): name is SegmentRole {
-  return (SEGMENT_ROLES as readonly string[]).includes(name)
+  return traverseDepthFirst({ root, visit, expand, attach: (c, p) => p.children!.push(c) })
 }
