@@ -51,3 +51,12 @@ export function composeRoute(route: RouteNode, components: ComponentMap): ReactE
 
   return element
 }
+
+/**
+Canonical Order:
+  screen
+  loading
+  not-found
+  error
+  layout
+*/
