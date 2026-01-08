@@ -1,6 +1,6 @@
 import { removeExtension } from '@/lib/path-utils'
 import { traverseDepthFirst } from '@/lib/traversal'
-import type { RouteNode } from './route-tree'
+import type { SegmentNode } from './segment-tree'
 
 export type RouteManifest = Record<string, Route>
 export type Route = {
@@ -11,46 +11,46 @@ export type Route = {
   'not-found'?: string  // nearest not found boundary
 }
 
-export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
-  // Initialize routeTree file maps
-  const rootLayouts = routeTree.roles.layout ? [removeExtension(routeTree.roles.layout)] : []
-  const rootError   = routeTree.roles.error ? removeExtension(routeTree.roles.error) : undefined
-  const rootNotFound = routeTree.roles['not-found'] ? removeExtension(routeTree.roles['not-found']) : undefined
+export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
+  // Initialize segmentTree file maps
+  const rootLayouts = segmentTree.roles.layout ? [removeExtension(segmentTree.roles.layout)] : []
+  const rootError   = segmentTree.roles.error ? removeExtension(segmentTree.roles.error) : undefined
+  const rootNotFound = segmentTree.roles['not-found'] ? removeExtension(segmentTree.roles['not-found']) : undefined
 
-  const layoutMap   = new Map([[routeTree, rootLayouts]])
-  const errorMap    = new Map([[routeTree, rootError]])
-  const notFoundMap = new Map([[routeTree, rootNotFound]])
+  const layoutMap   = new Map([[segmentTree, rootLayouts]])
+  const errorMap    = new Map([[segmentTree, rootError]])
+  const notFoundMap = new Map([[segmentTree, rootNotFound]])
   const manifest: Record<string, Route> = {}
 
   /** Add routes with screens to manifest */
-  function visit(parentRoute: RouteNode) {
-    const parentLayouts = layoutMap.get(parentRoute)!   // Always available
-    const parentError = errorMap.get(parentRoute)       // May be undefined
-    const parentNotFound = notFoundMap.get(parentRoute)
+  function visit(parentSegment: SegmentNode) {
+    const parentLayouts = layoutMap.get(parentSegment)!   // Always available
+    const parentError = errorMap.get(parentSegment)       // May be undefined
+    const parentNotFound = notFoundMap.get(parentSegment)
 
     // Only create manifest if this route has a screen
-    if (!parentRoute.roles.screen) return
+    if (!parentSegment.roles.screen) return
 
-    const url = parentRoute.url
-    const screen = parentRoute.roles.screen
+    const url = parentSegment.url
+    const screen = parentSegment.roles.screen
     const metadata: Route = { url, screen: removeExtension(screen) }
 
     if (parentLayouts.length) metadata.layouts = parentLayouts.toReversed()
     if (parentError)    metadata.error = parentError
     if (parentNotFound) metadata['not-found'] = parentNotFound
 
-    manifest[parentRoute.url] = metadata
+    manifest[parentSegment.url] = metadata
   }
 
   /** Get children and compute their layouts */
-  function expand(parentRoute: RouteNode) {
+  function expand(parentSegment: SegmentNode) {
     // Always available
-    const parentLayouts = layoutMap.get(parentRoute)!   // Always available
-    const parentError   = errorMap.get(parentRoute)     // May be undefined
-    const parentNotFound = notFoundMap.get(parentRoute)
+    const parentLayouts = layoutMap.get(parentSegment)!   // Always available
+    const parentError   = errorMap.get(parentSegment)     // May be undefined
+    const parentNotFound = notFoundMap.get(parentSegment)
 
     // Compute layouts for children in layout map to use them later
-    for (const route of parentRoute.children ?? []) {
+    for (const route of parentSegment.children ?? []) {
       // Nest parent layouts
       const layouts = route.roles.layout ? [...parentLayouts, removeExtension(route.roles.layout)] : parentLayouts
       layoutMap.set(route, layouts)
@@ -63,9 +63,9 @@ export function buildRouteManifest(routeTree: RouteNode): RouteManifest {
       const notFound = route.roles['not-found'] ? removeExtension(route.roles['not-found']) : parentNotFound
       notFoundMap.set(route, notFound)
     }
-    return parentRoute.children
+    return parentSegment.children
   }
 
-  traverseDepthFirst<RouteNode>({ root: routeTree, visit, expand })
+  traverseDepthFirst<SegmentNode>({ root: segmentTree, visit, expand })
   return manifest
 }
