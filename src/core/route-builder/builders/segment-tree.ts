@@ -3,6 +3,10 @@ import { traverseDepthFirst } from '@/lib/traversal'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 import { type FileNode } from './file-tree'
 
+// Constants for routes
+export const SEGMENT_EXTENSION = '.tsx' as const
+export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
+
 export type SegmentRole = typeof SEGMENT_ROLES[number]
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
@@ -12,10 +16,6 @@ export type SegmentNode = {
   roles: SegmentRoles
   children?: SegmentNode[]
 }
-
-// Constants for routes
-export const SEGMENT_EXTENSION = '.tsx' as const
-export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 
 /**
  * Builds a route tree from a file system tree.
