@@ -53,7 +53,7 @@ export function composeRoute(route: RouteNode, components: ComponentMap): ReactE
 }
 
 /**
-for each route in segment_chain:
+for each seglment in segment_chain:
   element = createElement(Screen)
   element = createElement(Loading)
   element = createElement(NotFound)
