@@ -2,14 +2,14 @@ import { removeExtension } from '@/lib/path-utils'
 import { traverseDepthFirst } from '@/lib/traversal'
 import type { SegmentNode } from './segment-tree'
 
-export type RouteManifest = Record<string, Route>
-export type Route = {
+export type RouteNode = {
   url: string           // url path like '/blog/'
   screen?: string       // path to screen
   layouts?: string[]    // inherited layouts
   error?: string        // nearest error boundary
   'not-found'?: string  // nearest not found boundary
 }
+export type RouteManifest = Record<string, RouteNode>
 
 export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
   // Initialize segmentTree file maps
@@ -20,7 +20,7 @@ export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
   const layoutMap   = new Map([[segmentTree, rootLayouts]])
   const errorMap    = new Map([[segmentTree, rootError]])
   const notFoundMap = new Map([[segmentTree, rootNotFound]])
-  const manifest: Record<string, Route> = {}
+  const manifest: Record<string, RouteNode> = {}
 
   /** Add routes with screens to manifest */
   function visit(parentSegment: SegmentNode) {
@@ -33,7 +33,7 @@ export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
 
     const url = parentSegment.url
     const screen = parentSegment.roles.screen
-    const metadata: Route = { url, screen: removeExtension(screen) }
+    const metadata: RouteNode = { url, screen: removeExtension(screen) }
 
     if (parentLayouts.length) metadata.layouts = parentLayouts.toReversed()
     if (parentError)    metadata.error = parentError
