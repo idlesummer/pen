@@ -59,23 +59,17 @@ export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNo
   return root
 }
 
-/**
- * Collect values by walking up from a source node to root.
- * Returns results in leaf → root order.
- */
-export function collectAncestors<TreeNode extends { parent?: TreeNode }, R>(
-  node: TreeNode,
-  mapper: (node: TreeNode) => R,
+export function collectAncestors<T, R>(
+  node: T,
+  parent: (node: T) => T | undefined,
+  mapper: (node: T) => R,
 ): R[] {
-
   const results: R[] = []
-  let currentNode = node
+  let currentNode: T | undefined = node
 
-  while (true) {
+  while (currentNode) {
     results.push(mapper(currentNode))
-    if (!currentNode.parent)
-      break
-    currentNode = currentNode.parent
+    currentNode = parent(currentNode)
   }
 
   return results
