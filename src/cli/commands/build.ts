@@ -27,8 +27,8 @@ interface BuildContext extends Record<string, unknown> {
 }
 
 export async function buildCommand(options: BuildOptions = {}) {
-  const appDir = options.dir || './src/app'
-  const outputDir = options.output || './.pen/build'
+  const appDir = options.dir ?? './src/app'
+  const outputDir = options.output ?? './.pen/build'
 
   console.log(pc.cyan('  Starting production build...\n'))
   console.log(pc.bold(`  ✎  pen v${VERSION}\n`))
