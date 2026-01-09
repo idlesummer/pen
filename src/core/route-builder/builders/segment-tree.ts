@@ -15,6 +15,7 @@ export type SegmentNode = {
   url: string
   type: 'page' | 'group'
   roles: SegmentRoles
+  parent?: SegmentNode
   children?: SegmentNode[]
 }
 
@@ -57,10 +58,10 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
         continue
 
       switch (name) {
-        case 'screen': parentSegment.roles['screen'] = file.path; break
+        case 'screen':    parentSegment.roles['screen'] = file.path; break
         case 'not-found': parentSegment.roles['not-found'] = file.path; break
-        case 'error':  parentSegment.roles['error']  = file.path;  break
-        case 'layout': parentSegment.roles['layout'] = file.path; break
+        case 'error':     parentSegment.roles['error']  = file.path;  break
+        case 'layout':    parentSegment.roles['layout'] = file.path; break
       }
     }
 
@@ -86,18 +87,32 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
     for (const file of parentFile.children) {
       if (!file.children) continue            // Skip if file
       if (file.name.startsWith('_')) continue // Skip if private directory
+
       const name = file.name
       const isGroup = name.startsWith('(') && name.endsWith(')')
       const url = isGroup ? parentSegment.url : `${parentSegment.url}${name}/`
       const type = isGroup ? 'group' : 'page'
+      const segment: SegmentNode = {
+        segment: name,
+        url,
+        type,
+        roles: {},
+        parent: parentSegment,
+        children: [], // dirs always have children (files were skipped)
+      }
 
-      // This segment will always have children since it is a dir (we already skipped files)
-      const segment: SegmentNode = { segment: name, url, type, roles: {}, children: [] }
+      // Map segment to its corresponding file for visit
       segmentToFile.set(segment, file)
       segments.push(segment)
     }
+
     return segments.sort((a, b) => a.segment.localeCompare(b.segment))
   }
 
-  return traverseDepthFirst({ root, visit, expand, attach: (c, p) => p.children!.push(c) })
+  return traverseDepthFirst({
+    root,
+    visit,
+    expand,
+    attach: (c, p) => p.children!.push(c),
+  })
 }
