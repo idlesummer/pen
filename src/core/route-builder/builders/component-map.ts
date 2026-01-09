@@ -9,13 +9,13 @@ export function buildComponentMap(manifest: RouteManifest) {
   const componentPaths = new Set<string>()
 
   for (const route of Object.values(manifest)) {
-    if (route.screen) componentPaths.add(route.screen)
-
-    for (const layout of route.layouts ?? [])
-      componentPaths.add(layout)
-
-    if (route.error)        componentPaths.add(route.error)
-    if (route['not-found']) componentPaths.add(route['not-found'])
+    // Loop through each segment in the chain
+    for (const segment of route.chain) {
+      if (segment['screen']) componentPaths.add(segment['screen'])
+      if (segment['not-found']) componentPaths.add(segment['not-found'])
+      if (segment['error'])  componentPaths.add(segment['error'])
+      if (segment['layout']) componentPaths.add(segment['layout'])
+    }
   }
 
   // Sort for consistent output
@@ -25,13 +25,11 @@ export function buildComponentMap(manifest: RouteManifest) {
   const imports: string[] = []
   const exports: string[] = []
 
-  for (let i = 0; i < sortedPaths.length; i++) {
-    const componentPath = sortedPaths[i]
+  for (const [i, componentPath] of sortedPaths.entries()) {
     const varName = `Component${i}`
 
-    // Convert: /app/home/screen.tsx → ../src/app/home/screen
+    // Convert: /app/home/screen → ./app/home/screen.js
     const importPath = componentPath.replace('/app/', './app/') + '.js'
-
     imports.push(`import ${varName} from '${importPath}'`)
     exports.push(`  '${componentPath}': ${varName},`)
   }
