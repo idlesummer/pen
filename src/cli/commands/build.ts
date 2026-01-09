@@ -109,6 +109,8 @@ export async function buildCommand(options: BuildOptions = {}) {
             platform: 'node',
             target: 'node24',
             bundle: false,
+            minify: true,
+            sourcemap: true,
           })
         },
       },
