@@ -49,7 +49,7 @@ export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNo
     // order when popping from stack
     const len = children.length
     for (let i = len-1; i >= 0; i--) {
-      const child = children[i]
+      const child = children[i]!
       attach?.(child, node)
 
       if (!filter || filter(child))
@@ -63,7 +63,11 @@ export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNo
  * Collect values by walking up from a source node to root.
  * Returns results in leaf → root order.
  */
-export function collectAncestors<TreeNode extends { parent?: TreeNode }, R>(node: TreeNode, mapper: (node: TreeNode) => R): R[] {
+export function collectAncestors<TreeNode extends { parent?: TreeNode }, R>(
+  node: TreeNode,
+  mapper: (node: TreeNode) => R,
+): R[] {
+
   const results: R[] = []
   let currentNode = node
 
@@ -74,5 +78,5 @@ export function collectAncestors<TreeNode extends { parent?: TreeNode }, R>(node
     currentNode = currentNode.parent
   }
 
-  return results.reverse()
+  return results
 }
