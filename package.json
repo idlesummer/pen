@@ -12,10 +12,10 @@
   "author": "idlesummer <09louisthebob@gmail.com> (https://github.com/idlesummer)",
   "type": "module",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.mjs"
   },
   "bin": {
-    "pen": "./dist/cli/index.js"
+    "pen": "./dist/cli/index.mjs"
   },
   "files": [
     "dist"
