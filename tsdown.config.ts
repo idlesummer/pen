@@ -7,8 +7,6 @@ const tsdownConfig = defineConfig({
   entry: {
     'index': 'src/index.ts',
     'cli/index': 'src/cli/index.ts',
-    // 'build/index': 'src/core/build/index.ts',   // temporary
-    // 'router/index': 'src/core/router/index.ts', // temporary
   },
 
   // Generation
