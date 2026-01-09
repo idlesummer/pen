@@ -98,7 +98,9 @@ export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
       const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
 
       for (const [roleName, path] of entries)
-        roles[roleName] = removeExtension(path)
+        if (roleName !== 'screen' || ancestorSegment === segment) // Skip ancestor screens
+          roles[roleName] = removeExtension(path)
+
       return roles
     })
 
