@@ -70,11 +70,11 @@ import type { SegmentNode, SegmentRoles } from './segment-tree'
 //   return manifest
 // }
 
+export type RouteManifest = Record<string, Route>
 export type Route = {
   url: string
   chain: SegmentRoles[]
 }
-export type RouteManifest = Record<string, Route>
 
 /**
  * Builds a route manifest from a segment tree.
