@@ -29,6 +29,7 @@
 
     // Type Checking
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,     // Optional: warn on unused variables
     "noUnusedParameters": true, // Optional: warn on unused params
     "noImplicitReturns": true,  // Optional: functions must return

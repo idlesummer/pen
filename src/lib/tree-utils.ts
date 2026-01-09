@@ -60,8 +60,8 @@ export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNo
 }
 
 /**
- * Walk up a tree from a node to root, collecting values.
- * Assumes nodes have an optional `parent` field.
+ * Collect values by walking up from a source node to root.
+ * Returns results in leaf → root order.
  */
 export function collectAncestors<TreeNode extends { parent?: TreeNode }, R>(node: TreeNode, mapper: (node: TreeNode) => R): R[] {
   const results: R[] = []
