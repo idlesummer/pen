@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from 'fs'
 import { resolve, join, posix } from 'path'
-import { traverseBreadthFirst } from '@/lib/traversal'
+import { traverseBreadthFirst } from '@/lib/tree-utils'
 import { DirectoryNotFoundError, NotADirectoryError } from '../errors'
 
 export type FileNode = {
