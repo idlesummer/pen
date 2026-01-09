@@ -96,7 +96,7 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
   const Screen = components[screenPath]
   if (!Screen) throw new ComponentNotFoundError(screenPath)
 
-  let element: ReactElement = createElement(Screen)
+  let element: ReactElement = createElement(Screen, { key: screenPath })
 
   // Process segments from leaf → root
   for (const segment of route.chain) {
@@ -130,7 +130,7 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
       if (!LayoutComponent)
         throw new ComponentNotFoundError(layoutPath)
 
-      element = createElement(LayoutComponent, null, element)
+      element = createElement(LayoutComponent, { key: layoutPath }, element)
     }
   }
 
