@@ -1,5 +1,5 @@
 import { parse } from 'path'
-import { traverseDepthFirst } from '@/lib/traversal'
+import { traverseDepthFirst } from '@/lib/tree-utils'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 import { type FileNode } from './file-tree'
 

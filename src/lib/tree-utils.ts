@@ -1,23 +1,3 @@
-/**
- * Tree utilities for building and traversing trees via BFS or DFS.
- * 
- * Use cases:
- * - Building trees from external sources (filesystem, API)
- * - Transforming existing trees
- * - Traversing trees with side effects
- * 
- * Hooks:
- * - visit: Inspect/process current node before expanding
- * - expand: Get/create child nodes (return undefined for leaf nodes)
- * - attach: Link child to parent (for tree construction)
- * - filter: Control traversal (true = traverse child, false = skip)
- * 
- * All hooks are optional - use what you need:
- * - Building: provide expand + attach
- * - Traversing: provide expand + visit
- * - Processing root only: provide visit only
- */
-
 export type TraversalOptions<TNode> = {
   root: TNode
   visit?:  (node: TNode) => void                 // Inspect/process current node
@@ -64,7 +44,7 @@ export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNo
 
     const children = expand?.(node)
     if (!children) continue
- 
+
     // Process in reverse to maintain left-to-right
     // order when popping from stack
     const len = children.length
@@ -77,4 +57,22 @@ export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNo
     }
   }
   return root
+}
+
+/**
+ * Walk up a tree from a node to root, collecting values.
+ * Assumes nodes have an optional `parent` field.
+ */
+export function collectAncestors<TreeNode extends { parent?: TreeNode }, R>(node: TreeNode, mapper: (node: TreeNode) => R): R[] {
+  const results: R[] = []
+  let currentNode = node
+
+  while (true) {
+    results.push(mapper(currentNode))
+    if (!currentNode.parent)
+      break
+    currentNode = currentNode.parent
+  }
+
+  return results.reverse()
 }
