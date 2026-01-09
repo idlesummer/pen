@@ -87,10 +87,10 @@ export type ComponentMap = Record<string, ComponentType>
 export function composeRoute(route: Route, components: ComponentMap): ReactElement {
 
   // Check if chain is guaranteed non-empty
-  if (route.chain.length === 0)
+  if (route.chain.length)
     throw new EmptyChainError(route.url)
 
-  // Step 1: Start with the screen (guaranteed in first segment)
+  // Start with the screen (guaranteed in first segment by route manifest)
   const leafSegment = route.chain[0]!       // Guaranteed chain is non-empty
   const screenPath = leafSegment['screen']! // Guaranteed leaf to be in screen
   const Screen = components[screenPath]
@@ -101,7 +101,7 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
   // Process segments from leaf → root
   for (const segment of route.chain) {
 
-    // Step 2: Not-found boundary (wraps screen/children)
+    // Not-found boundary (wraps screen/children)
     if (segment['not-found']) {
       const notFoundPath = segment['not-found']
       const NotFoundComponent = components[notFoundPath]
@@ -112,7 +112,7 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
       element = createElement(NotFoundBoundary, { key: notFoundPath, fallback }, element)
     }
 
-    // Step 3: Error boundary (wraps not-found + content)
+    // Error boundary (wraps not-found + content)
     if (segment['error']) {
       const errorPath = segment['error']
       const ErrorComponent = components[errorPath]
@@ -123,7 +123,7 @@ export function composeRoute(route: Route, components: ComponentMap): ReactEleme
       element = createElement(ErrorBoundary, { key: errorPath, fallback }, element)
     }
 
-    // Step 4: Layout (wraps error boundary + all descendants)
+    // Layout (wraps error boundary + all descendants)
     if (segment['layout']) {
       const layoutPath = segment['layout']
       const LayoutComponent = components[layoutPath]
