@@ -87,7 +87,7 @@ export type ComponentMap = Record<string, ComponentType>
 export function composeRoute(route: Route, components: ComponentMap): ReactElement {
 
   // Check if chain is guaranteed non-empty
-  if (route.chain.length)
+  if (!route.chain.length)
     throw new EmptyChainError(route.url)
 
   // Start with the screen (guaranteed in first segment by route manifest)
