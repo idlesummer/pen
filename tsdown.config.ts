@@ -1,6 +1,8 @@
-import { defineConfig } from 'tsup'
+import path from 'path'
+import alias from '@rollup/plugin-alias'
+import { defineConfig } from 'tsdown'
 
-const tsupConfig = defineConfig({
+const tsdownConfig = defineConfig({
   // Entry points
   entry: {
     'index': 'src/index.ts',
@@ -9,18 +11,9 @@ const tsupConfig = defineConfig({
     // 'router/index': 'src/core/router/index.ts', // temporary
   },
 
-  // Output format
-  format: ['esm'],
-  target: 'node24',
-
-  // Bundling
-  bundle: true,
-  splitting: true,
-
   // Generation
   dts: true,
   sourcemap: true,
-  clean: true,
 
   // External dependencies
   external: [
@@ -32,10 +25,13 @@ const tsupConfig = defineConfig({
     'ink',
   ],
 
-  // Build options
-  esbuildOptions: (options) => {
-    options.alias = { ...options.alias, '@': './src' }
-  },
+  // Build customization (Rolldown-style)
+  plugins: [
+    alias({
+      // Equivalent to: options.alias = { ...options.alias, '@': './src' }
+      entries: [{ find: '@', replacement: path.resolve(import.meta.dirname, 'src') }],
+    }),
+  ],
 })
 
-export default tsupConfig
+export default tsdownConfig
