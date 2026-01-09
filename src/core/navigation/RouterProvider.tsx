@@ -27,7 +27,7 @@ export const RouterContext = createContext<RouterContextValue | null>(null)
 // Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
   const [history, setHistory] = useState<NavigationHistory>({ stack: [initialUrl], index: 0 })
-  const url = history.stack[history.index]
+  const url = history.stack?.[history.index] ?? initialUrl
 
   // Push new URL to history
   const push = useCallback((newUrl: string) => {
