@@ -1,13 +1,20 @@
 {
   "name": "@idlesummer/pen",
   "version": "0.1.0",
-  "description": "Next.js-inspired file-based routing framework for building Ink terminal apps",
+  "description": "File-based routing for Ink terminal apps (experimental)",
   "keywords": [
     "cli",
     "ink",
+    "routing",
     "react",
-    "routing"
+    "terminal",
+    "experimental",
+    "learning-project"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/idlesummer/pen.git"
+  },
   "license": "MIT",
   "author": "idlesummer <09louisthebob@gmail.com> (https://github.com/idlesummer)",
   "type": "module",
