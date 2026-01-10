@@ -2,6 +2,7 @@
 
 import { Command } from 'commander'
 import { buildCommand } from '@/cli/commands/build'
+import { devCommand } from '@/cli/commands/dev'
 import { startCommand } from '@/cli/commands/start'
 
 const program = new Command()
@@ -17,6 +18,14 @@ program
   .option('-d, --dir <path>', 'App directory to scan', './src/app')
   .option('-o, --output <path>', 'Output directory', './.pen/build')
   .action(buildCommand)
+
+program
+  .command('dev')
+  .description('Build and start the application (no hot reload)')
+  .option('-d, --dir <path>', 'App directory to scan', './src/app')
+  .option('-o, --output <path>', 'Output directory', './.pen/build')
+  .option('-u, --url <path>', 'Initial URL to render', '/')
+  .action(devCommand)
 
 program
   .command('start')
