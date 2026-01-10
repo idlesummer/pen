@@ -97,7 +97,7 @@ export async function buildCommand(options: BuildOptions = {}) {
           // const appFiles = globSync(join(ctx.appDir, '/**/*.{js,jsx,ts,tsx}'))
           const appFiles = new fdir()
             .withFullPaths()
-            .glob('**/*.{js,jsx,ts,tsx}')
+            .filter((path) => /\.(js|jsx|ts|tsx)$/.test(path))
             .crawl(ctx.appDir)
             .sync()
 
