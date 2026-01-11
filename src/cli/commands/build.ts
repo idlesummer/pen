@@ -111,6 +111,8 @@ export async function buildCommand(options: BuildOptions = {}) {
             bundle: false,
             minify: true,
             sourcemap: true,
+            jsx: 'automatic',
+            jsxImportSource: 'react',
           })
         },
       },
