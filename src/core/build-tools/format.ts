@@ -2,6 +2,7 @@ import { statSync } from 'fs'
 import { join } from 'path'
 import { fdir } from 'fdir'
 import pc from 'picocolors'
+import pm from 'picomatch'
 import prettyBytes from 'pretty-bytes'
 import prettyMs from 'pretty-ms'
 
@@ -15,6 +16,7 @@ export function fileList(baseDir: string, pattern = '**/*') {
   // Find all files matching the pattern
   const files = new fdir()
     .withRelativePaths()
+    .withGlobFunction(pm)  // ← Add this line
     .glob(pattern)
     .crawl(baseDir)
     .sync()
