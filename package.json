@@ -1,6 +1,6 @@
 {
   "name": "@idlesummer/pen",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "File-based routing for Ink terminal apps (experimental)",
   "keywords": [
     "cli",
