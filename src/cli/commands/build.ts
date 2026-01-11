@@ -1,5 +1,5 @@
-import { mkdirSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { mkdirSync, writeFileSync, readFileSync } from 'fs'
+import { join, extname } from 'path'
 
 import { build } from 'esbuild'
 import { fdir } from 'fdir'
@@ -113,16 +113,37 @@ export async function buildCommand(options: BuildOptions = {}) {
             sourcemap: true,
             jsx: 'automatic',
             jsxImportSource: 'react',
-            plugins: [{
-              name: 'add-js-extensions',
-              setup: (build) => {
-                build.onResolve({ filter: /.*/ }, (args) => {
-                  if (!args.path.startsWith('.')) return              // Only handle relative imports
-                  if (/\.(js|jsx|ts|tsx)$/.test(args.path)) return    // Skip if already has extension
-                  return { path: `${args.path}.js`, external: true }  // Add .js extension for Node ESM
-                })
+            plugins: [
+              {
+                name: 'add-js-extensions',
+                setup(build) {
+                  // Intercept file loads and rewrite import statements
+                  build.onLoad({ filter: /\.(ts|tsx|js|jsx)$/ }, (args) => {
+                    const source = readFileSync(args.path, 'utf-8')
+                    const ext = extname(args.path)
+
+                    // Rewrite relative imports to add .js extensions
+                    // Handles: import/export ... from './path' and import './path'
+                    const contents = source.replace(
+                      /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
+                      (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
+                        // Skip if already has an extension
+                        if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
+                          return match
+                        }
+                        // Add .js extension
+                        return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
+                      }
+                    )
+
+                    return {
+                      contents,
+                      loader: ext === '.ts' ? 'ts' : ext === '.tsx' ? 'tsx' : ext === '.jsx' ? 'jsx' : 'js',
+                    }
+                  })
+                },
               },
-            }],
+            ],
           })
         },
       },
