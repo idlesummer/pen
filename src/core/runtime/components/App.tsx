@@ -1,6 +1,6 @@
-import { RouterProvider } from '@/core/navigation'
+import { RouterProvider } from '@/core/router'
 import { type RouteManifest } from '@/core/route-builder'
-import { ComponentMap } from '../runtime/composer'
+import { ComponentMap } from '../core/composer'
 import { ErrorBoundary } from './ErrorBoundary'
 import { ErrorScreen } from './ErrorScreen'
 import { FileRouter } from './FileRouter'

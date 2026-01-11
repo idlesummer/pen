@@ -1,7 +1,5 @@
-import { buildCommand } from './build'
-import { startCommand } from './start'
-import type { BuildOptions } from './build'
-import type { StartOptions } from './start'
+import { buildCommand, type BuildOptions } from './build'
+import { startCommand, type StartOptions } from './start'
 
 export interface DevOptions extends BuildOptions, StartOptions {
   // pass
