@@ -13,7 +13,7 @@
  */
 
 // Navigation API
-export { useRouter, type RouterContextValue } from './core/navigation'
+export { useRouter, type RouterContextValue } from './core/router'
 
 // Error API
-export type { ErrorComponentProps } from './core/file-router'
+export type { ErrorComponentProps } from './core/runtime'

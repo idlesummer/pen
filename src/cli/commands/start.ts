@@ -4,7 +4,7 @@ import { pathToFileURL } from 'url'
 import { createElement } from 'react'
 import { render } from 'ink'
 import pc from 'picocolors'
-import { App } from '@/core/file-router'
+import { App } from '@/core/runtime'
 import type { RouteManifest } from '@/core/route-builder'
 
 export interface StartOptions {

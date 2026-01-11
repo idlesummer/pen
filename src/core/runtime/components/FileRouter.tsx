@@ -1,8 +1,8 @@
 import { type ReactElement } from 'react'
 import { type RouteManifest } from '@/core/route-builder'
-import { useRouter } from '@/core/navigation'
-import { composeRoute, type ComponentMap } from '../runtime/composer'
-import { matchRoute } from '../runtime/matcher'
+import { useRouter } from '@/core/router'
+import { composeRoute, type ComponentMap } from '../core/composer'
+import { matchRoute } from '../core/matcher'
 import { NotFoundError } from '../errors'
 
 /**
