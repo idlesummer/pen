@@ -113,6 +113,21 @@ export async function buildCommand(options: BuildOptions = {}) {
             sourcemap: true,
             jsx: 'automatic',
             jsxImportSource: 'react',
+            plugins: [
+              {
+                name: 'add-js-extensions',
+                setup(build) {
+                  build.onResolve({ filter: /.*/ }, (args) => {
+                    // Only handle relative imports
+                    if (!args.path.startsWith('.')) return
+                    // Skip if already has extension
+                    if (/\.(js|jsx|ts|tsx)$/.test(args.path)) return
+                    // Add .js extension for Node ESM
+                    return { path: args.path + '.js', external: true }
+                  })
+                },
+              },
+            ],
           })
         },
       },
