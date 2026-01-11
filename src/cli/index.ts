@@ -4,13 +4,14 @@ import { Command } from 'commander'
 import { buildCommand } from '@/cli/commands/build'
 import { devCommand } from '@/cli/commands/dev'
 import { startCommand } from '@/cli/commands/start'
+import { VERSION } from '@/core/constants'
 
 const program = new Command()
 
 program
   .name('pen')
   .description('Idle Summer Pen - File-based routing for React Ink')
-  .version('0.1.0')
+  .version(VERSION)
 
 program
   .command('build')
