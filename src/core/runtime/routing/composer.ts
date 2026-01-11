@@ -1,7 +1,7 @@
 import { createElement, type ComponentType, type ReactElement } from 'react'
 import { type Route } from '@/core/route-builder'
-import { ErrorBoundary, type ErrorComponentProps } from '../components/ErrorBoundary'
-import { NotFoundBoundary, type NotFoundComponentProps } from '../components/NotFoundBoundary'
+import { ErrorBoundary, type ErrorComponentProps } from '../boundaries/ErrorBoundary'
+import { NotFoundBoundary, type NotFoundComponentProps } from '../boundaries/NotFoundBoundary'
 import { ComponentNotFoundError, EmptyChainError } from '../errors'
 
 /**

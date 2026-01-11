@@ -1,11 +1,11 @@
 import { RouterProvider } from '@/core/router'
 import { type RouteManifest } from '@/core/route-builder'
-import { ComponentMap } from '../core/composer'
-import { ErrorBoundary } from './ErrorBoundary'
-import { ErrorScreen } from './ErrorScreen'
+import { ErrorBoundary } from './boundaries/ErrorBoundary'
+import { NotFoundBoundary } from './boundaries/NotFoundBoundary'
+import { type ComponentMap } from './routing/composer'
+import { ErrorScreen } from './screens/ErrorScreen'
+import { NotFoundScreen } from './screens/NotFoundScreen'
 import { FileRouter } from './FileRouter'
-import { NotFoundScreen } from './NotFoundScreen'
-import { NotFoundBoundary } from './NotFoundBoundary'
 
 export interface AppProps {
   initialUrl: string
