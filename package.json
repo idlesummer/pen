@@ -1,6 +1,6 @@
 {
   "name": "@idlesummer/pen",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "File-based routing for Ink terminal apps (experimental)",
   "keywords": [
     "cli",
@@ -42,6 +42,7 @@
     "esbuild": "^0.27.2",
     "fdir": "^6.5.0",
     "ora": "^9.0.0",
+    "picomatch": "^4.0.3",
     "pretty-bytes": "^7.1.0",
     "pretty-ms": "^9.3.0"
   },
@@ -49,6 +50,7 @@
     "@eslint/js": "^9.39.2",
     "@rollup/plugin-alias": "^6.0.0",
     "@types/node": "^25.0.3",
+    "@types/picomatch": "^4.0.2",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
