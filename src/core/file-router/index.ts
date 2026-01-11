@@ -1,6 +1,6 @@
 export * from './components/App'
 export * from './components/ErrorBoundary'
 export * from './components/NotFoundScreen'
-export * from './components/Router'
+export * from './components/FileRouter'
 export * from './runtime/composer'
 export * from './runtime/matcher'
