@@ -6,10 +6,10 @@ import { matchRoute } from '../runtime/matcher'
 import { NotFoundError } from '../errors'
 
 /**
- * Props for the Router component.
+ * Props for the FileRouter component.
  * Defines the URL to render, the route manifest, and component map.
  */
-export interface RouterProps {
+export interface FileRouterProps {
   manifest: RouteManifest
   components: ComponentMap
 }
@@ -18,7 +18,7 @@ export interface RouterProps {
  * Router component that orchestrates route matching and composition.
  * Returns the composed route element or 404 screen.
  */
-export function Router({ manifest, components }: RouterProps): ReactElement {
+export function FileRouter({ manifest, components }: FileRouterProps): ReactElement {
   const { url } = useRouter()
   const route = matchRoute(url, manifest)
 

@@ -16,4 +16,4 @@
 export { useRouter, type RouterContextValue } from './core/navigation'
 
 // Error API
-export type { ErrorComponentProps } from './core/router'
+export type { ErrorComponentProps } from './core/file-router'

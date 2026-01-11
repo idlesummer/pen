@@ -1,9 +1,9 @@
 import { RouterProvider } from '@/core/navigation'
 import { type RouteManifest } from '@/core/route-builder'
-import { Router } from '@/core/router'
 import { ComponentMap } from '../runtime/composer'
 import { ErrorBoundary } from './ErrorBoundary'
 import { ErrorScreen } from './ErrorScreen'
+import { FileRouter } from './FileRouter'
 import { NotFoundScreen } from './NotFoundScreen'
 import { NotFoundBoundary } from './NotFoundBoundary'
 
@@ -18,7 +18,7 @@ export function App({ initialUrl, manifest, components }: AppProps) {
     <ErrorBoundary fallback={ErrorScreen}>
       <RouterProvider initialUrl={initialUrl}>
         <NotFoundBoundary fallback={NotFoundScreen}>
-          <Router manifest={manifest} components={components} />
+          <FileRouter manifest={manifest} components={components} />
         </NotFoundBoundary>
       </RouterProvider>
     </ErrorBoundary>
