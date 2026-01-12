@@ -21,7 +21,6 @@ const tsdownConfig = defineConfig({
     'react',
     'react-dom',
     'ink',
-    '@betit/rollup-plugin-rename-extensions',
   ],
 
   // Build customization (Rolldown-style)
