@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync, readFileSync } from 'fs'
 import { join, extname } from 'path'
 
-import { rolldown } from 'rolldown'
+import { build as rolldownBuild } from 'rolldown'
 import { fdir } from 'fdir'
 import renameExtensions from '@betit/rollup-plugin-rename-extensions'
 
@@ -102,7 +102,7 @@ export async function buildCommand(options: BuildOptions = {}) {
             .crawl(ctx.appDir)
             .sync()
 
-          const build = await rolldown({
+          await rolldownBuild({
             input: appFiles,
             cwd: ctx.appDir,
             platform: 'node',
@@ -117,15 +117,14 @@ export async function buildCommand(options: BuildOptions = {}) {
                 },
               }),
             ],
-          })
-
-          await build.write({
-            dir: join(ctx.outputDir, 'app'),
-            format: 'esm',
-            sourcemap: true,
-            minify: true,
-            preserveModules: true,
-            preserveModulesRoot: ctx.appDir,
+            output: {
+              dir: join(ctx.outputDir, 'app'),
+              format: 'esm',
+              sourcemap: true,
+              minify: true,
+              preserveModules: true,
+              preserveModulesRoot: ctx.appDir,
+            },
           })
         },
       },
