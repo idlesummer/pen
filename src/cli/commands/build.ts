@@ -109,10 +109,6 @@ export async function buildCommand(options: BuildOptions = {}) {
             resolve: {
               extensions: ['.ts', '.tsx', '.js', '.jsx'],
             },
-            jsx: {
-              mode: 'automatic',
-              importSource: 'react',
-            },
             plugins: [
               renameExtensions({
                 include: ['**/*.js'],
