@@ -9,7 +9,7 @@
     "test": "tsx src/index.tsx"
   },
   "dependencies": {
-    "@idlesummer/pen": "file:../..",
+    "@idlesummer/pen": "*",
     "ink": "^6.6.0",
     "react": "^19.2.3"
   },
