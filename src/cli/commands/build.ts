@@ -125,7 +125,7 @@ export async function buildCommand(options: BuildOptions = {}) {
                         if (/\.(js|jsx|ts|tsx|json)$/.test(importPath))
                           return match
                         // Add .js extension
-                        return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
+                        return `${prefix}${openQuote}${relativePrefix}${importPath}.js${closeQuote}`
                       },
                     ),
                   }
