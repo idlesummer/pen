@@ -37,7 +37,6 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "chokidar": "^5.0.0",
     "commander": "^14.0.2",
     "fdir": "^6.5.0",
     "ora": "^9.0.0",
