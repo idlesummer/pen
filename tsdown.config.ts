@@ -16,7 +16,7 @@ const tsdownConfig = defineConfig({
   // External dependencies
   external: [
     'commander',
-    'esbuild',
+    'rolldown',
     'chokidar',
     'react',
     'react-dom',
