@@ -1,18 +1,16 @@
-import React from 'react'
+// examples/router-2/src/app/about/screen.tsx
 import { Box, Text } from 'ink'
+import { text } from './_test'
 
 export default function AboutScreen() {
   return (
-    <Box flexDirection="column" gap={1}>
-      <Text color="magenta" bold>About This App</Text>
-      <Text>This is a simple example demonstrating Pen's file-based routing.</Text>
-      
-      <Box marginTop={1} flexDirection="column">
-        <Text bold>Features showcased:</Text>
-        <Text>  ✓ Nested routes</Text>
-        <Text>  ✓ Dynamic parameters</Text>
-        <Text>  ✓ Layout components</Text>
-        <Text>  ✓ File-based routing structure</Text>
+    <Box flexDirection="column">
+      <Text bold color="blue">ℹ️  About Screen {text}</Text>
+      <Text>This is a demo of nested layouts and navigation.</Text>
+      <Box marginTop={1}>
+        <Text>• Uses keyboard shortcuts for navigation</Text>
+        <Text>• Supports nested routes</Text>
+        <Text>• Layout inheritance</Text>
       </Box>
     </Box>
   )
