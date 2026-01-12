@@ -3,9 +3,12 @@ import { join, extname } from 'path'
 
 import { build as rolldownBuild } from 'rolldown'
 import { fdir } from 'fdir'
-import renameExtensions from '@betit/rollup-plugin-rename-extensions'
+import { createRequire } from 'module'
 
 import pc from 'picocolors'
+
+const require = createRequire(import.meta.url)
+const renameExtensions = require('@betit/rollup-plugin-rename-extensions')
 
 import { VERSION } from '@/core/constants'
 import { pipe } from '@/core/build-tools/pipeline'
@@ -92,7 +95,7 @@ export async function buildCommand(options: BuildOptions = {}) {
       {
         name: 'Compiling application',
         onSuccess: (_, ctx) => `Compiled application (${format.duration(ctx.duration)})`,
-        onError: (err) => `Compilation failed: ${err.message}`,
+        onError: (err) => `Compilation failed: ${err.message}\n${err.stack}`,
         run: async (ctx) => {
           // await delay(1200)  // Simulate work
           // const appFiles = globSync(join(ctx.appDir, '/**/*.{js,jsx,ts,tsx}'))
