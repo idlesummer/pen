@@ -3,6 +3,7 @@ import { join, extname } from 'path'
 
 import { build as rolldownBuild } from 'rolldown'
 import { fdir } from 'fdir'
+import nodeExternals from 'rollup-plugin-node-externals'
 
 import pc from 'picocolors'
 
@@ -105,14 +106,11 @@ export async function buildCommand(options: BuildOptions = {}) {
             input: appFiles,
             cwd: ctx.appDir,
             platform: 'node',
-            external: (id) => {
-              // Treat all node_modules and built-in Node.js modules as external
-              return !id.startsWith('.') && !id.startsWith('/')
-            },
             resolve: {
               extensions: ['.ts', '.tsx', '.js', '.jsx'],
             },
             plugins: [
+              nodeExternals(),
               {
                 name: 'add-js-extensions',
                 renderChunk(code) {
