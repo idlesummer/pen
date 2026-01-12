@@ -3,6 +3,7 @@ import { join, extname } from 'path'
 
 import { rolldown } from 'rolldown'
 import { fdir } from 'fdir'
+import renameExtensions from '@betit/rollup-plugin-rename-extensions'
 
 import pc from 'picocolors'
 
@@ -113,26 +114,12 @@ export async function buildCommand(options: BuildOptions = {}) {
               importSource: 'react',
             },
             plugins: [
-              {
-                name: 'add-js-extensions',
-                renderChunk(code) {
-                  // Rewrite relative imports to add .js extensions in the final output
-                  // This runs after TypeScript/JSX compilation, so we're working with JS
-                  return {
-                    code: code.replace(
-                      /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
-                      (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
-                        // Skip if already has an extension
-                        if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
-                          return match
-                        }
-                        // Add .js extension
-                        return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
-                      }
-                    ),
-                  }
+              renameExtensions({
+                include: ['**/*.js'],
+                mappings: {
+                  '.js': '.js',
                 },
-              },
+              }),
             ],
           })
 
