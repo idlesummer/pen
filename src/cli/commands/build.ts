@@ -105,6 +105,10 @@ export async function buildCommand(options: BuildOptions = {}) {
             input: appFiles,
             cwd: ctx.appDir,
             platform: 'node',
+            external: (id) => {
+              // Treat all node_modules and built-in Node.js modules as external
+              return !id.startsWith('.') && !id.startsWith('/')
+            },
             resolve: {
               extensions: ['.ts', '.tsx', '.js', '.jsx'],
             },
