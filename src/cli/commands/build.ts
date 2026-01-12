@@ -115,28 +115,21 @@ export async function buildCommand(options: BuildOptions = {}) {
             plugins: [
               {
                 name: 'add-js-extensions',
-                transform(code, id) {
-                  // Only process TypeScript and JavaScript files
-                  if (!/\.(ts|tsx|js|jsx)$/.test(id)) {
-                    return null
-                  }
-
-                  // Rewrite relative imports to add .js extensions
-                  // Handles: import/export ... from './path' and import './path'
-                  const contents = code.replace(
-                    /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
-                    (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
-                      // Skip if already has an extension
-                      if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
-                        return match
-                      }
-                      // Add .js extension
-                      return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
-                    }
-                  )
-
+                renderChunk(code) {
+                  // Rewrite relative imports to add .js extensions in the final output
+                  // This runs after TypeScript/JSX compilation, so we're working with JS
                   return {
-                    code: contents,
+                    code: code.replace(
+                      /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
+                      (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
+                        // Skip if already has an extension
+                        if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
+                          return match
+                        }
+                        // Add .js extension
+                        return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
+                      }
+                    ),
                   }
                 },
               },
