@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync, readFileSync } from 'fs'
 import { join, extname } from 'path'
 
-import { build } from 'esbuild'
+import { rolldown } from 'rolldown'
 import { fdir } from 'fdir'
 
 import pc from 'picocolors'
@@ -101,49 +101,55 @@ export async function buildCommand(options: BuildOptions = {}) {
             .crawl(ctx.appDir)
             .sync()
 
-          await build({
-            entryPoints: appFiles,
-            outdir: join(ctx.outputDir, 'app'),
-            outbase: ctx.appDir,
-            format: 'esm',
+          const build = await rolldown({
+            input: appFiles,
+            cwd: ctx.appDir,
             platform: 'node',
-            target: 'node24',
-            bundle: false,
-            minify: true,
-            sourcemap: true,
-            jsx: 'automatic',
-            jsxImportSource: 'react',
+            resolve: {
+              extensions: ['.ts', '.tsx', '.js', '.jsx'],
+            },
+            jsx: {
+              mode: 'automatic',
+              importSource: 'react',
+            },
             plugins: [
               {
                 name: 'add-js-extensions',
-                setup(build) {
-                  // Intercept file loads and rewrite import statements
-                  build.onLoad({ filter: /\.(ts|tsx|js|jsx)$/ }, (args) => {
-                    const source = readFileSync(args.path, 'utf-8')
-                    const ext = extname(args.path)
+                transform(code, id) {
+                  // Only process TypeScript and JavaScript files
+                  if (!/\.(ts|tsx|js|jsx)$/.test(id)) {
+                    return null
+                  }
 
-                    // Rewrite relative imports to add .js extensions
-                    // Handles: import/export ... from './path' and import './path'
-                    const contents = source.replace(
-                      /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
-                      (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
-                        // Skip if already has an extension
-                        if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
-                          return match
-                        }
-                        // Add .js extension
-                        return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
+                  // Rewrite relative imports to add .js extensions
+                  // Handles: import/export ... from './path' and import './path'
+                  const contents = code.replace(
+                    /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
+                    (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
+                      // Skip if already has an extension
+                      if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
+                        return match
                       }
-                    )
-
-                    return {
-                      contents,
-                      loader: ext === '.ts' ? 'ts' : ext === '.tsx' ? 'tsx' : ext === '.jsx' ? 'jsx' : 'js',
+                      // Add .js extension
+                      return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
                     }
-                  })
+                  )
+
+                  return {
+                    code: contents,
+                  }
                 },
               },
             ],
+          })
+
+          await build.write({
+            dir: join(ctx.outputDir, 'app'),
+            format: 'esm',
+            sourcemap: true,
+            minify: true,
+            preserveModules: true,
+            preserveModulesRoot: ctx.appDir,
           })
         },
       },
