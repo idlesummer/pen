@@ -37,6 +37,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "@betit/rollup-plugin-rename-extensions": "^0.1.0",
     "chokidar": "^5.0.0",
     "commander": "^14.0.2",
     "fdir": "^6.5.0",
