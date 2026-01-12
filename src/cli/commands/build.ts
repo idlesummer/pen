@@ -1,5 +1,5 @@
-import { mkdirSync, writeFileSync, readFileSync } from 'fs'
-import { join, extname } from 'path'
+import { mkdirSync, writeFileSync } from 'fs'
+import { join } from 'path'
 
 import { build as rolldownBuild } from 'rolldown'
 import { fdir } from 'fdir'
@@ -115,7 +115,7 @@ export async function buildCommand(options: BuildOptions = {}) {
               nodeExternals(),
               {
                 name: 'add-js-extensions',
-                renderChunk(code) {
+                renderChunk: (code) => {
                   // Rewrite relative imports to add .js extensions in the final output
                   // This runs after TypeScript/JSX compilation, so we're working with JS
                   return {
@@ -123,12 +123,11 @@ export async function buildCommand(options: BuildOptions = {}) {
                       /(from\s+|import\s+|export\s+\*\s+from\s+)(['"])(\.\.[/\\]|\.\/)(.*?)(['"])/g,
                       (match, prefix, openQuote, relativePrefix, importPath, closeQuote) => {
                         // Skip if already has an extension
-                        if (/\.(js|jsx|ts|tsx|json)$/.test(importPath)) {
+                        if (/\.(js|jsx|ts|tsx|json)$/.test(importPath))
                           return match
-                        }
                         // Add .js extension
                         return prefix + openQuote + relativePrefix + importPath + '.js' + closeQuote
-                      }
+                      },
                     ),
                   }
                 },
