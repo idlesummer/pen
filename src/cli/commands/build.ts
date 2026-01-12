@@ -96,9 +96,10 @@ export async function buildCommand(options: BuildOptions = {}) {
         run: async (ctx) => {
           // await delay(1200)  // Simulate work
           // const appFiles = globSync(join(ctx.appDir, '/**/*.{js,jsx,ts,tsx}'))
+          const excludedDirs = new Set(['.pen', 'node_modules', 'dist', 'build', '.next', '.turbo', '.cache'])
           const appFiles = new fdir()
             .withFullPaths()
-            .exclude((dirName) => dirName === '.pen' || dirName === 'node_modules')
+            .exclude((dirName) => excludedDirs.has(dirName))
             .filter((path) => /\.(js|jsx|ts|tsx)$/.test(path))
             .crawl(ctx.appDir)
             .sync()
