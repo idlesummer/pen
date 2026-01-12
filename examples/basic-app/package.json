@@ -8,7 +8,7 @@
     "start": "pen start"
   },
   "dependencies": {
-    "@idlesummer/pen": "*",
+    "@idlesummer/pen": "file:../..",
     "ink": "^6.5.1",
     "react": "^19.2.3"
   }
