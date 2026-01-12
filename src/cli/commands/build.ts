@@ -106,7 +106,6 @@ export async function buildCommand(options: BuildOptions = {}) {
 
           await rolldownBuild({
             input: appFiles,
-            cwd: ctx.appDir,
             platform: 'node',
             resolve: {
               extensions: ['.ts', '.tsx', '.js', '.jsx'],
