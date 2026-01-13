@@ -5,7 +5,7 @@ import { NotFoundBoundary, type NotFoundComponentProps } from '../boundaries/Not
 import { ComponentNotFoundError, EmptyChainError } from '../errors'
 
 /**
- * Maps component file paths to their loaded React components.
+ * Maps component IDs to their loaded React components.
  */
 export type ComponentMap = Record<string, ComponentType>
 

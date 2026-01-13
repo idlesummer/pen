@@ -1,5 +1,5 @@
-import { removeExtension } from '@/lib/path-utils'
 import { collectAncestors, traverseDepthFirst } from '@/lib/tree-utils'
+import { buildComponentId } from './component-id'
 import type { SegmentNode, SegmentRoles } from './segment-tree'
 
 export type RouteManifest = Record<string, Route>
@@ -12,7 +12,7 @@ export type Route = {
  * Builds a route manifest from a segment tree.
  *
  * Flattens the tree into a dictionary mapping URLs to route metadata.
- * Only includes routes that have screens.
+ * Only includes routes that have screens. Component roles are stored as IDs.
  *
  * @param segmentTree - Segment tree with parent pointers
  * @returns Flat manifest ready for runtime composition
@@ -34,7 +34,7 @@ export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
 
         for (const [roleName, path] of entries)
           if (roleName !== 'screen' || ancestorSegment === segment) // Skip ancestor screens
-            roles[roleName] = removeExtension(path)
+            roles[roleName] = buildComponentId(path)
 
         return roles
       },

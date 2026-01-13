@@ -1,37 +1,24 @@
-import type { RouteManifest } from './route-manifest'
+import { removeExtension } from '@/lib/path-utils'
+import type { ComponentRegistry } from './component-registry'
 
 /**
  * Generates the component map TypeScript code.
  * Returns the file content as a string.
  */
-export function buildComponentMap(manifest: RouteManifest) {
-  // Collect all unique component paths from manifest
-  const componentPaths = new Set<string>()
-
-  for (const route of Object.values(manifest)) {
-    // Loop through each segment in the chain
-    for (const segment of route.chain) {
-      if (segment['screen']) componentPaths.add(segment['screen'])
-      if (segment['not-found']) componentPaths.add(segment['not-found'])
-      if (segment['error'])  componentPaths.add(segment['error'])
-      if (segment['layout']) componentPaths.add(segment['layout'])
-    }
-  }
-
-  // Sort for consistent output
-  const sortedPaths = Array.from(componentPaths).sort()
+export function buildComponentMap(registry: ComponentRegistry) {
+  const sortedEntries = Object.entries(registry).sort(([a], [b]) => a.localeCompare(b))
 
   // Generate imports and exports
   const imports: string[] = []
   const exports: string[] = []
 
-  for (const [i, componentPath] of sortedPaths.entries()) {
+  for (const [i, [componentId, sourcePath]] of sortedEntries.entries()) {
     const varName = `Component${i}`
 
-    // Convert: /app/home/screen → ./app/home/screen.js
-    const importPath = componentPath.replace('/app/', './app/') + '.js'
+    // Convert: /app/home/screen.tsx → ./app/home/screen.js
+    const importPath = removeExtension(sourcePath).replace('/app/', './app/') + '.js'
     imports.push(`import ${varName} from '${importPath}'`)
-    exports.push(`  '${componentPath}': ${varName},`)
+    exports.push(`  '${componentId}': ${varName},`)
   }
 
   // Generate file content

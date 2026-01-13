@@ -10,8 +10,14 @@ import pc from 'picocolors'
 import { VERSION } from '@/core/constants'
 import { pipe } from '@/core/build-tools/pipeline'
 import * as format from '@/core/build-tools/format'
-import { buildFileTree, buildSegmentTree, buildRouteManifest, buildComponentMap } from '@/core/route-builder'
-import type { FileNode, SegmentNode, RouteManifest } from '@/core/route-builder'
+import {
+  buildFileTree,
+  buildSegmentTree,
+  buildRouteManifest,
+  buildComponentMap,
+  buildComponentRegistry,
+} from '@/core/route-builder'
+import type { FileNode, SegmentNode, RouteManifest, ComponentRegistry } from '@/core/route-builder'
 // import { delay } from '@/lib/delay'
 
 export interface BuildOptions {
@@ -25,6 +31,7 @@ interface BuildContext extends Record<string, unknown> {
   fileTree?: FileNode
   routeTree?: SegmentNode
   manifest?: RouteManifest
+  componentRegistry?: ComponentRegistry
 }
 
 export async function buildCommand(options: BuildOptions = {}) {
@@ -65,7 +72,8 @@ export async function buildCommand(options: BuildOptions = {}) {
         run: async (ctx) => {
           // await delay(500)  // Simulate work
           const manifest = buildRouteManifest(ctx.routeTree!) // Safe: set by previous task
-          return { manifest }
+          const componentRegistry = buildComponentRegistry(ctx.routeTree!)
+          return { manifest, componentRegistry }
         },
       },
       {
@@ -84,7 +92,7 @@ export async function buildCommand(options: BuildOptions = {}) {
         onSuccess: (_, ctx) => `Generated component map (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
           // await delay(450)  // Simulate work
-          const componentsCode = buildComponentMap(ctx.manifest!) // Safe: set by previous task
+          const componentsCode = buildComponentMap(ctx.componentRegistry!) // Safe: set by previous task
           const componentsPath = join(ctx.outputDir, 'components.js')
           writeFileSync(componentsPath, componentsCode, 'utf-8')
         },
