@@ -92,9 +92,30 @@ export async function buildCommand(options: BuildOptions = {}) {
         onSuccess: (_, ctx) => `Generated component map (${format.duration(ctx.duration)})`,
         run: async (ctx) => {
           // await delay(450)  // Simulate work
-          const componentsCode = buildComponentMap(ctx.componentRegistry!) // Safe: set by previous task
-          const componentsPath = join(ctx.outputDir, 'components.js')
+          const componentsCode = buildComponentMap(ctx.componentRegistry!, ctx.appDir) // Safe: set by previous task
+          const componentsPath = join(ctx.outputDir, 'components.entry.ts')
           writeFileSync(componentsPath, componentsCode, 'utf-8')
+        },
+      },
+      {
+        name: 'Bundling component map',
+        onSuccess: (_, ctx) => `Bundled component map (${format.duration(ctx.duration)})`,
+        onError: (err) => `Component map bundling failed: ${err.message}\n${err.stack}`,
+        run: async (ctx) => {
+          await rolldownBuild({
+            input: join(ctx.outputDir, 'components.entry.ts'),
+            platform: 'node',
+            resolve: {
+              extensions: ['.ts', '.tsx', '.js', '.jsx'],
+            },
+            plugins: [nodeExternals()],
+            output: {
+              file: join(ctx.outputDir, 'components.js'),
+              format: 'esm',
+              sourcemap: true,
+              minify: true,
+            },
+          })
         },
       },
       {

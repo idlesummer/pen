@@ -1,11 +1,18 @@
-import { removeExtension } from '@/lib/path-utils'
+import { resolve } from 'path'
+import { pathToFileURL } from 'url'
 import type { ComponentRegistry } from './component-registry'
+
+function toImportSpecifier(appDir: string, sourcePath: string): string {
+  const relativePath = sourcePath.replace(/^\/app\/?/, '')
+  const absolutePath = resolve(appDir, relativePath)
+  return pathToFileURL(absolutePath).href
+}
 
 /**
  * Generates the component map TypeScript code.
  * Returns the file content as a string.
  */
-export function buildComponentMap(registry: ComponentRegistry) {
+export function buildComponentMap(registry: ComponentRegistry, appDir: string) {
   const sortedEntries = Object.entries(registry).sort(([a], [b]) => a.localeCompare(b))
 
   // Generate imports and exports
@@ -15,8 +22,8 @@ export function buildComponentMap(registry: ComponentRegistry) {
   for (const [i, [componentId, sourcePath]] of sortedEntries.entries()) {
     const varName = `Component${i}`
 
-    // Convert: /app/home/screen.tsx → ./app/home/screen.js
-    const importPath = removeExtension(sourcePath).replace('/app/', './app/') + '.js'
+    // Convert: /app/home/screen.tsx → file:///abs/path/src/app/home/screen.tsx
+    const importPath = toImportSpecifier(appDir, sourcePath)
     imports.push(`import ${varName} from '${importPath}'`)
     exports.push(`  '${componentId}': ${varName},`)
   }
