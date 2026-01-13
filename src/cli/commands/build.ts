@@ -1,5 +1,5 @@
 import { mkdirSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 
 import { build as rolldownBuild } from 'rolldown'
 import { fdir } from 'fdir'
@@ -102,15 +102,17 @@ export async function buildCommand(options: BuildOptions = {}) {
         onSuccess: (_, ctx) => `Bundled component map (${format.duration(ctx.duration)})`,
         onError: (err) => `Component map bundling failed: ${err.message}\n${err.stack}`,
         run: async (ctx) => {
+          const entryPath = resolve(ctx.outputDir, 'components.entry.ts')
+          const outputPath = resolve(ctx.outputDir, 'components.js')
           await rolldownBuild({
-            input: join(ctx.outputDir, 'components.entry.ts'),
+            input: entryPath,
             platform: 'node',
             resolve: {
               extensions: ['.ts', '.tsx', '.js', '.jsx'],
             },
             plugins: [nodeExternals()],
             output: {
-              file: join(ctx.outputDir, 'components.js'),
+              file: outputPath,
               format: 'esm',
               sourcemap: true,
               minify: true,
