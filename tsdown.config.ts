@@ -3,14 +3,14 @@
 // - Uses tsconfig.json for TypeScript resolution and declaration rules
 // - Owns entry points, output format, sourcemaps, declarations, and externals
 
-import { defineConfig } from 'tsdown'
 import { createRequire } from 'module'
+import { defineConfig } from 'tsdown'
 
-// Load package.json ONLY at build time.
-// This is safe because this file is never shipped to users.
+// Load package.json
 const require = createRequire(import.meta.url)
-const pkg = require('./package.json') as { name: string; version: string }
+const pkg = require('./package.json')
 
+// Define main config
 const tsdownConfig = defineConfig({
   // TypeScript config
   tsconfig: './tsconfig.json',
