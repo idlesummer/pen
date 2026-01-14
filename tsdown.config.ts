@@ -1,3 +1,8 @@
+// Build configuration (tsdown)
+// - Controls what gets built, bundled, and emitted
+// - Uses tsconfig.json for TypeScript resolution and declaration rules
+// - Owns entry points, output format, sourcemaps, declarations, and externals
+
 import { defineConfig } from 'tsdown'
 
 const tsdownConfig = defineConfig({
@@ -10,9 +15,9 @@ const tsdownConfig = defineConfig({
     'cli/index': 'src/cli/index.ts',
   },
 
-  // Generation
-  dts: true,
+  // Output
   sourcemap: true,
+  dts: true,
 
   // External dependencies
   external: [
