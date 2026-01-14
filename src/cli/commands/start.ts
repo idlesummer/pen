@@ -1,4 +1,4 @@
-import type { CLICommand } from '../command'
+import type { CLICommand } from '../types'
 
 export type StartOptions = {
   dir?: string
