@@ -5,7 +5,7 @@ export type StartOptions = {
   output?: string
 }
 
-export const build: CLICommand<StartOptions> = {
+export const start: CLICommand<StartOptions> = {
   name: 'start',
   description: 'Start the application',
   options: [
