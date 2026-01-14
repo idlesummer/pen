@@ -1,6 +1,9 @@
 import { defineConfig } from 'tsdown'
 
 const tsdownConfig = defineConfig({
+  // TypeScript config
+  tsconfig: './tsconfig.json',
+
   // Entry points
   entry: {
     'index': 'src/index.ts',
