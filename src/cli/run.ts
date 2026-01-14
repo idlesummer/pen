@@ -29,7 +29,8 @@ export async function run(argv = process.argv) {
     return 0
   }
   catch (err) {
-    console.error(err instanceof Error ? err.message : 'Unknown error')
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error(message)
     return 1
   }
 }
