@@ -4,10 +4,12 @@
 // - Owns entry points, output format, sourcemaps, declarations, and externals
 
 import { defineConfig } from 'tsdown'
+import { createRequire } from 'module'
 
-// Import package.json ONLY at build time.
+// Load package.json ONLY at build time.
 // This is safe because this file is never shipped to users.
-import pkg from './package.json' assert { type: 'json' }
+const require = createRequire(import.meta.url)
+const pkg = require('./package.json') as { name: string; version: string }
 
 const tsdownConfig = defineConfig({
   // TypeScript config
@@ -23,7 +25,7 @@ const tsdownConfig = defineConfig({
   sourcemap: true,
   dts: true,
 
-  // Build-time constant injection (values are replaced at build time)
+  // Build-time constant injection
   define: {
     __VERSION__: JSON.stringify(pkg.version),
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
