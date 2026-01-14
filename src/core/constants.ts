@@ -1,5 +1,3 @@
-// src/core/constants.ts
-
 // These are compile-time placeholders.
 // tsdown replaces them with real strings.
 export const VERSION = __VERSION__
