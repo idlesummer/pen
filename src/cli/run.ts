@@ -5,12 +5,13 @@ import { build } from './commands/build'
 import { start } from './commands/start'
 
 export async function run(argv = process.argv) {
+  const commands = [build, start] as const
   const program = new Command()
     .name('pen')
     .description('@idlesummer/pen - File-based routing for React Ink')
     .version(VERSION)
 
-  for (const def of [build, start] as const) {
+  for (const def of commands) {
     const cmd = program
       .command(def.name)
       .description(def.description)
