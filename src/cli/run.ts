@@ -7,7 +7,7 @@ import { start } from './commands/start'
 export async function run(argv = process.argv) {
   const program = new Command()
     .name('pen')
-    .description('Pen - File-based routing for React Ink')
+    .description('@idlesummer/pen - File-based routing for React Ink')
     .version(VERSION)
 
   for (const def of [build, start] as const) {
@@ -18,8 +18,8 @@ export async function run(argv = process.argv) {
     for (const opt of def.options ?? [])
       cmd.option(opt.flags, opt.description, opt.defaultValue)
 
-    cmd.action(async (rawOpts, command) => {
-      await def.action(rawOpts, command)
+    cmd.action(async (options, command) => {
+      await def.action(options, command)
     })
   }
 
