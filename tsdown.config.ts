@@ -12,7 +12,7 @@ const tsdownConfig = defineConfig({
   // Entry points
   entry: {
     'index': 'src/index.ts',
-    'cli/index': 'src/cli/index.ts',
+    'bin': 'src/bin.ts',
   },
 
   // Output
