@@ -5,19 +5,29 @@
 
 import { defineConfig } from 'tsdown'
 
+// Import package.json ONLY at build time.
+// This is safe because this file is never shipped to users.
+import pkg from './package.json' assert { type: 'json' }
+
 const tsdownConfig = defineConfig({
   // TypeScript config
   tsconfig: './tsconfig.json',
 
   // Entry points
   entry: {
-    'index': 'src/index.ts',
-    'bin': 'src/bin.ts',
+    index: 'src/index.ts',  // library api
+    bin: 'src/bin.ts',      // cli executable entry
   },
 
-  // Output
+  // Output options
   sourcemap: true,
   dts: true,
+
+  // Build-time constant injection (values are replaced at build time)
+  define: {
+    __VERSION__: JSON.stringify(pkg.version),
+    __PACKAGE_NAME__: JSON.stringify(pkg.name),
+  },
 
   // External dependencies
   external: [

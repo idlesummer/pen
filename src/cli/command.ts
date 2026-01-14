@@ -1,10 +1,12 @@
 import type { Command } from 'commander'
 
-export type OptionSpec =
-  | { flags: string; description: string }
-  | { flags: string; description: string; defaultValue: string }
+export type OptionSpec = {
+  flags: string
+  description: string
+  defaultValue?: string
+}
 
-export type CliCommand<TOptions> = {
+export type CLICommand<TOptions> = {
   name: string
   description: string
   options?: readonly OptionSpec[]
