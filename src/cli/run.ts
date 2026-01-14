@@ -1,47 +1,33 @@
 import { Command } from 'commander'
 import { VERSION } from '@/core/constants'
-import type { CLICommand, OptionSpec } from './command'
 
 import { build } from './commands/build'
 import { start } from './commands/start'
 
-const commands = [build, start] as const
-
-function addOptions(cmd: Command, options?: readonly OptionSpec[]) {
-  for (const opt of options ?? []) {
-    cmd.option(opt.flags, opt.description, opt.defaultValue)
-  }
-}
-
-function registerCommand<TOptions>(program: Command, def: CLICommand<TOptions>) {
-  const cmd = program.command(def.name).description(def.description)
-
-  addOptions(cmd, def.options)
-
-  cmd.action(async (rawOpts: unknown, command: Command) => {
-    // Single, controlled boundary cast
-    await def.action(rawOpts as TOptions, command)
-  })
-}
-
-export async function run(argv = process.argv): Promise<number> {
+export async function run(argv = process.argv) {
   const program = new Command()
-
-  program
     .name('pen')
-    .description('Idle Summer Pen - File-based routing for React Ink')
+    .description('Pen - File-based routing for React Ink')
     .version(VERSION)
-    .showHelpAfterError()
-    .showSuggestionAfterError()
 
-  for (const def of commands) {
-    registerCommand(program, def)
+  for (const def of [build, start] as const) {
+    const cmd = program
+      .command(def.name)
+      .description(def.description)
+
+    for (const opt of def.options ?? [])
+      cmd.option(opt.flags, opt.description, opt.defaultValue)
+
+    cmd.action(async (rawOpts, command) => {
+      await def.action(rawOpts, command)
+    })
   }
 
   try {
     await program.parseAsync(argv)
     return 0
-  } catch (err: unknown) {
+  }
+  catch (err) {
     console.error(err instanceof Error ? err.message : 'Unknown error')
     return 1
   }
