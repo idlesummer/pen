@@ -1,5 +1,3 @@
-import path from 'path'
-import alias from '@rollup/plugin-alias'
 import { defineConfig } from 'tsdown'
 
 const tsdownConfig = defineConfig({
@@ -21,14 +19,6 @@ const tsdownConfig = defineConfig({
     'react',
     'react-dom',
     'ink',
-  ],
-
-  // Build customization (Rolldown-style)
-  plugins: [
-    alias({
-      // Equivalent to: options.alias = { ...options.alias, '@': './src' }
-      entries: [{ find: '@', replacement: path.resolve(import.meta.dirname, 'src') }],
-    }),
   ],
 })
 
