@@ -1,3 +1,8 @@
+// TypeScript configuration
+// - Defines the TypeScript program: module resolution, paths, JSX, and type checking
+// - Declaration shape and metadata (declaration, maps, sourcemaps)
+// - Does NOT control what files are built or how they are bundled
+
 {
   "compilerOptions": {
     // Language & Module
@@ -11,7 +16,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,            // Optional: if importing JSON
     "allowSyntheticDefaultImports": true, // Optional: better imports
-    "allowImportingTsExtensions": true,   // Optional: for better DX
 
     // Path Mapping
     "baseUrl": ".",
@@ -37,8 +41,7 @@
     "forceConsistentCasingInFileNames": true,
 
     // Advanced
-    "skipLibCheck": true,  // Optional: faster compilation
-    "allowJs": false  // Optional: only TypeScript files
+    "skipLibCheck": true  // Optional: faster compilation
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.config.ts"]
