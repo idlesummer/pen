@@ -16,8 +16,8 @@ program
 program
   .command('build')
   .description('Build the route manifest and compile application')
-  .option('-d, --dir <path>', 'App directory to scan', './src/app')
-  .option('-o, --output <path>', 'Output directory', './.pen/build')
+  .option('-d, --dir <path>', 'App directory to scan')
+  .option('-o, --output <path>', 'Output directory')
   .action(buildCommand)
 
 program
