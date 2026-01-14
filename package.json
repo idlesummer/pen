@@ -19,7 +19,10 @@
   "author": "idlesummer <09louisthebob@gmail.com> (https://github.com/idlesummer)",
   "type": "module",
   "exports": {
-    ".": "./dist/index.mjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
+    }
   },
   "bin": {
     "pen": "./dist/cli/index.mjs"
