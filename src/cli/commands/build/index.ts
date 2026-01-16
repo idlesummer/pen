@@ -24,7 +24,10 @@ export const build: CLICommand = {
       const pipeline = pipe(tasks)
 
       const result = await pipeline.run({ appDir, outDir })
-      console.log(result)
+      console.log(JSON.stringify(result, (key, value) => {
+        if (key === 'parent' || key === 'file') return undefined
+        return value
+      }, 2))
 
     }
     catch (err) {
