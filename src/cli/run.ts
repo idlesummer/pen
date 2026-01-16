@@ -1,10 +1,10 @@
+// src/cli/run.ts
 import { Command } from 'commander'
 import { VERSION } from '@/core/constants'
-
 import { build } from './commands/build'
 import { start } from './commands/start'
 
-export async function run(argv = process.argv) {
+function createProgram() {
   const commands = [build, start] as const
   const program = new Command()
     .name('pen')
@@ -23,6 +23,12 @@ export async function run(argv = process.argv) {
       await def.action(options, command)
     })
   }
+
+  return program
+}
+
+export async function run(argv = process.argv) {
+  const program = createProgram()
 
   try {
     await program.parseAsync(argv)
