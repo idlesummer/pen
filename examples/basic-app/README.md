@@ -32,7 +32,7 @@ src/app/
 ## Running
 
 ```bash
-# Install dependencies (from repo root)
+# Install dependencies
 npm install
 
 # Build the app

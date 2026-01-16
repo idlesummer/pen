@@ -85,9 +85,10 @@ export const generateTasks: Task<BuildContext>[] = [
         'import { manifest } from \'./manifest\'',
         'import { components } from \'./components\'',
         '',
-        'export function run(initialUrl: string) {',
+        'export async function run(initialUrl: string) {',
         '  const element = createElement(App, { initialUrl, manifest, components })',
-        '  render(element)',
+        '  const { waitUntilExit } = render(element)',
+        '  await waitUntilExit()',
         '}',
         '',
       ].join('\n')
