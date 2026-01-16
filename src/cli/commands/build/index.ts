@@ -1,4 +1,5 @@
 import pc from 'picocolors'
+import { loadConfig } from '@/core/config'
 import { pipe, duration, fileList } from '@/core/build-tools'
 import { CLI_NAME, VERSION } from '@/core/constants'
 import { scanTasks } from './tasks/scan'
@@ -12,9 +13,7 @@ export const build: CLICommand = {
   desc: 'Build the route manifest and compile application',
   action: async () => {
     try {
-      const appDir = './src/app'
-      const outDir = './.pen'
-
+      const { appDir, outDir } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
       console.log(pc.dim( `  entry:  ${appDir}`))
@@ -24,12 +23,6 @@ export const build: CLICommand = {
 
       const tasks = [...scanTasks, ...generateTasks, compileTask]
       const pipeline = pipe(tasks)
-
-      // const result = await pipeline.run({ appDir, outDir })
-      // console.log(JSON.stringify(result, (key, value) => {
-      //   if (key === 'parent' || key === 'file') return undefined
-      //   return value
-      // }, 2))
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })
       console.log()
