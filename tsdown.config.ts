@@ -22,8 +22,9 @@ const tsdownConfig = defineConfig({
   },
 
   // Output options
-  sourcemap: true,
   dts: true,
+  minify: true,
+  sourcemap: true,
 
   // Build-time constant injection
   define: {
