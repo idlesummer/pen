@@ -1,4 +1,3 @@
-// src/cli/run.ts
 import { Command } from 'commander'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/core/constants'
 import { build } from './commands/build'
