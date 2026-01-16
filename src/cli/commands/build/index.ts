@@ -1,5 +1,5 @@
 import pc from 'picocolors'
-import { pipe } from '@/core/build-tools'
+import { pipe, duration, fileList } from '@/core/build-tools'
 import { CLI_NAME, VERSION } from '@/core/constants'
 import { scanTasks } from './tasks/scan'
 import { generateTasks } from './tasks/generate'
@@ -25,13 +25,20 @@ export const build: CLICommand = {
       const tasks = [...scanTasks, ...generateTasks, compileTask]
       const pipeline = pipe(tasks)
 
-      const result = await pipeline.run({ appDir, outDir })
-      console.log(JSON.stringify(result, (key, value) => {
-        if (key === 'parent' || key === 'file') return undefined
-        return value
-      }, 2))
+      // const result = await pipeline.run({ appDir, outDir })
+      // console.log(JSON.stringify(result, (key, value) => {
+      //   if (key === 'parent' || key === 'file') return undefined
+      //   return value
+      // }, 2))
 
+      const { duration: dur } = await pipeline.run({ appDir, outDir })
+      console.log()
+      console.log(fileList(outDir, '**/*'))
+      console.log()
+      console.log(`${pc.green('✓')} Built in ${pc.bold(duration(dur))}`)
+      console.log()
     }
+
     catch (err) {
       console.error(`${pc.red('✗')} Build failed`)
       console.log()
