@@ -1,6 +1,8 @@
 import { defineConfig } from '@idlesummer/pen'
 
-export default defineConfig({
+const penConfig = defineConfig({
   appDir: './src/app',
   outDir: './.pen',
 })
+
+export default penConfig
