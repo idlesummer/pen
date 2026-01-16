@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "pen build",
-    "start": "pen start"
+    "start": "pen start",
+    "init": "pen init"
   },
   "dependencies": {
     "@idlesummer/pen": "file:../..",
