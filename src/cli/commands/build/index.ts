@@ -23,8 +23,8 @@ export const build: CLICommand = {
       const tasks = [...scanTasks]
       const pipeline = pipe(tasks)
 
-      const res = await pipeline.run({ appDir, outDir })
-      console.log(res)
+      const result = await pipeline.run({ appDir, outDir })
+      console.log(result)
 
     }
     catch (err) {
