@@ -1,7 +1,5 @@
-import type { Command } from 'commander'
-
-export type CLICommand<TOptions> = {
+export type CLICommand = {
   name: string
   desc: string
-  action: (opts: TOptions, cmd: Command) => void | Promise<void>
+  action: () => void | Promise<void>
 }

@@ -10,7 +10,7 @@ export type TraversalOptions<TNode> = {
  * Traverse tree breadth-first (level by level).
  * Processes all siblings before any children.
  */
-export function traverseBreadthFirst<TNode>(options: TraversalOptions<TNode>): TNode {
+export function traverseBreadthFirst<TNode>(options: TraversalOptions<TNode>) {
   const { root, visit, expand, attach, filter } = options
   const queue = [root]
 
@@ -34,7 +34,7 @@ export function traverseBreadthFirst<TNode>(options: TraversalOptions<TNode>): T
  * Traverse tree depth-first with preorder traversal.
  * Processes parent before children, going deep before wide.
  */
-export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>): TNode {
+export function traverseDepthFirst<TNode>(options: TraversalOptions<TNode>) {
   const { root, visit, expand, attach, filter } = options
   const stack = [root]
 
