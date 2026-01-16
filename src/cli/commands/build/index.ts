@@ -2,6 +2,8 @@ import pc from 'picocolors'
 import { pipe } from '@/core/build-tools'
 import { CLI_NAME, VERSION } from '@/core/constants'
 import { scanTasks } from './tasks/scan'
+import { generateTasks } from './tasks/generate'
+import { compileTask } from './tasks/compile'
 
 import type { CLICommand } from '../../types'
 
@@ -20,7 +22,7 @@ export const build: CLICommand = {
       console.log(pc.dim( `  output: ${outDir}`))
       console.log()
 
-      const tasks = [...scanTasks]
+      const tasks = [...scanTasks, ...generateTasks, compileTask]
       const pipeline = pipe(tasks)
 
       const result = await pipeline.run({ appDir, outDir })

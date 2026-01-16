@@ -21,8 +21,14 @@ const eslintConfig = [
     settings: { react: { version: 'detect' } },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': 'warn',
       'react/prop-types': 'off',
+      '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+      },
+    ],
 
       // Personal style
       'comma-dangle': ['warn', 'always-multiline'],
