@@ -20,7 +20,7 @@ function configureProgram(program: Command) {
   return program
 }
 
-export async function run(argv = process.argv) {
+export async function run(argv: string[]) {
   const command = new Command()
   const program = configureProgram(command)
 
