@@ -5,7 +5,7 @@ import { build } from './commands/build'
 import { init } from './commands/init'
 import { start } from './commands/start'
 
-function createProgram(program: Command) {
+function configureProgram(program: Command) {
   program
     .name(CLI_NAME)
     .description(DESCRIPTION)
@@ -22,7 +22,8 @@ function createProgram(program: Command) {
 }
 
 export async function run(argv = process.argv) {
-  const program = createProgram(new Command())
+  const command = new Command()
+  const program = configureProgram(command)
 
   try {
     await program.parseAsync(argv)
