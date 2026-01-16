@@ -1,4 +1,5 @@
 export { buildFileTree } from './builders/file-tree'
+export { buildSegmentTree } from './builders/segment-tree'
 export type { FileNode } from './builders/file-tree'
 
 export {
