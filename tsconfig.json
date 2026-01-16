@@ -43,6 +43,6 @@
     // Advanced
     "skipLibCheck": true  // Optional: faster compilation
   },
-  "include": ["src/**/*", "types"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.config.ts"]
 }
