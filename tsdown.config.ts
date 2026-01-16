@@ -27,18 +27,19 @@ const tsdownConfig = defineConfig({
 
   // Build-time constant injection
   define: {
-    __VERSION__: JSON.stringify(pkg.version),
+    __DESCRIPTION__: JSON.stringify(pkg.description),
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
+    __VERSION__: JSON.stringify(pkg.version),
   },
 
   // External dependencies
   external: [
-    'commander',
-    'rolldown',
     'chokidar',
+    'commander',
+    'ink',
     'react',
     'react-dom',
-    'ink',
+    'rolldown',
   ],
 })
 
