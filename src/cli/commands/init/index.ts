@@ -1,9 +1,9 @@
 // src/cli/commands/init/index.ts
 import { existsSync } from 'fs'
-// import { mkdir, writeFile } from 'fs/promises'
+import { writeFile } from 'fs/promises'
 import pc from 'picocolors'
 
-import { CLI_NAME } from '@/core/constants'
+import { CLI_NAME, PACKAGE_NAME } from '@/core/constants'
 import type { CLICommand } from '../../types'
 
 export const init: CLICommand = {
@@ -19,7 +19,20 @@ export const init: CLICommand = {
       return
     }
 
-    // TODO: Create pen.config.ts
+    // Create pen.config.ts
+    const configContent = [
+      `import { defineConfig } from '${PACKAGE_NAME}'`,
+      '',
+      'export default defineConfig({',
+      '  appDir: \'./src/app\',',
+      '  outDir: \'./.pen\',',
+      '})',
+      '',
+    ].join('\n')
+
+    await writeFile('pen.config.ts', configContent, 'utf-8')
+    console.log(pc.green('✓') + ' Created pen.config.ts')
+
     // TODO: Create src/app structure
     // TODO: Show success message
 
