@@ -1,17 +1,13 @@
-// src/core/navigation/RouterProvider.tsx
 import { createContext, useState, useCallback, type PropsWithChildren } from 'react'
-
-/** Internal navigation history state */
-interface NavigationHistory {
-  stack: string[]
-  index: number
-}
+import * as actions from './actions'
+import type { NavigationHistory } from './types'
 
 export interface RouterContextValue {
   url: string
+  data: unknown | undefined
   history: readonly string[]  // Expose as readonly
-  index: number               // Expose current position
-  push: (url: string) => void
+  position: number               // Expose current position
+  push: (url: string, data?: unknown) => void
   replace: (url: string) => void
   back: () => void
   forward: () => void
@@ -26,54 +22,47 @@ export const RouterContext = createContext<RouterContextValue | null>(null)
 
 // Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
-  const [history, setHistory] = useState<NavigationHistory>({ stack: [initialUrl], index: 0 })
-  const url = history.stack[history.index] ?? initialUrl
+  const [history, setHistory] = useState<NavigationHistory>({
+    stack: [{ url: initialUrl }],
+    position: 0,
+  })
 
-  // Push new URL to history
-  const push = useCallback((newUrl: string) => {
-    setHistory(prev => ({
-      stack: [...prev.stack.slice(0, prev.index + 1), newUrl],
-      index: prev.index + 1,
-    }))
+  // Grab the current url and data
+  const { url, data } = history.stack[history.position] ?? { url: initialUrl }
+
+  // Push new URL and data to history
+  const push = useCallback((newUrl: string, newData?: unknown) => {
+    setHistory(prev => actions.push(prev, newUrl, newData))
   }, [])
 
   // Replace current URL without adding to history
   const replace = useCallback((newUrl: string) => {
-    setHistory(prev => {
-      const newStack = [...prev.stack]
-      newStack[prev.index] = newUrl
-      return { ...prev, stack: newStack }
-    })
+    setHistory(prev => actions.replace(prev, newUrl))
   }, [])
 
   // Navigate backwards
   const back = useCallback(() => {
-    setHistory(prev =>
-      prev.index > 0
-        ? { ...prev, index: prev.index - 1 }
-        : prev,
-      )
+    setHistory(prev => actions.back(prev))
   }, [])
 
   // Navigate forwards
   const forward = useCallback(() => {
-    setHistory(prev =>
-      prev.index < prev.stack.length - 1
-        ? { ...prev, index: prev.index + 1 }
-        : prev,
-    )
+    setHistory(prev => actions.forward(prev))
   }, [])
 
   return (
-    <RouterContext.Provider value={{
-      url,
-      history: history.stack,  // Expose history
-      index: history.index,    // Expose index
-      push,
-      replace,
-      back,
-      forward,
-    }}>
+    <RouterContext.Provider
+      value={{
+        url,
+        data,
+        history: history.stack.map(entry => entry.url),
+        position: history.position,
+        push,
+        replace,
+        back,
+        forward,
+      }}
+    >
       {children}
     </RouterContext.Provider>
   )
