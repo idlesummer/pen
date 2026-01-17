@@ -36,8 +36,6 @@ export async function loadConfig(): Promise<PenConfig> {
     const module = await import(configUrl) as { default?: Partial<PenConfig> }
     const userConfig = module.default || {}
 
-    console.log(userConfig)
-
     // Merge with defaults
     return { ...defaultConfig, ...userConfig }
   }
