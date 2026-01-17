@@ -8,7 +8,7 @@
     // Language & Module
     "target": "esnext",
     "module": "esnext",
-    "lib": ["esnext"],  // Optional: if you need specific libs
+    "lib": ["esnext", "dom"],  // DOM needed for testing with happy-dom
     "jsx": "react-jsx",
 
     // Module Resolution
