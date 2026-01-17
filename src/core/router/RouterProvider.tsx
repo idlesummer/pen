@@ -5,8 +5,8 @@ import type { NavigationHistory } from './types'
 export interface RouterContextValue {
   url: string
   data: unknown | undefined
-  history: readonly string[]  // Expose as readonly
-  position: number               // Expose current position
+  history: readonly string[]    // Expose as readonly
+  position: number              // Expose current position
   push: (url: string, data?: unknown) => void
   replace: (url: string) => void
   back: () => void
