@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { join } from 'path';
 import { removeExtension } from '../path-utils';
 
 describe('path-utils', () => {
@@ -8,7 +9,9 @@ describe('path-utils', () => {
 		});
 
 		it('should remove extension from path with directory', () => {
-			expect(removeExtension('src/components/App.tsx')).toBe('src/components/App');
+			expect(removeExtension(join('src', 'components', 'App.tsx'))).toBe(
+				join('src', 'components', 'App'),
+			);
 		});
 
 		it('should handle files with multiple dots', () => {
@@ -24,7 +27,9 @@ describe('path-utils', () => {
 		});
 
 		it('should handle absolute paths', () => {
-			expect(removeExtension('/home/user/file.js')).toBe('/home/user/file');
+			const input = join('/', 'home', 'user', 'file.js');
+			const expected = join('/', 'home', 'user', 'file');
+			expect(removeExtension(input)).toBe(expected);
 		});
 
 		it('should handle empty directory', () => {
