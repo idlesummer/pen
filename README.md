@@ -23,7 +23,7 @@ File-based routing for Ink terminal apps (inspired by Next.js).
 
 ## Installation
 ```bash
-npm install @idlesummer/pen
+npm install github:idlesummer/pen
 ```
 
 ## Quick Start
