@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
-export default defineConfig({
+const vitestConfig = defineConfig({
 	test: {
 		// Use happy-dom for DOM simulation (faster than jsdom)
 		environment: 'happy-dom',
@@ -27,4 +27,6 @@ export default defineConfig({
 		// Setup files (if needed later)
 		// setupFiles: ['./vitest.setup.ts'],
 	},
-});
+})
+
+export default vitestConfig
