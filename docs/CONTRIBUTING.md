@@ -104,8 +104,7 @@ pen/
 │   ├── core/
 │   │   ├── route-builder/  # Build-time route generation
 │   │   ├── router/         # Runtime navigation
-│   │   ├── runtime/        # Runtime app composition
-│   │   └── build-tools/    # Build utilities
+│   │   └── runtime/        # Runtime app composition
 │   └── lib/                # Shared utilities
 ├── examples/               # Example apps
 ├── docs/                   # Documentation

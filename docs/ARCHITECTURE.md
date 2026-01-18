@@ -81,7 +81,6 @@ src/
 │   └── types.ts      # CLI command contract
 │
 ├── core/             # Framework core
-│   ├── build-tools/  # Task pipeline & formatting
 │   ├── config.ts     # Configuration loading
 │   ├── constants.ts  # Build-time constants
 │   ├── route-builder/# Build-time route generation
