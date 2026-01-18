@@ -1,8 +1,8 @@
 import { join, resolve } from 'path'
 import { build as rolldownBuild } from 'rolldown'
 import nodeExternals from 'rollup-plugin-node-externals'
-
-import { duration, type Task } from '@idlesummer/tasker'
+import { duration } from '@idlesummer/tasker'
+import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 
 export const compileTask: Task<BuildContext> = {

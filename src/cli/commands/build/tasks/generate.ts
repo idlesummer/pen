@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-
-import { duration, type Task } from '@idlesummer/tasker'
+import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
 import { buildComponentMap } from '@/core/route-builder'
+import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 
 export const generateTasks: Task<BuildContext>[] = [

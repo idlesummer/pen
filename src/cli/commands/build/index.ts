@@ -1,6 +1,6 @@
 import pc from 'picocolors'
-import { loadConfig } from '@/core/config'
 import { pipe, duration, fileList } from '@idlesummer/tasker'
+import { loadConfig } from '@/core/config'
 import { CLI_NAME, VERSION } from '@/core/constants'
 import { scanTasks } from './tasks/scan'
 import { generateTasks } from './tasks/generate'
