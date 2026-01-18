@@ -5,7 +5,6 @@ import { CLI_NAME, VERSION } from '@/core/constants'
 import { scanTasks } from './tasks/scan'
 import { generateTasks } from './tasks/generate'
 import { compileTask } from './tasks/compile'
-
 import type { CLICommand } from '../../types'
 
 export const build: CLICommand = {
