@@ -1,15 +1,12 @@
 # Source files (npm-specific - dev files that should be gitignored but not published)
 src/
 tsconfig.json
-tsup.config.ts
+tsdown.config.ts
 eslint.config.mjs
 
 # Documentation
 docs/
 examples/
-
-# Python reference
-*.py
 
 # Tests
 test/

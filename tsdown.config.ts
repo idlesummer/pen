@@ -22,9 +22,10 @@ const tsdownConfig = defineConfig({
   },
 
   // Output options
-  dts: true,
-  minify: true,
-  sourcemap: true,
+  dts: true,                // emit .d.ts type declarations
+  clean: true,              // clean dist/ before build
+  minify: true,             // for smaller builds
+  sourcemap: true,          // source maps for debugging
 
   // Build-time constant injection
   define: {
