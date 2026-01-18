@@ -43,6 +43,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@idlesummer/tasker": "^0.1.2",
     "commander": "^14.0.2",
     "ora": "^9.0.0",
     "picomatch": "^4.0.3",
