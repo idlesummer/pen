@@ -1,6 +1,6 @@
 # @idlesummer/pen
 
-File-based routing for React Ink terminal applications.
+File-based routing framework for React Ink terminal applications (inspired by Next.js).
 
 > **Heads up:** This is a personal learning project and my first attempt at building a routing framework. The API will change, there are bugs, and I'm figuring things out as I go. Use it for experiments and side projects, but probably not in production.
 
