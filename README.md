@@ -52,12 +52,6 @@ A lot, honestly:
 I'll get to these eventually. Or maybe you will! PRs welcome.
 
 ## Installation
-
-```bash
-npm install github:idlesummer/pen
-```
-
-Once published to npm, it'll be:
 ```bash
 npm install @idlesummer/pen
 ```
