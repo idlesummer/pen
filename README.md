@@ -267,7 +267,8 @@ npm run lint
 Things I want to add (no timeline, just a wishlist):
 
 - [ ] Dev mode with watch/rebuild
-- [ ] Dynamic routes (`[id]`, `[...slug]`)
+- [ ] Dynamic routes (`[id]`) and catch-all routes (`[...slug]`)
+- [ ] Integration tests
 - [ ] Loading states
 - [ ] Route middleware
 - [ ] Better error messages
