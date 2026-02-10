@@ -1,12 +1,20 @@
 /** Callbacks for tree traversal. */
 export type TraverseCallbacks<TNode> = {
+  /** Called when visiting each node (pre-order) */
   visit?: (node: TNode) => void
+  /** Returns children for a node (or creates them) */
   expand?: (node: TNode) => TNode[]
+  /** Attaches a child to its parent */
   attach?: (child: TNode, parent: TNode) => void
 }
 
+
 /**
  * Depth-first tree traversal with pluggable callbacks.
+ *
+ * @template TNode - The type of tree nodes
+ * @param root - The root node to start traversal from
+ * @param callbacks - Callbacks for visit, expand, and attach operations
  *
  * @example
  * // Visit existing tree
