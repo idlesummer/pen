@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
-import { generateRouteElement } from '../../../codegen/composer'
+import { generateRouteElement } from '../codegen/composer'
 
 export const generateTasks: Task<BuildContext>[] = [
   {
@@ -42,7 +42,7 @@ export const generateTasks: Task<BuildContext>[] = [
 
       // Generate component imports
       const imports = entries
-        .map((entry, i) => `import Component${i} from '${entry.importPath}'`)
+        .map((e, i) => `import Component${i} from '${e.importPath}'`)
         .join('\n')
 
       // Generate path lookup table to deduplicate absolute paths
