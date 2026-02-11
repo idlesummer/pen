@@ -2,26 +2,9 @@ import type { RouteManifest } from './route-manifest'
 import { relative } from 'path'
 
 /**
- * Absolute file system path (starts with /)
- */
-export type AbsolutePath = `/${string}`
-
-/**
- * Relative ES module import path (ends with .js)
- */
-export type RelativeImportPath = `${string}.js`
-
-/**
  * Maps absolute component file paths to their relative import paths.
- *
- * @example
- * ```ts
- * {
- *   '/home/user/pen/src/app/home/screen.tsx': '../../app/home/screen.js'
- * }
- * ```
  */
-export type ComponentImportMap = Record<AbsolutePath, RelativeImportPath>
+export type ComponentImportMap = Record<string, string>
 
 /**
  * Builds a component map from a route manifest.
