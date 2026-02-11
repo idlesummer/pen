@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { useRouter } from '@/core/router'
 import { composeRoute } from './composer'
 import { matchRoute } from './matcher'
@@ -9,29 +8,44 @@ import type { RouteManifest } from '@/core/route-builder'
 import type { ComponentMap } from '../types'
 
 /**
+ * Pre-built route elements mapped by URL.
+ * Built once at initialization to avoid recomposing on every navigation.
+ */
+export type PrebuiltRoutes = Record<string, ReactElement>
+
+/**
  * Props for the FileRouter component.
- * Defines the URL to render, the route manifest, and component map.
  */
 export interface FileRouterProps {
-  manifest: RouteManifest
-  components: ComponentMap
+  routes: PrebuiltRoutes
 }
 
 /**
- * Router component that orchestrates route matching and composition.
- * Returns the composed route element or throws NotFoundError.
- *
- * Routes are cached on first access to avoid recomposing the same route tree.
+ * Builds all route elements from the manifest upfront.
+ * Called once at initialization to pre-compose all routes.
  */
-export function FileRouter({ manifest, components }: FileRouterProps): ReactElement {
-  const routeCache = useRef<Record<string, ReactElement>>({})
-  const { url } = useRouter()
+export function buildRoutes(manifest: RouteManifest, components: ComponentMap): PrebuiltRoutes {
+  const routes: PrebuiltRoutes = {}
 
-  if (!(url in routeCache.current)) {
+  for (const url in manifest) {
     const route = matchRoute(url, manifest)
-    if (!route) throw new NotFoundError(url)
-    routeCache.current[url] = composeRoute(route, components)
+    if (route) {
+      routes[url] = composeRoute(route, components)
+    }
   }
 
-  return routeCache.current[url]
+  return routes
+}
+
+/**
+ * Router component that renders pre-built route elements.
+ * Simply looks up the current URL in the pre-built routes map.
+ */
+export function FileRouter({ routes }: FileRouterProps): ReactElement {
+  const { url } = useRouter()
+  const element = routes[url]
+
+  if (!element) throw new NotFoundError(url)
+
+  return element
 }
