@@ -3,7 +3,8 @@ import { ErrorBoundary } from './ui/ErrorBoundary'
 import { NotFoundBoundary } from './ui/NotFoundBoundary'
 import { ErrorScreen } from './ui/ErrorScreen'
 import { NotFoundScreen } from './ui/NotFoundScreen'
-import { FileRouter, type CompiledRoutes } from './routing/FileRouter'
+import { FileRouter } from './routing/FileRouter'
+import type { CompiledRoutes } from './routing/compiler'
 
 export interface AppProps {
   initialUrl: string
@@ -12,7 +13,7 @@ export interface AppProps {
 
 /**
  * Root application component.
- * Routes are pre-built at build time via codegen - no runtime composition needed!
+ * Routes are compiled at build time via codegen - no runtime composition needed!
  */
 export function App({ initialUrl, routes }: AppProps) {
   return (
