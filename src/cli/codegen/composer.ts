@@ -33,10 +33,7 @@ export interface ComponentEntry {
  * // Returns: "createElement(ErrorBoundary, { ... }, createElement(Component0, ...))"
  * ```
  */
-export function generateRouteElement(
-  route: Route,
-  componentEntries: ComponentEntry[],
-): string {
+export function generateRouteElement(route: Route, componentEntries: ComponentEntry[]): string {
   const getComponentIndex = (path: string) => {
     const index = componentEntries.findIndex((entry) => entry.absolutePath === path)
     if (index === -1) throw new Error(`Component not found: ${path}`)
