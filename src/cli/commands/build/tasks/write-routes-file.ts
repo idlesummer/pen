@@ -43,7 +43,7 @@ export const writeRoutesFile: Task<BuildContext> = {
       '// Do not manually edit this file',
       '',
       `import type { CompiledRoutes } from '${PACKAGE_NAME}'`,
-      "import { createElement } from 'react'",
+      'import { createElement } from \'react\'',
       '',
       imports,
       '',
