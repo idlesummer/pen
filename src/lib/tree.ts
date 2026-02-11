@@ -49,3 +49,18 @@ export function traverse<TNode>(root: TNode, callbacks: TraverseCallbacks<TNode>
     }
   }
 }
+
+export type AncestorCallbacks<TNode> = {
+  visit: (node: TNode) => void
+  parent: (node: TNode) => TNode | undefined
+}
+
+export function ancestors<TNode>(node: TNode, callbacks: AncestorCallbacks<TNode>) {
+  const { visit, parent } = callbacks
+  let currentNode: TNode | undefined = node
+
+  while (currentNode) {
+    visit(currentNode)
+    currentNode = parent(currentNode)
+  }
+}
