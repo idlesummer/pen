@@ -27,7 +27,7 @@ export function buildComponentMap(manifest: RouteManifest, outDir: string): Comp
   for (const absPath of segmentPaths) {
     // Calculate relative path and normalize to forward slashes for ES modules
     const relPath = relative(genDir, absPath).replace(/\\/g, '/')
-    const importPath = relPath + '.js'
+    const importPath = `${relPath}.js`
     componentMap[absPath] = importPath
   }
 
