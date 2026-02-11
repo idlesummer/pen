@@ -18,7 +18,7 @@ export type FileNode = {
  * @throws {DirectoryNotFoundError} If the directory doesn't exist
  * @throws {NotADirectoryError} If the path is not a directory
  */
-export function buildFileTree(appPath: string): FileNode {
+export function createFileTree(appPath: string): FileNode {
   const absPath = resolve(appPath)
   validateDirectory(absPath)
 
@@ -29,12 +29,12 @@ export function buildFileTree(appPath: string): FileNode {
 
   traverse(root, {
     attach: (child, parent) => parent.children!.push(child),
-    expand: (parentFile) => {
-      if (!parentFile.children) return []
+    expand: (file) => {
+      if (!file.children) return []
 
-      return readdirSync(parentFile.absPath, { withFileTypes: true })
+      return readdirSync(file.absPath, { withFileTypes: true })
         .filter(d => d.isFile() || d.isDirectory())
-        .map(d => createFileNode(d, parentFile))
+        .map(d => createFileNode(d, file))
         .sort((a, b) => a.name.localeCompare(b.name))
     },
   })

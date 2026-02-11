@@ -1,7 +1,7 @@
 // Functions
-export { buildFileTree } from './builders/file-tree'
-export { buildSegmentTree } from './builders/segment-tree'
-export { buildRouteManifest } from './builders/route-manifest'
+export { createFileTree } from './builders/file-tree'
+export { createSegmentTree } from './builders/segment-tree'
+export { createRouteManifest } from './builders/route-manifest'
 export { buildComponentMap } from './builders/component-map'
 
 // Errors
