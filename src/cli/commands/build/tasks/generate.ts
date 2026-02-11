@@ -62,27 +62,23 @@ export const generateTasks: Task<BuildContext>[] = [
       ].join('\n')
 
       await writeFile(componentsPath, code, 'utf-8')
+      return componentMap
     },
   },
   {
-    name: 'Writing routes.tsx',
-    onSuccess: (_, dur) => `Saved routes.tsx (${duration(dur)})`,
+    name: 'Writing routes.ts',
+    onSuccess: (_, dur) => `Saved routes.ts (${duration(dur)})`,
     run: async (ctx) => {
       const genDir = join(ctx.outDir, 'generated')
-      const routesPath = join(genDir, 'routes.tsx')
+      const routesPath = join(genDir, 'routes.ts')
       await mkdir(genDir, { recursive: true })
 
-      const componentMap = buildComponentMap(ctx.manifest!, ctx.outDir)
+      const componentMap = ctx.componentMap
       const entries = Object.entries(componentMap).sort(([a], [b]) => a.localeCompare(b))
 
       // Generate component imports
       const imports = entries
         .map(([_, importPath], i) => `import Component${i} from '${importPath}'`)
-        .join('\n')
-
-      // Build component map for composition
-      const componentMapCode = entries
-        .map(([absPath], i) => `  '${absPath.replace(/\\/g, '\\\\')}': Component${i},`)
         .join('\n')
 
       // Generate pre-built route elements
@@ -97,7 +93,7 @@ export const generateTasks: Task<BuildContext>[] = [
         '// Do not manually edit this file',
         '',
         "import { createElement } from 'react'",
-        `import { ErrorBoundary, NotFoundBoundary, type PrebuiltRoutes } from '${PACKAGE_NAME}'`,
+        `import type { PrebuiltRoutes } from '${PACKAGE_NAME}'`,
         '',
         imports,
         '',
