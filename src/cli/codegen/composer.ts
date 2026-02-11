@@ -33,7 +33,7 @@ export function generateRouteElement(route: Route, componentEntries: ComponentEn
   const leafSegment = route.chain[0]!
   const screenPath = leafSegment['screen']!
   const screenIndex = getComponentIndex(screenPath)
-  let element = `createElement(Component${screenIndex}, { key: '${screenPath}' })`
+  let element = `createElement(Component${screenIndex}, { key: paths[${screenIndex}] })`
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
@@ -41,21 +41,21 @@ export function generateRouteElement(route: Route, componentEntries: ComponentEn
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = getComponentIndex(path)
-      element = `createElement(NotFoundBoundary, { key: '${path}', fallback: Component${index} }, ${element})`
+      element = `createElement(NotFoundBoundary, { key: paths[${index}], fallback: Component${index} }, ${element})`
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = getComponentIndex(path)
-      element = `createElement(ErrorBoundary, { key: '${path}', fallback: Component${index} }, ${element})`
+      element = `createElement(ErrorBoundary, { key: paths[${index}], fallback: Component${index} }, ${element})`
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
       const index = getComponentIndex(path)
-      element = `createElement(Component${index}, { key: '${path}' }, ${element})`
+      element = `createElement(Component${index}, { key: paths[${index}] }, ${element})`
     }
   }
 

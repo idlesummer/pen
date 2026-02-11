@@ -45,6 +45,9 @@ export const generateTasks: Task<BuildContext>[] = [
         .map((entry, i) => `import Component${i} from '${entry.importPath}'`)
         .join('\n')
 
+      // Generate path lookup table to deduplicate absolute paths
+      const pathsArray = entries.map(e => `  '${e.absolutePath}',`).join('\n')
+
       // Generate pre-built route elements
       const routeElements: string[] = []
       for (const [url, route] of Object.entries(ctx.manifest!)) {
@@ -60,6 +63,11 @@ export const generateTasks: Task<BuildContext>[] = [
         `import type { CompiledRoutes } from '${PACKAGE_NAME}'`,
         '',
         imports,
+        '',
+        '// Path lookup table (deduplicates absolute paths used as keys)',
+        'const paths = [',
+        pathsArray,
+        '] as const',
         '',
         '// Compiled route elements generated at build time',
         'export const routes: CompiledRoutes = {',
