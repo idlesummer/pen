@@ -51,9 +51,7 @@ export const generateTasks: Task<BuildContext>[] = [
         .join('\n')
 
       // Build path-to-index lookup for route element generation
-      const pathToIndex = Object.fromEntries(
-        entries.map((e, i) => [e.absolutePath, i])
-      )
+      const pathToIndex = Object.fromEntries(entries.map((e, i) => [e.absolutePath, i]))
 
       // Generate pre-built route elements
       const routeElements: string[] = []
