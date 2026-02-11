@@ -47,7 +47,7 @@ export const writeRoutesFile: Task<BuildContext> = {
       '',
       imports,
       '',
-      '// Path lookup table (deduplicates absolute paths used as keys)',
+      '// Use import paths as unique keys',
       'const importPaths = [',
       importPaths,
       '] as const',
