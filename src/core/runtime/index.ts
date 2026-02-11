@@ -17,5 +17,5 @@ export { NotFoundError, EmptyChainError, ComponentNotFoundError } from './errors
 export type { AppProps } from './App'
 export type { ErrorComponentProps } from './ui/ErrorBoundary'
 export type { NotFoundComponentProps } from './ui/NotFoundBoundary'
-export type { FileRouterProps, PrebuiltRoutes } from './routing/FileRouter'
+export type { FileRouterProps, CompiledRoutes } from './routing/FileRouter'
 export type { ComponentMap } from './types'
