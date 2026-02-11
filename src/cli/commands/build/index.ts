@@ -1,8 +1,8 @@
+import type { CLICommand } from '../../types'
 import pc from 'picocolors'
 import { pipe, duration, fileList } from '@idlesummer/tasker'
 import { loadConfig } from '@/core/config'
 import { CLI_NAME, VERSION } from '@/core/constants'
-import type { CLICommand } from '../../types'
 
 // Import individual tasks
 import { scanFilesystem } from './tasks/scan-filesystem'
@@ -27,7 +27,7 @@ export const build: CLICommand = {
       console.log(pc.dim( `  output: ${outDir}`))
       console.log()
 
-      const tasks = [
+      const pipeline = pipe([
         scanFilesystem,
         buildSegmentTree,
         generateManifest,
@@ -36,8 +36,7 @@ export const build: CLICommand = {
         writeRoutesFile,
         writeEntryFile,
         compileApplication,
-      ]
-      const pipeline = pipe(tasks)
+      ])
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })
       console.log()
