@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
-import { generateRouteElement, type ComponentEntry } from '../../../codegen/composer'
+import { generateRouteElement } from '../../../codegen/composer'
 
 export const generateTasks: Task<BuildContext>[] = [
   {
@@ -38,9 +38,7 @@ export const generateTasks: Task<BuildContext>[] = [
       const routesPath = join(genDir, 'routes.ts')
       await mkdir(genDir, { recursive: true })
 
-      const entries: ComponentEntry[] = Object.entries(ctx.componentMap!)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([absolutePath, importPath]) => ({ absolutePath, importPath }))
+      const entries = ctx.componentEntries!
 
       // Generate component imports
       const imports = entries

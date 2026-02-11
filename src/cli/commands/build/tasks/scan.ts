@@ -1,7 +1,7 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import { duration } from '@idlesummer/tasker'
-import { createFileTree, createSegmentTree, createRouteManifest, buildComponentMap } from '@/core/route-builder'
+import { createFileTree, createSegmentTree, createRouteManifest, buildComponentEntries } from '@/core/route-builder'
 
 export const scanTasks: Task<BuildContext>[] = [
   {
@@ -23,9 +23,9 @@ export const scanTasks: Task<BuildContext>[] = [
       ({ manifest: createRouteManifest(ctx.segmentTree!) }),
   },
   {
-    name: 'Building component map',
-    onSuccess: (_, dur) => `Built component map (${duration(dur)})`,
+    name: 'Building component entries',
+    onSuccess: (_, dur) => `Built component entries (${duration(dur)})`,
     run: async (ctx) =>
-      ({ componentMap: buildComponentMap(ctx.manifest!, ctx.outDir) }),
+      ({ componentEntries: buildComponentEntries(ctx.manifest!, ctx.outDir) }),
   },
 ]

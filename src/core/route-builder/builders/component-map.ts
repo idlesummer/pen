@@ -2,15 +2,21 @@ import type { RouteManifest } from './route-manifest'
 import { relative } from 'path'
 
 /**
- * Maps absolute component file paths to their relative import paths.
+ * Component entry for codegen.
+ * Maps the absolute file path to its import path.
  */
-export type ComponentImportMap = Record<string, string>
+export interface ComponentEntry {
+  /** Absolute file system path to the component */
+  absolutePath: string
+  /** Import path used in generated code */
+  importPath: string
+}
 
 /**
- * Builds a component map from a route manifest.
- * Maps absolute component paths to relative import paths.
+ * Builds a sorted list of component entries from a route manifest.
+ * Each entry contains the absolute path and its relative import path.
  */
-export function buildComponentMap(manifest: RouteManifest, outDir: string): ComponentImportMap {
+export function buildComponentEntries(manifest: RouteManifest, outDir: string): ComponentEntry[] {
   const segmentPaths = new Set<string>()
 
   // Collect all unique absolute paths from manifest
@@ -23,16 +29,17 @@ export function buildComponentMap(manifest: RouteManifest, outDir: string): Comp
     }
   }
 
-  // Build map: absolute path → relative import path
-  const componentMap: ComponentImportMap = {}
+  // Build entries: absolute path → relative import path
   const genDir = `${outDir}/generated`
+  const entries: ComponentEntry[] = []
 
-  for (const absPath of segmentPaths) {
+  for (const absolutePath of segmentPaths) {
     // Calculate relative path and normalize to forward slashes for ES modules
-    const relPath = relative(genDir, absPath).replace(/\\/g, '/')
+    const relPath = relative(genDir, absolutePath).replace(/\\/g, '/')
     const importPath = `${relPath}.js`
-    componentMap[absPath] = importPath
+    entries.push({ absolutePath, importPath })
   }
 
-  return componentMap
+  // Sort by absolute path for deterministic output
+  return entries.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath))
 }
