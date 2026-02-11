@@ -1,6 +1,6 @@
-import { removeExtension } from '@/lib/path-utils'
-import { collectAncestors, traverseDepthFirst } from '@/lib/tree-utils'
 import type { SegmentNode, SegmentRoles } from './segment-tree'
+import { removeExtension } from '@/lib/path-utils'
+import { ancestors, traverse } from '@/lib/tree'
 
 export type RouteManifest = Record<string, Route>
 export type Route = {
@@ -20,37 +20,35 @@ export type Route = {
 export function createRouteManifest(segmentTree: SegmentNode): RouteManifest {
   const manifest: RouteManifest = {}
 
-  function visit(segment: SegmentNode) {
-    // Only create manifest entry if this node has a screen
-    if (!segment.roles.screen) return
+  traverse(segmentTree, {
+    expand: parentSegment => parentSegment.children ?? [],
+    visit: segment => {
+      if (!segment.roles.screen) return
 
-    // Build ancestor chain (leaf → root order)
-    const segmentChain = collectAncestors(
-      segment,
-      node => node.parent,
-      ancestorSegment => {
-        const roles: SegmentRoles = {}
-        const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
-
-        for (const [roleName, path] of entries)
-          if (roleName !== 'screen' || ancestorSegment === segment) // Skip ancestor screens
-            roles[roleName] = removeExtension(path)
-
-        return roles
-      },
-    )
-
-    manifest[segment.url] = {
-      url: segment.url,
-      chain: segmentChain,
-    }
-  }
-
-  traverseDepthFirst({
-    root: segmentTree,
-    visit,
-    expand: parentSegment => parentSegment.children,
+      const url = segment.url
+      const chain = createSegmentChain(segment)
+      manifest[url] = { url, chain }
+    },
   })
 
   return manifest
+}
+
+/** Builds ancestor chain from leaf → root order. */
+function createSegmentChain(segment: SegmentNode) {
+  const chain: SegmentRoles[] = []
+
+  ancestors(segment, {
+    parent: ancestorSegment => ancestorSegment.parent,
+    visit: (ancestorSegment) => {
+      const roles: SegmentRoles = {}
+      const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
+
+      for (const [name, path] of entries)
+        if (name !== 'screen' || ancestorSegment === segment) // Skip ancestor screens
+          roles[name] = removeExtension(path)
+      chain.push(roles)
+    },
+  })
+  return chain
 }

@@ -1,5 +1,5 @@
-import { relative } from 'path'
 import type { RouteManifest } from './route-manifest'
+import { relative } from 'path'
 
 export type ComponentImportMap = Record<string, string>
 
