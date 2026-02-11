@@ -1,7 +1,7 @@
 // src/core/router/components/GlobalErrorFallback.tsx
 import { Box, Text, useInput } from 'ink'
 import { useState } from 'react'
-import { type ErrorComponentProps } from '../boundaries/ErrorBoundary'
+import { type ErrorComponentProps } from './ErrorBoundary'
 
 /** Global error fallback that always wraps the app. */
 export function ErrorScreen({ error, reset }: ErrorComponentProps) {

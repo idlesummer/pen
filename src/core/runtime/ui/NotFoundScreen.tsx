@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from 'ink'
 import { useRouter } from '@/core/router'
-import { type NotFoundComponentProps } from '../boundaries/NotFoundBoundary'
+import { type NotFoundComponentProps } from './NotFoundBoundary'
 
 /**
  * Not found error screen displayed when a route is not found.
