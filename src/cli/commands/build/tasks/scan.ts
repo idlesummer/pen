@@ -19,10 +19,7 @@ export const scanTasks: Task<BuildContext>[] = [
   {
     name: 'Generating manifest',
     onSuccess: (_, dur) => `Generated manifest (${duration(dur)})`,
-    run: async (ctx) => {
-      // await delay(500)  // Simulate work
-      const manifest = buildRouteManifest(ctx.segmentTree!)
-      return { manifest }
-    },
+    run: async (ctx) =>
+      ({ manifest: buildRouteManifest(ctx.segmentTree!) }),
   },
 ]
