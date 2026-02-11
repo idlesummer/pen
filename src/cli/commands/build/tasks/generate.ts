@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
-import { generateRouteElement } from '@/cli/codegen/composer'
+import { generateRouteElement } from '../../../codegen/composer'
 
 export const generateTasks: Task<BuildContext>[] = [
   {
