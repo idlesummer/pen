@@ -1,15 +1,4 @@
-import type { Route } from '@/core/route-builder'
-
-/**
- * Represents a component entry for codegen.
- * Maps the absolute file path to its import path.
- */
-export interface ComponentEntry {
-  /** Absolute file system path to the component */
-  absolutePath: string
-  /** Import path used in generated code */
-  importPath: string
-}
+import type { Route, ComponentEntry } from '@/core/route-builder'
 
 /**
  * Generates a route element by composing React components into nested createElement calls.
