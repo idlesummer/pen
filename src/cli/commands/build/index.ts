@@ -2,10 +2,17 @@ import pc from 'picocolors'
 import { pipe, duration, fileList } from '@idlesummer/tasker'
 import { loadConfig } from '@/core/config'
 import { CLI_NAME, VERSION } from '@/core/constants'
-import { scanTasks } from './tasks/scan'
-import { generateTasks } from './tasks/generate'
-import { compileTask } from './tasks/compile'
 import type { CLICommand } from '../../types'
+
+// Import individual tasks
+import { scanFilesystem } from './tasks/scan-filesystem'
+import { buildSegmentTree } from './tasks/build-segment-tree'
+import { generateManifest } from './tasks/generate-manifest'
+import { buildComponents } from './tasks/build-component-entries'
+import { writeManifestFile } from './tasks/write-manifest-file'
+import { writeRoutesFile } from './tasks/write-routes-file'
+import { writeEntryFile } from './tasks/write-entry-file'
+import { compileApplication } from './tasks/compile-application'
 
 export const build: CLICommand = {
   name: 'build',
@@ -20,7 +27,16 @@ export const build: CLICommand = {
       console.log(pc.dim( `  output: ${outDir}`))
       console.log()
 
-      const tasks = [...scanTasks, ...generateTasks, compileTask]
+      const tasks = [
+        scanFilesystem,
+        buildSegmentTree,
+        generateManifest,
+        buildComponents,
+        writeManifestFile,
+        writeRoutesFile,
+        writeEntryFile,
+        compileApplication,
+      ]
       const pipeline = pipe(tasks)
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })

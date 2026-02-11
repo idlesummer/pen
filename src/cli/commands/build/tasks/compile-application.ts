@@ -5,7 +5,9 @@ import { duration } from '@idlesummer/tasker'
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 
-export const compileTask: Task<BuildContext> = {
+// ===== Main Task =====
+
+export const compileApplication: Task<BuildContext> = {
   name: 'Compiling application',
   onSuccess: (_, dur) => `Compiled application (${duration(dur)})`,
   onError: (err) => `Compilation failed: ${err.message}`,
@@ -20,7 +22,7 @@ export const compileTask: Task<BuildContext> = {
       },
       plugins: [nodeExternals()],
       output: {
-        dir: resolve(join(ctx.outDir, 'dist')),  // Also resolve output
+        dir: resolve(join(ctx.outDir, 'dist')),
         format: 'esm',
         sourcemap: true,
         minify: true,
