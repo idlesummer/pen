@@ -26,6 +26,5 @@ export function FileRouter({ manifest, components }: FileRouterProps): ReactElem
 
   if (!route)
     throw new NotFoundError(url)
-
   return composeRoute(route, components)
 }
