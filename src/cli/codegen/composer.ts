@@ -22,9 +22,9 @@ import type { Route, ComponentEntry } from '@/core/route-builder'
  * // Returns: "createElement(ErrorBoundary, { ... }, createElement(Component0, ...))"
  * ```
  */
-export function generateRouteElement(route: Route, componentEntries: ComponentEntry[]): string {
+export function generateRouteElement(route: Route, componentEntries: ComponentEntry[]) {
   const getComponentIndex = (path: string) => {
-    const index = componentEntries.findIndex((entry) => entry.absolutePath === path)
+    const index = componentEntries.findIndex(entry => entry.absolutePath === path)
     if (index === -1) throw new Error(`Component not found: ${path}`)
     return index
   }
