@@ -7,9 +7,7 @@ export { NotFoundScreen } from './ui/NotFoundScreen'
 export { FileRouter } from './routing/FileRouter'
 
 // Functions
-export { composeRoute } from './routing/composer'
 export { matchRoute } from './routing/matcher'
-export { compileRoutes } from './routing/compiler'
 
 // Errors
 export { NotFoundError, EmptyChainError, ComponentNotFoundError } from './errors'
@@ -19,5 +17,4 @@ export type { AppProps } from './App'
 export type { ErrorComponentProps } from './ui/ErrorBoundary'
 export type { NotFoundComponentProps } from './ui/NotFoundBoundary'
 export type { FileRouterProps } from './routing/FileRouter'
-export type { CompiledRoutes } from './routing/compiler'
-export type { ComponentMap } from './types'
+export type { ComponentMap, CompiledRoutes } from './types'

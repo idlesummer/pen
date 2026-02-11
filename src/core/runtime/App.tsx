@@ -4,7 +4,7 @@ import { NotFoundBoundary } from './ui/NotFoundBoundary'
 import { ErrorScreen } from './ui/ErrorScreen'
 import { NotFoundScreen } from './ui/NotFoundScreen'
 import { FileRouter } from './routing/FileRouter'
-import type { CompiledRoutes } from './routing/compiler'
+import type { CompiledRoutes } from './types'
 
 export interface AppProps {
   initialUrl: string

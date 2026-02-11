@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
+import { generateRouteElement } from '@/cli/codegen/composer'
 
 export const generateTasks: Task<BuildContext>[] = [
   {
@@ -99,50 +100,3 @@ export const generateTasks: Task<BuildContext>[] = [
     },
   },
 ]
-
-/**
- * Generates the code for a single route element tree.
- * Mirrors the runtime composition logic from composer.ts but generates static code.
- */
-function generateRouteElement(
-  route: { url: string; chain: Array<Record<string, string>> },
-  componentEntries: Array<[string, string]>,
-): string {
-  const getComponentIndex = (path: string) => {
-    const index = componentEntries.findIndex(([absPath]) => absPath === path)
-    if (index === -1) throw new Error(`Component not found: ${path}`)
-    return index
-  }
-
-  // Start with the screen from the first segment
-  const leafSegment = route.chain[0]!
-  const screenPath = leafSegment['screen']!
-  const screenIndex = getComponentIndex(screenPath)
-  let element = `createElement(Component${screenIndex}, { key: '${screenPath}' })`
-
-  // Process segments from leaf → root (same order as composer.ts)
-  for (const segment of route.chain) {
-    // Not-found boundary
-    if (segment['not-found']) {
-      const path = segment['not-found']
-      const index = getComponentIndex(path)
-      element = `createElement(NotFoundBoundary, { key: '${path}', fallback: Component${index} }, ${element})`
-    }
-
-    // Error boundary
-    if (segment['error']) {
-      const path = segment['error']
-      const index = getComponentIndex(path)
-      element = `createElement(ErrorBoundary, { key: '${path}', fallback: Component${index} }, ${element})`
-    }
-
-    // Layout
-    if (segment['layout']) {
-      const path = segment['layout']
-      const index = getComponentIndex(path)
-      element = `createElement(Component${index}, { key: '${path}' }, ${element})`
-    }
-  }
-
-  return element
-}
