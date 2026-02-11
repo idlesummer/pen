@@ -30,7 +30,11 @@ export const writeComponentsFile: Task<BuildContext> = {
       '// NOTE: This file is kept for documentation/debugging.',
       '// Shows the mapping between component indices and their file paths.',
       '',
-      `export const components = ${JSON.stringify(formattedEntries, null, 2)} as const`,
+      `import type { ComponentEntry } from '${PACKAGE_NAME}'`,
+      '',
+      'export type IndexedComponentEntry = ComponentEntry & { index: number }',
+      '',
+      `export const components: readonly IndexedComponentEntry[] = ${JSON.stringify(formattedEntries, null, 2)} as const`,
       '',
     ].join('\n')
 
