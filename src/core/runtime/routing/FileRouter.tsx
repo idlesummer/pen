@@ -1,40 +1,16 @@
-import { useRouter } from '@/core/router'
-import { composeRoute } from './composer'
-import { matchRoute } from './matcher'
-import { NotFoundError } from '../errors'
-
 import type { ReactElement } from 'react'
-import type { RouteManifest } from '@/core/route-builder'
-import type { ComponentMap } from '../types'
+import { useRouter } from '@/core/router'
+import { NotFoundError } from '../errors'
 
 /**
  * Pre-built route elements mapped by URL.
  * Built once at initialization to avoid recomposing on every navigation.
  */
-export type PrebuiltRoutes = Record<string, ReactElement>
+export type CompiledRoutes = Record<string, ReactElement>
 
-/**
- * Props for the FileRouter component.
- */
+/** Props for the FileRouter component. */
 export interface FileRouterProps {
-  routes: PrebuiltRoutes
-}
-
-/**
- * Builds all route elements from the manifest upfront.
- * Called once at initialization to pre-compose all routes.
- */
-export function buildRoutes(manifest: RouteManifest, components: ComponentMap): PrebuiltRoutes {
-  const routes: PrebuiltRoutes = {}
-
-  for (const url in manifest) {
-    const route = matchRoute(url, manifest)
-    if (route) {
-      routes[url] = composeRoute(route, components)
-    }
-  }
-
-  return routes
+  routes: CompiledRoutes
 }
 
 /**
@@ -46,6 +22,5 @@ export function FileRouter({ routes }: FileRouterProps): ReactElement {
   const element = routes[url]
 
   if (!element) throw new NotFoundError(url)
-
   return element
 }

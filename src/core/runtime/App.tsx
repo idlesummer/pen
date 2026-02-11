@@ -3,11 +3,11 @@ import { ErrorBoundary } from './ui/ErrorBoundary'
 import { NotFoundBoundary } from './ui/NotFoundBoundary'
 import { ErrorScreen } from './ui/ErrorScreen'
 import { NotFoundScreen } from './ui/NotFoundScreen'
-import { FileRouter, type PrebuiltRoutes } from './routing/FileRouter'
+import { FileRouter, type CompiledRoutes } from './routing/FileRouter'
 
 export interface AppProps {
   initialUrl: string
-  routes: PrebuiltRoutes
+  routes: CompiledRoutes
 }
 
 /**
