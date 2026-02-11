@@ -1,4 +1,4 @@
-import type { Route, ComponentEntry } from '@/core/route-builder'
+import type { Route } from '@/core/route-builder'
 
 /**
  * Generates a route element by composing React components into nested createElement calls.
@@ -13,19 +13,19 @@ import type { Route, ComponentEntry } from '@/core/route-builder'
  * 4. Error boundary (wraps layout + all descendants)
  *
  * @param route - The route to generate code for
- * @param componentEntries - Array of component entries with absolute and import paths
+ * @param pathToIndex - Lookup table mapping absolute paths to component indices
  * @returns A code string that creates the nested React element
  *
  * @example
  * ```ts
- * generateRouteElement(route, components)
+ * generateRouteElement(route, pathToIndex)
  * // Returns: "createElement(ErrorBoundary, { ... }, createElement(Component0, ...))"
  * ```
  */
-export function generateRouteElement(route: Route, componentEntries: ComponentEntry[]) {
+export function generateRouteElement(route: Route, pathToIndex: Record<string, number>) {
   const getComponentIndex = (path: string) => {
-    const index = componentEntries.findIndex(entry => entry.absolutePath === path)
-    if (index === -1) throw new Error(`Component not found: ${path}`)
+    const index = pathToIndex[path]
+    if (index === undefined) throw new Error(`Component not found: ${path}`)
     return index
   }
 

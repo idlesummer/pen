@@ -50,10 +50,15 @@ export const generateTasks: Task<BuildContext>[] = [
         .map(e => `  ${JSON.stringify(e.absolutePath)},`)
         .join('\n')
 
+      // Build path-to-index lookup for route element generation
+      const pathToIndex = Object.fromEntries(
+        entries.map((e, i) => [e.absolutePath, i])
+      )
+
       // Generate pre-built route elements
       const routeElements: string[] = []
       for (const [url, route] of Object.entries(ctx.manifest!)) {
-        const elementCode = generateRouteElement(route, entries)
+        const elementCode = generateRouteElement(route, pathToIndex)
         routeElements.push(`  '${url}': ${elementCode},`)
       }
 
