@@ -66,7 +66,7 @@ export const generateTasks: Task<BuildContext>[] = [
       ].join('\n')
 
       await writeFile(componentsPath, code, 'utf-8')
-      return componentMap
+      return { componentMap }
     },
   },
   {
@@ -77,7 +77,7 @@ export const generateTasks: Task<BuildContext>[] = [
       const routesPath = join(genDir, 'routes.ts')
       await mkdir(genDir, { recursive: true })
 
-      const componentMap = ctx.componentMap
+      const componentMap = ctx.componentMap!
       const entries = Object.entries(componentMap).sort(([a], [b]) => a.localeCompare(b))
 
       // Generate component imports
