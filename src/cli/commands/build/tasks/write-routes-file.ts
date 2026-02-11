@@ -16,20 +16,20 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routesPath = join(genDir, 'routes.ts')
     await mkdir(genDir, { recursive: true })
 
-    const entries = ctx.componentEntries!
+    const imports = ctx.componentImports!
 
     // Generate component imports
-    const imports = entries
+    const importStatements = imports
       .map((e, i) => `import Component${i} from '${e.importPath}'`)
       .join('\n')
 
     // Generate path lookup table to deduplicate absolute paths
-    const importPaths = entries
+    const importPaths = imports
       .map(e => `  ${JSON.stringify(e.absolutePath)},`)
       .join('\n')
 
     // Build path-to-index lookup for route element generation
-    const pathToIndex = Object.fromEntries(entries.map((e, i) => [e.absolutePath, i]))
+    const pathToIndex = Object.fromEntries(imports.map((e, i) => [e.absolutePath, i]))
 
     // Generate pre-built route elements
     const routeElements: string[] = []
@@ -45,7 +45,7 @@ export const writeRoutesFile: Task<BuildContext> = {
       `import type { CompiledRoutes } from '${PACKAGE_NAME}'`,
       'import { createElement } from \'react\'',
       '',
-      imports,
+      importStatements,
       '',
       '// Use import paths as unique keys',
       'const importPaths = [',

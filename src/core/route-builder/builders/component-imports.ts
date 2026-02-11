@@ -2,10 +2,10 @@ import type { RouteManifest } from './route-manifest'
 import { relative } from 'path'
 
 /**
- * Component entry for codegen.
+ * Component import for codegen.
  * Maps the absolute file path to its import path.
  */
-export interface ComponentEntry {
+export interface ComponentImport {
   /** Absolute file system path to the component */
   absolutePath: string
   /** Import path used in generated code */
@@ -13,10 +13,10 @@ export interface ComponentEntry {
 }
 
 /**
- * Builds a sorted list of component entries from a route manifest.
+ * Builds a sorted list of component imports from a route manifest.
  * Each entry contains the absolute path and its relative import path.
  */
-export function buildComponentEntries(manifest: RouteManifest, outDir: string): ComponentEntry[] {
+export function buildComponentImports(manifest: RouteManifest, outDir: string): ComponentImport[] {
   const segmentPaths = new Set<string>()
 
   // Collect all unique absolute paths from manifest
@@ -31,7 +31,7 @@ export function buildComponentEntries(manifest: RouteManifest, outDir: string): 
 
   // Build entries: absolute path → relative import path
   const genDir = `${outDir}/generated`
-  const entries: ComponentEntry[] = []
+  const entries: ComponentImport[] = []
 
   for (const absolutePath of segmentPaths) {
     // Calculate relative path and normalize to forward slashes for ES modules
