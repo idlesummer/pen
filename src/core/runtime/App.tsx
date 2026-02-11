@@ -1,27 +1,20 @@
-import { useMemo } from 'react'
-import type { RouteManifest } from '@/core/route-builder'
-import type { ComponentMap } from './types'
-
 import { RouterProvider } from '@/core/router'
 import { ErrorBoundary } from './ui/ErrorBoundary'
 import { NotFoundBoundary } from './ui/NotFoundBoundary'
 import { ErrorScreen } from './ui/ErrorScreen'
 import { NotFoundScreen } from './ui/NotFoundScreen'
-import { FileRouter, buildRoutes } from './routing/FileRouter'
+import { FileRouter, type PrebuiltRoutes } from './routing/FileRouter'
 
 export interface AppProps {
   initialUrl: string
-  manifest: RouteManifest
-  components: ComponentMap
+  routes: PrebuiltRoutes
 }
 
-export function App({ initialUrl, manifest, components }: AppProps) {
-  // Pre-build all routes once (memoized - only runs when manifest/components change)
-  const routes = useMemo(
-    () => buildRoutes(manifest, components),
-    [manifest, components]
-  )
-
+/**
+ * Root application component.
+ * Routes are pre-built at build time via codegen - no runtime composition needed!
+ */
+export function App({ initialUrl, routes }: AppProps) {
   return (
     <ErrorBoundary fallback={ErrorScreen}>
       <RouterProvider initialUrl={initialUrl}>
