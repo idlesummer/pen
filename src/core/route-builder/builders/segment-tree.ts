@@ -3,8 +3,8 @@ import { parse, posix } from 'path'
 import { traverse } from '@/lib/tree'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 
-const ROLES = ['layout', 'screen', 'error', 'not-found'] as const
-type Role = typeof ROLES[number]
+export const ROLES = ['layout', 'screen', 'error', 'not-found'] as const
+export type Role = typeof ROLES[number]
 
 export type SegmentRoles = Partial<Record<Role, string>>
 export type SegmentNode = {
