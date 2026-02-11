@@ -1,6 +1,17 @@
 import type { Route } from '@/core/route-builder'
 
 /**
+ * Represents a component entry for codegen.
+ * Maps the absolute file path to its import path.
+ */
+export interface ComponentEntry {
+  /** Absolute file system path to the component */
+  absolutePath: string
+  /** Import path used in generated code */
+  importPath: string
+}
+
+/**
  * Generates a route element by composing React components into nested createElement calls.
  *
  * This function mirrors the runtime composition logic but generates static code strings
@@ -13,7 +24,7 @@ import type { Route } from '@/core/route-builder'
  * 4. Error boundary (wraps layout + all descendants)
  *
  * @param route - The route to generate code for
- * @param componentEntries - Array of [absolutePath, importPath] tuples for all components
+ * @param componentEntries - Array of component entries with absolute and import paths
  * @returns A code string that creates the nested React element
  *
  * @example
@@ -24,10 +35,10 @@ import type { Route } from '@/core/route-builder'
  */
 export function generateRouteElement(
   route: Route,
-  componentEntries: Array<[string, string]>,
+  componentEntries: ComponentEntry[],
 ): string {
   const getComponentIndex = (path: string) => {
-    const index = componentEntries.findIndex(([absPath]) => absPath === path)
+    const index = componentEntries.findIndex((entry) => entry.absolutePath === path)
     if (index === -1) throw new Error(`Component not found: ${path}`)
     return index
   }
