@@ -30,7 +30,6 @@ export function createRouteManifest(segmentTree: SegmentNode): RouteManifest {
       manifest[url] = { url, chain }
     },
   })
-
   return manifest
 }
 
