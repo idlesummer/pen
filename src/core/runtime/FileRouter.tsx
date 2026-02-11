@@ -1,8 +1,8 @@
 import { useRouter } from '@/core/router'
-import { NotFoundError } from '../errors'
+import { NotFoundError } from './errors'
 
 import type { ReactElement } from 'react'
-import type { CompiledRoutes } from '../types'
+import type { CompiledRoutes } from './types'
 
 /**
  * Props for the FileRouter component.
