@@ -3,7 +3,7 @@ import * as actions from './actions'
 import type { NavigationHistory } from './types'
 
 export interface RouterContextValue {
-  url: string
+  url: `${string}/`
   data: unknown | undefined
   history: readonly string[]    // Expose as readonly
   position: number              // Expose current position
