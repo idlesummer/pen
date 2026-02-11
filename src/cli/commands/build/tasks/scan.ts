@@ -9,12 +9,14 @@ export const scanTasks: Task<BuildContext>[] = [
   {
     name: 'Scanning filesystem...',
     onSuccess: (_, dur) => `Scanned filesystem (${duration(dur)})`,
-    run: async (ctx) => ({ fileTree: buildFileTree(ctx.appDir) }),
+    run: async (ctx) =>
+      ({ fileTree: buildFileTree(ctx.appDir) }),
   },
   {
     name: 'Building segment tree...',
     onSuccess: (_, dur) => `Built segment tree (${duration(dur)})`,
-    run: async (ctx) => ({ segmentTree: buildSegmentTree(ctx.fileTree!) }),
+    run: async (ctx) =>
+      ({ segmentTree: buildSegmentTree(ctx.fileTree!) }),
   },
   {
     name: 'Generating manifest',
