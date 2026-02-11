@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
-import { composeRoute, renderElementCode } from '../codegen/composer'
+import { generateRouteElement } from '../codegen/composer'
 
 export const generateTasks: Task<BuildContext>[] = [
   {
@@ -56,10 +56,7 @@ export const generateTasks: Task<BuildContext>[] = [
       // Generate pre-built route elements
       const routeElements: string[] = []
       for (const [url, route] of Object.entries(ctx.manifest!)) {
-        // Step 1: Compose the route into a tree structure
-        const tree = composeRoute(route, pathToIndex)
-        // Step 2: Render the tree as code with custom key expression
-        const elementCode = renderElementCode(tree, (i) => `importPaths[${i}]`)
+        const elementCode = generateRouteElement(route, pathToIndex)
         routeElements.push(`  '${url}': ${elementCode},`)
       }
 
