@@ -35,9 +35,9 @@ export const generateTasks: Task<BuildContext>[] = [
     onSuccess: (_, dur) => `Saved routes.ts (${duration(dur)})`,
     run: async (ctx) => {
       const genDir = join(ctx.outDir, 'generated')
-      const routesPath = join(genDir, 'routes.ts')
       await mkdir(genDir, { recursive: true })
 
+      const routesPath = join(genDir, 'routes.ts')
       const entries = Object.entries(ctx.componentMap!).sort(([a], [b]) => a.localeCompare(b))
 
       // Generate component imports
