@@ -46,7 +46,9 @@ export const generateTasks: Task<BuildContext>[] = [
         .join('\n')
 
       // Generate path lookup table to deduplicate absolute paths
-      const importPaths = entries.map(e => `  ${JSON.stringify(e.absolutePath)},`).join('\n')
+      const importPaths = entries
+        .map(e => `  ${JSON.stringify(e.absolutePath)},`)
+        .join('\n')
 
       // Generate pre-built route elements
       const routeElements: string[] = []
