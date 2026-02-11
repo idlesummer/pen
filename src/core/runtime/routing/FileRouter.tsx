@@ -20,6 +20,5 @@ export function FileRouter({ routes }: FileRouterProps): ReactElement {
   const element = routes[url]
 
   if (!element) throw new NotFoundError(url)
-
   return element
 }
