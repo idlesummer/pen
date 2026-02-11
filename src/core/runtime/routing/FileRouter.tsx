@@ -1,11 +1,11 @@
 import { useRouter } from '@/core/router'
-import { composeRoute } from './routing/composer'
-import { matchRoute } from './routing/matcher'
-import { NotFoundError } from './errors'
+import { composeRoute } from './composer'
+import { matchRoute } from './matcher'
+import { NotFoundError } from '../errors'
 
 import type { ReactElement } from 'react'
 import type { RouteManifest } from '@/core/route-builder'
-import type { ComponentMap } from './types'
+import type { ComponentMap } from '../types'
 
 /**
  * Props for the FileRouter component.

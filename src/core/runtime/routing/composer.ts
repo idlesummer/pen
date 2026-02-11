@@ -1,13 +1,13 @@
 import { createElement } from 'react'
 
-import { ErrorBoundary } from '../boundaries/ErrorBoundary'
-import { NotFoundBoundary } from '../boundaries/NotFoundBoundary'
+import { ErrorBoundary } from '../ui/ErrorBoundary'
+import { NotFoundBoundary } from '../ui/NotFoundBoundary'
 import { ComponentNotFoundError, EmptyChainError } from '../errors'
 
 import type { ComponentType, ReactElement } from 'react'
 import type { Route } from '@/core/route-builder'
-import type { ErrorComponentProps } from '../boundaries/ErrorBoundary'
-import type { NotFoundComponentProps } from '../boundaries/NotFoundBoundary'
+import type { ErrorComponentProps } from '../ui/ErrorBoundary'
+import type { NotFoundComponentProps } from '../ui/NotFoundBoundary'
 import type { ComponentMap } from '../types'
 
 /**
