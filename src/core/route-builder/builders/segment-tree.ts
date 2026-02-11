@@ -3,10 +3,10 @@ import { parse, posix } from 'path'
 import { traverse } from '@/lib/tree'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 
-export const ROLES = ['layout', 'screen', 'error', 'not-found'] as const
-export type Role = typeof ROLES[number]
+export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
+export type SegmentRole = typeof SEGMENT_ROLES[number]
 
-export type SegmentRoles = Partial<Record<Role, string>>
+export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
   segment: string
   url: `${string}/`
@@ -84,8 +84,8 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
 function assignRoles(segment: SegmentNode) {
   for (const child of segment.file.children ?? []) {
     const { name, ext } = parse(child.name)
-    if (ext === '.tsx' && ROLES.includes(name as Role))
-      segment.roles[name as Role] = child.absPath
+    if (ext === '.tsx' && SEGMENT_ROLES.includes(name as SegmentRole))
+      segment.roles[name as SegmentRole] = child.absPath
   }
 }
 
