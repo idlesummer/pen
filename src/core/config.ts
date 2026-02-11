@@ -4,7 +4,7 @@ import { pathToFileURL } from 'url'
 export interface PenConfig {
   /**
    * Directory containing your app routes.
-   * @default './src/app'
+   * @default './src/'
    */
   appDir: string
 
