@@ -1,5 +1,6 @@
 import { createContext, useState, useCallback, type PropsWithChildren } from 'react'
 import * as actions from './actions'
+import { normalizeUrl } from './actions'
 import type { NavigationHistory } from './types'
 
 export interface RouterContextValue {
@@ -22,13 +23,14 @@ export const RouterContext = createContext<RouterContextValue | null>(null)
 
 // Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
+  const normalizedInitialUrl = normalizeUrl(initialUrl)
   const [history, setHistory] = useState<NavigationHistory>({
-    stack: [{ url: initialUrl }],
+    stack: [{ url: normalizedInitialUrl }],
     position: 0,
   })
 
   // Grab the current url and data
-  const { url, data } = history.stack[history.position] ?? { url: initialUrl }
+  const { url, data } = history.stack[history.position] ?? { url: normalizedInitialUrl }
 
   // Push new URL and data to history
   const push = useCallback((newUrl: string, newData?: unknown) => {
