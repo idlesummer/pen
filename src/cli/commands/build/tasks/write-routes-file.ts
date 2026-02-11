@@ -113,6 +113,5 @@ function generateRouteElement(route: Route, pathToIndex: Record<string, number>)
       element = `createElement(Component${index}, { key: importPaths[${index}] }, ${element})`
     }
   }
-
   return element
 }
