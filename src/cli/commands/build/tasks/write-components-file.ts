@@ -24,7 +24,7 @@ export const writeComponentsFile: Task<BuildContext> = {
       '',
       'import type { ComponentEntry } from \'@idlesummer/pen\'',
       '',
-      `export const components: ComponentEntry = ${JSON.stringify(entries, null, 2)} as const`,
+      `export const components: ComponentEntry[] = ${JSON.stringify(entries, null, 2)} as const`,
       '',
     ].join('\n')
 
