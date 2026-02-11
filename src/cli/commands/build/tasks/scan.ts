@@ -1,9 +1,10 @@
+import type { Task } from '@idlesummer/tasker'
+import type { BuildContext } from '../types'
+
 import { duration } from '@idlesummer/tasker'
 import { buildFileTree } from '@/core/route-builder'
 import { buildSegmentTree } from '@/core/route-builder'
 import { buildRouteManifest } from '@/core/route-builder'
-import type { Task } from '@idlesummer/tasker'
-import type { BuildContext } from '../types'
 
 export const scanTasks: Task<BuildContext>[] = [
   {
