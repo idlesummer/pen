@@ -1,6 +1,6 @@
 import type { RouteManifest } from './route-manifest'
-import { SEGMENT_ROLES } from './segment-tree'
 import { relative } from 'path'
+import { SEGMENT_ROLES } from './segment-tree'
 
 /**
  * Component import for codegen.
@@ -23,9 +23,8 @@ export function buildComponentImports(manifest: RouteManifest, outDir: string): 
   // Collect all unique absolute paths from manifest
   for (const route of Object.values(manifest)) {
     for (const segment of route.chain) {
-      for (const role of SEGMENT_ROLES) {
+      for (const role of SEGMENT_ROLES)
         if (segment[role]) segmentPaths.add(segment[role])
-      }
     }
   }
 
