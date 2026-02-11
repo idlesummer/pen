@@ -17,7 +17,7 @@ export type Route = {
  * @param segmentTree - Segment tree with parent pointers
  * @returns Flat manifest ready for runtime composition
  */
-export function buildRouteManifest(segmentTree: SegmentNode): RouteManifest {
+export function createRouteManifest(segmentTree: SegmentNode): RouteManifest {
   const manifest: RouteManifest = {}
 
   function visit(segment: SegmentNode) {

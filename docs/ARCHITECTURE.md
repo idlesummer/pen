@@ -1,7 +1,7 @@
 # Architecture Documentation: @idlesummer/pen
 
-**Version:** 0.1.0  
-**Author:** idlesummer  
+**Version:** 0.1.0
+**Author:** idlesummer
 **Last Updated:** January 2026
 
 ---
@@ -345,7 +345,7 @@ interface RouterContext {
 - Testable: Easy to mock context
 - Modern: Matches Vite, Rollup, RxJS patterns
 
-**Alternative considered:** Listr2-style class API  
+**Alternative considered:** Listr2-style class API
 **Rejected because:** More boilerplate, less composable
 
 ---
@@ -359,7 +359,7 @@ interface RouterContext {
 - **Manifest phase**: Flattens for O(1) runtime lookups
 - Separation makes each phase simpler
 
-**Alternative considered:** Direct file tree → manifest  
+**Alternative considered:** Direct file tree → manifest
 **Rejected because:** Would mix concerns, harder to validate
 
 ---
@@ -373,7 +373,7 @@ interface RouterContext {
 - Manifest stays portable (just data)
 - Easy to debug (full paths visible)
 
-**Tradeoff:** Manifest not portable across machines  
+**Tradeoff:** Manifest not portable across machines
 **Acceptable because:** Manifest is generated per build
 
 ---
@@ -388,7 +388,7 @@ interface RouterContext {
 - Debugging: Source maps point to real files
 - Performance: No runtime `require()` overhead
 
-**Alternative considered:** Dynamic imports at runtime  
+**Alternative considered:** Dynamic imports at runtime
 **Rejected because:** Loses type safety, slower startup
 
 ---
@@ -403,7 +403,7 @@ interface RouterContext {
 - Works with dynamic components
 - Testable: Easy to mock
 
-**Alternative considered:** JSX strings + eval  
+**Alternative considered:** JSX strings + eval
 **Rejected because:** Security risk, loses type safety
 
 ---
@@ -432,11 +432,11 @@ User runs: pen build
 
 2. Scan Phase
    src/app/ (filesystem)
-     ↓ buildFileTree() [BFS]
+     ↓ createFileTree() [BFS]
    FileNode tree
-     ↓ buildSegmentTree() [DFS]
+     ↓ createSegmentTree() [DFS]
    SegmentNode tree
-     ↓ buildRouteManifest()
+     ↓ createRouteManifest()
    RouteManifest (JSON)
 
 3. Generate Phase
@@ -691,6 +691,6 @@ export const config = {
 
 ---
 
-**Questions or contributions?**  
-GitHub: https://github.com/idlesummer/pen  
+**Questions or contributions?**
+GitHub: https://github.com/idlesummer/pen
 Issues: https://github.com/idlesummer/pen/issues

@@ -1,18 +1,15 @@
 import { parse, posix } from 'path'
-import { traverseDepthFirst } from '@/lib/tree-utils'
+import { traverse } from '@/lib/tree'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 import type { FileNode } from './file-tree'
 
-export type SegmentRoles = {
-  'layout'?: string
-  'screen'?: string
-  'error'?: string
-  'not-found'?: string
-}
+const ROLES = ['layout', 'screen', 'error', 'not-found'] as const
+type Role = typeof ROLES[number]
 
+export type SegmentRoles = Partial<Record<Role, string>>
 export type SegmentNode = {
-  segment: string // directory name
-  url: string
+  segment: string
+  url: `${string}/`
   type: 'page' | 'group'
   roles: SegmentRoles
   parent?: SegmentNode
@@ -21,19 +18,23 @@ export type SegmentNode = {
 }
 
 /**
- * Builds a segment tree from a file system tree.
+ * Creates a segment tree from a file system tree.
  *
  * @param fileTree - File system tree
- * @returns Segment tree with computed URLs and validated structure
+ * @returns Segment tree with assigned roles and validated structure
  * @throws {RootIsFileError} If the root is a file instead of a directory
  * @throws {DuplicateScreenError} If multiple screens map to the same URL
  */
-export function buildSegmentTree(fileTree: FileNode): SegmentNode {
+export function createSegmentTree(fileTree: FileNode): SegmentNode {
+  const tree = buildSegmentTree(fileTree) // Builds segment tree structure from file tree
+  bindSegmentTree(tree)                   // Binds roles to segments and validates tree structure
+  return tree
+}
+
+function buildSegmentTree(fileTree: FileNode) {
   if (fileTree.children === undefined)
     throw new RootIsFileError(fileTree.absPath)
 
-  // Special case: Root has "/" as url instead of "/app",
-  // and empty segment instead of "app"
   const root: SegmentNode = {
     segment: '',
     url: '/',
@@ -43,72 +44,56 @@ export function buildSegmentTree(fileTree: FileNode): SegmentNode {
     file: fileTree,
   }
 
-  // Early return if root has no children
-  if (!fileTree.children.length)
-    return root
-
-  // For tracking duplicate screens
-  const screenSegments: Record<string, string> = {}
-
-  function visit(parentSegment: SegmentNode) {
-    const parentFile = parentSegment.file
-    if (!parentFile.children?.length) return
-
-    // Step 1: Assign file to segment role
-    for (const file of parentFile.children) {
-      const { name, ext }  = parse(file.name)
-      if (ext !== '.tsx') continue
-
-      switch (name) {
-        case 'screen':    parentSegment.roles['screen'] = file.absPath; break
-        case 'not-found': parentSegment.roles['not-found'] = file.absPath; break
-        case 'error':     parentSegment.roles['error']  = file.absPath;  break
-        case 'layout':    parentSegment.roles['layout'] = file.absPath; break
-      }
-    }
-
-    // Step 2: Validate that screen URLs are unique across the entire tree
-    if (!parentSegment.roles.screen)
-      return  // No screen to validate
-
-    // Check if another screen already claimed this URL
-    const existingFilePath = screenSegments[parentSegment.url]
-    if (existingFilePath)
-      throw new DuplicateScreenError(parentSegment.url, [existingFilePath, parentFile.absPath])
-
-    screenSegments[parentSegment.url] = parentFile.absPath
-  }
-
-  function expand(parentSegment: SegmentNode) {
-    const parentFile = parentSegment.file
-    if (!parentFile.children) return  // Skip expand if route has no children
-
-    // Create container for route children
-    const segments: SegmentNode[] = []
-
-    for (const file of parentFile.children) {
-      if (!file.children) continue            // Skip if file (only dirs pass through)
-      if (file.name.startsWith('_')) continue // Skip if private directory
-
-      const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
-      segments.push({
-        segment: file.name,
-        url: isGroup ? parentSegment.url : `${posix.join(parentSegment.url, file.name)}/`,
-        type: isGroup ? 'group' : 'page',
-        roles: {},
-        parent: parentSegment,
-        children: [],
-        file,
-      })
-    }
-
-    return segments.sort((a, b) => a.segment.localeCompare(b.segment))
-  }
-
-  return traverseDepthFirst({
-    root,
-    visit,
-    expand,
+  traverse(root, {
     attach: (child, parent) => parent.children!.push(child),
+    expand: segment =>
+      (segment.file.children ?? [])
+        .filter(file => file.children && !file.name.startsWith('_'))
+        .map(file => createSegmentNode(file, segment))
+        .sort((a, b) => a.segment.localeCompare(b.segment)),
   })
+  return root
+}
+
+function bindSegmentTree(segmentTree: SegmentNode) {
+  const screens: Record<SegmentNode['url'], string> = {}
+
+  traverse(segmentTree, {
+    expand: segment => segment.children ?? [],
+    visit: segment => {
+      assignRoles(segment)
+      validateScreenUniqueness(segment, screens)
+    },
+  })
+}
+
+function createSegmentNode(file: FileNode, parent: SegmentNode) {
+  const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
+  const segmentNode: SegmentNode = {
+    segment: file.name,
+    url: isGroup ? parent.url : `${posix.join(parent.url, file.name)}/`,
+    type: isGroup ? 'group' : 'page',
+    roles: {},
+    parent,
+    children: [],
+    file,
+  }
+  return segmentNode
+}
+
+function assignRoles(segment: SegmentNode) {
+  for (const child of segment.file.children ?? []) {
+    const { name, ext } = parse(child.name)
+    if (ext === '.tsx' && ROLES.includes(name as Role))
+      segment.roles[name as Role] = child.absPath
+  }
+}
+
+function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['url'], string>) {
+  if (!segment.roles.screen) return
+
+  const existing = screens[segment.url]
+  if (existing)
+    throw new DuplicateScreenError(segment.url, [existing, segment.file.absPath])
+  screens[segment.url] = segment.file.absPath
 }
