@@ -2,7 +2,6 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
-import { buildComponentMap } from '@/core/route-builder'
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 
@@ -38,8 +37,7 @@ export const generateTasks: Task<BuildContext>[] = [
       const componentsPath = join(genDir, 'components.ts')
       await mkdir(genDir, { recursive: true })
 
-      const componentMap = buildComponentMap(ctx.manifest!, ctx.outDir)
-      const entries = Object.entries(componentMap).sort(([a], [b]) => a.localeCompare(b))
+      const entries = Object.entries(ctx.componentMap!).sort(([a], [b]) => a.localeCompare(b))
 
       const imports = entries
         .map(([_, importPath], i) => `import Component${i} from '${importPath}'`)
@@ -77,8 +75,7 @@ export const generateTasks: Task<BuildContext>[] = [
       const routesPath = join(genDir, 'routes.ts')
       await mkdir(genDir, { recursive: true })
 
-      const componentMap = ctx.componentMap!
-      const entries = Object.entries(componentMap).sort(([a], [b]) => a.localeCompare(b))
+      const entries = Object.entries(ctx.componentMap!).sort(([a], [b]) => a.localeCompare(b))
 
       // Generate component imports
       const imports = entries
