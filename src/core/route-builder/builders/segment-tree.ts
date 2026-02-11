@@ -1,7 +1,7 @@
+import type { FileNode } from './file-tree'
 import { parse, posix } from 'path'
 import { traverse } from '@/lib/tree'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
-import type { FileNode } from './file-tree'
 
 const ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 type Role = typeof ROLES[number]
