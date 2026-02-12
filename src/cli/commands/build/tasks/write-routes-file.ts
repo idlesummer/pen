@@ -1,6 +1,6 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
-import type { Route, ComponentImport } from '@/core/route-builder'
+import type { Route } from '@/core/route-builder'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
@@ -18,7 +18,7 @@ export const writeRoutesFile: Task<BuildContext> = {
 
     // Generate component imports
     const importStatements = imports
-      .map((e, i) => `import Component${i} from '${e.importPath}'`)
+      .map((importPath, i) => `import Component${i} from '${importPath}'`)
       .join('\n')
 
     // Generate pre-built route elements
@@ -60,8 +60,8 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function generateRouteElement(route: Route, indices: Record<string, number>, imports: ComponentImport[]) {
-  const getKey = (index: number) => JSON.stringify(imports[index]!.importPath)
+function generateRouteElement(route: Route, indices: Record<string, number>, imports: readonly string[]) {
+  const getKey = (index: number) => JSON.stringify(imports[index]!)
 
   // Start with the screen from the first segment
   const leafSegment = route.chain[0]!

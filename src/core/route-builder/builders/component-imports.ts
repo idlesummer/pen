@@ -3,22 +3,11 @@ import { relative } from 'path'
 import { SEGMENT_ROLES } from './segment-tree'
 
 /**
- * Component import for codegen.
- * Maps the absolute file path to its import path.
- */
-export interface ComponentImport {
-  /** Absolute file system path to the component */
-  absolutePath: string
-  /** Import path used in generated code */
-  importPath: string
-}
-
-/**
  * Component import data including both the array and lookup map.
  */
 export interface ComponentImportData {
-  /** Sorted array of component imports */
-  imports: ComponentImport[]
+  /** Sorted array of import paths (index = component number) */
+  imports: readonly string[]
   /** Lookup map from absolute path to component index */
   indices: Record<string, number>
 }
@@ -38,21 +27,22 @@ export function buildComponentImports(manifest: RouteManifest, outDir: string): 
     }
   }
 
-  // Build entries: absolute path → relative import path
-  const genDir = `${outDir}/generated`
-  const entries: ComponentImport[] = []
+  // Sort absolute paths for deterministic output
+  const sortedPaths = Array.from(segmentPaths).sort()
 
-  for (const absolutePath of segmentPaths) {
+  // Build import paths and indices map
+  const genDir = `${outDir}/generated`
+  const imports: string[] = []
+  const indices: Record<string, number> = {}
+
+  for (let i = 0; i < sortedPaths.length; i++) {
+    const absPath = sortedPaths[i]!
     // Calculate relative path and normalize to forward slashes for ES modules
-    const relPath = relative(genDir, absolutePath).replace(/\\/g, '/')
+    const relPath = relative(genDir, absPath).replace(/\\/g, '/')
     const importPath = `${relPath}.js`
-    entries.push({ absolutePath, importPath })
+    imports.push(importPath)
+    indices[absPath] = i
   }
 
-  // Sort by absolute path for deterministic output
-  const imports = entries.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath))
-
-  // Build lookup map from absolute path to component index
-  const indices = Object.fromEntries(imports.map((e, i) => [e.absolutePath, i]))
   return { imports, indices }
 }
