@@ -64,11 +64,7 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function generateRouteElement(
-  route: Route,
-  indices: Record<string, number>,
-  imports: readonly ComponentImport[]
-) {
+function generateRouteElement(route: Route, indices: Record<string, number>, imports: ComponentImport[]) {
   const getKey = (index: number) => JSON.stringify(imports[index]!.importPath)
 
   // Start with the screen from the first segment

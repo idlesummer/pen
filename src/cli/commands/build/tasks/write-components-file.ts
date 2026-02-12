@@ -24,7 +24,7 @@ export const writeComponentsFile: Task<BuildContext> = {
       '',
       `import type { ComponentImport } from '${PACKAGE_NAME}'`,
       '',
-      `export const components: readonly ComponentImport[] = ${JSON.stringify(imports, null, 2)} as const`,
+      `export const components: ComponentImport[] = ${JSON.stringify(imports, null, 2)} as const`,
       '',
     ].join('\n')
 
