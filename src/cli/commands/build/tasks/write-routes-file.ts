@@ -72,18 +72,12 @@ function generateRouteElement(
   pathToIndex: Record<string, number>,
   imports: readonly ComponentImport[]
 ) {
-  const getComponentIndex = (path: string) => {
-    const index = pathToIndex[path]
-    if (index === undefined) throw new Error(`Component not found: ${path}`)
-    return index
-  }
-
   const getKey = (index: number) => JSON.stringify(imports[index].importPath)
 
   // Start with the screen from the first segment
   const leafSegment = route.chain[0]!
   const screenPath = leafSegment['screen']!
-  const screenIndex = getComponentIndex(screenPath)
+  const screenIndex = pathToIndex[screenPath]!
   let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
 
   // Process segments from leaf → root (same order as runtime composition)
@@ -91,21 +85,21 @@ function generateRouteElement(
     // Not-found boundary
     if (segment['not-found']) {
       const path = segment['not-found']
-      const index = getComponentIndex(path)
+      const index = pathToIndex[path]!
       element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
-      const index = getComponentIndex(path)
+      const index = pathToIndex[path]!
       element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
-      const index = getComponentIndex(path)
+      const index = pathToIndex[path]!
       element = `createElement(Component${index}, { key: ${getKey(index)} }, ${element})`
     }
   }
