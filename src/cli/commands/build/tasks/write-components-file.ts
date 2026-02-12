@@ -22,7 +22,7 @@ export const writeComponentsFile: Task<BuildContext> = {
       '// Do not manually edit this file',
       '// NOTE: This file is kept for documentation/debugging.',
       '',
-      `import type { ComponentImport } from '${PACKAGE_NAME}'`,
+      `import type { ComponentImportData } from '${PACKAGE_NAME}'`,
       '',
       `export const components: ComponentImport[] = ${JSON.stringify(imports, null, 2)} as const`,
       '',
