@@ -6,8 +6,6 @@ import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
 
-// ===== Main Task =====
-
 export const writeRoutesFile: Task<BuildContext> = {
   name: 'Writing routes.ts',
   onSuccess: (_, dur) => `Saved routes.ts (${duration(dur)})`,
@@ -49,8 +47,6 @@ export const writeRoutesFile: Task<BuildContext> = {
     await writeFile(routesPath, code, 'utf-8')
   },
 }
-
-// ===== Helpers =====
 
 /**
  * Generates a route element by composing React components into nested createElement calls.
