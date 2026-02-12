@@ -14,10 +14,20 @@ export interface ComponentImport {
 }
 
 /**
- * Builds a sorted list of component imports from a route manifest.
- * Each entry contains the absolute path and its relative import path.
+ * Component import data including both the array and lookup map.
  */
-export function buildComponentImports(manifest: RouteManifest, outDir: string): ComponentImport[] {
+export interface ComponentImportData {
+  /** Sorted array of component imports */
+  imports: ComponentImport[]
+  /** Lookup map from absolute path to component index */
+  componentIndexByPath: Record<string, number>
+}
+
+/**
+ * Builds component import data from a route manifest.
+ * Returns both the sorted import array and a lookup map for efficient access.
+ */
+export function buildComponentImports(manifest: RouteManifest, outDir: string): ComponentImportData {
   const segmentPaths = new Set<string>()
 
   // Collect all unique absolute paths from manifest
@@ -40,5 +50,12 @@ export function buildComponentImports(manifest: RouteManifest, outDir: string): 
   }
 
   // Sort by absolute path for deterministic output
-  return entries.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath))
+  const imports = entries.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath))
+
+  // Build lookup map from absolute path to component index
+  const componentIndexByPath = Object.fromEntries(
+    imports.map((e, i) => [e.absolutePath, i])
+  )
+
+  return { imports, componentIndexByPath }
 }
