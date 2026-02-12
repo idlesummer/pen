@@ -9,7 +9,6 @@ import { scanFilesystem } from './tasks/scan-filesystem'
 import { buildSegmentTree } from './tasks/build-segment-tree'
 import { generateManifest } from './tasks/generate-manifest'
 import { buildComponents } from './tasks/build-component-entries'
-import { writeComponentsFile } from './tasks/write-components-file'
 import { writeManifestFile } from './tasks/write-manifest-file'
 import { writeRoutesFile } from './tasks/write-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
@@ -33,7 +32,6 @@ export const build: CLICommand = {
         buildSegmentTree,
         generateManifest,
         buildComponents,
-        writeComponentsFile,
         writeManifestFile,
         writeRoutesFile,
         writeEntryFile,
