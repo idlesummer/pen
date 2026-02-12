@@ -20,7 +20,7 @@ export interface ComponentImportData {
   /** Sorted array of component imports */
   imports: ComponentImport[]
   /** Lookup map from absolute path to component index */
-  componentIndexByPath: Record<string, number>
+  indices: Record<string, number>
 }
 
 /**
@@ -53,9 +53,9 @@ export function buildComponentImports(manifest: RouteManifest, outDir: string): 
   const imports = entries.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath))
 
   // Build lookup map from absolute path to component index
-  const componentIndexByPath = Object.fromEntries(
+  const indices = Object.fromEntries(
     imports.map((e, i) => [e.absolutePath, i])
   )
 
-  return { imports, componentIndexByPath }
+  return { imports, indices }
 }
