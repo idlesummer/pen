@@ -16,9 +16,8 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routesPath = join(genDir, 'routes.ts')
     await mkdir(genDir, { recursive: true })
 
-    const imports = ctx.componentImports!
-
     // Generate component imports
+    const imports = ctx.componentImports!
     const importStatements = imports
       .map((e, i) => `import Component${i} from '${e.importPath}'`)
       .join('\n')
