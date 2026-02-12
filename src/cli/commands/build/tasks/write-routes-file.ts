@@ -16,19 +16,17 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routesPath = join(genDir, 'routes.ts')
     await mkdir(genDir, { recursive: true })
 
+    const { imports, componentIndexByPath } = ctx.componentImports!
+
     // Generate component imports
-    const imports = ctx.componentImports!
     const importStatements = imports
       .map((e, i) => `import Component${i} from '${e.importPath}'`)
       .join('\n')
 
-    // Build path-to-index lookup for route element generation
-    const pathToIndex = Object.fromEntries(imports.map((e, i) => [e.absolutePath, i]))
-
     // Generate pre-built route elements
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
-      const elementCode = generateRouteElement(route, pathToIndex, imports)
+      const elementCode = generateRouteElement(route, componentIndexByPath, imports)
       routeElements.push(`  '${url}': ${elementCode},`)
     }
 
@@ -66,13 +64,17 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function generateRouteElement(route: Route, pathToIndex: Record<string, number>, imports: readonly ComponentImport[]) {
+function generateRouteElement(
+  route: Route,
+  componentIndexByPath: Record<string, number>,
+  imports: readonly ComponentImport[]
+) {
   const getKey = (index: number) => JSON.stringify(imports[index]!.importPath)
 
   // Start with the screen from the first segment
   const leafSegment = route.chain[0]!
   const screenPath = leafSegment['screen']!
-  const screenIndex = pathToIndex[screenPath]!
+  const screenIndex = componentIndexByPath[screenPath]!
   let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
 
   // Process segments from leaf → root (same order as runtime composition)
@@ -80,21 +82,21 @@ function generateRouteElement(route: Route, pathToIndex: Record<string, number>,
     // Not-found boundary
     if (segment['not-found']) {
       const path = segment['not-found']
-      const index = pathToIndex[path]!
+      const index = componentIndexByPath[path]!
       element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
-      const index = pathToIndex[path]!
+      const index = componentIndexByPath[path]!
       element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
-      const index = pathToIndex[path]!
+      const index = componentIndexByPath[path]!
       element = `createElement(Component${index}, { key: ${getKey(index)} }, ${element})`
     }
   }

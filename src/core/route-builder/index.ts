@@ -17,4 +17,4 @@ export {
 export type { FileNode } from './builders/file-tree'
 export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
 export type { RouteManifest, Route } from './builders/route-manifest'
-export type { ComponentImport } from './builders/component-imports'
+export type { ComponentImport, ComponentImportData } from './builders/component-imports'
