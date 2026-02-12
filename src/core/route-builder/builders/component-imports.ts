@@ -53,9 +53,6 @@ export function buildComponentImports(manifest: RouteManifest, outDir: string): 
   const imports = entries.sort((a, b) => a.absolutePath.localeCompare(b.absolutePath))
 
   // Build lookup map from absolute path to component index
-  const indices = Object.fromEntries(
-    imports.map((e, i) => [e.absolutePath, i])
-  )
-
+  const indices = Object.fromEntries(imports.map((e, i) => [e.absolutePath, i]))
   return { imports, indices }
 }
