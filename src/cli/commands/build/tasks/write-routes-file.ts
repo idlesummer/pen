@@ -1,6 +1,6 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
-import type { ElementTree } from './build-element-tree'
+import type { ElementTree } from '@/core/route-builder'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
