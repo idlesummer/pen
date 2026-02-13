@@ -1,6 +1,7 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import type { ElementTree } from '@/core/route-builder'
+import { ComponentRef } from '@/core/route-builder'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
@@ -51,7 +52,14 @@ export const writeRoutesFile: Task<BuildContext> = {
 /** Serialize ElementTree to createElement string. */
 function serialize(tree: ElementTree): string {
   const props = Object.entries(tree.props)
-    .map(([key, { value, isString }]) => `${key}: ${isString ? `'${value}'` : value}`)
+    .map(([key, value]) => {
+      // Component references are not quoted
+      if (value instanceof ComponentRef) {
+        return `${key}: ${value.name}`
+      }
+      // Everything else is JSON stringified (strings get quotes, etc.)
+      return `${key}: ${JSON.stringify(value)}`
+    })
     .join(', ')
 
   return tree.children
