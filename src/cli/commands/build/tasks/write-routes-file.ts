@@ -23,7 +23,7 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
       const elementCode = buildRouteElement(route, indices, imports)
-      const formatted = formatCode(elementCode)
+      const formatted = '\n    ' + formatCode(elementCode).replace(/\n/g, '\n    ')
       routeElements.push(`  '${url}': ${formatted},`)
     }
 
@@ -46,38 +46,6 @@ export const writeRoutesFile: Task<BuildContext> = {
     await mkdir(genDir, { recursive: true })
     await writeFile(routesPath, code, 'utf-8')
   },
-}
-
-/**
- * Formats generated code for readability.
- * Adds line breaks and indentation to nested createElement chains.
- */
-function formatCode(code: string): string {
-  let depth = 0
-  let result = ''
-
-  for (let i = 0; i < code.length; i++) {
-    const char = code[i]
-
-    // Opening paren after function name
-    if (char === '(' && i > 0 && /[a-zA-Z0-9]/.test(code[i - 1]!)) {
-      result += '(\n' + '  '.repeat(++depth)
-    }
-    // Closing paren
-    else if (char === ')') {
-      result += '\n' + '  '.repeat(--depth) + ')'
-    }
-    // Argument separator
-    else if (char === ',' && code[i + 1] === ' ') {
-      result += ',\n' + '  '.repeat(depth)
-      i++ // skip the space
-    }
-    else {
-      result += char
-    }
-  }
-
-  return result
 }
 
 /**
@@ -123,4 +91,39 @@ function buildRouteElement(route: Route, indices: Record<string, number>, import
     }
   }
   return element
+}
+
+/**
+ * Formats generated code for readability.
+ * Adds line breaks and indentation to nested createElement chains.
+ */
+function formatCode(code: string): string {
+  let depth = 0
+  let result = ''
+  const argCounts = [0]
+
+  for (let i = 0; i < code.length; i++) {
+    const char = code[i]
+    const prevChar = code[i - 1]
+
+    if (char === '(' && prevChar && /[a-zA-Z0-9]/.test(prevChar)) {
+      argCounts[++depth] = 0
+      result += '('
+    }
+    else if (char === ')') {
+      const multiLine = argCounts[depth]! >= 2
+      result += multiLine ? `\n${'  '.repeat(--depth)})` : ')'
+      if (!multiLine) depth--
+      argCounts.pop()
+    }
+    else if (char === ',' && code[i + 1] === ' ') {
+      const argCount = ++argCounts[depth]!
+      result += argCount >= 2 ? `,\n${'  '.repeat(depth)}` : ', '
+      i++ // Skip space
+    }
+    else
+      result += char
+  }
+
+  return result
 }
