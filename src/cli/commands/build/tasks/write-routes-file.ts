@@ -59,14 +59,19 @@ export const writeRoutesFile: Task<BuildContext> = {
   },
 }
 
-/** Serialize ElementTree to createElement string. */
-function serialize(tree: ElementTree): string {
+/** Serialize ElementTree to createElement string with indentation. */
+function serialize(tree: ElementTree, indent = 0): string {
+  const spaces = '  '.repeat(indent)
+
   // Props are already pre-serialized (strings have quotes, identifiers don't)
   const props = Object.entries(tree.props)
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ')
 
-  return tree.children
-    ? `createElement(${tree.component}, { ${props} }, ${serialize(tree.children)})`
-    : `createElement(${tree.component}, { ${props} })`
+  if (tree.children) {
+    const childCode = serialize(tree.children, indent + 1)
+    return `createElement(${tree.component}, { ${props} },\n${spaces}  ${childCode}\n${spaces})`
+  }
+
+  return `createElement(${tree.component}, { ${props} })`
 }
