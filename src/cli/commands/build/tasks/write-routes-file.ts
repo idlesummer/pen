@@ -51,21 +51,19 @@ export const writeRoutesFile: Task<BuildContext> = {
 }
 
 /**
- * Wraps a child element with proper indentation for nested structure.
- * Re-indents all lines in the child to maintain consistent formatting.
+ * Represents a React element tree structure before code generation
  */
-function indentWrap(child: string, openingLine: string, depth: number): string {
-  const childIndent = '  '.repeat(depth)
-  const closeIndent = '  '.repeat(depth - 1)
-  const reindented = child.replace(/\n/g, `\n${childIndent}`)
-  return `${openingLine},\n${childIndent}${reindented}\n${closeIndent})`
+interface ElementTree {
+  tag: string
+  props?: Record<string, any>
+  children?: ElementTree[]
 }
 
 /**
- * Generates a route element by composing React components into nested createElement calls.
+ * Builds a tree structure representing the composed route element.
  *
- * This function mirrors the runtime composition logic but generates static code strings
- * that will be written to the generated routes.ts file.
+ * This function mirrors the runtime composition logic but generates a tree data structure
+ * rather than code strings.
  *
  * Composition order per segment (inside to outside):
  * 1. Screen component (only in leaf segment)
@@ -73,15 +71,18 @@ function indentWrap(child: string, openingLine: string, depth: number): string {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function generateRouteElement(route: Route, indices: Record<string, number>, imports: readonly string[]) {
-  const getKey = (index: number) => JSON.stringify(imports[index]!)
+function buildRouteTree(route: Route, indices: Record<string, number>, imports: readonly string[]): ElementTree {
+  const getKey = (index: number) => imports[index]!
 
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
   const screenIndex = indices[screenPath]!
-  let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
-  let depth = 1
+
+  let tree: ElementTree = {
+    tag: `Component${screenIndex}`,
+    props: { key: getKey(screenIndex) },
+  }
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
@@ -89,25 +90,71 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
-      element = indentWrap(element, `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }`, depth)
-      depth++
+      tree = {
+        tag: 'NotFoundBoundary',
+        props: {
+          key: getKey(index),
+          fallback: `Component${index}`,
+        },
+        children: [tree],
+      }
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
-      element = indentWrap(element, `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }`, depth)
-      depth++
+      tree = {
+        tag: 'ErrorBoundary',
+        props: {
+          key: getKey(index),
+          fallback: `Component${index}`,
+        },
+        children: [tree],
+      }
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
-      element = indentWrap(element, `createElement(Component${index}, { key: ${getKey(index)} }`, depth)
-      depth++
+      tree = {
+        tag: `Component${index}`,
+        props: { key: getKey(index) },
+        children: [tree],
+      }
     }
   }
-  return element
+
+  return tree
+}
+
+/**
+ * Generates createElement code from an element tree structure.
+ */
+function generateCreateElement(element: ElementTree, depth = 0): string {
+  const indent = '  '.repeat(depth)
+  const { tag, props = {}, children = [] } = element
+
+  const propsStr = Object.keys(props).length
+    ? `, ${JSON.stringify(props)}`
+    : ''
+
+  if (children.length === 0) {
+    return `${indent}createElement('${tag}'${propsStr})`
+  }
+
+  const childrenStr = children
+    .map(child => generateCreateElement(child, depth + 1))
+    .join(',\n')
+
+  return `${indent}createElement('${tag}'${propsStr},\n${childrenStr}\n${indent})`
+}
+
+/**
+ * Generates a route element by composing React components into nested createElement calls.
+ */
+function generateRouteElement(route: Route, indices: Record<string, number>, imports: readonly string[]): string {
+  const tree = buildRouteTree(route, indices, imports)
+  return generateCreateElement(tree)
 }
