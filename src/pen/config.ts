@@ -29,7 +29,7 @@ export function defineConfig(config: Partial<PenConfig>): Partial<PenConfig> {
 export const defaultConfig: PenConfig = {
   appDir: './src/app',
   outDir: './.pen',
-  emitMetadata: true,
+  emitMetadata: false,
 }
 
 /**
