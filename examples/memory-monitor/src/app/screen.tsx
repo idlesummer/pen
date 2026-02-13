@@ -1,21 +1,25 @@
 import { Box, Text } from 'ink'
 import { useState, useEffect } from 'react'
 import { useMemoryMonitor } from '@idlesummer/pen'
+import { BarChart } from '../components/bar-chart.js'
 
 export default function HomeScreen() {
   const memory = useMemoryMonitor(500) // Update every 500ms
   const [dataSize, setDataSize] = useState(0)
   const [data, setData] = useState<number[]>([])
 
-  // Calculate usage percentages
-  const heapUsagePercent = memory.heapTotal > 0
-    ? Math.round((memory.heapUsed / memory.heapTotal) * 100)
-    : 0
+  // Track peak RSS to scale bars dynamically
+  const [peakRss, setPeakRss] = useState(0)
+  useEffect(() => {
+    if (memory.rss > peakRss) setPeakRss(memory.rss)
+  }, [memory.rss, peakRss])
+
+  // Use a sensible max for the chart: at least 1.5x peak RSS or 100 MB
+  const chartMax = Math.max(Math.round(peakRss * 1.5), 100)
 
   // Simulate memory allocation
   const allocateMemory = (mbSize: number) => {
-    // Allocate approximately mbSize MB of memory (rough estimate)
-    const itemsToAllocate = mbSize * 125000 // ~1MB per 125k numbers
+    const itemsToAllocate = mbSize * 125000
     const newData = Array.from({ length: itemsToAllocate }, (_, i) => i * Math.random())
     setData(prev => [...prev, ...newData])
     setDataSize(prev => prev + mbSize)
@@ -24,7 +28,6 @@ export default function HomeScreen() {
   const clearMemory = () => {
     setData([])
     setDataSize(0)
-    // Force garbage collection if available (requires --expose-gc flag)
     if (global.gc) {
       global.gc()
     }
@@ -32,27 +35,37 @@ export default function HomeScreen() {
 
   return (
     <Box flexDirection="column" gap={1}>
-      <Box flexDirection="column" borderStyle="single" borderColor="blue" padding={1}>
-        <Text bold color="blue">Memory Statistics (Updates every 500ms)</Text>
-        <Box marginTop={1} flexDirection="column">
-          <Text>
-            <Text color="yellow">Heap Used:    </Text>
-            <Text bold>{memory.heapUsed} MB</Text>
-            <Text dimColor> / {memory.heapTotal} MB</Text>
-            <Text color="magenta"> ({heapUsagePercent}%)</Text>
-          </Text>
-          <Text>
-            <Text color="yellow">RSS:          </Text>
-            <Text bold>{memory.rss} MB</Text>
-            <Text dimColor> (Total process memory)</Text>
-          </Text>
-          <Text>
-            <Text color="yellow">External:     </Text>
-            <Text bold>{memory.external} MB</Text>
-            <Text dimColor> (C++ objects)</Text>
-          </Text>
-        </Box>
-      </Box>
+      <BarChart
+        title="Memory Usage"
+        titleColor="blue"
+        barWidth={36}
+        items={[
+          {
+            label: 'Heap Used',
+            value: memory.heapUsed,
+            maxValue: memory.heapTotal,
+            color: 'green',
+          },
+          {
+            label: 'Heap Total',
+            value: memory.heapTotal,
+            maxValue: chartMax,
+            color: 'cyan',
+          },
+          {
+            label: 'RSS',
+            value: memory.rss,
+            maxValue: chartMax,
+            color: 'magenta',
+          },
+          {
+            label: 'External',
+            value: memory.external,
+            maxValue: chartMax,
+            color: 'yellow',
+          },
+        ]}
+      />
 
       <Box flexDirection="column" borderStyle="single" borderColor="green" padding={1}>
         <Text bold color="green">Memory Allocation Simulator</Text>
@@ -86,7 +99,6 @@ export default function HomeScreen() {
         <Text dimColor>Press <Text bold>q</Text> to quit</Text>
       </Box>
 
-      {/* Hidden input handler */}
       <KeyHandler
         onKey={(key) => {
           if (key === '1') allocateMemory(1)
@@ -99,7 +111,6 @@ export default function HomeScreen() {
   )
 }
 
-// Simple key handler component
 function KeyHandler({ onKey }: { onKey: (key: string) => void }) {
   useEffect(() => {
     const handleData = (data: Buffer) => {
