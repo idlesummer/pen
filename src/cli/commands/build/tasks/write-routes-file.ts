@@ -1,11 +1,11 @@
 import type { Task } from '@idlesummer/tasker'
+import type { ElementTree } from '@/core/route-builder'
 import type { BuildContext } from '../types'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
 import { SEGMENT_ROLES } from '@/core/route-builder/builders/segment-tree'
-import { serialize } from '../codegen'
 
 export const writeRoutesFile: Task<BuildContext> = {
   name: 'Writing routes.ts',
@@ -57,4 +57,21 @@ export const writeRoutesFile: Task<BuildContext> = {
     await mkdir(genDir, { recursive: true })
     await writeFile(routesPath, code, 'utf-8')
   },
+}
+
+/** Serializes an ElementTree to React.createElement() code string. */
+export function serialize(tree: ElementTree, indent = 0): string {
+  const spaces = '  '.repeat(indent)
+
+  // Props are already pre-serialized (strings have quotes, identifiers don't)
+  const props = Object.entries(tree.props)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(', ')
+
+  if (tree.children) {
+    const childCode = serialize(tree.children, indent + 1)
+    return `createElement(${tree.component}, { ${props} },\n${spaces}  ${childCode}\n${spaces})`
+  }
+
+  return `createElement(${tree.component}, { ${props} })`
 }
