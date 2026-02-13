@@ -61,27 +61,33 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 4. Error boundary (wraps layout + all descendants)
  */
 function buildRouteElement(route: Route, { indices, imports }: ComponentImportData) {
-  const generateElement = (name: string, path: string, extraProps = '', child = '') => {
-    const index = indices[path]!
-    const props = `{ key: '${imports[index]}'${extraProps} }`
-    return `createElement(${name}, ${props}${child ? `, ${child}` : ''})`
-  }
+  // Start with the screen from the first segment
+  const screenSegment = route.chain[0]!
+  const screenPath = screenSegment['screen']!
+  const screenIndex = indices[screenPath]!
+  let element = `createElement(Component${screenIndex}, { key: '${imports[screenIndex]}' })`
 
-  const segment = route.chain[0]!
-  let element = generateElement(`Component${indices[segment['screen']!]!}`, segment['screen']!)
-
+  // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
+    // Not-found boundary
     if (segment['not-found']) {
-      const index = indices[segment['not-found']]!
-      element = generateElement('NotFoundBoundary', segment['not-found'], `, fallback: Component${index}`, element)
+      const path = segment['not-found']
+      const index = indices[path]!
+      element = `createElement(NotFoundBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
     }
+
+    // Error boundary
     if (segment['error']) {
-      const index = indices[segment['error']]!
-      element = generateElement('ErrorBoundary', segment['error'], `, fallback: Component${index}`, element)
+      const path = segment['error']
+      const index = indices[path]!
+      element = `createElement(ErrorBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
     }
+
+    // Layout
     if (segment['layout']) {
-      const index = indices[segment['layout']]!
-      element = generateElement(`Component${index}`, segment['layout'], '', element)
+      const path = segment['layout']
+      const index = indices[path]!
+      element = `createElement(Component${index}, { key: '${imports[index]}' }, ${element})`
     }
   }
   return element
