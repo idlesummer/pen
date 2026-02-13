@@ -53,9 +53,9 @@ export const writeRoutesFile: Task<BuildContext> = {
 /**
  * Represents a React element tree structure before code generation
  */
-interface ElementTree {
+type ElementTree = {
   tag: string
-  props?: Record<string, any>
+  props?: Record<string, unknown>
   children?: ElementTree[]
 }
 
