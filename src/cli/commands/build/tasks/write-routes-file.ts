@@ -124,6 +124,5 @@ function formatCode(code: string): string {
     else
       result += char
   }
-
   return result
 }
