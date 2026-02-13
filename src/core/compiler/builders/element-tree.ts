@@ -15,15 +15,12 @@ export type ComponentMap = Record<string, number>
 /**
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
- * Returns both the trees and the component mapping for code generation.
  */
-export function createElementTrees(manifest: RouteManifest) {
+export function createElementTrees(manifest: RouteManifest, componentMap: ComponentMap): ElementTreeMap {
   const elementTrees: ElementTreeMap = {}
-  const componentMap = buildComponentMap(manifest)
-
   for (const [url, route] of Object.entries(manifest))
     elementTrees[url] = createElementTree(route, componentMap)
-  return { elementTrees, componentMap }
+  return elementTrees
 }
 
 /**
@@ -31,7 +28,7 @@ export function createElementTrees(manifest: RouteManifest) {
  * Collects all unique import paths and assigns them indices.
  * Keys are stored in sorted order for deterministic output.
  */
-function buildComponentMap(manifest: RouteManifest): ComponentMap {
+export function buildComponentMap(manifest: RouteManifest): ComponentMap {
   const importPaths = new Set<string>()
 
   // Collect all unique import paths from manifest
