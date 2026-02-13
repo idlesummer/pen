@@ -75,14 +75,12 @@ function buildRouteElement(route: Route, { indices, imports }: ComponentImportDa
       const index = indices[path]!
       element = `createElement(NotFoundBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
     }
-
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
       element = `createElement(ErrorBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
     }
-
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
