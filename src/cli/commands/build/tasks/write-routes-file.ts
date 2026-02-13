@@ -77,8 +77,8 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
   const getKey = (index: number) => JSON.stringify(imports[index]!)
 
   // Start with the screen from the first segment
-  const leafSegment = route.chain[0]!
-  const screenPath = leafSegment['screen']!
+  const screenSegment = route.chain[0]!
+  const screenPath = screenSegment['screen']!
   const screenIndex = indices[screenPath]!
   let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
   let depth = 1
