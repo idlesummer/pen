@@ -1,9 +1,4 @@
-import type { ComponentType, ReactElement } from 'react'
-
-/**
- * Map of absolute component file paths to their React components.
- */
-export type ComponentMap = Record<string, ComponentType>
+import type { ReactElement } from 'react'
 
 /**
  * Compiled route elements mapped by URL.
