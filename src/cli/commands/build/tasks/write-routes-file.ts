@@ -68,6 +68,7 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
   const screenPath = leafSegment['screen']!
   const screenIndex = indices[screenPath]!
   let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
+  let depth = 1
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
@@ -75,21 +76,30 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
-      element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
+      const childIndent = '  '.repeat(depth)
+      const closeIndent = '  '.repeat(depth - 1)
+      element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} },\n${childIndent}${element.replace(/\n/g, '\n' + childIndent)}\n${closeIndent})`
+      depth++
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
-      element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
+      const childIndent = '  '.repeat(depth)
+      const closeIndent = '  '.repeat(depth - 1)
+      element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} },\n${childIndent}${element.replace(/\n/g, '\n' + childIndent)}\n${closeIndent})`
+      depth++
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
-      element = `createElement(Component${index}, { key: ${getKey(index)} }, ${element})`
+      const childIndent = '  '.repeat(depth)
+      const closeIndent = '  '.repeat(depth - 1)
+      element = `createElement(Component${index}, { key: ${getKey(index)} },\n${childIndent}${element.replace(/\n/g, '\n' + childIndent)}\n${closeIndent})`
+      depth++
     }
   }
   return element
