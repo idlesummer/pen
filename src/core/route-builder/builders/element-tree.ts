@@ -52,12 +52,11 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
+      const key = JSON.stringify(imports[index]!)
+      const fallback = `Component${index}`
       tree = {
         component: 'NotFoundBoundary',
-        props: {
-          key: JSON.stringify(imports[index]!), // Pre-serialized with quotes
-          fallback: `Component${index}`, // No quotes (component identifier)
-        },
+        props: { key, fallback },
         children: tree,
       }
     }
@@ -65,12 +64,11 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
+      const key = JSON.stringify(imports[index]!)
+      const fallback = `Component${index}`
       tree = {
         component: 'ErrorBoundary',
-        props: {
-          key: JSON.stringify(imports[index]!), // Pre-serialized with quotes
-          fallback: `Component${index}`, // No quotes (component identifier)
-        },
+        props: { key, fallback },
         children: tree,
       }
     }
@@ -78,16 +76,13 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
+      const key = JSON.stringify(imports[index]!)
       tree = {
         component: `Component${index}`,
-        props: {
-          key: JSON.stringify(imports[index]!), // Pre-serialized with quotes
-        },
+        props: { key },
         children: tree,
       }
     }
   }
-
-  console.log(tree)
   return tree
 }
