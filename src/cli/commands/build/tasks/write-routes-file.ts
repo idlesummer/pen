@@ -71,7 +71,7 @@ interface ElementTree {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function buildRouteTree(route: Route, indices: Record<string, number>, imports: readonly string[]): ElementTree {
+function buildRouteTree(route: Route, indices: Record<string, number>, imports: string[]): ElementTree {
   const getKey = (index: number) => imports[index]!
 
   // Start with the screen from the first segment
@@ -136,13 +136,10 @@ function generateCreateElement(element: ElementTree, depth = 0): string {
   const indent = '  '.repeat(depth)
   const { tag, props = {}, children = [] } = element
 
-  const propsStr = Object.keys(props).length
-    ? `, ${JSON.stringify(props)}`
-    : ''
+  const propsStr = Object.keys(props).length ? `, ${JSON.stringify(props)}` : ''
 
-  if (children.length === 0) {
+  if (children.length === 0)
     return `${indent}createElement('${tag}'${propsStr})`
-  }
 
   const childrenStr = children
     .map(child => generateCreateElement(child, depth + 1))
@@ -154,7 +151,7 @@ function generateCreateElement(element: ElementTree, depth = 0): string {
 /**
  * Generates a route element by composing React components into nested createElement calls.
  */
-function generateRouteElement(route: Route, indices: Record<string, number>, imports: readonly string[]): string {
+function generateRouteElement(route: Route, indices: Record<string, number>, imports: string[]): string {
   const tree = buildRouteTree(route, indices, imports)
   return generateCreateElement(tree)
 }
