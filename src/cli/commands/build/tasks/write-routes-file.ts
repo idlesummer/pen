@@ -25,7 +25,9 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
       const elementCode = generateRouteElement(route, indices, imports)
-      routeElements.push(`  '${url}': ${elementCode},`)
+      // Put createElement on new line with 2-space indentation continuation
+      const indentedElement = elementCode.replace(/\n/g, '\n  ')
+      routeElements.push(`  '${url}':\n  ${indentedElement},`)
     }
 
     const code = [
@@ -46,6 +48,17 @@ export const writeRoutesFile: Task<BuildContext> = {
 
     await writeFile(routesPath, code, 'utf-8')
   },
+}
+
+/**
+ * Wraps a child element with proper indentation for nested structure.
+ * Re-indents all lines in the child to maintain consistent formatting.
+ */
+function indentWrap(child: string, openingLine: string, depth: number): string {
+  const childIndent = '  '.repeat(depth)
+  const closeIndent = '  '.repeat(depth - 1)
+  const reindented = child.replace(/\n/g, '\n' + childIndent)
+  return `${openingLine},\n${childIndent}${reindented}\n${closeIndent})`
 }
 
 /**
@@ -76,9 +89,7 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
-      const childIndent = '  '.repeat(depth)
-      const closeIndent = '  '.repeat(depth - 1)
-      element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} },\n${childIndent}${element.replace(/\n/g, '\n' + childIndent)}\n${closeIndent})`
+      element = indentWrap(element, `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }`, depth)
       depth++
     }
 
@@ -86,9 +97,7 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
-      const childIndent = '  '.repeat(depth)
-      const closeIndent = '  '.repeat(depth - 1)
-      element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} },\n${childIndent}${element.replace(/\n/g, '\n' + childIndent)}\n${closeIndent})`
+      element = indentWrap(element, `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }`, depth)
       depth++
     }
 
@@ -96,9 +105,7 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
-      const childIndent = '  '.repeat(depth)
-      const closeIndent = '  '.repeat(depth - 1)
-      element = `createElement(Component${index}, { key: ${getKey(index)} },\n${childIndent}${element.replace(/\n/g, '\n' + childIndent)}\n${closeIndent})`
+      element = indentWrap(element, `createElement(Component${index}, { key: ${getKey(index)} }`, depth)
       depth++
     }
   }
