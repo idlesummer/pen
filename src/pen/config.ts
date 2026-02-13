@@ -13,6 +13,13 @@ export interface PenConfig {
    * @default './.pen'
    */
   outDir: string
+
+  /**
+   * Emit metadata files (manifest, components, element-tree) to aid debugging and tooling.
+   * These files provide introspection into your app's structure.
+   * @default true
+   */
+  emitMetadata?: boolean
 }
 
 export function defineConfig(config: Partial<PenConfig>): Partial<PenConfig> {
@@ -22,6 +29,7 @@ export function defineConfig(config: Partial<PenConfig>): Partial<PenConfig> {
 export const defaultConfig: PenConfig = {
   appDir: './src/app',
   outDir: './.pen',
+  emitMetadata: true,
 }
 
 /**

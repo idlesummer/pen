@@ -22,7 +22,7 @@ export const build: CLICommand = {
   desc: 'Build the route manifest and compile application',
   action: async () => {
     try {
-      const { appDir, outDir } = await loadConfig()
+      const { appDir, outDir, emitMetadata } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
       console.log(pc.dim( `  entry:  ${appDir}`))
@@ -30,19 +30,22 @@ export const build: CLICommand = {
       console.log(pc.dim( `  output: ${outDir}`))
       console.log()
 
-      const pipeline = pipe([
+      const tasks = [
         buildFileTree,
         buildSegmentTree,
         buildRouteManifest,
         buildComponentMap,
         buildElementTree,
-        writeManifestFile,
-        writeElementTreeFile,
-        writeComponentMapFile,
-        writeRoutesFile,
-        writeEntryFile,
-        compileApplication,
-      ])
+      ]
+
+      // Conditionally add metadata file generation tasks
+      if (emitMetadata) {
+        tasks.push(writeManifestFile, writeElementTreeFile, writeComponentMapFile)
+      }
+
+      tasks.push(writeRoutesFile, writeEntryFile, compileApplication)
+
+      const pipeline = pipe(tasks)
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })
       console.log()
