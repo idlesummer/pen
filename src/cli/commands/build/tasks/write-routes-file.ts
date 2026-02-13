@@ -5,7 +5,6 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
-import { SEGMENT_ROLES } from '@/core/compiler/builders/segment-tree'
 
 export const writeRoutesFile: Task<BuildContext> = {
   name: 'Writing routes.ts',
@@ -13,18 +12,11 @@ export const writeRoutesFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const routesPath = join(genDir, 'routes.ts')
-    const manifest = ctx.manifest!
     const elementTrees = ctx.elementTrees!
+    const componentMap = ctx.componentMap!
 
-    // Build component mapping from manifest
-    const importPaths = new Set<string>()
-    for (const route of Object.values(manifest)) {
-      for (const segment of route.chain) {
-        for (const role of SEGMENT_ROLES)
-          if (segment[role]) importPaths.add(segment[role])
-      }
-    }
-    const sortedImports = Array.from(importPaths).sort()
+    // Get sorted imports from component map
+    const sortedImports = Object.keys(componentMap)
 
     // Generate component imports
     const importStatements = sortedImports
