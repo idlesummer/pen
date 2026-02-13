@@ -1,8 +1,6 @@
 import type { Route, RouteManifest } from './route-manifest'
 import type { ComponentImportData } from './component-imports'
 
-// ===== Types =====
-
 export interface ElementTree {
   component: string
   props: Record<string, unknown>
@@ -10,8 +8,6 @@ export interface ElementTree {
 }
 
 export type ElementTreeMap = Record<string, ElementTree>
-
-// ===== Main Function =====
 
 /**
  * Creates element trees for all routes in the manifest.
@@ -22,7 +18,6 @@ export function createElementTrees(manifest: RouteManifest, componentImports: Co
 
   for (const [url, route] of Object.entries(manifest))
     trees[url] = createElementTree(route, componentImports)
-
   return trees
 }
 
