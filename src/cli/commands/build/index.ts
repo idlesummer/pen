@@ -12,6 +12,7 @@ import { buildComponents } from './tasks/build-component-imports'
 import { buildElementTree } from './tasks/build-element-tree'
 import { writeComponentsFile } from './tasks/write-components-file'
 import { writeManifestFile } from './tasks/write-manifest-file'
+import { writeElementTreeFile } from './tasks/write-element-tree-file'
 import { writeRoutesFile } from './tasks/write-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
 import { compileApplication } from './tasks/compile-application'
@@ -37,6 +38,7 @@ export const build: CLICommand = {
         buildElementTree,
         writeComponentsFile,
         writeManifestFile,
+        writeElementTreeFile,
         writeRoutesFile,
         writeEntryFile,
         compileApplication,
