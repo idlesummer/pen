@@ -60,7 +60,7 @@ function formatCode(code: string): string {
     const char = code[i]
 
     // Opening paren after function name
-    if (char === '(' && i > 0 && /[a-zA-Z0-9]/.test(code[i - 1])) {
+    if (char === '(' && i > 0 && /[a-zA-Z0-9]/.test(code[i - 1]!)) {
       result += '(\n' + '  '.repeat(++depth)
     }
     // Closing paren
