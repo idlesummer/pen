@@ -1,18 +1,22 @@
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 
+/**
+ * User-facing configuration (what users write in pen.config.ts).
+ * All fields are optional and will be merged with defaults.
+ */
 export interface PenConfig {
   /**
    * Directory containing your app routes.
    * @default './src/app'
    */
-  appDir: string
+  appDir?: string
 
   /**
    * Output directory for generated files and build artifacts.
    * @default './.pen'
    */
-  outDir: string
+  outDir?: string
 
   /**
    * Emit metadata files (manifest, components, element-tree) to aid debugging and tooling.
@@ -22,11 +26,32 @@ export interface PenConfig {
   emitMetadata?: boolean
 }
 
-export function defineConfig(config: Partial<PenConfig>): Partial<PenConfig> {
+/**
+ * Resolved configuration with all fields guaranteed to be present.
+ * This is what loadConfig() returns after merging user config with defaults.
+ */
+export interface ResolvedPenConfig {
+  /**
+   * Directory containing your app routes.
+   */
+  appDir: string
+
+  /**
+   * Output directory for generated files and build artifacts.
+   */
+  outDir: string
+
+  /**
+   * Emit metadata files (manifest, components, element-tree) to aid debugging and tooling.
+   */
+  emitMetadata: boolean
+}
+
+export function defineConfig(config: PenConfig): PenConfig {
   return config
 }
 
-export const defaultConfig: PenConfig = {
+const defaultConfig: ResolvedPenConfig = {
   appDir: './src/app',
   outDir: './.pen',
   emitMetadata: false,
@@ -35,13 +60,14 @@ export const defaultConfig: PenConfig = {
 /**
  * Loads pen.config.ts from the current directory.
  * Falls back to defaults if config file doesn't exist.
+ * Returns a fully resolved config with all fields guaranteed to be present.
  */
-export async function loadConfig(): Promise<PenConfig> {
+export async function loadConfig(): Promise<ResolvedPenConfig> {
   try {
     const configPath = resolve(process.cwd(), 'pen.config.ts')
     const configUrl = pathToFileURL(configPath).href
 
-    const module = await import(configUrl) as { default?: Partial<PenConfig> }
+    const module = await import(configUrl) as { default?: PenConfig }
     const userConfig = module.default || {}
 
     // Merge with defaults
