@@ -1,6 +1,6 @@
 import type { Task } from '@idlesummer/tasker'
+import type { ComponentImportData, Route } from '@/core/route-builder'
 import type { BuildContext } from '../types'
-import type { Route } from '@/core/route-builder'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
@@ -12,17 +12,17 @@ export const writeRoutesFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const routesPath = join(genDir, 'routes.ts')
-    const { imports, indices } = ctx.componentImports!
+    const componentImports = ctx.componentImports!
 
     // Generate component imports
-    const importStatements = imports
-    .map((importPath, i) => `import Component${i} from '${importPath}'`)
-    .join('\n')
+    const importStatements = componentImports.imports
+      .map((importPath, i) => `import Component${i} from '${importPath}'`)
+      .join('\n')
 
     // Generate pre-built route elements
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
-      const elementCode = buildRouteElement(route, indices, imports)
+      const elementCode = buildRouteElement(route, componentImports)
       const formatted = '\n    ' + formatCode(elementCode).replace(/\n/g, '\n    ')
       routeElements.push(`  '${url}': ${formatted},`)
     }
@@ -60,34 +60,28 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function buildRouteElement(route: Route, indices: Record<string, number>, imports: string[]) {
-  // Start with the screen from the first segment
-  const screenSegment = route.chain[0]!
-  const screenPath = screenSegment['screen']!
-  const screenIndex = indices[screenPath]!
-  let element = `createElement(Component${screenIndex}, { key: '${imports[screenIndex]}' })`
+function buildRouteElement(route: Route, { indices, imports }: ComponentImportData) {
+  const generateElement = (name: string, path: string, extraProps = '', child = '') => {
+    const index = indices[path]!
+    const props = `{ key: '${imports[index]}'${extraProps} }`
+    return `createElement(${name}, ${props}${child ? `, ${child}` : ''})`
+  }
 
-  // Process segments from leaf → root (same order as runtime composition)
+  const segment = route.chain[0]!
+  let element = generateElement(`Component${indices[segment['screen']!]!}`, segment['screen']!)
+
   for (const segment of route.chain) {
-    // Not-found boundary
     if (segment['not-found']) {
-      const path = segment['not-found']
-      const index = indices[path]!
-      element = `createElement(NotFoundBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
+      const index = indices[segment['not-found']]!
+      element = generateElement('NotFoundBoundary', segment['not-found'], `, fallback: Component${index}`, element)
     }
-
-    // Error boundary
     if (segment['error']) {
-      const path = segment['error']
-      const index = indices[path]!
-      element = `createElement(ErrorBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
+      const index = indices[segment['error']]!
+      element = generateElement('ErrorBoundary', segment['error'], `, fallback: Component${index}`, element)
     }
-
-    // Layout
     if (segment['layout']) {
-      const path = segment['layout']
-      const index = indices[path]!
-      element = `createElement(Component${index}, { key: '${imports[index]}' }, ${element})`
+      const index = indices[segment['layout']]!
+      element = generateElement(`Component${index}`, segment['layout'], '', element)
     }
   }
   return element
