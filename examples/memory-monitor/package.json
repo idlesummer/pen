@@ -1,0 +1,16 @@
+{
+  "name": "memory-monitor-example",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pen build",
+    "start": "pen start",
+    "init": "pen init"
+  },
+  "dependencies": {
+    "@idlesummer/pen": "file:../..",
+    "ink": "^6.5.1",
+    "react": "^19.2.3"
+  }
+}
