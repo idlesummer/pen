@@ -68,10 +68,9 @@ export function serialize(tree: ElementTree, indent = 0): string {
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ')
 
-  if (tree.children) {
-    const childCode = serialize(tree.children, indent + 1)
-    return `createElement(${tree.component}, { ${props} },\n${spaces}  ${childCode}\n${spaces})`
-  }
+  if (!tree.children)
+    return `createElement(${tree.component}, { ${props} })`
 
-  return `createElement(${tree.component}, { ${props} })`
+  const childCode = serialize(tree.children, indent + 1)
+  return `createElement(${tree.component}, { ${props} },\n${spaces}  ${childCode}\n${spaces})`
 }
