@@ -13,8 +13,6 @@ export const writeComponentsFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const componentsPath = join(genDir, 'components.ts')
-    await mkdir(genDir, { recursive: true })
-
     const data = ctx.componentImports!
 
     const code = [
@@ -28,6 +26,7 @@ export const writeComponentsFile: Task<BuildContext> = {
       '',
     ].join('\n')
 
+    await mkdir(genDir, { recursive: true })
     await writeFile(componentsPath, code, 'utf-8')
   },
 }
