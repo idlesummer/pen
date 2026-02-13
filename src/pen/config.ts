@@ -29,9 +29,6 @@ export interface ResolvedPenConfig {
 /**
  * User-facing configuration (what users write in pen.config.ts).
  * All fields are optional and will be merged with defaults.
- *
- * This is an interface (not a type) to support declaration merging,
- * allowing plugins to extend the config.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PenConfig extends Partial<ResolvedPenConfig> {}
