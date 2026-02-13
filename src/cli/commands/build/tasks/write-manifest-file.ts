@@ -19,7 +19,7 @@ export const writeManifestFile: Task<BuildContext> = {
       '// NOTE: This file is kept for documentation/debugging.',
       '// Runtime uses pre-built routes from routes.ts instead.',
       '',
-      `import { RouteManifest } from '${PACKAGE_NAME}'`,
+      `import type { RouteManifest } from '${PACKAGE_NAME}'`,
       '',
       `export const manifest: RouteManifest = ${JSON.stringify(ctx.manifest!, null, 2)} as const`,
       '',
