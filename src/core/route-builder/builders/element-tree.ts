@@ -3,14 +3,17 @@ import type { ComponentImportData } from './component-imports'
 
 // ===== Types =====
 
-export interface PropValue {
-  value: string
-  isString: boolean // true = quoted string, false = direct reference
+/**
+ * Marker class for component references in props.
+ * Used to distinguish component refs from string literals during serialization.
+ */
+export class ComponentRef {
+  constructor(public readonly name: string) {}
 }
 
 export interface ElementTree {
   component: string
-  props: Record<string, PropValue>
+  props: Record<string, unknown>
   children?: ElementTree
 }
 
@@ -52,7 +55,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
   let tree: ElementTree = {
     component: `Component${screenIndex}`,
     props: {
-      key: { value: imports[screenIndex]!, isString: true },
+      key: imports[screenIndex]!,
     },
   }
 
@@ -65,8 +68,8 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       tree = {
         component: 'NotFoundBoundary',
         props: {
-          key: { value: imports[index]!, isString: true },
-          fallback: { value: `Component${index}`, isString: false },
+          key: imports[index]!,
+          fallback: new ComponentRef(`Component${index}`),
         },
         children: tree,
       }
@@ -78,8 +81,8 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       tree = {
         component: 'ErrorBoundary',
         props: {
-          key: { value: imports[index]!, isString: true },
-          fallback: { value: `Component${index}`, isString: false },
+          key: imports[index]!,
+          fallback: new ComponentRef(`Component${index}`),
         },
         children: tree,
       }
@@ -91,7 +94,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       tree = {
         component: `Component${index}`,
         props: {
-          key: { value: imports[index]!, isString: true },
+          key: imports[index]!,
         },
         children: tree,
       }
