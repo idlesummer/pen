@@ -3,14 +3,6 @@ import type { ComponentImportData } from './component-imports'
 
 // ===== Types =====
 
-/**
- * Marker class for component references in props.
- * Used to distinguish component refs from string literals during serialization.
- */
-export class ComponentRef {
-  constructor(public readonly name: string) {}
-}
-
 export interface ElementTree {
   component: string
   props: Record<string, unknown>
@@ -69,7 +61,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
         component: 'NotFoundBoundary',
         props: {
           key: imports[index]!,
-          fallback: new ComponentRef(`Component${index}`),
+          fallback: `Component${index}`,
         },
         children: tree,
       }
@@ -82,7 +74,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
         component: 'ErrorBoundary',
         props: {
           key: imports[index]!,
-          fallback: new ComponentRef(`Component${index}`),
+          fallback: `Component${index}`,
         },
         children: tree,
       }
