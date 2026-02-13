@@ -47,7 +47,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
   let tree: ElementTree = {
     component: `Component${screenIndex}`,
     props: {
-      key: imports[screenIndex]!,
+      key: JSON.stringify(imports[screenIndex]!), // Pre-serialized with quotes
     },
   }
 
@@ -60,8 +60,8 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       tree = {
         component: 'NotFoundBoundary',
         props: {
-          key: imports[index]!,
-          fallback: `Component${index}`,
+          key: JSON.stringify(imports[index]!), // Pre-serialized with quotes
+          fallback: `Component${index}`, // No quotes (component identifier)
         },
         children: tree,
       }
@@ -73,8 +73,8 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       tree = {
         component: 'ErrorBoundary',
         props: {
-          key: imports[index]!,
-          fallback: `Component${index}`,
+          key: JSON.stringify(imports[index]!), // Pre-serialized with quotes
+          fallback: `Component${index}`, // No quotes (component identifier)
         },
         children: tree,
       }
@@ -86,7 +86,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       tree = {
         component: `Component${index}`,
         props: {
-          key: imports[index]!,
+          key: JSON.stringify(imports[index]!), // Pre-serialized with quotes
         },
         children: tree,
       }
