@@ -25,7 +25,7 @@ export const writeManifestFile: Task<BuildContext> = {
       '',
     ].join('\n')
 
-    await writeFile(manifestPath, code, 'utf-8')
     await mkdir(genDir, { recursive: true })
+    await writeFile(manifestPath, code, 'utf-8')
   },
 }
