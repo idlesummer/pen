@@ -5,7 +5,7 @@ import { loadConfig } from '@/core/config'
 import { CLI_NAME, VERSION } from '@/core/constants'
 
 // Import individual tasks
-import { buildFileTree } from './tasks/scan-filesystem'
+import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
 import { buildRouteManifest } from './tasks/build-route-manifest'
 import { buildComponents } from './tasks/build-component-imports'
