@@ -96,31 +96,34 @@ function buildRouteElement(route: Route, { indices, imports }: ComponentImportDa
  * Adds line breaks and indentation to nested createElement chains.
  */
 function formatCode(code: string): string {
+  const isIdentifier = (char: string | undefined) => char && /[a-zA-Z0-9]/.test(char)
+  const indent = (level: number) => '  '.repeat(level)
+
   let depth = 0
   let result = ''
   const argCounts = [0]
 
   for (let i = 0; i < code.length; i++) {
     const char = code[i]
-    const prevChar = code[i - 1]
 
-    if (char === '(' && prevChar && /[a-zA-Z0-9]/.test(prevChar)) {
+    if (char === '(' && isIdentifier(code[i - 1])) {
       argCounts[++depth] = 0
       result += '('
     }
     else if (char === ')') {
-      const multiLine = argCounts[depth]! >= 2
-      result += multiLine ? `\n${'  '.repeat(--depth)})` : ')'
-      if (!multiLine) depth--
+      const hasMultipleArgs = argCounts[depth]! >= 2
+      depth -= 1
+      result += hasMultipleArgs ? `\n${indent(depth)})` : ')'
       argCounts.pop()
     }
     else if (char === ',' && code[i + 1] === ' ') {
       const argCount = ++argCounts[depth]!
-      result += argCount >= 2 ? `,\n${'  '.repeat(depth)}` : ', '
+      result += argCount >= 2 ? `,\n${indent(depth)}` : ', '
       i++ // Skip space
     }
     else
       result += char
   }
+
   return result
 }
