@@ -12,14 +12,12 @@ export const writeRoutesFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const routesPath = join(genDir, 'routes.ts')
-    await mkdir(genDir, { recursive: true })
-
     const { imports, indices } = ctx.componentImports!
 
     // Generate component imports
     const importStatements = imports
-      .map((importPath, i) => `import Component${i} from '${importPath}'`)
-      .join('\n')
+    .map((importPath, i) => `import Component${i} from '${importPath}'`)
+    .join('\n')
 
     // Generate pre-built route elements
     const routeElements: string[] = []
@@ -45,6 +43,7 @@ export const writeRoutesFile: Task<BuildContext> = {
       '',
     ].join('\n')
 
+    await mkdir(genDir, { recursive: true })
     await writeFile(routesPath, code, 'utf-8')
   },
 }
