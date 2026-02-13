@@ -66,14 +66,14 @@ function wrapTree(
   tree: ElementTree,
   path: string | undefined,
   tag: string,
-  getKey: (index: number) => string,
   indices: Record<string, number>,
+  imports: string[],
   withFallback = false,
 ): ElementTree {
   if (!path) return tree
 
   const index = indices[path]!
-  const props: Record<string, unknown> = { key: getKey(index) }
+  const props: Record<string, unknown> = { key: imports[index]! }
 
   if (withFallback)
     props.fallback = `Component${index}`
@@ -98,8 +98,6 @@ function wrapTree(
  * 4. Error boundary (wraps layout + all descendants)
  */
 function buildRouteTree(route: Route, indices: Record<string, number>, imports: string[]): ElementTree {
-  const getKey = (index: number) => imports[index]!
-
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
@@ -107,14 +105,14 @@ function buildRouteTree(route: Route, indices: Record<string, number>, imports: 
 
   let tree: ElementTree = {
     tag: `Component${screenIndex}`,
-    props: { key: getKey(screenIndex) },
+    props: { key: imports[screenIndex]! },
   }
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
-    tree = wrapTree(tree, segment['not-found'], 'NotFoundBoundary', getKey, indices, true)
-    tree = wrapTree(tree, segment['error'], 'ErrorBoundary', getKey, indices, true)
-    tree = wrapTree(tree, segment['layout'], '', getKey, indices, false)
+    tree = wrapTree(tree, segment['not-found'], 'NotFoundBoundary', indices, imports, true)
+    tree = wrapTree(tree, segment['error'], 'ErrorBoundary', indices, imports, true)
+    tree = wrapTree(tree, segment['layout'], '', indices, imports, false)
   }
 
   return tree
