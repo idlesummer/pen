@@ -5,8 +5,6 @@ import { duration } from '@idlesummer/tasker'
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 
-// ===== Main Task =====
-
 export const compileApplication: Task<BuildContext> = {
   name: 'Compiling application',
   onSuccess: (_, dur) => `Compiled application (${duration(dur)})`,
