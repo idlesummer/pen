@@ -5,7 +5,7 @@ import { pathToFileURL } from 'url'
  * Resolved configuration with all fields guaranteed to be present.
  * This is what loadConfig() returns after merging user config with defaults.
  */
-export interface ResolvedPenConfig {
+export type ResolvedPenConfig = {
   /**
    * Directory containing your app routes.
    * @default './src/app'

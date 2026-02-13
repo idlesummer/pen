@@ -17,7 +17,7 @@ describe('useUrl', () => {
 			</RouterProvider>,
 		)
 
-		expect(getByTestId('url').textContent).toBe('/home')
+		expect(getByTestId('url').textContent).toBe('/home/')
 	})
 
 	it('should return different URL when initialUrl changes', () => {
@@ -27,7 +27,7 @@ describe('useUrl', () => {
 			</RouterProvider>,
 		)
 
-		expect(getByTestId('url').textContent).toBe('/about')
+		expect(getByTestId('url').textContent).toBe('/about/')
 	})
 
 	it('should throw error when used outside RouterProvider', () => {
