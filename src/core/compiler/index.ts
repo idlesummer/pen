@@ -1,4 +1,5 @@
 // Types
+export type { CompiledRoutes } from './types'
 export type { FileNode } from './builders/file-tree'
 export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
 export type { RouteManifest, Route } from './builders/route-manifest'

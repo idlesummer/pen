@@ -1,7 +1,6 @@
-import type { ReactElement } from 'react'
+import type { ComponentType } from 'react'
 
 /**
- * Compiled route elements mapped by URL.
- * Routes are compiled once at build time via codegen.
+ * Map of absolute component file paths to their React components.
  */
-export type CompiledRoutes = Record<string, ReactElement>
+export type ComponentMap = Record<string, ComponentType>
