@@ -24,7 +24,7 @@ export const writeRoutesFile: Task<BuildContext> = {
     // Generate pre-built route elements
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
-      const elementCode = generateRouteElement(route, indices, imports)
+      const elementCode = buildRouteElement(route, indices, imports)
       routeElements.push(`  '${url}': ${elementCode},`)
     }
 
@@ -60,7 +60,7 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function generateRouteElement(route: Route, indices: Record<string, number>, imports: string[]) {
+function buildRouteElement(route: Route, indices: Record<string, number>, imports: string[]) {
   const getKey = (index: number) => JSON.stringify(imports[index]!)
 
   // Start with the screen from the first segment
