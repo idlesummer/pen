@@ -42,7 +42,7 @@ function createSegmentChain(segment: SegmentNode, genDir: string) {
 
   ancestors(segment, {
     parent: ancestorSegment => ancestorSegment.parent,
-    visit: (ancestorSegment) => {
+    visit: ancestorSegment => {
       const roles: SegmentRoles = {}
       const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
 
