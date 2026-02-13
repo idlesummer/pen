@@ -42,7 +42,9 @@ export const build: CLICommand = {
           writeElementTreeFile,
           writeComponentMapFile,
         ]),
-        writeRoutesFile, writeEntryFile, compileApplication
+        writeRoutesFile,
+        writeEntryFile,
+        compileApplication,
       ])
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })
