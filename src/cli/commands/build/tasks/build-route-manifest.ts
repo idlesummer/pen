@@ -8,5 +8,7 @@ import { createRouteManifest } from '@/core/route-builder'
 export const buildRouteManifest: Task<BuildContext> = {
   name: 'Building route manifest',
   onSuccess: (_, dur) => `Built route manifest (${duration(dur)})`,
-  run: async (ctx) => ({ manifest: createRouteManifest(ctx.segmentTree!) }),
+  run: async (ctx) => ({
+    manifest: createRouteManifest(ctx.segmentTree!),
+  }),
 }
