@@ -2,50 +2,35 @@ import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 
 /**
- * User-facing configuration (what users write in pen.config.ts).
- * All fields are optional and will be merged with defaults.
- */
-export interface PenConfig {
-  /**
-   * Directory containing your app routes.
-   * @default './src/app'
-   */
-  appDir?: string
-
-  /**
-   * Output directory for generated files and build artifacts.
-   * @default './.pen'
-   */
-  outDir?: string
-
-  /**
-   * Emit metadata files (manifest, components, element-tree) to aid debugging and tooling.
-   * These files provide introspection into your app's structure.
-   * @default true
-   */
-  emitMetadata?: boolean
-}
-
-/**
  * Resolved configuration with all fields guaranteed to be present.
  * This is what loadConfig() returns after merging user config with defaults.
  */
 export interface ResolvedPenConfig {
   /**
    * Directory containing your app routes.
+   * @default './src/app'
    */
   appDir: string
 
   /**
    * Output directory for generated files and build artifacts.
+   * @default './.pen'
    */
   outDir: string
 
   /**
    * Emit metadata files (manifest, components, element-tree) to aid debugging and tooling.
+   * These files provide introspection into your app's structure.
+   * @default true
    */
   emitMetadata: boolean
 }
+
+/**
+ * User-facing configuration (what users write in pen.config.ts).
+ * All fields are optional and will be merged with defaults.
+ */
+export type PenConfig = Partial<ResolvedPenConfig>
 
 export function defineConfig(config: PenConfig): PenConfig {
   return config
