@@ -1,7 +1,7 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import { duration } from '@idlesummer/tasker'
-import { createFileTree } from '@/core/route-builder'
+import { createFileTree } from '@/core/compiler'
 
 // ===== Main Task =====
 
