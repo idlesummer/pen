@@ -11,7 +11,7 @@ import { buildRouteManifest } from './tasks/build-route-manifest'
 import { buildElementTree } from './tasks/build-element-tree'
 import { writeManifestFile } from './tasks/write-manifest-file'
 import { writeElementTreeFile } from './tasks/write-element-tree-file'
-import { writeComponentMappingFile } from './tasks/write-component-mapping-file'
+import { writeComponentMapFile } from './tasks/write-component-mapping-file'
 import { writeRoutesFile } from './tasks/write-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
 import { compileApplication } from './tasks/compile-application'
@@ -36,7 +36,7 @@ export const build: CLICommand = {
         buildElementTree,
         writeManifestFile,
         writeElementTreeFile,
-        writeComponentMappingFile,
+        writeComponentMapFile,
         writeRoutesFile,
         writeEntryFile,
         compileApplication,

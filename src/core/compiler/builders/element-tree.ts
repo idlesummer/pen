@@ -19,11 +19,11 @@ export type ComponentMap = Record<string, number>
  */
 export function createElementTrees(manifest: RouteManifest) {
   const elementTrees: ElementTreeMap = {}
-  const componentMapping = buildComponentMap(manifest)
+  const componentMap = buildComponentMap(manifest)
 
   for (const [url, route] of Object.entries(manifest))
-    elementTrees[url] = createElementTree(route, componentMapping)
-  return { elementTrees, componentMapping }
+    elementTrees[url] = createElementTree(route, componentMap)
+  return { elementTrees, componentMap }
 }
 
 /**
