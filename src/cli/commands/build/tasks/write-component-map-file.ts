@@ -3,7 +3,7 @@ import type { BuildContext } from '../types'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
-import { PACKAGE_NAME } from '@/core/constants'
+import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeComponentMapFile: Task<BuildContext> = {
   name: 'Writing components.ts',

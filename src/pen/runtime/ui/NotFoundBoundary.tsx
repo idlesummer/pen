@@ -1,5 +1,5 @@
 import { Component, type ComponentType, type PropsWithChildren } from 'react'
-import { useRouter } from '@/core/router'
+import { useRouter } from '@/pen/router'
 import { NotFoundError } from '../errors'
 
 /** Props passed to not-found.tsx components */

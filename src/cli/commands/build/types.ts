@@ -1,7 +1,7 @@
 import { Context } from '@idlesummer/tasker'
-import type { FileNode, ElementTreeMap, ComponentMap } from '@/core/compiler'
-import type { SegmentNode } from '@/core/compiler/builders/segment-tree'
-import type { RouteManifest } from '@/core/compiler/builders/route-manifest'
+import type { FileNode, ElementTreeMap, ComponentMap } from '@/pen/compiler'
+import type { SegmentNode } from '@/pen/compiler/builders/segment-tree'
+import type { RouteManifest } from '@/pen/compiler/builders/route-manifest'
 
 export type BuildContext = Context & {
   appDir: string

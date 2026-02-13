@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import pc from 'picocolors'
 
-import { CLI_NAME, PACKAGE_NAME } from '@/core/constants'
+import { CLI_NAME, PACKAGE_NAME } from '@/pen/constants'
 import type { CLICommand } from '../../types'
 
 export const init: CLICommand = {
