@@ -57,7 +57,7 @@ export const writeRoutesFile: Task<BuildContext> = {
 function indentWrap(child: string, openingLine: string, depth: number): string {
   const childIndent = '  '.repeat(depth)
   const closeIndent = '  '.repeat(depth - 1)
-  const reindented = child.replace(/\n/g, '\n' + childIndent)
+  const reindented = child.replace(/\n/g, `\n${childIndent}`)
   return `${openingLine},\n${childIndent}${reindented}\n${closeIndent})`
 }
 
