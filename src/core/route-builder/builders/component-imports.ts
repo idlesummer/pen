@@ -7,7 +7,7 @@ import { SEGMENT_ROLES } from './segment-tree'
  */
 export interface ComponentImportData {
   /** Sorted array of import paths (index = component number) */
-  imports: readonly string[]
+  imports: string[]
   /** Lookup map from absolute path to component index */
   indices: Record<string, number>
 }
