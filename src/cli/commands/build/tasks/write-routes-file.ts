@@ -6,6 +6,19 @@ import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/core/constants'
 
+// ===== Types =====
+
+interface PropValue {
+  value: string
+  isString: boolean // true = quoted string, false = direct reference
+}
+
+interface ElementTree {
+  component: string
+  props: Record<string, PropValue>
+  children?: ElementTree
+}
+
 export const writeRoutesFile: Task<BuildContext> = {
   name: 'Writing routes.ts',
   onSuccess: (_, dur) => `Saved routes.ts (${duration(dur)})`,
@@ -13,6 +26,18 @@ export const writeRoutesFile: Task<BuildContext> = {
     const genDir = join(ctx.outDir, 'generated')
     const routesPath = join(genDir, 'routes.ts')
     const componentImports = ctx.componentImports!
+
+    // Helper: Serialize ElementTree to createElement string
+    function serialize(tree: ElementTree): string {
+      const props = Object.entries(tree.props)
+        .map(([key, { value, isString }]) => `${key}: ${isString ? `'${value}'` : value}`)
+        .join(', ')
+
+      if (tree.children) {
+        return `createElement(${tree.component}, { ${props} }, ${serialize(tree.children)})`
+      }
+      return `createElement(${tree.component}, { ${props} })`
+    }
 
     // Generate component imports
     const importStatements = componentImports.imports
@@ -22,9 +47,9 @@ export const writeRoutesFile: Task<BuildContext> = {
     // Generate pre-built route elements
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
-      const elementCode = buildRouteElement(route, componentImports)
-      const formatted = '\n    ' + formatCode(elementCode).replace(/\n/g, '\n    ')
-      routeElements.push(`  '${url}': ${formatted},`)
+      const tree = buildElementTree(route, componentImports)
+      const elementCode = serialize(tree)
+      routeElements.push(`  '${url}': ${elementCode},`)
     }
 
     const code = [
@@ -49,10 +74,10 @@ export const writeRoutesFile: Task<BuildContext> = {
 }
 
 /**
- * Builds a route element by composing React components into nested createElement calls.
+ * Builds a structured element tree representing nested React components.
  *
- * This function mirrors the runtime composition logic but generates static code strings
- * that will be written to the generated routes.ts file.
+ * This function mirrors the runtime composition logic but creates a structured data tree
+ * that will be serialized into createElement calls for the generated routes.ts file.
  *
  * Composition order per segment (inside to outside):
  * 1. Screen component (only in leaf segment)
@@ -60,12 +85,18 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function buildRouteElement(route: Route, { indices, imports }: ComponentImportData) {
+function buildElementTree(route: Route, { indices, imports }: ComponentImportData): ElementTree {
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
   const screenIndex = indices[screenPath]!
-  let element = `createElement(Component${screenIndex}, { key: '${imports[screenIndex]}' })`
+
+  let tree: ElementTree = {
+    component: `Component${screenIndex}`,
+    props: {
+      key: { value: imports[screenIndex]!, isString: true },
+    },
+  }
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
@@ -73,57 +104,42 @@ function buildRouteElement(route: Route, { indices, imports }: ComponentImportDa
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
-      element = `createElement(NotFoundBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
+      tree = {
+        component: 'NotFoundBoundary',
+        props: {
+          key: { value: imports[index]!, isString: true },
+          fallback: { value: `Component${index}`, isString: false },
+        },
+        children: tree,
+      }
     }
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
-      element = `createElement(ErrorBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
+      tree = {
+        component: 'ErrorBoundary',
+        props: {
+          key: { value: imports[index]!, isString: true },
+          fallback: { value: `Component${index}`, isString: false },
+        },
+        children: tree,
+      }
     }
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
-      element = `createElement(Component${index}, { key: '${imports[index]}' }, ${element})`
+      tree = {
+        component: `Component${index}`,
+        props: {
+          key: { value: imports[index]!, isString: true },
+        },
+        children: tree,
+      }
     }
   }
-  return element
+
+  return tree
 }
 
-/**
- * Formats generated code for readability.
- * Adds line breaks and indentation to nested createElement chains.
- */
-function formatCode(code: string): string {
-  const isIdentifier = (char: string | undefined) => char && /[a-zA-Z0-9]/.test(char)
-  const indent = (level: number) => '  '.repeat(level)
-
-  let depth = 0
-  let result = ''
-  const argCounts = [0]
-
-  for (let i = 0; i < code.length; i++) {
-    const char = code[i]
-
-    if (char === '(' && isIdentifier(code[i - 1])) {
-      argCounts[++depth] = 0
-      result += '('
-    }
-    else if (char === ')') {
-      const hasMultipleArgs = argCounts[depth]! >= 2
-      depth -= 1
-      result += hasMultipleArgs ? `\n${indent(depth)})` : ')'
-      argCounts.pop()
-    }
-    else if (char === ',' && code[i + 1] === ' ') {
-      const argCount = ++argCounts[depth]!
-      result += argCount >= 2 ? `,\n${indent(depth)}` : ', '
-      i++ // Skip space
-    }
-    else
-      result += char
-  }
-
-  return result
-}
