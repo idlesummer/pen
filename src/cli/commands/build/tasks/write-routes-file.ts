@@ -34,8 +34,8 @@ export const writeRoutesFile: Task<BuildContext> = {
     // Generate pre-built route elements from element trees
     const routeElements: string[] = []
     for (const [url, tree] of Object.entries(elementTrees)) {
-      const elementCode = serialize(tree)
-      routeElements.push(`  '${url}': ${elementCode},`)
+      const elementCode = `    ${serialize(tree).replace(/\n/g, '\n    ')}`
+      routeElements.push(`  '${url}':\n${elementCode},`)
     }
 
     const code = [
