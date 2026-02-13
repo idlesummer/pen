@@ -87,5 +87,7 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
       }
     }
   }
+
+  console.log(tree)
   return tree
 }
