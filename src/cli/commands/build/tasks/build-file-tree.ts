@@ -8,5 +8,7 @@ import { createFileTree } from '@/core/route-builder'
 export const buildFileTree: Task<BuildContext> = {
   name: 'Building file tree',
   onSuccess: (_, dur) => `Built file tree (${duration(dur)})`,
-  run: async (ctx) => ({ fileTree: createFileTree(ctx.appDir) }),
+  run: async (ctx) => ({
+    fileTree: createFileTree(ctx.appDir),
+  }),
 }

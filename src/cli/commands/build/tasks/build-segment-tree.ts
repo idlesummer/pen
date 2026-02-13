@@ -8,5 +8,7 @@ import { createSegmentTree } from '@/core/route-builder'
 export const buildSegmentTree: Task<BuildContext> = {
   name: 'Building segment tree...',
   onSuccess: (_, dur) => `Built segment tree (${duration(dur)})`,
-  run: async (ctx) => ({ segmentTree: createSegmentTree(ctx.fileTree!) }),
+  run: async (ctx) => ({
+    segmentTree: createSegmentTree(ctx.fileTree!),
+  }),
 }
