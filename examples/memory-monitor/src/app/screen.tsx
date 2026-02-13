@@ -57,40 +57,6 @@ export default function HomeScreen() {
           </BarChart>
         </Box>
       </Box>
-
-      <Box
-        flexDirection="column"
-        borderStyle="single"
-        borderColor="green"
-        padding={1}
-      >
-        <Text bold color="green">
-          Memory Allocation Simulator
-        </Text>
-        <Box marginTop={1} flexDirection="column">
-          <Text>
-            <Text color="cyan">Allocated: </Text>
-            <Text bold>{dataSize} MB</Text>
-            <Text dimColor> (~{data.length.toLocaleString()} items)</Text>
-          </Text>
-          <Box marginTop={1} gap={1}>
-            <Text dimColor>Press: </Text>
-            <Text>
-              <Text color="green">1</Text> +1MB
-            </Text>
-            <Text>
-              <Text color="green">5</Text> +5MB
-            </Text>
-            <Text>
-              <Text color="green">0</Text> +10MB
-            </Text>
-            <Text>
-              <Text color="red">c</Text> Clear
-            </Text>
-          </Box>
-        </Box>
-      </Box>
-
       <Box
         flexDirection="column"
         borderStyle="single"
