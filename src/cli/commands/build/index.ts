@@ -36,12 +36,12 @@ export const build: CLICommand = {
         buildRouteManifest,
         buildComponentMap,
         buildElementTree,
+
         // Conditionally add metadata file generation tasks
-        ...(!emitMetadata ? [] : [
-          writeManifestFile,
-          writeElementTreeFile,
-          writeComponentMapFile,
-        ]),
+        emitMetadata && writeManifestFile,
+        emitMetadata && writeElementTreeFile,
+        emitMetadata && writeComponentMapFile,
+
         writeRoutesFile,
         writeEntryFile,
         compileApplication,
