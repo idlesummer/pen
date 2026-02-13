@@ -1,4 +1,4 @@
-import { RouterProvider } from '@/core/router'
+import { RouterProvider } from '@/pen/router'
 import { ErrorBoundary } from './ui/ErrorBoundary'
 import { NotFoundBoundary } from './ui/NotFoundBoundary'
 import { ErrorScreen } from './ui/ErrorScreen'

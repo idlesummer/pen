@@ -1,8 +1,8 @@
 import type { CLICommand } from '../../types'
 import pc from 'picocolors'
 import { pipe, duration, fileList } from '@idlesummer/tasker'
-import { loadConfig } from '@/core/config'
-import { CLI_NAME, VERSION } from '@/core/constants'
+import { loadConfig } from '@/pen/config'
+import { CLI_NAME, VERSION } from '@/pen/constants'
 
 // Import individual tasks
 import { buildFileTree } from './tasks/build-file-tree'

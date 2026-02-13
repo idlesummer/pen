@@ -1,7 +1,7 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import { duration } from '@idlesummer/tasker'
-import { createSegmentTree } from '@/core/compiler'
+import { createSegmentTree } from '@/pen/compiler'
 
 // ===== Main Task =====
 

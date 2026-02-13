@@ -1,10 +1,10 @@
 import type { Task } from '@idlesummer/tasker'
-import type { ElementTree } from '@/core/compiler'
+import type { ElementTree } from '@/pen/compiler'
 import type { BuildContext } from '../types'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
-import { PACKAGE_NAME } from '@/core/constants'
+import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeRoutesFile: Task<BuildContext> = {
   name: 'Writing routes.ts',

@@ -1,7 +1,7 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import { duration } from '@idlesummer/tasker'
-import { createRouteManifest } from '@/core/compiler'
+import { createRouteManifest } from '@/pen/compiler'
 
 // ===== Main Task =====
 
