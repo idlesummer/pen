@@ -21,10 +21,9 @@ export const writeRoutesFile: Task<BuildContext> = {
         .map(([key, { value, isString }]) => `${key}: ${isString ? `'${value}'` : value}`)
         .join(', ')
 
-      if (tree.children) {
-        return `createElement(${tree.component}, { ${props} }, ${serialize(tree.children)})`
-      }
-      return `createElement(${tree.component}, { ${props} })`
+      return tree.children
+        ? `createElement(${tree.component}, { ${props} }, ${serialize(tree.children)})`
+        : `createElement(${tree.component}, { ${props} })`
     }
 
     // Generate component imports
