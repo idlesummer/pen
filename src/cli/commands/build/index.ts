@@ -7,7 +7,7 @@ import { CLI_NAME, VERSION } from '@/core/constants'
 // Import individual tasks
 import { scanFilesystem } from './tasks/scan-filesystem'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { generateManifest } from './tasks/generate-manifest'
+import { buildRouteManifest } from './tasks/generate-manifest'
 import { buildComponents } from './tasks/build-component-entries'
 import { writeComponentsFile } from './tasks/write-components-file'
 import { writeManifestFile } from './tasks/write-manifest-file'
@@ -31,7 +31,7 @@ export const build: CLICommand = {
       const pipeline = pipe([
         scanFilesystem,
         buildSegmentTree,
-        generateManifest,
+        buildRouteManifest,
         buildComponents,
         writeComponentsFile,
         writeManifestFile,
