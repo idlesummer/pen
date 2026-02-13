@@ -19,14 +19,6 @@ export interface ComponentMapping {
 }
 
 /**
- * Get sorted array of import paths from component mapping.
- * Keys are guaranteed to be in sorted order.
- */
-export function getImports(mapping: ComponentMapping): string[] {
-  return Object.keys(mapping.indices)
-}
-
-/**
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
  * Returns both the trees and the component mapping for code generation.
@@ -79,7 +71,7 @@ function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
  */
 function createElementTree(route: Route, mapping: ComponentMapping): ElementTree {
   const { indices } = mapping
-  const imports = getImports(mapping)
+  const imports = Object.keys(mapping)
 
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
