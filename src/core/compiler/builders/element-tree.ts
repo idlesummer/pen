@@ -10,7 +10,7 @@ export interface ElementTree {
 export type ElementTreeMap = Record<string, ElementTree>
 
 /** Map from import path to component index (keys are in sorted order) */
-export type ComponentMapping = Record<string, number>
+export type ComponentMap = Record<string, number>
 
 /**
  * Creates element trees for all routes in the manifest.
@@ -18,12 +18,12 @@ export type ComponentMapping = Record<string, number>
  * Returns both the trees and the component mapping for code generation.
  */
 export function createElementTrees(manifest: RouteManifest) {
-  const trees: ElementTreeMap = {}
-  const mapping = buildComponentMapping(manifest)
+  const elementTrees: ElementTreeMap = {}
+  const componentMapping = buildComponentMap(manifest)
 
   for (const [url, route] of Object.entries(manifest))
-    trees[url] = createElementTree(route, mapping)
-  return { trees, mapping }
+    elementTrees[url] = createElementTree(route, componentMapping)
+  return { elementTrees, componentMapping }
 }
 
 /**
@@ -31,7 +31,7 @@ export function createElementTrees(manifest: RouteManifest) {
  * Collects all unique import paths and assigns them indices.
  * Keys are stored in sorted order for deterministic output.
  */
-function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
+function buildComponentMap(manifest: RouteManifest): ComponentMap {
   const importPaths = new Set<string>()
 
   // Collect all unique import paths from manifest
@@ -44,7 +44,7 @@ function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
 
   // Sort for deterministic output
   const imports = Array.from(importPaths).sort()
-  const mapping: ComponentMapping = {}
+  const mapping: ComponentMap = {}
   for (let i = 0; i < imports.length; i++)
     mapping[imports[i]!] = i
 
@@ -63,7 +63,7 @@ function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function createElementTree(route: Route, mapping: ComponentMapping): ElementTree {
+function createElementTree(route: Route, mapping: ComponentMap): ElementTree {
   const imports = Object.keys(mapping)
 
   // Start with the screen from the first segment
