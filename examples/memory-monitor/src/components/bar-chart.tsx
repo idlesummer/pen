@@ -63,9 +63,6 @@ interface ChartConfig {
 
 // ─── Constants ──────────────────────────────────────────────────
 
-const BAR_W = 8
-const GROUP_GAP = 3
-const INNER_GAP = 1
 const BLOCK = '█'
 const BLOCK_CAP = '▀'
 const GRID_CHAR = '·'
@@ -76,9 +73,22 @@ interface BarChartProps {
   data: Record<string, unknown>[]
   children?: ReactNode
   height?: number
+  /** Width of each bar in characters (default 8) */
+  barSize?: number
+  /** Gap between bars within the same category group (default 1) */
+  barGap?: number
+  /** Gap between category groups (default 3) */
+  barCategoryGap?: number
 }
 
-export function BarChart({ data, children, height = 10 }: BarChartProps) {
+export function BarChart({
+  data,
+  children,
+  height = 10,
+  barSize = 8,
+  barGap = 1,
+  barCategoryGap = 3,
+}: BarChartProps) {
   const cfg = parseConfig(children)
   if (cfg.bars.length === 0 || data.length === 0) return null
 
@@ -109,12 +119,18 @@ export function BarChart({ data, children, height = 10 }: BarChartProps) {
   // ── Layout math ──
   const barsPerGroup = cfg.bars.length
   const groupW =
-    barsPerGroup * BAR_W + Math.max(0, barsPerGroup - 1) * INNER_GAP
+    barsPerGroup * barSize + Math.max(0, barsPerGroup - 1) * barGap
   const totalW =
-    data.length * groupW + Math.max(0, data.length - 1) * GROUP_GAP
+    data.length * groupW + Math.max(0, data.length - 1) * barCategoryGap
 
   // ── Y-axis reference rows ──
   const yRefRows = [height, Math.ceil(height / 2), 1]
+
+  // ── X-axis labels: skip row if all labels are empty ──
+  const hasLabels = groups.some((g) => g.label.trim() !== '')
+
+  // ── Legend mode: per-item colors vs per-bar-series ──
+  const hasItemFills = groups.some((g) => g.fill !== undefined)
 
   return (
     <Box flexDirection="column">
@@ -145,7 +161,9 @@ export function BarChart({ data, children, height = 10 }: BarChartProps) {
             {groups.map((group, gi) => {
               const gapStr =
                 gi > 0
-                  ? (cfg.showGrid && isRef ? GRID_CHAR : ' ').repeat(GROUP_GAP)
+                  ? (cfg.showGrid && isRef ? GRID_CHAR : ' ').repeat(
+                      barCategoryGap,
+                    )
                   : ''
               return (
                 <Text key={gi}>
@@ -155,26 +173,25 @@ export function BarChart({ data, children, height = 10 }: BarChartProps) {
                     const isTop =
                       row === fills[gi][bi] && fills[gi][bi] > 0
                     const color = group.fill ?? cfg.bars[bi].fill
-                    const innerGap =
+                    const innerGapStr =
                       bi > 0
-                        ? (
-                            cfg.showGrid && isRef && !filled
-                              ? GRID_CHAR
-                              : ' '
-                          ).repeat(INNER_GAP)
+                        ? (cfg.showGrid && isRef && !filled
+                            ? GRID_CHAR
+                            : ' '
+                          ).repeat(barGap)
                         : ''
                     return (
                       <Text key={bi}>
-                        {innerGap}
+                        {innerGapStr}
                         <Text
                           color={filled ? color : undefined}
                           dimColor={!filled && cfg.showGrid && isRef}
                         >
                           {filled
-                            ? (isTop ? BLOCK_CAP : BLOCK).repeat(BAR_W)
+                            ? (isTop ? BLOCK_CAP : BLOCK).repeat(barSize)
                             : cfg.showGrid && isRef
-                              ? GRID_CHAR.repeat(BAR_W)
-                              : ' '.repeat(BAR_W)}
+                              ? GRID_CHAR.repeat(barSize)
+                              : ' '.repeat(barSize)}
                         </Text>
                       </Text>
                     )
@@ -193,28 +210,31 @@ export function BarChart({ data, children, height = 10 }: BarChartProps) {
       </Text>
 
       {/* X-axis labels (centered under each group) */}
-      <Text>
-        {cfg.showYAxis && <Text>{' '.repeat(yLabelW + 3)}</Text>}
-        {groups.map((g, gi) => {
-          const cellW = groupW + (gi < groups.length - 1 ? GROUP_GAP : 0)
-          const label = g.label.slice(0, cellW)
-          const padL = Math.floor((cellW - label.length) / 2)
-          const padR = cellW - label.length - padL
-          return (
-            <Text key={gi} dimColor>
-              {' '.repeat(padL)}
-              {label}
-              {' '.repeat(padR)}
-            </Text>
-          )
-        })}
-      </Text>
+      {hasLabels && (
+        <Text>
+          {cfg.showYAxis && <Text>{' '.repeat(yLabelW + 3)}</Text>}
+          {groups.map((g, gi) => {
+            const cellW =
+              groupW + (gi < groups.length - 1 ? barCategoryGap : 0)
+            const label = g.label.slice(0, cellW)
+            const padL = Math.floor((cellW - label.length) / 2)
+            const padR = cellW - label.length - padL
+            return (
+              <Text key={gi} dimColor>
+                {' '.repeat(padL)}
+                {label}
+                {' '.repeat(padR)}
+              </Text>
+            )
+          })}
+        </Text>
+      )}
 
       {/* Legend */}
       <Box marginTop={1} gap={2} flexWrap="wrap">
-        {cfg.bars.length === 1
+        {hasItemFills
           ? groups.map((g, gi) => {
-              const unit = cfg.bars[0].unit ?? ''
+              const unit = cfg.bars[0]?.unit ?? ''
               return (
                 <Text key={gi}>
                   <Text color={g.fill ?? cfg.bars[0].fill}>{'● '}</Text>
