@@ -22,7 +22,7 @@ export type ElementTreeMap = Record<string, ElementTree>
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createElementTrees(manifest: RouteManifest,componentImports: ComponentImportData) {
+export function createElementTrees(manifest: RouteManifest, componentImports: ComponentImportData) {
   const trees: ElementTreeMap = {}
 
   for (const [url, route] of Object.entries(manifest))
