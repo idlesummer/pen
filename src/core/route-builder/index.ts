@@ -2,7 +2,7 @@
 export { createFileTree } from './builders/file-tree'
 export { createSegmentTree } from './builders/segment-tree'
 export { createRouteManifest } from './builders/route-manifest'
-export { buildComponentImports } from './builders/component-imports'
+export { createComponentImports } from './builders/component-imports'
 
 // Errors
 export {

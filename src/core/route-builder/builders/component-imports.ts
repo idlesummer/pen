@@ -13,10 +13,10 @@ export interface ComponentImportData {
 }
 
 /**
- * Builds component import data from a route manifest.
+ * Creates component import data from a route manifest.
  * Returns both the sorted import array and a lookup map for efficient access.
  */
-export function buildComponentImports(manifest: RouteManifest, outDir: string): ComponentImportData {
+export function createComponentImports(manifest: RouteManifest, outDir: string): ComponentImportData {
   const segmentPaths = new Set<string>()
 
   // Collect all unique absolute paths from manifest
