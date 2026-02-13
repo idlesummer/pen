@@ -7,6 +7,6 @@ export const buildElementTree: Task<BuildContext> = {
   name: 'Building element trees',
   onSuccess: (_, dur) => `Built element trees (${duration(dur)})`,
   run: async (ctx) => ({
-    elementTrees: createElementTrees(ctx.manifest!, ctx.componentImports!),
+    elementTrees: createElementTrees(ctx.manifest!),
   }),
 }

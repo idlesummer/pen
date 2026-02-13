@@ -9,6 +9,6 @@ export const buildRouteManifest: Task<BuildContext> = {
   name: 'Building route manifest',
   onSuccess: (_, dur) => `Built route manifest (${duration(dur)})`,
   run: async (ctx) => ({
-    manifest: createRouteManifest(ctx.segmentTree!),
+    manifest: createRouteManifest(ctx.segmentTree!, ctx.outDir),
   }),
 }
