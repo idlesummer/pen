@@ -25,9 +25,9 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
       const elementCode = generateRouteElement(route, indices, imports)
-      // Put createElement on new line with 2-space indentation continuation
-      const indentedElement = elementCode.replace(/\n/g, '\n  ')
-      routeElements.push(`  '${url}':\n  ${indentedElement},`)
+      // Put createElement on new line with 4-space indentation (2 for object + 2 for continuation)
+      const indentedElement = elementCode.replace(/\n/g, '\n    ')
+      routeElements.push(`  '${url}':\n    ${indentedElement},`)
     }
 
     const code = [
