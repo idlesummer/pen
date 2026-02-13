@@ -15,17 +15,6 @@ export const writeRoutesFile: Task<BuildContext> = {
     const componentImports = ctx.componentImports!
     const elementTrees = ctx.elementTrees!
 
-    // Helper: Serialize ElementTree to createElement string
-    function serialize(tree: ElementTree): string {
-      const props = Object.entries(tree.props)
-        .map(([key, { value, isString }]) => `${key}: ${isString ? `'${value}'` : value}`)
-        .join(', ')
-
-      return tree.children
-        ? `createElement(${tree.component}, { ${props} }, ${serialize(tree.children)})`
-        : `createElement(${tree.component}, { ${props} })`
-    }
-
     // Generate component imports
     const importStatements = componentImports.imports
       .map((importPath, i) => `import Component${i} from '${importPath}'`)
@@ -59,4 +48,13 @@ export const writeRoutesFile: Task<BuildContext> = {
   },
 }
 
+/** Serialize ElementTree to createElement string. */
+function serialize(tree: ElementTree): string {
+  const props = Object.entries(tree.props)
+    .map(([key, { value, isString }]) => `${key}: ${isString ? `'${value}'` : value}`)
+    .join(', ')
 
+  return tree.children
+    ? `createElement(${tree.component}, { ${props} }, ${serialize(tree.children)})`
+    : `createElement(${tree.component}, { ${props} })`
+}
