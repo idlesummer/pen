@@ -38,12 +38,11 @@ function createElementTree(route: Route, { indices, imports }: ComponentImportDa
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
   const screenIndex = indices[screenPath]!
+  const screenKey = JSON.stringify(imports[screenIndex]!)
 
   let tree: ElementTree = {
     component: `Component${screenIndex}`,
-    props: {
-      key: JSON.stringify(imports[screenIndex]!), // Pre-serialized with quotes
-    },
+    props: { key: screenKey },
   }
 
   // Process segments from leaf → root (same order as runtime composition)
