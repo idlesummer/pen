@@ -50,16 +50,9 @@ export const writeRoutesFile: Task<BuildContext> = {
 
 /** Serialize ElementTree to createElement string. */
 function serialize(tree: ElementTree): string {
-  // Props that are component references (not quoted)
-  const componentRefProps = new Set(['fallback'])
-
+  // Props are already pre-serialized (strings have quotes, identifiers don't)
   const props = Object.entries(tree.props)
-    .map(([key, value]) => {
-      if (componentRefProps.has(key)) {
-        return `${key}: ${value}` // Component ref - no quotes
-      }
-      return `${key}: ${JSON.stringify(value)}` // String literal - quoted
-    })
+    .map(([key, value]) => `${key}: ${value}`)
     .join(', ')
 
   return tree.children
