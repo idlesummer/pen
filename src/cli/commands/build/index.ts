@@ -30,22 +30,20 @@ export const build: CLICommand = {
       console.log(pc.dim( `  output: ${outDir}`))
       console.log()
 
-      const tasks = [
+      const pipeline = pipe([
         buildFileTree,
         buildSegmentTree,
         buildRouteManifest,
         buildComponentMap,
         buildElementTree,
-      ]
-
-      // Conditionally add metadata file generation tasks
-      if (emitMetadata) {
-        tasks.push(writeManifestFile, writeElementTreeFile, writeComponentMapFile)
-      }
-
-      tasks.push(writeRoutesFile, writeEntryFile, compileApplication)
-
-      const pipeline = pipe(tasks)
+        // Conditionally add metadata file generation tasks
+        ...(!emitMetadata ? [] : [
+          writeManifestFile,
+          writeElementTreeFile,
+          writeComponentMapFile,
+        ]),
+        writeRoutesFile, writeEntryFile, compileApplication
+      ])
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })
       console.log()
