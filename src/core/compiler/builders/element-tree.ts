@@ -28,7 +28,7 @@ export function createElementTrees(manifest: RouteManifest, componentMap: Compon
  * Collects all unique import paths and assigns them indices.
  * Keys are stored in sorted order for deterministic output.
  */
-export function buildComponentMap(manifest: RouteManifest): ComponentMap {
+export function createComponentMap(manifest: RouteManifest): ComponentMap {
   const importPaths = new Set<string>()
 
   // Collect all unique import paths from manifest
