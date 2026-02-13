@@ -23,7 +23,8 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
       const elementCode = buildRouteElement(route, indices, imports)
-      routeElements.push(`  '${url}': ${elementCode},`)
+      const formatted = formatCode(elementCode)
+      routeElements.push(`  '${url}': ${formatted},`)
     }
 
     const code = [
@@ -48,7 +49,39 @@ export const writeRoutesFile: Task<BuildContext> = {
 }
 
 /**
- * Generates a route element by composing React components into nested createElement calls.
+ * Formats generated code for readability.
+ * Adds line breaks and indentation to nested createElement chains.
+ */
+function formatCode(code: string): string {
+  let depth = 0
+  let result = ''
+
+  for (let i = 0; i < code.length; i++) {
+    const char = code[i]
+
+    // Opening paren after function name
+    if (char === '(' && i > 0 && /[a-zA-Z0-9]/.test(code[i - 1])) {
+      result += '(\n' + '  '.repeat(++depth)
+    }
+    // Closing paren
+    else if (char === ')') {
+      result += '\n' + '  '.repeat(--depth) + ')'
+    }
+    // Argument separator
+    else if (char === ',' && code[i + 1] === ' ') {
+      result += ',\n' + '  '.repeat(depth)
+      i++ // skip the space
+    }
+    else {
+      result += char
+    }
+  }
+
+  return result
+}
+
+/**
+ * Builds a route element by composing React components into nested createElement calls.
  *
  * This function mirrors the runtime composition logic but generates static code strings
  * that will be written to the generated routes.ts file.
