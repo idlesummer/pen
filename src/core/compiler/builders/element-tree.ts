@@ -9,14 +9,8 @@ export interface ElementTree {
 
 export type ElementTreeMap = Record<string, ElementTree>
 
-/**
- * Component import mapping built from manifest.
- * Maps import paths to component IDs for code generation.
- */
-export interface ComponentMapping {
-  /** Map from import path to component index (keys are in sorted order) */
-  indices: Record<string, number>
-}
+/** Map from import path to component index (keys are in sorted order) */
+export type ComponentMapping = Record<string, number>
 
 /**
  * Creates element trees for all routes in the manifest.
@@ -50,11 +44,11 @@ function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
 
   // Sort for deterministic output
   const imports = Array.from(importPaths).sort()
-  const indices: Record<string, number> = {}
+  const mapping: ComponentMapping = {}
   for (let i = 0; i < imports.length; i++)
-    indices[imports[i]!] = i
+    mapping[imports[i]!] = i
 
-  return { indices }
+  return mapping
 }
 
 /**
@@ -70,13 +64,12 @@ function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
  * 4. Error boundary (wraps layout + all descendants)
  */
 function createElementTree(route: Route, mapping: ComponentMapping): ElementTree {
-  const { indices } = mapping
   const imports = Object.keys(mapping)
 
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
-  const screenIndex = indices[screenPath]!
+  const screenIndex = mapping[screenPath]!
   const screenKey = JSON.stringify(imports[screenIndex]!)
 
   let tree: ElementTree = {
@@ -89,7 +82,7 @@ function createElementTree(route: Route, mapping: ComponentMapping): ElementTree
     // Not-found boundary
     if (segment['not-found']) {
       const path = segment['not-found']
-      const index = indices[path]!
+      const index = mapping[path]!
       const key = JSON.stringify(imports[index]!)
       const fallback = `Component${index}`
       tree = {
@@ -101,7 +94,7 @@ function createElementTree(route: Route, mapping: ComponentMapping): ElementTree
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
-      const index = indices[path]!
+      const index = mapping[path]!
       const key = JSON.stringify(imports[index]!)
       const fallback = `Component${index}`
       tree = {
@@ -113,7 +106,7 @@ function createElementTree(route: Route, mapping: ComponentMapping): ElementTree
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
-      const index = indices[path]!
+      const index = mapping[path]!
       const key = JSON.stringify(imports[index]!)
       tree = {
         component: `Component${index}`,
