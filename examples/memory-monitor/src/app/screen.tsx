@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink'
 import { useState, useEffect } from 'react'
-import { useMemoryMonitor } from '@idlesummer/pen/lib/hooks'
+import { useMemoryMonitor } from '@idlesummer/pen'
 
 export default function HomeScreen() {
   const memory = useMemoryMonitor(500) // Update every 500ms
