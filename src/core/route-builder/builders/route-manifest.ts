@@ -28,7 +28,6 @@ export function createRouteManifest(segmentTree: SegmentNode, outDir: string): R
     expand: parentSegment => parentSegment.children ?? [],
     visit: segment => {
       if (!segment.roles.screen) return
-
       const url = segment.url
       const chain = createSegmentChain(segment, genDir)
       manifest[url] = { url, chain }
@@ -49,10 +48,9 @@ function createSegmentChain(segment: SegmentNode, genDir: string) {
 
       for (const [name, path] of entries) {
         if (name !== 'screen' || ancestorSegment === segment) { // Skip ancestor screens
-          // Remove extension, convert to relative path, add .js for ES modules
-          const pathNoExt = removeExtension(path)
-          const relPath = relative(genDir, pathNoExt).replace(/\\/g, '/')
-          roles[name] = `${relPath}.js`
+          const importPath = removeExtension(path)              // Remove extension
+          const relPath = relative(genDir, importPath).replace(/\\/g, '/')  // Convert to relative path
+          roles[name] = `${relPath}.js`                         // Add .js for ES modules
         }
       }
       chain.push(roles)
