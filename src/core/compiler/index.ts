@@ -1,3 +1,9 @@
+// Types
+export type { FileNode } from './builders/file-tree'
+export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
+export type { RouteManifest, Route } from './builders/route-manifest'
+export type { ElementTree, ElementTreeMap, ComponentMap } from './builders/element-tree'
+
 // Functions
 export { createFileTree } from './builders/file-tree'
 export { createSegmentTree } from './builders/segment-tree'
@@ -12,9 +18,3 @@ export {
   RootIsFileError,
   DuplicateScreenError,
 } from './errors'
-
-// Types
-export type { FileNode } from './builders/file-tree'
-export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
-export type { RouteManifest, Route } from './builders/route-manifest'
-export type { ElementTree, ElementTreeMap, ComponentMap } from './builders/element-tree'
