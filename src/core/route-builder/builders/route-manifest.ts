@@ -1,6 +1,7 @@
 import type { SegmentNode, SegmentRoles } from './segment-tree'
-import { removeExtension } from '@/lib/path-utils'
 import { ancestors, traverse } from '@/lib/tree'
+import { relative } from 'path'
+import { removeExtension } from '@/lib/path-utils'
 
 export type RouteManifest = Record<string, Route>
 export type Route = {
@@ -13,12 +14,15 @@ export type Route = {
  *
  * Flattens the tree into a dictionary mapping URLs to route metadata.
  * Only includes routes that have screens.
+ * Paths are stored as relative import paths from the generated directory.
  *
  * @param segmentTree - Segment tree with parent pointers
+ * @param outDir - Output directory (to calculate relative import paths)
  * @returns Flat manifest ready for runtime composition
  */
-export function createRouteManifest(segmentTree: SegmentNode): RouteManifest {
+export function createRouteManifest(segmentTree: SegmentNode, outDir: string): RouteManifest {
   const manifest: RouteManifest = {}
+  const genDir = `${outDir}/generated`
 
   traverse(segmentTree, {
     expand: parentSegment => parentSegment.children ?? [],
@@ -26,7 +30,7 @@ export function createRouteManifest(segmentTree: SegmentNode): RouteManifest {
       if (!segment.roles.screen) return
 
       const url = segment.url
-      const chain = createSegmentChain(segment)
+      const chain = createSegmentChain(segment, genDir)
       manifest[url] = { url, chain }
     },
   })
@@ -34,7 +38,7 @@ export function createRouteManifest(segmentTree: SegmentNode): RouteManifest {
 }
 
 /** Builds ancestor chain from leaf → root order. */
-function createSegmentChain(segment: SegmentNode) {
+function createSegmentChain(segment: SegmentNode, genDir: string) {
   const chain: SegmentRoles[] = []
 
   ancestors(segment, {
@@ -43,9 +47,14 @@ function createSegmentChain(segment: SegmentNode) {
       const roles: SegmentRoles = {}
       const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
 
-      for (const [name, path] of entries)
-        if (name !== 'screen' || ancestorSegment === segment) // Skip ancestor screens
-          roles[name] = removeExtension(path)
+      for (const [name, path] of entries) {
+        if (name !== 'screen' || ancestorSegment === segment) { // Skip ancestor screens
+          // Remove extension, convert to relative path, add .js for ES modules
+          const pathNoExt = removeExtension(path)
+          const relPath = relative(genDir, pathNoExt).replace(/\\/g, '/')
+          roles[name] = `${relPath}.js`
+        }
+      }
       chain.push(roles)
     },
   })

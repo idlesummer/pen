@@ -1,5 +1,5 @@
 import type { Route, RouteManifest } from './route-manifest'
-import type { ComponentImportData } from './component-imports'
+import { SEGMENT_ROLES } from './segment-tree'
 
 export interface ElementTree {
   component: string
@@ -10,15 +10,51 @@ export interface ElementTree {
 export type ElementTreeMap = Record<string, ElementTree>
 
 /**
+ * Component import mapping built from manifest.
+ * Maps import paths to component IDs for code generation.
+ */
+export interface ComponentMapping {
+  /** Sorted array of unique import paths */
+  imports: string[]
+  /** Map from import path to component index */
+  indices: Record<string, number>
+}
+
+/**
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createElementTrees(manifest: RouteManifest, componentImports: ComponentImportData) {
+export function createElementTrees(manifest: RouteManifest) {
   const trees: ElementTreeMap = {}
+  const mapping = buildComponentMapping(manifest)
 
   for (const [url, route] of Object.entries(manifest))
-    trees[url] = createElementTree(route, componentImports)
+    trees[url] = createElementTree(route, mapping)
   return trees
+}
+
+/**
+ * Builds a mapping of import paths to component IDs from the manifest.
+ * Collects all unique import paths and assigns them indices.
+ */
+function buildComponentMapping(manifest: RouteManifest): ComponentMapping {
+  const importPaths = new Set<string>()
+
+  // Collect all unique import paths from manifest
+  for (const route of Object.values(manifest)) {
+    for (const segment of route.chain) {
+      for (const role of SEGMENT_ROLES)
+        if (segment[role]) importPaths.add(segment[role])
+    }
+  }
+
+  // Sort for deterministic output
+  const imports = Array.from(importPaths).sort()
+  const indices: Record<string, number> = {}
+  for (let i = 0; i < imports.length; i++)
+    indices[imports[i]!] = i
+
+  return { imports, indices }
 }
 
 /**
@@ -33,7 +69,7 @@ export function createElementTrees(manifest: RouteManifest, componentImports: Co
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function createElementTree(route: Route, { indices, imports }: ComponentImportData): ElementTree {
+function createElementTree(route: Route, { indices, imports }: ComponentMapping): ElementTree {
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
