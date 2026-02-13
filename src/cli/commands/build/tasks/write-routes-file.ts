@@ -73,10 +73,9 @@ function wrapTree(
   if (!path) return tree
 
   const index = indices[path]!
-  const props: Record<string, unknown> = { key: imports[index]! }
-
-  if (withFallback)
-    props.fallback = `Component${index}`
+  const props: Record<string, unknown> = withFallback
+    ? { key: imports[index]! }
+    : { key: imports[index]!, fallback: `Component${index}` }
 
   return {
     tag: withFallback ? tag : `Component${index}`,
@@ -114,20 +113,16 @@ function buildRouteTree(route: Route, indices: Record<string, number>, imports: 
     tree = wrapTree(tree, segment['error'], 'ErrorBoundary', indices, imports, true)
     tree = wrapTree(tree, segment['layout'], '', indices, imports, false)
   }
-
   return tree
 }
 
-/**
- * Generates createElement code from an element tree structure.
- */
+/** Generates createElement code from an element tree structure. */
 function generateCreateElement(element: ElementTree, depth = 0): string {
+  const { tag, props, children } = element
   const indent = '  '.repeat(depth)
-  const { tag, props = {}, children = [] } = element
+  const propsStr = Object.keys(props ?? {}).length ? `, ${JSON.stringify(props)}` : ''
 
-  const propsStr = Object.keys(props).length ? `, ${JSON.stringify(props)}` : ''
-
-  if (children.length === 0)
+  if (!children || children.length === 0)
     return `${indent}createElement('${tag}'${propsStr})`
 
   const childrenStr = children
@@ -137,9 +132,7 @@ function generateCreateElement(element: ElementTree, depth = 0): string {
   return `${indent}createElement('${tag}'${propsStr},\n${childrenStr}\n${indent})`
 }
 
-/**
- * Generates a route element by composing React components into nested createElement calls.
- */
+/** Generates a route element by composing React components into nested createElement calls. */
 function generateRouteElement(route: Route, indices: Record<string, number>, imports: string[]): string {
   const tree = buildRouteTree(route, indices, imports)
   return generateCreateElement(tree)
