@@ -8,6 +8,7 @@ import { CLI_NAME, VERSION } from '@/core/constants'
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
 import { buildRouteManifest } from './tasks/build-route-manifest'
+import { buildComponentMapTask } from './tasks/build-component-map'
 import { buildElementTree } from './tasks/build-element-tree'
 import { writeManifestFile } from './tasks/write-manifest-file'
 import { writeElementTreeFile } from './tasks/write-element-tree-file'
@@ -33,6 +34,7 @@ export const build: CLICommand = {
         buildFileTree,
         buildSegmentTree,
         buildRouteManifest,
+        buildComponentMapTask,
         buildElementTree,
         writeManifestFile,
         writeElementTreeFile,
