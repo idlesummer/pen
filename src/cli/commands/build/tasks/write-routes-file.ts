@@ -60,13 +60,11 @@ export const writeRoutesFile: Task<BuildContext> = {
  * 4. Error boundary (wraps layout + all descendants)
  */
 function buildRouteElement(route: Route, indices: Record<string, number>, imports: string[]) {
-  const getKey = (index: number) => JSON.stringify(imports[index]!)
-
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
   const screenIndex = indices[screenPath]!
-  let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
+  let element = `createElement(Component${screenIndex}, { key: '${imports[screenIndex]}' })`
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
@@ -74,21 +72,21 @@ function buildRouteElement(route: Route, indices: Record<string, number>, import
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
-      element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
+      element = `createElement(NotFoundBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
-      element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
+      element = `createElement(ErrorBoundary, { key: '${imports[index]}', fallback: Component${index} }, ${element})`
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
-      element = `createElement(Component${index}, { key: ${getKey(index)} }, ${element})`
+      element = `createElement(Component${index}, { key: '${imports[index]}' }, ${element})`
     }
   }
   return element
