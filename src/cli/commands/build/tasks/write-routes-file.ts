@@ -25,9 +25,7 @@ export const writeRoutesFile: Task<BuildContext> = {
     const routeElements: string[] = []
     for (const [url, route] of Object.entries(ctx.manifest!)) {
       const elementCode = generateRouteElement(route, indices, imports)
-      // Put createElement on new line with 4-space indentation (2 for object + 2 for continuation)
-      const indentedElement = elementCode.replace(/\n/g, '\n    ')
-      routeElements.push(`  '${url}':\n    ${indentedElement},`)
+      routeElements.push(`  '${url}': ${elementCode},`)
     }
 
     const code = [
@@ -51,17 +49,6 @@ export const writeRoutesFile: Task<BuildContext> = {
 }
 
 /**
- * Wraps a child element with proper indentation for nested structure.
- * Re-indents all lines in the child to maintain consistent formatting.
- */
-function indentWrap(child: string, openingLine: string, depth: number): string {
-  const childIndent = '  '.repeat(depth)
-  const closeIndent = '  '.repeat(depth - 1)
-  const reindented = child.replace(/\n/g, `\n${childIndent}`)
-  return `${openingLine},\n${childIndent}${reindented}\n${closeIndent})`
-}
-
-/**
  * Generates a route element by composing React components into nested createElement calls.
  *
  * This function mirrors the runtime composition logic but generates static code strings
@@ -81,7 +68,6 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
   const screenPath = screenSegment['screen']!
   const screenIndex = indices[screenPath]!
   let element = `createElement(Component${screenIndex}, { key: ${getKey(screenIndex)} })`
-  let depth = 1
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
@@ -89,24 +75,21 @@ function generateRouteElement(route: Route, indices: Record<string, number>, imp
     if (segment['not-found']) {
       const path = segment['not-found']
       const index = indices[path]!
-      element = indentWrap(element, `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }`, depth)
-      depth++
+      element = `createElement(NotFoundBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
     }
 
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
       const index = indices[path]!
-      element = indentWrap(element, `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }`, depth)
-      depth++
+      element = `createElement(ErrorBoundary, { key: ${getKey(index)}, fallback: Component${index} }, ${element})`
     }
 
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
       const index = indices[path]!
-      element = indentWrap(element, `createElement(Component${index}, { key: ${getKey(index)} }`, depth)
-      depth++
+      element = `createElement(Component${index}, { key: ${getKey(index)} }, ${element})`
     }
   }
   return element
