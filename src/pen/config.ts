@@ -33,6 +33,7 @@ export interface ResolvedPenConfig {
  * This is an interface (not a type) to support declaration merging,
  * allowing plugins to extend the config.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PenConfig extends Partial<ResolvedPenConfig> {}
 
 export function defineConfig(config: PenConfig): PenConfig {
