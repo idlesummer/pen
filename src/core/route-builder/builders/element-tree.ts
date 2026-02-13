@@ -1,4 +1,4 @@
-import type { Route } from './route-manifest'
+import type { Route, RouteManifest } from './route-manifest'
 import type { ComponentImportData } from './component-imports'
 
 // ===== Types =====
@@ -22,15 +22,11 @@ export type ElementTreeMap = Record<string, ElementTree>
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createElementTrees(
-  manifest: Record<string, Route>,
-  componentImports: ComponentImportData,
-): ElementTreeMap {
+export function createElementTrees(manifest: RouteManifest,componentImports: ComponentImportData) {
   const trees: ElementTreeMap = {}
 
-  for (const [url, route] of Object.entries(manifest)) {
+  for (const [url, route] of Object.entries(manifest))
     trees[url] = createElementTree(route, componentImports)
-  }
 
   return trees
 }
@@ -47,7 +43,7 @@ export function createElementTrees(
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-export function createElementTree(route: Route, { indices, imports }: ComponentImportData): ElementTree {
+function createElementTree(route: Route, { indices, imports }: ComponentImportData): ElementTree {
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
@@ -101,6 +97,5 @@ export function createElementTree(route: Route, { indices, imports }: ComponentI
       }
     }
   }
-
   return tree
 }
