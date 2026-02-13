@@ -1,10 +1,10 @@
 import type { Task } from '@idlesummer/tasker'
+import type { ElementTree } from '@/pen/compiler'
 import type { BuildContext } from '../types'
-import type { Route } from '@/core/route-builder'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
-import { PACKAGE_NAME } from '@/core/constants'
+import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeRoutesFile: Task<BuildContext> = {
   name: 'Writing routes.ts',
@@ -12,22 +12,22 @@ export const writeRoutesFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const routesPath = join(genDir, 'routes.ts')
-    await mkdir(genDir, { recursive: true })
+    const elementTrees = ctx.elementTrees!
+    const componentMap = ctx.componentMap!
 
-    const { imports, indices } = ctx.componentImports!
+    // Get sorted imports from component map
+    const sortedImports = Object.keys(componentMap)
 
     // Generate component imports
-    const importStatements = imports
+    const importStatements = sortedImports
       .map((importPath, i) => `import Component${i} from '${importPath}'`)
       .join('\n')
 
-    // Generate pre-built route elements
+    // Generate pre-built route elements from element trees
     const routeElements: string[] = []
-    for (const [url, route] of Object.entries(ctx.manifest!)) {
-      const elementCode = generateRouteElement(route, indices, imports)
-      // Put createElement on new line with 4-space indentation (2 for object + 2 for continuation)
-      const indentedElement = elementCode.replace(/\n/g, '\n    ')
-      routeElements.push(`  '${url}':\n    ${indentedElement},`)
+    for (const [url, tree] of Object.entries(elementTrees)) {
+      const elementCode = `    ${serialize(tree).replace(/\n/g, '\n    ')}`
+      routeElements.push(`  '${url}':\n${elementCode},`)
     }
 
     const code = [
@@ -46,94 +46,23 @@ export const writeRoutesFile: Task<BuildContext> = {
       '',
     ].join('\n')
 
+    await mkdir(genDir, { recursive: true })
     await writeFile(routesPath, code, 'utf-8')
   },
 }
 
-/**
- * Represents a React element tree structure before code generation
- */
-type ElementTree = {
-  tag: string
-  props?: Record<string, unknown>
-  children?: ElementTree[]
-}
+/** Serializes an ElementTree to React.createElement() code string. */
+export function serialize(tree: ElementTree, indent = 0): string {
+  const spaces = '  '.repeat(indent)
 
-/**
- * Wraps a tree with a component if the path exists in the segment
- */
-function wrapTree(
-  tree: ElementTree,
-  path: string | undefined,
-  tag: string,
-  indices: Record<string, number>,
-  imports: string[],
-  withFallback = false,
-): ElementTree {
-  if (!path) return tree
+  // Props are already pre-serialized (strings have quotes, identifiers don't)
+  const props = Object.entries(tree.props)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(', ')
 
-  const index = indices[path]!
-  const props: Record<string, unknown> = withFallback
-    ? { key: imports[index]! }
-    : { key: imports[index]!, fallback: `Component${index}` }
+  if (!tree.children)
+    return `createElement(${tree.component}, { ${props} })`
 
-  return {
-    tag: withFallback ? tag : `Component${index}`,
-    props,
-    children: [tree],
-  }
-}
-
-/**
- * Builds a tree structure representing the composed route element.
- *
- * This function mirrors the runtime composition logic but generates a tree data structure
- * rather than code strings.
- *
- * Composition order per segment (inside to outside):
- * 1. Screen component (only in leaf segment)
- * 2. Not-found boundary (wraps screen if present)
- * 3. Layout (wraps content)
- * 4. Error boundary (wraps layout + all descendants)
- */
-function buildRouteTree(route: Route, indices: Record<string, number>, imports: string[]): ElementTree {
-  // Start with the screen from the first segment
-  const screenSegment = route.chain[0]!
-  const screenPath = screenSegment['screen']!
-  const screenIndex = indices[screenPath]!
-
-  let tree: ElementTree = {
-    tag: `Component${screenIndex}`,
-    props: { key: imports[screenIndex]! },
-  }
-
-  // Process segments from leaf → root (same order as runtime composition)
-  for (const segment of route.chain) {
-    tree = wrapTree(tree, segment['not-found'], 'NotFoundBoundary', indices, imports, true)
-    tree = wrapTree(tree, segment['error'], 'ErrorBoundary', indices, imports, true)
-    tree = wrapTree(tree, segment['layout'], '', indices, imports, false)
-  }
-  return tree
-}
-
-/** Generates createElement code from an element tree structure. */
-function generateCreateElement(element: ElementTree, depth = 0): string {
-  const { tag, props, children } = element
-  const indent = '  '.repeat(depth)
-  const propsStr = Object.keys(props ?? {}).length ? `, ${JSON.stringify(props)}` : ''
-
-  if (!children || children.length === 0)
-    return `${indent}createElement('${tag}'${propsStr})`
-
-  const childrenStr = children
-    .map(child => generateCreateElement(child, depth + 1))
-    .join(',\n')
-
-  return `${indent}createElement('${tag}'${propsStr},\n${childrenStr}\n${indent})`
-}
-
-/** Generates a route element by composing React components into nested createElement calls. */
-function generateRouteElement(route: Route, indices: Record<string, number>, imports: string[]): string {
-  const tree = buildRouteTree(route, indices, imports)
-  return generateCreateElement(tree)
+  const childCode = serialize(tree.children, indent + 1)
+  return `createElement(${tree.component}, { ${props} },\n${spaces}  ${childCode}\n${spaces})`
 }

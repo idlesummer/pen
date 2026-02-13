@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import { CLI_NAME, DESCRIPTION, VERSION } from '@/core/constants'
+import { CLI_NAME, DESCRIPTION, VERSION } from '@/pen/constants'
 import { build } from './commands/build'
 import { init } from './commands/init'
 import { start } from './commands/start'

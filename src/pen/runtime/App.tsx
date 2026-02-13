@@ -1,10 +1,10 @@
-import { RouterProvider } from '@/core/router'
+import { RouterProvider } from '@/pen/router'
 import { ErrorBoundary } from './ui/ErrorBoundary'
 import { NotFoundBoundary } from './ui/NotFoundBoundary'
 import { ErrorScreen } from './ui/ErrorScreen'
 import { NotFoundScreen } from './ui/NotFoundScreen'
 import { FileRouter } from './FileRouter'
-import type { CompiledRoutes } from './types'
+import type { CompiledRoutes } from '../compiler/types'
 
 export interface AppProps {
   initialUrl: string

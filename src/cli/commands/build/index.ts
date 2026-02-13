@@ -1,16 +1,18 @@
 import type { CLICommand } from '../../types'
 import pc from 'picocolors'
 import { pipe, duration, fileList } from '@idlesummer/tasker'
-import { loadConfig } from '@/core/config'
-import { CLI_NAME, VERSION } from '@/core/constants'
+import { loadConfig } from '@/pen/config'
+import { CLI_NAME, VERSION } from '@/pen/constants'
 
 // Import individual tasks
-import { scanFilesystem } from './tasks/scan-filesystem'
+import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { generateManifest } from './tasks/generate-manifest'
-import { buildComponents } from './tasks/build-component-entries'
-import { writeComponentsFile } from './tasks/write-components-file'
+import { buildRouteManifest } from './tasks/build-route-manifest'
+import { buildComponentMap } from './tasks/build-component-map'
+import { buildElementTree } from './tasks/build-element-tree'
 import { writeManifestFile } from './tasks/write-manifest-file'
+import { writeElementTreeFile } from './tasks/write-element-tree-file'
+import { writeComponentMapFile } from './tasks/write-component-map-file'
 import { writeRoutesFile } from './tasks/write-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
 import { compileApplication } from './tasks/compile-application'
@@ -29,12 +31,14 @@ export const build: CLICommand = {
       console.log()
 
       const pipeline = pipe([
-        scanFilesystem,
+        buildFileTree,
         buildSegmentTree,
-        generateManifest,
-        buildComponents,
-        writeComponentsFile,
+        buildRouteManifest,
+        buildComponentMap,
+        buildElementTree,
         writeManifestFile,
+        writeElementTreeFile,
+        writeComponentMapFile,
         writeRoutesFile,
         writeEntryFile,
         compileApplication,
