@@ -60,6 +60,32 @@ type ElementTree = {
 }
 
 /**
+ * Wraps a tree with a component if the path exists in the segment
+ */
+function wrapTree(
+  tree: ElementTree,
+  path: string | undefined,
+  tag: string,
+  getKey: (index: number) => string,
+  indices: Record<string, number>,
+  withFallback = false,
+): ElementTree {
+  if (!path) return tree
+
+  const index = indices[path]!
+  const props: Record<string, unknown> = { key: getKey(index) }
+
+  if (withFallback)
+    props.fallback = `Component${index}`
+
+  return {
+    tag: withFallback ? tag : `Component${index}`,
+    props,
+    children: [tree],
+  }
+}
+
+/**
  * Builds a tree structure representing the composed route element.
  *
  * This function mirrors the runtime composition logic but generates a tree data structure
@@ -86,44 +112,9 @@ function buildRouteTree(route: Route, indices: Record<string, number>, imports: 
 
   // Process segments from leaf → root (same order as runtime composition)
   for (const segment of route.chain) {
-    // Not-found boundary
-    if (segment['not-found']) {
-      const path = segment['not-found']
-      const index = indices[path]!
-      tree = {
-        tag: 'NotFoundBoundary',
-        props: {
-          key: getKey(index),
-          fallback: `Component${index}`,
-        },
-        children: [tree],
-      }
-    }
-
-    // Error boundary
-    if (segment['error']) {
-      const path = segment['error']
-      const index = indices[path]!
-      tree = {
-        tag: 'ErrorBoundary',
-        props: {
-          key: getKey(index),
-          fallback: `Component${index}`,
-        },
-        children: [tree],
-      }
-    }
-
-    // Layout
-    if (segment['layout']) {
-      const path = segment['layout']
-      const index = indices[path]!
-      tree = {
-        tag: `Component${index}`,
-        props: { key: getKey(index) },
-        children: [tree],
-      }
-    }
+    tree = wrapTree(tree, segment['not-found'], 'NotFoundBoundary', getKey, indices, true)
+    tree = wrapTree(tree, segment['error'], 'ErrorBoundary', getKey, indices, true)
+    tree = wrapTree(tree, segment['layout'], '', getKey, indices, false)
   }
 
   return tree
