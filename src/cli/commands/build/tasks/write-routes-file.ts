@@ -92,7 +92,7 @@ function formatCode(code: string): string {
  * 3. Layout (wraps content)
  * 4. Error boundary (wraps layout + all descendants)
  */
-function buildRouteElement(route: Route, indices: Record<string, number>, imports: readonly string[]) {
+function buildRouteElement(route: Route, indices: Record<string, number>, imports: string[]) {
   const getKey = (index: number) => JSON.stringify(imports[index]!)
 
   // Start with the screen from the first segment
