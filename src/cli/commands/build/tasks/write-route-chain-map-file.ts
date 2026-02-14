@@ -6,8 +6,8 @@ import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeRouteMapFile: Task<BuildContext> = {
-  name: 'Writing route-map.ts',
-  onSuccess: (_, dur) => `Saved route-map.ts (${duration(dur)})`,
+  name: 'Writing route-chain-map.ts',
+  onSuccess: (_, dur) => `Saved route-chain-map.ts (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'artifacts')
     const outDir = join(genDir, 'route-map.ts')

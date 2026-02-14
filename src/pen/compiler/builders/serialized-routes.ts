@@ -1,5 +1,5 @@
 import type { Route, RouteChainMap } from './route-chain-map'
-import type { ComponentIdMap } from './component-index-map'
+import type { ComponentIdMap } from './component-id-map'
 
 export interface SerializedTree {
   component: string
