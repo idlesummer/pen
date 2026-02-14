@@ -6,11 +6,11 @@ import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeComponentIdMapFile: Task<BuildContext> = {
-  name: 'Writing component-index-map.ts',
-  onSuccess: (_, dur) => `Saved component-index-map.ts (${duration(dur)})`,
+  name: 'Writing component-id-map.ts',
+  onSuccess: (_, dur) => `Saved component-id-map.ts (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'artifacts')
-    const outDir = join(genDir, 'component-index-map.ts')
+    const outDir = join(genDir, 'component-id-map.ts')
 
     const componentIdMap = ctx.componentIdMap!
     const code = [
