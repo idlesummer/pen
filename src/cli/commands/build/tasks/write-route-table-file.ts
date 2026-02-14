@@ -5,9 +5,7 @@ import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
-// ===== Main Task =====
-
-export const writeManifestFile: Task<BuildContext> = {
+export const writeRouteTableFile: Task<BuildContext> = {
   name: 'Writing manifest.ts',
   onSuccess: (_, dur) => `Saved manifest.ts (${duration(dur)})`,
   run: async (ctx) => {
