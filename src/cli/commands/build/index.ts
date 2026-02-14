@@ -7,12 +7,12 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 // Import individual tasks
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { buildRouteTable } from './tasks/build-route-table'
-import { buildComponentMap } from './tasks/build-component-map'
-import { buildElementTree } from './tasks/build-element-tree'
-import { writeRouteTableFile } from './tasks/write-route-table-file'
-import { writeElementTreeFile } from './tasks/write-element-tree-file'
-import { writeComponentMapFile } from './tasks/write-component-map-file'
+import { buildRouteMap } from './tasks/build-route-map'
+import { buildComponentIndexMap } from './tasks/build-component-index-map'
+import { buildSerializedTree } from './tasks/build-serialized-component-tree'
+import { writeRouteMapFile } from './tasks/write-route-map-file'
+import { writeSerializedTreeFile } from './tasks/write-serialized-component-tree-file'
+import { writeComponentIndexMapFile } from './tasks/write-component-index-map-file'
 import { writeCompiledRoutesFile } from './tasks/write-compiled-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
 import { compileApplication } from './tasks/compile-application'
@@ -33,14 +33,14 @@ export const build: CLICommand = {
       const pipeline = pipe([
         buildFileTree,
         buildSegmentTree,
-        buildRouteTable,
-        buildComponentMap,
-        buildElementTree,
+        buildRouteMap,
+        buildComponentIndexMap,
+        buildSerializedTree,
 
         // Conditionally add metadata file generation tasks
-        emitMetadata && writeRouteTableFile,
-        emitMetadata && writeElementTreeFile,
-        emitMetadata && writeComponentMapFile,
+        emitMetadata && writeRouteMapFile,
+        emitMetadata && writeSerializedTreeFile,
+        emitMetadata && writeComponentIndexMapFile,
 
         writeCompiledRoutesFile,
         writeEntryFile,
