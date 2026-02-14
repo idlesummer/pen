@@ -6,7 +6,7 @@ import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
-export const writeRoutesFile: Task<BuildContext> = {
+export const writeCompiledRoutesFile: Task<BuildContext> = {
   name: 'Writing compiled-routes.ts',
   onSuccess: (_, dur) => `Saved compiled-routes.ts (${duration(dur)})`,
   run: async (ctx) => {
@@ -40,7 +40,7 @@ export const writeRoutesFile: Task<BuildContext> = {
       importStatements,
       '',
       '// Compiled route elements generated at build time',
-      'export const routes: CompiledRoutes = {',
+      'export const compiledRoutes: CompiledRoutes = {',
       routeElements.join('\n'),
       '} as const',
       '',
