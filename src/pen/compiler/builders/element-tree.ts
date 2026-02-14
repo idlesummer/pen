@@ -1,4 +1,4 @@
-import type { Route, RouteManifest } from './route-manifest'
+import type { Route, RouteTable } from './route-manifest'
 import type { ComponentMap } from './component-map'
 
 export interface ElementTree {
@@ -13,7 +13,7 @@ export type ElementTreeMap = Record<string, ElementTree>
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createElementTrees(manifest: RouteManifest, componentMap: ComponentMap): ElementTreeMap {
+export function createElementTrees(manifest: RouteTable, componentMap: ComponentMap): ElementTreeMap {
   const elementTrees: ElementTreeMap = {}
   for (const [url, route] of Object.entries(manifest))
     elementTrees[url] = createElementTree(route, componentMap)

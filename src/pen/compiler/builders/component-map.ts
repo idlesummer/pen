@@ -1,4 +1,4 @@
-import type { RouteManifest } from './route-manifest'
+import type { RouteTable } from './route-manifest'
 import { SEGMENT_ROLES } from './segment-tree'
 
 /** Map from import path to component index (keys are in sorted order) */
@@ -9,7 +9,7 @@ export type ComponentMap = Record<string, number>
  * Collects all unique import paths and assigns them indices.
  * Keys are stored in sorted order for deterministic output.
  */
-export function createComponentMap(manifest: RouteManifest): ComponentMap {
+export function createComponentMap(manifest: RouteTable): ComponentMap {
   const importPaths = new Set<string>()
 
   // Collect all unique import paths from manifest

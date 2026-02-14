@@ -7,7 +7,7 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 // Import individual tasks
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { buildRouteManifest } from './tasks/build-route-manifest'
+import { buildRouteTable } from './tasks/build-route-manifest'
 import { buildComponentMap } from './tasks/build-component-map'
 import { buildElementTree } from './tasks/build-element-tree'
 import { writeManifestFile } from './tasks/write-manifest-file'
@@ -33,7 +33,7 @@ export const build: CLICommand = {
       const pipeline = pipe([
         buildFileTree,
         buildSegmentTree,
-        buildRouteManifest,
+        buildRouteTable,
         buildComponentMap,
         buildElementTree,
 
