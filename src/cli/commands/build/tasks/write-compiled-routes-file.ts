@@ -1,5 +1,5 @@
 import type { Task } from '@idlesummer/tasker'
-import type { ElementTree } from '@/pen/compiler'
+import type { SerializedTree } from '@/pen/compiler'
 import type { BuildContext } from '../types'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -12,11 +12,11 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const outDir = join(genDir, 'compiled-routes.ts')
-    const elementTrees = ctx.elementTrees!
-    const componentMap = ctx.componentMap!
+    const serializedComponentTreeMap = ctx.serializedComponentTreeMap!
+    const componentIndexMap = ctx.componentIndexMap!
 
     // Get sorted imports from component map
-    const sortedImports = Object.keys(componentMap)
+    const sortedImports = Object.keys(componentIndexMap)
 
     // Generate component imports
     const importStatements = sortedImports
@@ -25,7 +25,7 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
 
     // Generate pre-built route elements from element trees
     const routeElements: string[] = []
-    for (const [url, tree] of Object.entries(elementTrees)) {
+    for (const [url, tree] of Object.entries(serializedComponentTreeMap)) {
       const elementCode = `    ${serialize(tree).replace(/\n/g, '\n    ')}`
       routeElements.push(`  '${url}':\n${elementCode},`)
     }
@@ -51,8 +51,8 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
   },
 }
 
-/** Serializes an ElementTree to React.createElement() code string. */
-export function serialize(tree: ElementTree, indent = 0): string {
+/** Serializes an SerializedTree to React.createElement() code string. */
+export function serialize(tree: SerializedTree, indent = 0): string {
   const spaces = '  '.repeat(indent)
 
   // Props are already pre-serialized (strings have quotes, identifiers don't)

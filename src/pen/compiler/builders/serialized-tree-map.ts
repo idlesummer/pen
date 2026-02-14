@@ -1,38 +1,32 @@
-import type { Route, RouteTable } from './route-manifest'
-import type { ComponentMap } from './component-map'
+import type { Route, RouteMap } from './route-table'
+import type { ComponentIndexMap } from './component-map'
 
-export interface ElementTree {
+export interface SerializedTree {
   component: string
   props: Record<string, unknown>
-  children?: ElementTree
+  children?: SerializedTree
 }
 
-export type ElementTreeMap = Record<string, ElementTree>
+export type SerializedComponentTreeMap = Record<string, SerializedTree>
 
 /**
  * Creates element trees for all routes in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createElementTrees(manifest: RouteTable, componentMap: ComponentMap): ElementTreeMap {
-  const elementTrees: ElementTreeMap = {}
+export function createSerializedComponentTreeMap(manifest: RouteMap, componentIndexMap: ComponentIndexMap): SerializedComponentTreeMap {
+  const serializedComponentTreeMap: SerializedComponentTreeMap = {}
   for (const [url, route] of Object.entries(manifest))
-    elementTrees[url] = createElementTree(route, componentMap)
-  return elementTrees
+    serializedComponentTreeMap[url] = createSerializedTree(route, componentIndexMap)
+  return serializedComponentTreeMap
 }
 
 /**
- * Builds a structured element tree representing nested React components.
+ * Builds a structured serialized element tree representing nested React components.
  *
- * This function mirrors the runtime composition logic but creates a structured data tree
- * that will be serialized into createElement calls for the generated routes.ts file.
- *
- * Composition order per segment (inside to outside):
- * 1. Screen component (only in leaf segment)
- * 2. Not-found boundary (wraps screen if present)
- * 3. Layout (wraps content)
- * 4. Error boundary (wraps layout + all descendants)
+ * This function creates a structured data tree that will be serialized into
+ * createElement calls for the generated routes.ts file.
  */
-function createElementTree(route: Route, mapping: ComponentMap): ElementTree {
+function createSerializedTree(route: Route, mapping: ComponentIndexMap): SerializedTree {
   const imports = Object.keys(mapping)
 
   // Start with the screen from the first segment
@@ -41,7 +35,7 @@ function createElementTree(route: Route, mapping: ComponentMap): ElementTree {
   const screenIndex = mapping[screenPath]!
   const screenKey = JSON.stringify(imports[screenIndex]!)
 
-  let tree: ElementTree = {
+  let tree: SerializedTree = {
     component: `Component${screenIndex}`,
     props: { key: screenKey },
   }

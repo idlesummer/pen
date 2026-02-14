@@ -1,14 +1,14 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import { duration } from '@idlesummer/tasker'
-import { createRouteTable } from '@/pen/compiler'
+import { createRouteMap } from '@/pen/compiler'
 
 // ===== Main Task =====
 
-export const buildRouteTable: Task<BuildContext> = {
+export const buildRouteMap: Task<BuildContext> = {
   name: 'Building route manifest',
   onSuccess: (_, dur) => `Built route table (${duration(dur)})`,
   run: async (ctx) => ({
-    manifest: createRouteTable(ctx.segmentTree!, ctx.outDir),
+    manifest: createRouteMap(ctx.segmentTree!, ctx.outDir),
   }),
 }
