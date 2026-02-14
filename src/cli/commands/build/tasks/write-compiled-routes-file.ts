@@ -12,11 +12,11 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const outDir = join(genDir, 'compiled-routes.ts')
-    const serializedComponentTreeMap = ctx.serializedComponentTreeMap!
-    const componentIndexMap = ctx.componentIndexMap!
+    const serializedRoutes = ctx.serializedRoutes!
+    const componentIdMap = ctx.componentIdMap!
 
     // Get sorted imports from component map
-    const sortedImports = Object.keys(componentIndexMap)
+    const sortedImports = Object.keys(componentIdMap)
 
     // Generate component imports
     const importStatements = sortedImports
@@ -25,7 +25,7 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
 
     // Generate pre-built route components from element trees
     const routeEntries: string[] = []
-    for (const [url, tree] of Object.entries(serializedComponentTreeMap)) {
+    for (const [url, tree] of Object.entries(serializedRoutes)) {
       const elementCode = `    ${serialize(tree).replace(/\n/g, '\n    ')}`
       routeEntries.push(`  '${url}':\n${elementCode},`)
     }

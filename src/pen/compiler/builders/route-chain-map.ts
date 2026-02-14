@@ -3,7 +3,7 @@ import { ancestors, traverse } from '@/lib/tree'
 import { relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 
-export type RouteMap = Record<string, Route>
+export type RouteChainMap = Record<string, Route>
 export type Route = {
   url: string
   chain: SegmentRoles[]
@@ -20,8 +20,8 @@ export type Route = {
  * @param outDir - Output directory (to calculate relative import paths)
  * @returns Flat manifest ready for runtime composition
  */
-export function createRouteMap(segmentTree: SegmentNode, outDir: string): RouteMap {
-  const manifest: RouteMap = {}
+export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): RouteChainMap {
+  const routes: RouteChainMap = {}
   const genDir = `${outDir}/generated`
 
   traverse(segmentTree, {
@@ -30,10 +30,10 @@ export function createRouteMap(segmentTree: SegmentNode, outDir: string): RouteM
       if (!segment.roles.screen) return
       const url = segment.url
       const chain = createSegmentChain(segment, genDir)
-      manifest[url] = { url, chain }
+      routes[url] = { url, chain }
     },
   })
-  return manifest
+  return routes
 }
 
 /** Builds ancestor chain from leaf → root order. */

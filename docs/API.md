@@ -320,7 +320,7 @@ Arguments:
 
 ```typescript
 // Route manifest structure
-interface RouteMap {
+interface RouteChainMap {
   [url: string]: Route;
 }
 

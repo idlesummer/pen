@@ -1,5 +1,5 @@
-import type { Route, RouteMap } from './route-table'
-import type { ComponentIndexMap } from './component-map'
+import type { Route, RouteChainMap } from './route-chain-map'
+import type { ComponentIdMap } from './component-index-map'
 
 export interface SerializedTree {
   component: string
@@ -7,26 +7,26 @@ export interface SerializedTree {
   children?: SerializedTree
 }
 
-export type SerializedComponentTreeMap = Record<string, SerializedTree>
+export type SerializedRouteTreeMap = Record<string, SerializedTree>
 
 /**
- * Creates element trees for all routes in the manifest.
+ * Creates element trees for all routeChain in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createSerializedComponentTreeMap(manifest: RouteMap, componentIndexMap: ComponentIndexMap): SerializedComponentTreeMap {
-  const serializedComponentTreeMap: SerializedComponentTreeMap = {}
-  for (const [url, route] of Object.entries(manifest))
-    serializedComponentTreeMap[url] = createSerializedTree(route, componentIndexMap)
-  return serializedComponentTreeMap
+export function createSerializedRoutes(routeChain: RouteChainMap, componentIdMap: ComponentIdMap): SerializedRouteTreeMap {
+  const serializedRoutes: SerializedRouteTreeMap = {}
+  for (const [url, route] of Object.entries(routeChain))
+    serializedRoutes[url] = createSerializedTree(route, componentIdMap)
+  return serializedRoutes
 }
 
 /**
  * Builds a structured serialized element tree representing nested React components.
  *
  * This function creates a structured data tree that will be serialized into
- * createElement calls for the generated routes.ts file.
+ * createElement calls for the generated routeChain.ts file.
  */
-function createSerializedTree(route: Route, mapping: ComponentIndexMap): SerializedTree {
+function createSerializedTree(route: Route, mapping: ComponentIdMap): SerializedTree {
   const imports = Object.keys(mapping)
 
   // Start with the screen from the first segment
