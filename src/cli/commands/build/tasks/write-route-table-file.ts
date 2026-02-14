@@ -6,8 +6,8 @@ import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeRouteTableFile: Task<BuildContext> = {
-  name: 'Writing manifest.ts',
-  onSuccess: (_, dur) => `Saved manifest.ts (${duration(dur)})`,
+  name: 'Writing route-table.ts',
+  onSuccess: (_, dur) => `Saved route-table.ts (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
     const manifestPath = join(genDir, 'route-table.ts')
