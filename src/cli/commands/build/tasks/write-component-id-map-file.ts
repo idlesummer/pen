@@ -5,12 +5,14 @@ import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
+const filename = 'component-id-map.ts'
+
 export const writeComponentIdMapFile: Task<BuildContext> = {
-  name: 'Writing component-id-map.ts',
-  onSuccess: (_, dur) => `Saved component-id-map.ts (${duration(dur)})`,
+  name: `Writing ${filename}`,
+  onSuccess: (_, dur) => `Saved ${filename} (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'artifacts')
-    const outDir = join(genDir, 'component-id-map.ts')
+    const outDir = join(genDir, filename)
 
     const componentIdMap = ctx.componentIdMap!
     const code = [
