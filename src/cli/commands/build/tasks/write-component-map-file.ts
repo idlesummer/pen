@@ -6,11 +6,11 @@ import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writeComponentMapFile: Task<BuildContext> = {
-  name: 'Writing components.ts',
-  onSuccess: (_, dur) => `Saved components.ts (${duration(dur)})`,
+  name: 'Writing component-map.ts',
+  onSuccess: (_, dur) => `Saved component-map.ts (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
-    const componentsPath = join(genDir, 'component-map.ts')
+    const outDir = join(genDir, 'component-map.ts')
 
     const componentMap = ctx.componentMap!
     const code = [
@@ -24,6 +24,6 @@ export const writeComponentMapFile: Task<BuildContext> = {
     ].join('\n')
 
     await mkdir(genDir, { recursive: true })
-    await writeFile(componentsPath, code, 'utf-8')
+    await writeFile(outDir, code, 'utf-8')
   },
 }
