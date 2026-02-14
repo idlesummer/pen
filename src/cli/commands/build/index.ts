@@ -13,7 +13,7 @@ import { buildElementTree } from './tasks/build-element-tree'
 import { writeRouteTableFile } from './tasks/write-route-table-file'
 import { writeElementTreeFile } from './tasks/write-element-tree-file'
 import { writeComponentMapFile } from './tasks/write-component-map-file'
-import { writeRoutesFile } from './tasks/write-compiled-routes-file'
+import { writeCompiledRoutesFile } from './tasks/write-compiled-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
 import { compileApplication } from './tasks/compile-application'
 
