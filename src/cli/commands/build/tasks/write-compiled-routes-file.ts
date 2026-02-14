@@ -11,7 +11,7 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
   onSuccess: (_, dur) => `Saved compiled-routes.ts (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
-    const routesPath = join(genDir, 'compiled-routes.ts')
+    const outDir = join(genDir, 'compiled-routes.ts')
     const elementTrees = ctx.elementTrees!
     const componentMap = ctx.componentMap!
 
@@ -47,7 +47,7 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
     ].join('\n')
 
     await mkdir(genDir, { recursive: true })
-    await writeFile(routesPath, code, 'utf-8')
+    await writeFile(outDir, code, 'utf-8')
   },
 }
 
