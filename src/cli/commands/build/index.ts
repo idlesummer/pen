@@ -7,10 +7,10 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 // Import individual tasks
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { buildRouteTable } from './tasks/build-route-manifest'
+import { buildRouteTable } from './tasks/build-route-table'
 import { buildComponentMap } from './tasks/build-component-map'
 import { buildElementTree } from './tasks/build-element-tree'
-import { writeManifestFile } from './tasks/write-manifest-file'
+import { writeRouteTableFile } from './tasks/write-route-table-file'
 import { writeElementTreeFile } from './tasks/write-element-tree-file'
 import { writeComponentMapFile } from './tasks/write-component-map-file'
 import { writeRoutesFile } from './tasks/write-routes-file'
@@ -38,7 +38,7 @@ export const build: CLICommand = {
         buildElementTree,
 
         // Conditionally add metadata file generation tasks
-        emitMetadata && writeManifestFile,
+        emitMetadata && writeRouteTableFile,
         emitMetadata && writeElementTreeFile,
         emitMetadata && writeComponentMapFile,
 
