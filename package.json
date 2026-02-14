@@ -35,7 +35,7 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "tsc --noEmit && tsdown",
+    "build": "tsc && tsdown",
     "lint": "eslint",
     "prepare": "npm run build",
     "test": "vitest",

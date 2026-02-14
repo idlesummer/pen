@@ -7,19 +7,19 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 // Import individual tasks
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { buildRouteMap } from './tasks/build-route-map'
-import { buildComponentIndexMap } from './tasks/build-component-index-map'
-import { buildSerializedTree } from './tasks/build-serialized-component-tree'
-import { writeRouteMapFile } from './tasks/write-route-map-file'
-import { writeSerializedTreeFile } from './tasks/write-serialized-component-tree-file'
-import { writeComponentIndexMapFile } from './tasks/write-component-index-map-file'
+import { buildRouteChainMap } from './tasks/build-route-chain-map'
+import { buildComponentIdMap } from './tasks/build-component-id-map'
+import { writeRouteMapFile } from './tasks/write-routes-file'
+import { buildSerializedRoutes } from './tasks/build-serialized-routes'
+import { writeSerializedTreeFile } from './tasks/write-serialized-routes-file'
+import { writeComponentIdMapFile } from './tasks/write-component-id-map-file'
 import { writeCompiledRoutesFile } from './tasks/write-compiled-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
 import { compileApplication } from './tasks/compile-application'
 
 export const build: CLICommand = {
   name: 'build',
-  desc: 'Build the route manifest and compile application',
+  desc: 'Build the routing structure and compile application',
   action: async () => {
     try {
       const { appDir, outDir, emitMetadata } = await loadConfig()
@@ -33,14 +33,14 @@ export const build: CLICommand = {
       const pipeline = pipe([
         buildFileTree,
         buildSegmentTree,
-        buildRouteMap,
-        buildComponentIndexMap,
-        buildSerializedTree,
+        buildRouteChainMap,
+        buildComponentIdMap,
+        buildSerializedRoutes,
 
         // Conditionally add metadata file generation tasks
         emitMetadata && writeRouteMapFile,
         emitMetadata && writeSerializedTreeFile,
-        emitMetadata && writeComponentIndexMapFile,
+        emitMetadata && writeComponentIdMapFile,
 
         writeCompiledRoutesFile,
         writeEntryFile,

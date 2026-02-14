@@ -198,7 +198,7 @@ Transforms files into logical routes:
 **Task 3: Generate Manifest**
 ```
 Input:  SegmentNode tree
-Output: RouteMap (flat dictionary)
+Output: RouteChainMap (flat dictionary)
 ```
 
 Flattens tree into runtime-friendly format:
@@ -218,7 +218,7 @@ Flattens tree into runtime-friendly format:
 
 **Task 1: Write manifest.ts**
 ```typescript
-export const manifest: RouteMap = { ... }
+export const routes: RouteChainMap = { ... }
 ```
 
 **Task 2: Write components.ts**
@@ -369,7 +369,7 @@ interface RouterContext {
 **Decision:** Store absolute filesystem paths
 
 **Rationale:**
-- ComponentIndexMap can resolve to relative imports
+- ComponentIdMap can resolve to relative imports
 - Manifest stays portable (just data)
 - Easy to debug (full paths visible)
 
@@ -436,12 +436,12 @@ User runs: pen build
    FileNode tree
      ↓ createSegmentTree() [DFS]
    SegmentNode tree
-     ↓ createRouteMap()
-   RouteMap (JSON)
+     ↓ createRouteChainMap()
+   RouteChainMap (JSON)
 
 3. Generate Phase
-   RouteMap
-     ↓ buildComponentIndexMap()
+   RouteChainMap
+     ↓ buildComponentIdMap()
    ComponentImportMap
      ↓ codegen
    .pen/generated/

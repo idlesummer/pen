@@ -2,16 +2,16 @@
 export type { CompiledRoutes } from './types'
 export type { FileNode } from './builders/file-tree'
 export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
-export type { RouteMap, Route } from './builders/route-table'
-export type { ComponentIndexMap } from './builders/component-map'
-export type { SerializedTree, SerializedComponentTreeMap } from './builders/serialized-tree-map'
+export type { RouteChainMap, Route } from './builders/route-chain-map'
+export type { ComponentIdMap } from './builders/component-index-map'
+export type { SerializedTree, SerializedRouteTreeMap } from './builders/serialized-routes'
 
 // Functions
 export { createFileTree } from './builders/file-tree'
 export { createSegmentTree } from './builders/segment-tree'
-export { createRouteMap } from './builders/route-table'
-export { createComponentIndexMap } from './builders/component-map'
-export { createSerializedComponentTreeMap } from './builders/serialized-tree-map'
+export { createRouteChainMap } from './builders/route-chain-map'
+export { createComponentIdMap } from './builders/component-index-map'
+export { createSerializedRoutes } from './builders/serialized-routes'
 
 // Errors
 export {

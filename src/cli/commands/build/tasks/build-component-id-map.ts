@@ -1,12 +1,12 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
 import { duration } from '@idlesummer/tasker'
-import { createComponentIndexMap } from '@/pen/compiler'
+import { createComponentIdMap } from '@/pen/compiler'
 
-export const buildComponentIndexMap: Task<BuildContext> = {
-  name: 'Building component map',
+export const buildComponentIdMap: Task<BuildContext> = {
+  name: 'Building component index map',
   onSuccess: (_, dur) => `Built component map (${duration(dur)})`,
   run: async (ctx) => ({
-    componentIndexMap: createComponentIndexMap(ctx.manifest!),
+    componentIdMap: createComponentIdMap(ctx.routeChainMap!),
   }),
 }
