@@ -10,7 +10,7 @@ export const writeComponentMapFile: Task<BuildContext> = {
   onSuccess: (_, dur) => `Saved components.ts (${duration(dur)})`,
   run: async (ctx) => {
     const genDir = join(ctx.outDir, 'generated')
-    const componentsPath = join(genDir, 'components.ts')
+    const componentsPath = join(genDir, 'component-map.ts')
 
     const componentMap = ctx.componentMap!
     const code = [
