@@ -23,11 +23,11 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
       .map((importPath, i) => `import Component${i} from '${importPath}'`)
       .join('\n')
 
-    // Generate pre-built route elements from element trees
-    const routeElements: string[] = []
+    // Generate pre-built route components from element trees
+    const routeEntries: string[] = []
     for (const [url, tree] of Object.entries(serializedComponentTreeMap)) {
       const elementCode = `    ${serialize(tree).replace(/\n/g, '\n    ')}`
-      routeElements.push(`  '${url}':\n${elementCode},`)
+      routeEntries.push(`  '${url}':\n${elementCode},`)
     }
 
     const code = [
@@ -41,7 +41,7 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
       '',
       '// Compiled route elements generated at build time',
       'export const compiledRoutes: CompiledRoutes = {',
-      routeElements.join('\n'),
+      routeEntries.join('\n'),
       '} as const',
       '',
     ].join('\n')
