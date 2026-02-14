@@ -11,7 +11,7 @@ export const writeSerializedTreeFile: Task<BuildContext> = {
   name: 'Writing serialized-component-tree.ts',
   onSuccess: (_, dur) => `Saved element-tree.ts (${duration(dur)})`,
   run: async (ctx) => {
-    const genDir = join(ctx.outDir, 'generated')
+    const genDir = join(ctx.outDir, 'artifacts')
     const outDir = join(genDir, 'serialized-component-tree.ts')
 
     const code = [

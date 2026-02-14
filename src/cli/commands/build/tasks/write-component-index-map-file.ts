@@ -9,7 +9,7 @@ export const writeComponentIndexMapFile: Task<BuildContext> = {
   name: 'Writing component-index-map.ts',
   onSuccess: (_, dur) => `Saved component-index-map.ts (${duration(dur)})`,
   run: async (ctx) => {
-    const genDir = join(ctx.outDir, 'generated')
+    const genDir = join(ctx.outDir, 'artifacts')
     const outDir = join(genDir, 'component-index-map.ts')
 
     const componentIndexMap = ctx.componentIndexMap!
