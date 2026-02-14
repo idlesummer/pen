@@ -3,7 +3,7 @@ import { ancestors, traverse } from '@/lib/tree'
 import { relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 
-export type RouteManifest = Record<string, Route>
+export type RouteTable = Record<string, Route>
 export type Route = {
   url: string
   chain: SegmentRoles[]
@@ -20,8 +20,8 @@ export type Route = {
  * @param outDir - Output directory (to calculate relative import paths)
  * @returns Flat manifest ready for runtime composition
  */
-export function createRouteManifest(segmentTree: SegmentNode, outDir: string): RouteManifest {
-  const manifest: RouteManifest = {}
+export function createRouteTable(segmentTree: SegmentNode, outDir: string): RouteTable {
+  const manifest: RouteTable = {}
   const genDir = `${outDir}/generated`
 
   traverse(segmentTree, {

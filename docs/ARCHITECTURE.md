@@ -198,7 +198,7 @@ Transforms files into logical routes:
 **Task 3: Generate Manifest**
 ```
 Input:  SegmentNode tree
-Output: RouteManifest (flat dictionary)
+Output: RouteTable (flat dictionary)
 ```
 
 Flattens tree into runtime-friendly format:
@@ -218,7 +218,7 @@ Flattens tree into runtime-friendly format:
 
 **Task 1: Write manifest.ts**
 ```typescript
-export const manifest: RouteManifest = { ... }
+export const manifest: RouteTable = { ... }
 ```
 
 **Task 2: Write components.ts**
@@ -436,11 +436,11 @@ User runs: pen build
    FileNode tree
      ↓ createSegmentTree() [DFS]
    SegmentNode tree
-     ↓ createRouteManifest()
-   RouteManifest (JSON)
+     ↓ createRouteTable()
+   RouteTable (JSON)
 
 3. Generate Phase
-   RouteManifest
+   RouteTable
      ↓ buildComponentMap()
    ComponentImportMap
      ↓ codegen
