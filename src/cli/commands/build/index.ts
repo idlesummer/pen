@@ -42,7 +42,7 @@ export const build: CLICommand = {
         emitMetadata && writeElementTreeFile,
         emitMetadata && writeComponentMapFile,
 
-        writeRoutesFile,
+        writeCompiledRoutesFile,
         writeEntryFile,
         compileApplication,
       ])

@@ -20,7 +20,7 @@ export const writeEntryFile: Task<BuildContext> = {
       'import { createElement } from \'react\'',
       'import { render } from \'ink\'',
       `import { App } from '${PACKAGE_NAME}'`,
-      'import { compiledRoutes } from \'./compiled-routes\'',
+      'import { compiledRoutes as routes } from \'./compiled-routes\'',
       '',
       'export async function run(initialUrl: string) {',
       '  const element = createElement(App, { initialUrl, routes })',
