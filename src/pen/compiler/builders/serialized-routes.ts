@@ -26,13 +26,13 @@ export function createSerializedRoutes(routeChain: RouteChainMap, componentIdMap
  * This function creates a structured data tree that will be serialized into
  * createElement calls for the generated routeChain.ts file.
  */
-function createSerializedRoute(route: Route, mapping: ComponentIdMap) {
-  const imports = Object.keys(mapping)
+function createSerializedRoute(route: Route, componentIdMap: ComponentIdMap) {
+  const imports = Object.keys(componentIdMap)
 
   // Start with the screen from the first segment
   const screenSegment = route.chain[0]!
   const screenPath = screenSegment['screen']!
-  const screenIndex = mapping[screenPath]!
+  const screenIndex = componentIdMap[screenPath]!
   const screenKey = JSON.stringify(imports[screenIndex]!)
 
   let tree: SerializedComponentTree = {
@@ -45,7 +45,7 @@ function createSerializedRoute(route: Route, mapping: ComponentIdMap) {
     // Not-found boundary
     if (segment['not-found']) {
       const path = segment['not-found']
-      const index = mapping[path]!
+      const index = componentIdMap[path]!
       const key = JSON.stringify(imports[index]!)
       const fallback = `Component${index}`
       tree = {
@@ -57,7 +57,7 @@ function createSerializedRoute(route: Route, mapping: ComponentIdMap) {
     // Error boundary
     if (segment['error']) {
       const path = segment['error']
-      const index = mapping[path]!
+      const index = componentIdMap[path]!
       const key = JSON.stringify(imports[index]!)
       const fallback = `Component${index}`
       tree = {
@@ -69,7 +69,7 @@ function createSerializedRoute(route: Route, mapping: ComponentIdMap) {
     // Layout
     if (segment['layout']) {
       const path = segment['layout']
-      const index = mapping[path]!
+      const index = componentIdMap[path]!
       const key = JSON.stringify(imports[index]!)
       tree = {
         component: `Component${index}`,
