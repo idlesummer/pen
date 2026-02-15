@@ -1,5 +1,5 @@
 import type { Task } from '@idlesummer/tasker'
-import type { SerializedTree } from '@/pen/compiler'
+import type { SerializedComponentTree } from '@/pen/compiler'
 import type { BuildContext } from '../types'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -53,8 +53,8 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
   },
 }
 
-/** Serializes an SerializedTree to React.createElement() code string. */
-export function serialize(tree: SerializedTree, indent = 0): string {
+/** Serializes an SerializedRoutes to React.createElement() code string. */
+export function serialize(tree: SerializedComponentTree, indent = 0): string {
   const spaces = '  '.repeat(indent)
 
   // Props are already pre-serialized (strings have quotes, identifiers don't)

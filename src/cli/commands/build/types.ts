@@ -1,5 +1,5 @@
 import type { Context } from '@idlesummer/tasker'
-import type { FileNode, SerializedRouteTreeMap, ComponentIdMap } from '@/pen/compiler'
+import type { FileNode, SerializedRoutes, ComponentIdMap } from '@/pen/compiler'
 import type { SegmentNode } from '@/pen/compiler/builders/segment-tree'
 import type { RouteChainMap } from '@/pen/compiler/builders/route-chain-map'
 
@@ -9,6 +9,6 @@ export type BuildContext = Context & {
   fileTree?: FileNode
   segmentTree?: SegmentNode
   routeChainMap?: RouteChainMap
-  serializedRoutes?: SerializedRouteTreeMap
+  serializedRoutes?: SerializedRoutes
   componentIdMap?: ComponentIdMap
 }
