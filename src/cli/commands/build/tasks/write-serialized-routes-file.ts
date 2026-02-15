@@ -5,7 +5,7 @@ import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
 import { PACKAGE_NAME } from '@/pen/constants'
 
-const filename = 'serialized-route-tree.ts'
+const filename = 'serialized-routes.ts'
 
 export const writeSerializedTreeFile: Task<BuildContext> = {
   name: `Writing ${filename}`,
