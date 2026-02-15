@@ -17,11 +17,8 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
     const serializedRoutes = ctx.serializedRoutes!
     const componentIdMap = ctx.componentIdMap!
 
-    // Get sorted imports from component map
-    const sortedImports = Object.keys(componentIdMap)
-
     // Generate component imports
-    const importStatements = sortedImports
+    const importStatements = Object.keys(componentIdMap)
       .map((importPath, i) => `import Component${i} from '${importPath}'`)
       .join('\n')
 
