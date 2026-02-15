@@ -7,7 +7,7 @@ import { PACKAGE_NAME } from '@/pen/constants'
 
 const filename = 'serialized-routes.ts'
 
-export const writeSerializedTreeFile: Task<BuildContext> = {
+export const writeSerializedRoutesFile: Task<BuildContext> = {
   name: `Writing ${filename}`,
   onSuccess: (_, dur) => `Saved ${filename} (${duration(dur)})`,
   run: async (ctx) => {
@@ -19,9 +19,9 @@ export const writeSerializedTreeFile: Task<BuildContext> = {
       '// Do not manually edit this file',
       '// NOTE: This file is kept for documentation/debugging.',
       '',
-      `import type { SerializedRouteTreeMap } from '${PACKAGE_NAME}'`,
+      `import type { SerializedRoutes } from '${PACKAGE_NAME}'`,
       '',
-      `export const serializedRoutes: SerializedRouteTreeMap = ${JSON.stringify(ctx.serializedRoutes!, null, 2)} as const`,
+      `export const serializedRoutes: SerializedRoutes = ${JSON.stringify(ctx.serializedRoutes!, null, 2)} as const`,
       '',
     ].join('\n')
 

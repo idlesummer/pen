@@ -4,7 +4,7 @@ export type { FileNode } from './builders/file-tree'
 export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
 export type { RouteChainMap, Route } from './builders/route-chain-map'
 export type { ComponentIdMap } from './builders/component-id-map'
-export type { SerializedTree, SerializedRouteTreeMap } from './builders/serialized-routes'
+export type { SerializedComponentTree, SerializedRoutes } from './builders/serialized-routes'
 
 // Functions
 export { createFileTree } from './builders/file-tree'

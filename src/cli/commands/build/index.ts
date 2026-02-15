@@ -11,7 +11,7 @@ import { buildRouteChainMap } from './tasks/build-route-chain-map'
 import { buildComponentIdMap } from './tasks/build-component-id-map'
 import { writeRouteMapFile } from './tasks/write-route-chain-map-file'
 import { buildSerializedRoutes } from './tasks/build-serialized-routes'
-import { writeSerializedTreeFile } from './tasks/write-serialized-routes-file'
+import { writeSerializedRoutesFile } from './tasks/write-serialized-routes-file'
 import { writeComponentIdMapFile } from './tasks/write-component-id-map-file'
 import { writeCompiledRoutesFile } from './tasks/write-compiled-routes-file'
 import { writeEntryFile } from './tasks/write-entry-file'
@@ -39,7 +39,7 @@ export const build: CLICommand = {
 
         // Conditionally add metadata file generation tasks
         emitMetadata && writeRouteMapFile,
-        emitMetadata && writeSerializedTreeFile,
+        emitMetadata && writeSerializedRoutesFile,
         emitMetadata && writeComponentIdMapFile,
 
         writeCompiledRoutesFile,

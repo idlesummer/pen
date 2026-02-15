@@ -1,22 +1,22 @@
 import type { Route, RouteChainMap } from './route-chain-map'
 import type { ComponentIdMap } from './component-id-map'
 
-export interface SerializedTree {
+export interface SerializedComponentTree {
   component: string
   props: Record<string, unknown>
-  children?: SerializedTree
+  children?: SerializedComponentTree
 }
 
-export type SerializedRouteTreeMap = Record<string, SerializedTree>
+export type SerializedRoutes = Record<string, SerializedComponentTree>
 
 /**
  * Creates element trees for all routeChain in the manifest.
  * Each tree represents the nested React component structure for a route.
  */
-export function createSerializedRoutes(routeChain: RouteChainMap, componentIdMap: ComponentIdMap): SerializedRouteTreeMap {
-  const serializedRoutes: SerializedRouteTreeMap = {}
+export function createSerializedRoutes(routeChain: RouteChainMap, componentIdMap: ComponentIdMap) {
+  const serializedRoutes: SerializedRoutes = {}
   for (const [url, route] of Object.entries(routeChain))
-    serializedRoutes[url] = createSerializedTree(route, componentIdMap)
+    serializedRoutes[url] = createSerializedRoute(route, componentIdMap)
   return serializedRoutes
 }
 
@@ -26,7 +26,7 @@ export function createSerializedRoutes(routeChain: RouteChainMap, componentIdMap
  * This function creates a structured data tree that will be serialized into
  * createElement calls for the generated routeChain.ts file.
  */
-function createSerializedTree(route: Route, mapping: ComponentIdMap): SerializedTree {
+function createSerializedRoute(route: Route, mapping: ComponentIdMap) {
   const imports = Object.keys(mapping)
 
   // Start with the screen from the first segment
@@ -35,7 +35,7 @@ function createSerializedTree(route: Route, mapping: ComponentIdMap): Serialized
   const screenIndex = mapping[screenPath]!
   const screenKey = JSON.stringify(imports[screenIndex]!)
 
-  let tree: SerializedTree = {
+  let tree: SerializedComponentTree = {
     component: `Component${screenIndex}`,
     props: { key: screenKey },
   }
