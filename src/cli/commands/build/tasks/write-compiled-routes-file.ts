@@ -18,8 +18,8 @@ export const writeCompiledRoutesFile: Task<BuildContext> = {
     const componentIdMap = ctx.componentIdMap!
 
     // Generate component imports
-    const importStatements = Object.keys(componentIdMap)
-      .map((importPath, i) => `import Component${i} from '${importPath}'`)
+    const importStatements = Object.entries(componentIdMap)
+      .map(([importPath, i]) => `import Component${i} from '${importPath}'`)
       .join('\n')
 
     // Generate pre-built route components from element trees
