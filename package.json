@@ -1,6 +1,6 @@
 {
   "name": "@idlesummer/pen",
-  "version": "0.1.0",
+  "version": "0.2.4",
   "description": "File-based routing for React Ink apps (experimental)",
   "keywords": [
     "cli",
@@ -35,7 +35,7 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsc && tsdown",
     "lint": "eslint",
     "prepare": "npm run build",
     "test": "vitest",
@@ -44,7 +44,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "@idlesummer/tasker": "^0.1.2",
+    "@idlesummer/tasker": "^0.2.0",
     "commander": "^14.0.2",
     "ora": "^9.0.0",
     "picomatch": "^4.0.3",

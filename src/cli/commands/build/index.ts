@@ -1,18 +1,28 @@
+import type { CLICommand } from '../../types'
 import pc from 'picocolors'
 import { pipe, duration, fileList } from '@idlesummer/tasker'
-import { loadConfig } from '@/core/config'
-import { CLI_NAME, VERSION } from '@/core/constants'
-import { scanTasks } from './tasks/scan'
-import { generateTasks } from './tasks/generate'
-import { compileTask } from './tasks/compile'
-import type { CLICommand } from '../../types'
+import { loadConfig } from '@/pen/config'
+import { CLI_NAME, VERSION } from '@/pen/constants'
+
+// Import individual tasks
+import { buildFileTree } from './tasks/build-file-tree'
+import { buildSegmentTree } from './tasks/build-segment-tree'
+import { buildRouteChainMap } from './tasks/build-route-chain-map'
+import { buildComponentIdMap } from './tasks/build-component-id-map'
+import { writeRouteMapFile } from './tasks/write-route-chain-map-file'
+import { buildSerializedRoutes } from './tasks/build-serialized-routes'
+import { writeSerializedRoutesFile } from './tasks/write-serialized-routes-file'
+import { writeComponentIdMapFile } from './tasks/write-component-id-map-file'
+import { writeCompiledRoutesFile } from './tasks/write-compiled-routes-file'
+import { writeEntryFile } from './tasks/write-entry-file'
+import { compileApplication } from './tasks/compile-application'
 
 export const build: CLICommand = {
   name: 'build',
-  desc: 'Build the route manifest and compile application',
+  desc: 'Build the routing structure and compile application',
   action: async () => {
     try {
-      const { appDir, outDir } = await loadConfig()
+      const { appDir, outDir, emitMetadata } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
       console.log(pc.dim( `  entry:  ${appDir}`))
@@ -20,8 +30,22 @@ export const build: CLICommand = {
       console.log(pc.dim( `  output: ${outDir}`))
       console.log()
 
-      const tasks = [...scanTasks, ...generateTasks, compileTask]
-      const pipeline = pipe(tasks)
+      const pipeline = pipe([
+        buildFileTree,
+        buildSegmentTree,
+        buildRouteChainMap,
+        buildComponentIdMap,
+        buildSerializedRoutes,
+
+        // Conditionally add metadata file generation tasks
+        emitMetadata && writeRouteMapFile,
+        emitMetadata && writeSerializedRoutesFile,
+        emitMetadata && writeComponentIdMapFile,
+
+        writeCompiledRoutesFile,
+        writeEntryFile,
+        compileApplication,
+      ])
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })
       console.log()

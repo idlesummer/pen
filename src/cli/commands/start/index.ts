@@ -3,8 +3,8 @@ import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 import pc from 'picocolors'
 
-import { loadConfig } from '@/core/config'
-import { CLI_NAME } from '@/core/constants'
+import { loadConfig } from '@/pen/config'
+import { CLI_NAME } from '@/pen/constants'
 import type { CLICommand } from '../../types'
 
 export const start: CLICommand = {
