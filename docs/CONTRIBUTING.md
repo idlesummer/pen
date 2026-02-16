@@ -269,7 +269,7 @@ Understanding the architecture helps when contributing:
    - Validates structure
 
 3. **Generate** (`src/core/route-builder/builders/route-manifest.ts`)
-   - Flattens tree to RouteManifest
+   - Flattens tree to RouteChainMap
    - Creates component import map
 
 4. **Codegen** (`src/cli/commands/build/tasks/generate.ts`)

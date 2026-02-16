@@ -1,7 +1,7 @@
 # Architecture Documentation: @idlesummer/pen
 
-**Version:** 0.1.0  
-**Author:** idlesummer  
+**Version:** 0.1.0
+**Author:** idlesummer
 **Last Updated:** January 2026
 
 ---
@@ -198,7 +198,7 @@ Transforms files into logical routes:
 **Task 3: Generate Manifest**
 ```
 Input:  SegmentNode tree
-Output: RouteManifest (flat dictionary)
+Output: RouteChainMap (flat dictionary)
 ```
 
 Flattens tree into runtime-friendly format:
@@ -218,7 +218,7 @@ Flattens tree into runtime-friendly format:
 
 **Task 1: Write manifest.ts**
 ```typescript
-export const manifest: RouteManifest = { ... }
+export const routes: RouteChainMap = { ... }
 ```
 
 **Task 2: Write components.ts**
@@ -345,7 +345,7 @@ interface RouterContext {
 - Testable: Easy to mock context
 - Modern: Matches Vite, Rollup, RxJS patterns
 
-**Alternative considered:** Listr2-style class API  
+**Alternative considered:** Listr2-style class API
 **Rejected because:** More boilerplate, less composable
 
 ---
@@ -359,7 +359,7 @@ interface RouterContext {
 - **Manifest phase**: Flattens for O(1) runtime lookups
 - Separation makes each phase simpler
 
-**Alternative considered:** Direct file tree → manifest  
+**Alternative considered:** Direct file tree → manifest
 **Rejected because:** Would mix concerns, harder to validate
 
 ---
@@ -369,11 +369,11 @@ interface RouterContext {
 **Decision:** Store absolute filesystem paths
 
 **Rationale:**
-- ComponentMap can resolve to relative imports
+- ComponentIdMap can resolve to relative imports
 - Manifest stays portable (just data)
 - Easy to debug (full paths visible)
 
-**Tradeoff:** Manifest not portable across machines  
+**Tradeoff:** Manifest not portable across machines
 **Acceptable because:** Manifest is generated per build
 
 ---
@@ -388,7 +388,7 @@ interface RouterContext {
 - Debugging: Source maps point to real files
 - Performance: No runtime `require()` overhead
 
-**Alternative considered:** Dynamic imports at runtime  
+**Alternative considered:** Dynamic imports at runtime
 **Rejected because:** Loses type safety, slower startup
 
 ---
@@ -403,7 +403,7 @@ interface RouterContext {
 - Works with dynamic components
 - Testable: Easy to mock
 
-**Alternative considered:** JSX strings + eval  
+**Alternative considered:** JSX strings + eval
 **Rejected because:** Security risk, loses type safety
 
 ---
@@ -432,16 +432,16 @@ User runs: pen build
 
 2. Scan Phase
    src/app/ (filesystem)
-     ↓ buildFileTree() [BFS]
+     ↓ createFileTree() [BFS]
    FileNode tree
-     ↓ buildSegmentTree() [DFS]
+     ↓ createSegmentTree() [DFS]
    SegmentNode tree
-     ↓ buildRouteManifest()
-   RouteManifest (JSON)
+     ↓ createRouteChainMap()
+   RouteChainMap (JSON)
 
 3. Generate Phase
-   RouteManifest
-     ↓ buildComponentMap()
+   RouteChainMap
+     ↓ buildComponentIdMap()
    ComponentImportMap
      ↓ codegen
    .pen/generated/
@@ -691,6 +691,6 @@ export const config = {
 
 ---
 
-**Questions or contributions?**  
-GitHub: https://github.com/idlesummer/pen  
+**Questions or contributions?**
+GitHub: https://github.com/idlesummer/pen
 Issues: https://github.com/idlesummer/pen/issues
