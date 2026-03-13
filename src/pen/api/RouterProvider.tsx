@@ -3,7 +3,7 @@ import * as actions from './actions'
 import { normalizeUrl } from './actions'
 import type { NavigationHistory } from './types'
 
-export interface RouterContextValue {
+export type RouterContextValue = {
   url: string
   data: unknown | undefined
   history: readonly string[]    // Expose as readonly
@@ -14,14 +14,9 @@ export interface RouterContextValue {
   forward: () => void
 }
 
-export interface RouterProviderProps extends PropsWithChildren {
-  initialUrl: string
-}
-
-// Step 1: Define what data exists on the channel
 export const RouterContext = createContext<RouterContextValue | null>(null)
+export type RouterProviderProps = PropsWithChildren<{ initialUrl: string }>
 
-// Step 2: Broadcast the data
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
   const normalizedInitialUrl = normalizeUrl(initialUrl)
   const [history, setHistory] = useState<NavigationHistory>({
@@ -38,26 +33,18 @@ export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
   }, [])
 
   // Replace current URL without adding to history
-  const replace = useCallback((newUrl: string) => {
-    setHistory(prev => actions.replace(prev, newUrl))
-  }, [])
+  const replace = useCallback((newUrl: string) => setHistory(prev => actions.replace(prev, newUrl)), [])
 
-  // Navigate backwards
-  const back = useCallback(() => {
-    setHistory(prev => actions.back(prev))
-  }, [])
-
-  // Navigate forwards
-  const forward = useCallback(() => {
-    setHistory(prev => actions.forward(prev))
-  }, [])
+  // Navigate backwards/forwards
+  const back = useCallback(() => setHistory(prev => actions.back(prev)), [])
+  const forward = useCallback(() => setHistory(prev => actions.forward(prev)), [])
 
   return (
     <RouterContext.Provider
       value={{
         url,
         data,
-        history: history.stack.map(entry => entry.url),
+        history: history.stack.map(e => e.url),
         position: history.position,
         push,
         replace,
