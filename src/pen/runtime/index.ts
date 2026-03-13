@@ -13,4 +13,4 @@ export { NotFoundScreen } from './components/NotFoundScreen'
 export { FileRouter } from './components/FileRouter'
 
 // Errors
-export { NotFoundError, EmptyChainError, ComponentNotFoundError } from './errors'
+export { NotFoundError } from './errors'
