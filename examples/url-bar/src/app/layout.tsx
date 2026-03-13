@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useRouter } from '@idlesummer/pen'
 import type { PropsWithChildren } from 'react'
@@ -7,12 +7,26 @@ export default function RootLayout({ children }: PropsWithChildren) {
   const router = useRouter()
   const [draft, setDraft] = useState(router.url)
 
+  // ── Timing ────────────────────────────────────────────────────
+  const pushAt = useRef<number | null>(null)
+  const [lastMs, setLastMs] = useState<number | null>(null)
+
+  // Fires after React has re-rendered with the new URL
+  useEffect(() => {
+    if (pushAt.current !== null) {
+      setLastMs(performance.now() - pushAt.current)
+      pushAt.current = null
+    }
+  }, [router.url])
+  // ─────────────────────────────────────────────────────────────
+
   useInput((char, key) => {
     if (key.return) {
       // Normalise: ensure leading and trailing slash
       let url = draft.trim()
       if (!url.startsWith('/')) url = `/${url}`
       if (!url.endsWith('/')) url = `${url}/`
+      pushAt.current = performance.now()   // start the clock
       router.push(url)
       setDraft(url)
     } else if (key.backspace || key.delete) {
@@ -43,12 +57,15 @@ export default function RootLayout({ children }: PropsWithChildren) {
         {children}
       </Box>
 
-      {/* ── Help ────────────────────────────────────────────── */}
+      {/* ── Timing + Help ───────────────────────────────────── */}
       <Box>
         <Text dimColor>{'─'.repeat(40)}</Text>
       </Box>
-      <Box paddingY={1}>
+      <Box paddingY={1} gap={2}>
         <Text dimColor>type a path · Enter to go · Esc to cancel</Text>
+        {lastMs !== null && (
+          <Text dimColor>last switch: <Text color="yellow">{lastMs.toFixed(2)}ms</Text></Text>
+        )}
       </Box>
 
     </Box>
