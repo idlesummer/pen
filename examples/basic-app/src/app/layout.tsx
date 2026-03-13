@@ -21,17 +21,19 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <Text dimColor>URL: {router.url}</Text>
       </Box>
 
-      {/* Content */}
-      <Box flexDirection="column" paddingX={1}>
-        <Text bold color="cyan">{'My App\n'}</Text>
-        {children}
-      </Box>
-
-      {/* Footer */}
-      <Box padding={1} paddingBottom={0}>
+      {/* Navigation */}
+      <Box paddingX={1} paddingBottom={0}>
         <Text dimColor>
           [1] Home  [2] About  [3] Settings  [4] Profile
         </Text>
+      </Box>
+
+      {/* Content */}
+      <Box flexDirection="column" padding={1}>
+        <Box flexDirection="row" justifyContent="center">
+          <Text bold color="cyan">{'My App\n'}</Text>
+        </Box>
+        {children}
       </Box>
     </Box>
   )
