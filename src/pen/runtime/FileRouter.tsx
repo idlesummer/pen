@@ -1,14 +1,9 @@
-import { useRouter } from '@/pen/router'
-import { NotFoundError } from './errors'
-
 import type { ReactElement } from 'react'
-import type { CompiledRoutes } from '../compiler/types'
+import type { RouteResolver } from './routing/resolver'
+import { useRouter } from '@/pen/api'
 
-/**
- * Props for the FileRouter component.
- */
-export interface FileRouterProps {
-  routes: CompiledRoutes
+export type FileRouterProps = {
+  routes: RouteResolver
 }
 
 /**
@@ -17,8 +12,5 @@ export interface FileRouterProps {
  */
 export function FileRouter({ routes }: FileRouterProps): ReactElement {
   const { url } = useRouter()
-  const element = routes[url]
-
-  if (!element) throw new NotFoundError(url)
-  return element
+  return routes(url)
 }
