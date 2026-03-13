@@ -14,11 +14,7 @@ export type RoutingTable = {
   pathComponentMap: PathComponentMap
 }
 
-export function composeRoute(
-  url: string,
-  routingTable: RoutingTable,
-  params: Record<string, string>,
-): ReactElement {
+export function composeRoute(url: string, routingTable: RoutingTable, params: Record<string, string>): ReactElement {
   const { routeChainMap, pathComponentMap } = routingTable
   const route = routeChainMap[url]
   if (!route) throw new NotFoundError(url)
