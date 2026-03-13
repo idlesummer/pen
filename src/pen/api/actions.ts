@@ -9,26 +9,26 @@ export function normalizeUrl(url: string): string {
 }
 
 export function push(prev: NavigationHistory, newUrl: string, newData?: unknown): NavigationHistory {
-  return {
-    stack: [...prev.stack.slice(0, prev.position + 1), { url: normalizeUrl(newUrl), data: newData }],
-    position: prev.position + 1,
-  }
+  const head = prev.stack.slice(0, prev.position+1)
+  const entry = { url: normalizeUrl(newUrl), data: newData }
+  const stack = [...head, entry]
+  return { stack, position: prev.position+1 }
 }
 
 export function replace(prev: NavigationHistory, newUrl: string): NavigationHistory {
-  const newStack = [...prev.stack]
-  newStack[prev.position] = { url: normalizeUrl(newUrl) }
-  return { ...prev, stack: newStack }
+  const stack = [...prev.stack]
+  stack[prev.position] = { url: normalizeUrl(newUrl) }
+  return { ...prev, stack }
 }
 
 export function back(prev: NavigationHistory): NavigationHistory {
   return prev.position > 0
-    ? { ...prev, position: prev.position - 1 }
+    ? { ...prev, position: prev.position-1 }
     : prev
 }
 
 export function forward(prev: NavigationHistory): NavigationHistory {
-  return prev.position < prev.stack.length - 1
-    ? { ...prev, position: prev.position + 1 }
+  return prev.position < prev.stack.length-1
+    ? { ...prev, position: prev.position+1 }
     : prev
 }

@@ -1,11 +1,11 @@
 /** Navigation entry with URL and optional data */
-export interface NavigationEntry {
+export type NavigationEntry = {
   url: string
   data?: unknown
 }
 
 /** Internal navigation history state */
-export interface NavigationHistory {
+export type NavigationHistory = {
   stack: NavigationEntry[]
   position: number
 }
