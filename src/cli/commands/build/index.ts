@@ -30,8 +30,8 @@ export const build: CLICommand = {
         buildFileTree,
         buildSegmentTree,
         buildRouteChainMap,
-        writePathComponentMap,
         writeRouteChainMap,
+        writePathComponentMap,
         writeEntry,
         compileApplication,
       ])

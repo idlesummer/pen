@@ -15,25 +15,23 @@ export default function RootLayout({ children }: PropsWithChildren) {
   })
 
   return (
-    <Box borderStyle="round"  flexDirection="column" padding={1}>
+    <Box borderStyle="round" flexDirection="column">
       {/* Header */}
-      <Text bold color="cyan">{'My App\n'}</Text>
-
-      {/* Navigation */}
-      <Box marginBottom={1}>
-        <Text dimColor>
-          [1] Home  [2] About  [3] Settings  [4] Profile
-        </Text>
+      <Box paddingX={1} borderStyle="single" borderBottom borderTop={false} borderLeft={false} borderRight={false}>
+        <Text dimColor>URL: {router.url}</Text>
       </Box>
 
       {/* Content */}
       <Box flexDirection="column" paddingX={1}>
+        <Text bold color="cyan">{'My App\n'}</Text>
         {children}
       </Box>
 
       {/* Footer */}
-      <Box marginTop={1}>
-        <Text dimColor>Current: {router.url}</Text>
+      <Box padding={1} paddingBottom={0}>
+        <Text dimColor>
+          [1] Home  [2] About  [3] Settings  [4] Profile
+        </Text>
       </Box>
     </Box>
   )
