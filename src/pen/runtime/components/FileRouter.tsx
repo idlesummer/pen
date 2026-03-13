@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { RouteResolver } from './routing/resolver'
+import type { RouteResolver } from '../routing/resolver'
 import { useRouter } from '@/pen/api'
 
 export type FileRouterProps = {

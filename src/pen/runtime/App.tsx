@@ -1,10 +1,10 @@
 import type { RoutingTable } from './routing/composer'
 import { RouterProvider } from '@/pen/api'
-import { ErrorBoundary } from './ui/ErrorBoundary'
-import { NotFoundBoundary } from './ui/NotFoundBoundary'
-import { ErrorScreen } from './ui/ErrorScreen'
-import { NotFoundScreen } from './ui/NotFoundScreen'
-import { FileRouter } from './FileRouter'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { NotFoundBoundary } from './components/NotFoundBoundary'
+import { ErrorScreen } from './components/ErrorScreen'
+import { NotFoundScreen } from './components/NotFoundScreen'
+import { FileRouter } from './components/FileRouter'
 import { buildRoutes } from './routing/resolver'
 
 export type AppProps = {

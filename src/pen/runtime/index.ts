@@ -1,16 +1,16 @@
+// Types
+export type { AppProps } from './App'
+export type { ErrorComponentProps } from './components/ErrorBoundary'
+export type { NotFoundComponentProps } from './components/NotFoundBoundary'
+export type { FileRouterProps } from './components/FileRouter'
+
 // Components
 export { App } from './App'
-export { ErrorBoundary } from './ui/ErrorBoundary'
-export { NotFoundBoundary } from './ui/NotFoundBoundary'
-export { ErrorScreen } from './ui/ErrorScreen'
-export { NotFoundScreen } from './ui/NotFoundScreen'
-export { FileRouter } from './FileRouter'
+export { ErrorBoundary } from './components/ErrorBoundary'
+export { NotFoundBoundary } from './components/NotFoundBoundary'
+export { ErrorScreen } from './components/ErrorScreen'
+export { NotFoundScreen } from './components/NotFoundScreen'
+export { FileRouter } from './components/FileRouter'
 
 // Errors
 export { NotFoundError, EmptyChainError, ComponentNotFoundError } from './errors'
-
-// Types
-export type { AppProps } from './App'
-export type { ErrorComponentProps } from './ui/ErrorBoundary'
-export type { NotFoundComponentProps } from './ui/NotFoundBoundary'
-export type { FileRouterProps } from './FileRouter'
