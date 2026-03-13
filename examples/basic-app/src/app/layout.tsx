@@ -18,7 +18,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <Box borderStyle="round" flexDirection="column">
       {/* Header */}
       <Box paddingX={1} borderStyle="single" borderBottom borderTop={false} borderLeft={false} borderRight={false}>
-        <Text dimColor>URL: {router.url}</Text>
+        <Text dimColor>{router.url}</Text>
       </Box>
 
       {/* Navigation */}
@@ -30,8 +30,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
       {/* Content */}
       <Box flexDirection="column" padding={1}>
-        <Box flexDirection="row" justifyContent="center">
-          <Text bold color="cyan">{'My App\n'}</Text>
+        <Box flexDirection="row" justifyContent="center" paddingBottom={1}>
+          <Text bold underline color="cyan">{'<My Terminal Application>'}</Text>
         </Box>
         {children}
       </Box>
