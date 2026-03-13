@@ -42,8 +42,11 @@ export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): R
 function collectParams(segment: SegmentNode): string[] {
   const params: string[] = []
   ancestors(segment, {
-    parent: s => s.parent,
-    visit: s => { if (s.param) params.push(s.param) },
+    parent: ancestorSegment => ancestorSegment.parent,
+    visit: ancestorSegment => {
+      if (ancestorSegment.param)
+        params.push(ancestorSegment.param)
+    },
   })
   return params.reverse() // ancestors() goes leaf→root; flip to root→leaf
 }
