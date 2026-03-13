@@ -5,7 +5,6 @@ import { NotFoundBoundary } from './components/NotFoundBoundary'
 import { ErrorScreen } from './components/ErrorScreen'
 import { NotFoundScreen } from './components/NotFoundScreen'
 import { FileRouter } from './components/FileRouter'
-import { buildRoutes } from './routing/resolver'
 
 export type AppProps = {
   initialUrl: string
@@ -17,13 +16,11 @@ export type AppProps = {
  * Routes are compiled at build time via codegen - no runtime composition needed!
  */
 export function App({ initialUrl, routingTable }: AppProps) {
-  const routes = buildRoutes(routingTable)
-
   return (
     <ErrorBoundary fallback={ErrorScreen}>
       <RouterProvider initialUrl={initialUrl}>
         <NotFoundBoundary fallback={NotFoundScreen}>
-          <FileRouter routes={routes} />
+          <FileRouter routingTable={routingTable} />
         </NotFoundBoundary>
       </RouterProvider>
     </ErrorBoundary>

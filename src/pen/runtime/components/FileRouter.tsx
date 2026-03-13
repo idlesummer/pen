@@ -1,16 +1,21 @@
 import type { ReactElement } from 'react'
-import type { RouteResolver } from '../routing/resolver'
+import type { RoutingTable } from '../routing/composer'
+import { useMemo } from 'react'
 import { useRouter } from '@/pen/api'
+import { createRouteResolver } from '../routing/resolver'
 
 export type FileRouterProps = {
-  routes: RouteResolver
+  routingTable: RoutingTable
 }
 
 /**
- * Router component that renders compiled route elements.
- * Simply looks up the current URL in the compiled routes map.
+ * Router component that matches the current URL and renders the corresponding route.
+ * Lazily composes route elements on first visit and caches them for subsequent renders.
  */
-export function FileRouter({ routes }: FileRouterProps): ReactElement {
+export function FileRouter({ routingTable }: FileRouterProps): ReactElement {
+  // routingTable is static — created once from generated files, never changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const routeResolver = useMemo(() => createRouteResolver(routingTable), [])
   const { url } = useRouter()
-  return routes(url)
+  return routeResolver(url)
 }
