@@ -40,12 +40,12 @@ export const build: CLICommand = {
       console.log()
       console.log(fileList(outDir, '**/*'))
       console.log()
-      console.log(`${pc.green('✓')} Built in ${pc.bold(duration(dur))}`)
+      console.log(pc.green(`Built in ${pc.bold(duration(dur))}`))
       console.log()
     }
 
     catch (err) {
-      console.error(`${pc.red('✗')} Build failed`)
+      console.error(pc.red('Build failed'))
       console.log()
 
       const message = err instanceof Error ? err.message : String(err)
