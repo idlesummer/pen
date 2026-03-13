@@ -6,6 +6,7 @@ import { createElement } from 'react'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { NotFoundBoundary } from '../components/NotFoundBoundary'
 import { NotFoundError } from '../errors'
+import { ParamsContext } from '../params-context'
 
 export type PathComponentMap = Record<string, ComponentType>
 export type RoutingTable = {
@@ -13,7 +14,11 @@ export type RoutingTable = {
   pathComponentMap: PathComponentMap
 }
 
-export function composeRoute(url: string, routingTable: RoutingTable): ReactElement {
+export function composeRoute(
+  url: string,
+  routingTable: RoutingTable,
+  params: Record<string, string>,
+): ReactElement {
   const { routeChainMap, pathComponentMap } = routingTable
   const route = routeChainMap[url]
   if (!route) throw new NotFoundError(url)
@@ -39,5 +44,9 @@ export function composeRoute(url: string, routingTable: RoutingTable): ReactElem
       element = createElement(Layout, props, element)
     }
   }
+
+  // Wrap with params context so useParams() works inside any screen/layout
+  element = createElement(ParamsContext.Provider, { value: params }, element)
+
   return element
 }

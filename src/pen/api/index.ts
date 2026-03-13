@@ -7,3 +7,4 @@ export { RouterProvider, RouterContext } from './RouterProvider'
 // Hooks
 export { useNavigate } from './hooks/use-navigate'
 export { useRouter } from './hooks/use-router'
+export { useParams } from './hooks/use-params'
