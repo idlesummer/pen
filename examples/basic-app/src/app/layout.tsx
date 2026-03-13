@@ -9,9 +9,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
   useInput((input) => {
     if (input === '1') router.push('/')
-    if (input === '2') router.push('/about/')
-    if (input === '3') router.push('/settings/')
-    if (input === '4') router.push('/settings/profile/')
+    else if (input === '2') router.push('/about/')
+    else if (input === '3') router.push('/settings/')
+    else if (input === '4') router.push('/settings/profile/')
   })
 
   return (
