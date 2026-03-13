@@ -6,6 +6,7 @@ import { removeExtension } from '@/lib/path-utils'
 export type RouteChainMap = Record<string, Route>
 export type Route = {
   url: string
+  params: string[]  // param names extracted from dynamic segments, root→leaf order
   chain: SegmentRoles[]
 }
 
@@ -30,10 +31,21 @@ export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): R
       if (!segment.roles.screen) return
       const url = segment.url
       const chain = createSegmentChain(segment, genDir)
-      routes[url] = { url, chain }
+      const params = collectParams(segment)
+      routes[url] = { url, params, chain }
     },
   })
   return routes
+}
+
+/** Collects dynamic param names from root → leaf order. */
+function collectParams(segment: SegmentNode): string[] {
+  const params: string[] = []
+  ancestors(segment, {
+    parent: s => s.parent,
+    visit: s => { if (s.param) params.push(s.param) },
+  })
+  return params.reverse() // ancestors() goes leaf→root; flip to root→leaf
 }
 
 /** Builds ancestor chain from leaf → root order. */

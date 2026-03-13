@@ -70,10 +70,19 @@ function bindSegmentTree(segmentTree: SegmentNode) {
 
 function createSegmentNode(file: FileNode, parent: SegmentNode) {
   const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
+  const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
+  const param = isDynamic ? file.name.slice(1, -1) : undefined
+
+  let url: SegmentNode['url']
+  if (isGroup) url = parent.url
+  else if (isDynamic) url = `${parent.url}:${param}/`
+  else url = `${posix.join(parent.url, file.name)}/`
+
   const segmentNode: SegmentNode = {
     segment: file.name,
-    url: isGroup ? parent.url : `${posix.join(parent.url, file.name)}/`,
-    type: isGroup ? 'group' : 'page',
+    url,
+    type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
+    param,
     roles: {},
     parent,
     children: [],

@@ -1,6 +1,12 @@
 import { defineConfig } from 'vitest/config'
+import { resolve } from 'path'
 
 const vitestConfig = defineConfig({
+	resolve: {
+		alias: {
+			'@': resolve(__dirname, 'src'),
+		},
+	},
 	test: {
 		// Use happy-dom for DOM simulation (faster than jsdom)
 		environment: 'happy-dom',
