@@ -23,9 +23,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
       {/* Navigation */}
       <Box paddingX={1} paddingBottom={0}>
-        <Text dimColor>
-          [1] Home  [2] About  [3] Settings  [4] Profile
-        </Text>
+        <Text dimColor>[1] Home  [2] About  [3] Settings  [4] Profile</Text>
       </Box>
 
       {/* Content */}
