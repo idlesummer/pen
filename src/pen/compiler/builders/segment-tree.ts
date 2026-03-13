@@ -8,9 +8,10 @@ export type SegmentRole = typeof SEGMENT_ROLES[number]
 
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
-  segment: string
   url: `${string}/`
-  type: 'page' | 'group'
+  segment: string
+  param?: string // e.g. "id" from [id]
+  type: 'page' | 'group' | 'dynamic'
   roles: SegmentRoles
   parent?: SegmentNode
   children?: SegmentNode[]
