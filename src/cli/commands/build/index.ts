@@ -8,21 +8,17 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
 import { buildRouteChainMap } from './tasks/build-route-chain-map'
-import { buildComponentIdMap } from './tasks/build-component-id-map'
-import { writeRouteMapFile } from './tasks/write-route-chain-map-file'
-import { buildSerializedRoutes } from './tasks/build-serialized-routes'
-import { writeSerializedRoutesFile } from './tasks/write-serialized-routes-file'
-import { writeComponentIdMapFile } from './tasks/write-component-id-map-file'
-import { writeCompiledRoutesFile } from './tasks/write-compiled-routes-file'
-import { writeEntryFile } from './tasks/write-entry-file'
+import { writeRouteChainMap } from './tasks/write-route-chain-map'
+import { writeEntry } from './tasks/write-entry'
 import { compileApplication } from './tasks/compile-application'
+import { writePathComponentMap } from './tasks/write-path-component-map'
 
 export const build: CLICommand = {
   name: 'build',
   desc: 'Build the routing structure and compile application',
   action: async () => {
     try {
-      const { appDir, outDir, emitMetadata } = await loadConfig()
+      const { appDir, outDir } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
       console.log(pc.dim( `  entry:  ${appDir}`))
@@ -34,16 +30,9 @@ export const build: CLICommand = {
         buildFileTree,
         buildSegmentTree,
         buildRouteChainMap,
-        buildComponentIdMap,
-        buildSerializedRoutes,
-
-        // Conditionally add metadata file generation tasks
-        emitMetadata && writeRouteMapFile,
-        emitMetadata && writeSerializedRoutesFile,
-        emitMetadata && writeComponentIdMapFile,
-
-        writeCompiledRoutesFile,
-        writeEntryFile,
+        writePathComponentMap,
+        writeRouteChainMap,
+        writeEntry,
         compileApplication,
       ])
 

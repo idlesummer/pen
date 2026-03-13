@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from 'ink'
-import { useRouter } from '@/pen/router'
+import { useRouter } from '@/pen/api'
 import { type NotFoundComponentProps } from './NotFoundBoundary'
 
 /**
