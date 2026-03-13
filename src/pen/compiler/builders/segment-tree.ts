@@ -62,7 +62,7 @@ function bindSegmentTree(segmentTree: SegmentNode) {
   traverse(segmentTree, {
     expand: segment => segment.children ?? [],
     visit: segment => {
-      assignRoles(segment)
+      bindFileToSegmentRoles(segment)
       validateScreenUniqueness(segment, screens)
     },
   })
@@ -91,7 +91,7 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
   return segmentNode
 }
 
-function assignRoles(segment: SegmentNode) {
+function bindFileToSegmentRoles(segment: SegmentNode) {
   for (const child of segment.file.children ?? []) {
     const { name, ext } = parse(child.name)
     if (ext === '.tsx' && SEGMENT_ROLES.includes(name as SegmentRole))
