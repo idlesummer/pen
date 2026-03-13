@@ -1,4 +1,5 @@
 // examples/router-2/src/app/layout.tsx
+import { useState, useEffect, useRef } from 'react'
 import { Box, Text } from 'ink'
 import { useInput } from 'ink'
 import { useRouter } from '@idlesummer/pen'
@@ -7,18 +8,33 @@ import type { PropsWithChildren } from 'react'
 export default function RootLayout({ children }: PropsWithChildren) {
   const router = useRouter()
 
+  const pushAt = useRef<number | null>(null)
+  const [lastMs, setLastMs] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (pushAt.current !== null) {
+      setLastMs(performance.now() - pushAt.current)
+      pushAt.current = null
+    }
+  }, [router.url])
+
   useInput((input) => {
+    pushAt.current = performance.now()
     if (input === '1') router.push('/')
     else if (input === '2') router.push('/about/')
     else if (input === '3') router.push('/settings/')
     else if (input === '4') router.push('/settings/profile/')
+    else pushAt.current = null  // not a navigation key, discard
   })
 
   return (
     <Box borderStyle="round" flexDirection="column">
       {/* Header */}
-      <Box paddingX={1} borderStyle="single" borderBottom borderTop={false} borderLeft={false} borderRight={false}>
+      <Box paddingX={1} borderStyle="single" borderBottom borderTop={false} borderLeft={false} borderRight={false} gap={2}>
         <Text dimColor>{router.url}</Text>
+        {lastMs !== null && (
+          <Text dimColor>switch: <Text color="yellow">{lastMs.toFixed(2)}ms</Text></Text>
+        )}
       </Box>
 
       {/* Navigation */}
