@@ -18,14 +18,14 @@ export const RouterContext = createContext<RouterContextValue | null>(null)
 export type RouterProviderProps = PropsWithChildren<{ initialUrl: string }>
 
 export function RouterProvider({ initialUrl, children }: RouterProviderProps) {
-  const normalizedInitialUrl = normalizeUrl(initialUrl)
+  const normalizedUrl = normalizeUrl(initialUrl)
   const [history, setHistory] = useState<NavigationHistory>({
-    stack: [{ url: normalizedInitialUrl }],
+    stack: [{ url: normalizedUrl }],
     position: 0,
   })
 
   // Grab the current url and data
-  const { url, data } = history.stack[history.position] ?? { url: normalizedInitialUrl }
+  const { url, data } = history.stack[history.position] ?? { url: normalizedUrl }
 
   // Push new URL and data to history
   const push = useCallback((newUrl: string, newData?: unknown) => {
