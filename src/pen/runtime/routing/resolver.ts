@@ -4,9 +4,9 @@ import { composeRoute } from './composer'
 
 export type RouteResolver = (url: string) => ReactElement
 export function buildRoutes(routingTable: RoutingTable): RouteResolver {
-  const cache: Record<string, ReactElement> = {}
+  const elementCache: Record<string, ReactElement> = {}
   const resolveRoute: RouteResolver = (url) =>
-    (cache[url] ??= composeRoute(url, routingTable))
+    (elementCache[url] ??= composeRoute(url, routingTable))
 
   return resolveRoute
 }
