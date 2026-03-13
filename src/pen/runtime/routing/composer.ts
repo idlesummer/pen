@@ -2,7 +2,6 @@ import type { ReactElement, ComponentType } from 'react'
 import type { RouteChainMap } from '@/pen/compiler'
 import type { ErrorComponentProps } from '../ui/ErrorBoundary'
 import type { NotFoundComponentProps } from '../ui/NotFoundBoundary'
-
 import { createElement } from 'react'
 import { ErrorBoundary } from '../ui/ErrorBoundary'
 import { NotFoundBoundary } from '../ui/NotFoundBoundary'
