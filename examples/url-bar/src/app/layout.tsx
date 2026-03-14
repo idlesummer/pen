@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useRouter } from '@idlesummer/pen'
+import { usePathname, useRouter } from '@idlesummer/pen'
 import type { PropsWithChildren } from 'react'
 
 export default function RootLayout({ children }: PropsWithChildren) {
+  const url = usePathname()
   const router = useRouter()
-  const [draft, setDraft] = useState(router.url)
+  const [draft, setDraft] = useState(url)
 
   // ── Timing ────────────────────────────────────────────────────
   const pushAt = useRef<number | null>(null)
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       setLastMs(performance.now() - pushAt.current)
       pushAt.current = null
     }
-  }, [router.url])
+  }, [url])
   // ─────────────────────────────────────────────────────────────
 
   useInput((char, key) => {
@@ -32,7 +33,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
     } else if (key.backspace || key.delete) {
       setDraft(prev => prev.slice(0, -1))
     } else if (key.escape) {
-      setDraft(router.url)   // cancel edit, restore current URL
+      setDraft(url)   // cancel edit, restore current URL
     } else if (char && !key.ctrl && !key.meta) {
       setDraft(prev => prev + char)
     }
