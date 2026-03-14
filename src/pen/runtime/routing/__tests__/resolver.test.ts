@@ -33,7 +33,7 @@ describe('matchDynamic', () => {
       })
     })
 
-  })
+})
 
   describe('multiple dynamic segments', () => {
     it('extracts multiple params in order', () => {

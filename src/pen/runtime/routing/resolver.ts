@@ -6,21 +6,21 @@ import { composeRoute } from './composer'
 export type RouteResolver = (url: string) => RouteMatch
 export type RouteMatch = {
   element: ReactElement
-  params: Record<string, string>
+  params?: DynamicParams
 }
 
 export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const { routeChainMap } = routingTable
-  const elementCache: Record<string, RouteMatch> = {}
+  const routeMatchCache: Record<string, RouteMatch> = {}
 
   const resolveRoute: RouteResolver = (url) => {
-    if (elementCache[url])
-      return elementCache[url]
+    if (routeMatchCache[url])
+      return routeMatchCache[url]
 
     // 1. Exact match (static routes always win)
     if (routeChainMap[url]) {
       const element = composeRoute(url, routingTable)
-      return (elementCache[url] = { element, params: {} })
+      return (routeMatchCache[url] = { element })
     }
 
     // 2. Dynamic match — try each pattern with params
@@ -31,13 +31,13 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       const params = matchDynamic(url, pattern, route.params)
       if (params !== null) {
         const element = composeRoute(pattern, routingTable)
-        return (elementCache[url] = { element, params })
+        return (routeMatchCache[url] = { element, params })
       }
     }
 
     // 3. No match — composeRoute will throw NotFoundError
     const element = composeRoute(url, routingTable)
-    return ({ element, params: {} })
+    return ({ element })
   }
 
   return resolveRoute
