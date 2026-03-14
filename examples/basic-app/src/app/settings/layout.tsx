@@ -1,4 +1,4 @@
-// examples/router-2/src/app/settings/layout.tsx
+// examples/basic-app/src/app/settings/layout.tsx
 import { Box, Text } from 'ink'
 import type { PropsWithChildren } from 'react'
 
