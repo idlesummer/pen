@@ -60,13 +60,12 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
   for (let i = 0; i < patternParts.length; i++) {
     const patternPart = patternParts[i]!
     const urlPart = urlParts[i]!
-    if (patternPart !== urlPart)  // return immediately if a part doesn't match
-      return null
 
-    if (patternPart.startsWith(':')) {
-      const name = patternPart.slice(1)
-      params[name] = urlPart
-    }
+    if (patternPart.startsWith(':'))
+      params[patternPart.slice(1)] = urlPart
+
+    else if (patternPart !== urlPart)
+      return null
   }
   return params
 }
