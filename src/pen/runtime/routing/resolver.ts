@@ -51,8 +51,8 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
   if (paramNames.length === 0)
     return null // not a dynamic pattern
 
-  const urlParts = url.split('/').filter(Boolean)
-  const patternParts = pattern.split('/').filter(Boolean)
+  const urlParts = url.slice(1, -1).split('/')  // trim leading and trailing slashes
+  const patternParts = pattern.slice(1, -1).split('/')
   if (urlParts.length !== patternParts.length)
     return null
 
@@ -60,13 +60,12 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
   for (let i = 0; i < patternParts.length; i++) {
     const patternPart = patternParts[i]!
     const urlPart = urlParts[i]!
+    if (patternPart !== urlPart)  // return immediately if a part doesn't match
+      return null
 
     if (patternPart.startsWith(':')) {
       const name = patternPart.slice(1)
-      params[name] = decodeURIComponent(urlPart)
-    }
-    else if (patternPart !== urlPart) {
-      return null
+      params[name] = urlPart
     }
   }
   return params
