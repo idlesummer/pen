@@ -37,7 +37,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 
     // 3. No match — composeRoute will throw NotFoundError
     const element = composeRoute(url, routingTable)
-    return ({ element, params: {} })
+    return ({ element })
   }
 
   return resolveRoute
