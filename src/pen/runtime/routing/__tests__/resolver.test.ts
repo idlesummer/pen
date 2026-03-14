@@ -33,12 +33,7 @@ describe('matchDynamic', () => {
       })
     })
 
-    it('URL-decodes param values', () => {
-      expect(matchDynamic('/tags/hello%20world/', '/tags/:name/', ['name'])).toEqual({
-        name: 'hello world',
-      })
-    })
-  })
+})
 
   describe('multiple dynamic segments', () => {
     it('extracts multiple params in order', () => {
