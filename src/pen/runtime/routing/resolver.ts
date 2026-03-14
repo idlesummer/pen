@@ -28,7 +28,8 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       if (route.params.length === 0) // skip static patterns
         continue
 
-      const params = matchDynamic(url, pattern, route.params)
+      const urlParts = extractSegments(url)
+      const params = matchDynamic(urlParts, pattern, route.params)
       if (params !== null) {
         const element = composeRoute(pattern, routingTable)
         return (routeMatchCache[url] = { element, params })
@@ -47,12 +48,11 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
  * Tries to match a concrete URL against a pattern that may contain `:param` segments.
  * Returns the extracted params on success, or null if the URL doesn't match.
  */
-export function matchDynamic(url: string, pattern: string, paramNames: string[]): DynamicParams | null {
+export function matchDynamic(urlParts: string[], pattern: string, paramNames: string[]): DynamicParams | null {
   if (paramNames.length === 0)
     return null // not a dynamic pattern
 
-  const urlParts = url.slice(1, -1).split('/')  // trim leading and trailing slashes
-  const patternParts = pattern.slice(1, -1).split('/')
+  const patternParts = extractSegments(pattern)
   if (urlParts.length !== patternParts.length)
     return null
 
@@ -68,4 +68,8 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
       return null
   }
   return params
+}
+
+function extractSegments(url: string) {
+  return url.slice(1, -1).split('/')
 }
