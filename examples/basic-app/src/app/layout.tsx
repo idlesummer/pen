@@ -1,3 +1,4 @@
+// examples/basic-app/src/app/screen.tsx
 import type { PropsWithChildren } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { Box, Text, useInput } from 'ink'

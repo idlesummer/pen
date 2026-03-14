@@ -1,4 +1,4 @@
-// examples/router-2/src/app/screen.tsx
+// examples/basic-app/src/app/screen.tsx
 import { Box, Text } from 'ink'
 
 export default function HomeScreen() {
