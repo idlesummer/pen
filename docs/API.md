@@ -26,7 +26,7 @@ export default defineConfig({
 
 ## Router Hooks
 
-All hooks must be used within a component tree wrapped by `RouterProvider`.
+All hooks must be used within a component tree wrapped by `NavigationProvider`.
 
 ### `useRouter()`
 
@@ -53,7 +53,7 @@ function MyComponent() {
 #### Return Type
 
 ```typescript
-interface RouterContextValue {
+interface NavigationContextValue {
   url: string;
   data: unknown;
   history: readonly string[];
@@ -342,7 +342,7 @@ interface ComponentImportMap {
 }
 
 // Router context
-interface RouterContextValue {
+interface NavigationContextValue {
   url: string;
   data: unknown;
   history: readonly string[];
@@ -491,7 +491,7 @@ Common build errors and solutions:
 
 ### Runtime Errors
 
-**"useRouter must be used within RouterProvider"**
+**"useRouter must be used within NavigationProvider"**
 - You're using a router hook outside the component tree
 - Make sure your component is rendered as part of a route
 

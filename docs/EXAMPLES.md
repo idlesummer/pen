@@ -609,14 +609,14 @@ export function NavButton() {
 
 // Test file
 import { render } from 'ink-testing-library';
-import { RouterProvider } from '@idlesummer/pen';
+import { NavigationProvider } from '@idlesummer/pen';
 import { NavButton } from './NavButton';
 
 test('NavButton shows current URL', () => {
   const { lastFrame } = render(
-    <RouterProvider initialUrl="/home">
+    <NavigationProvider initialUrl="/home">
       <NavButton />
-    </RouterProvider>
+    </NavigationProvider>
   );
 
   expect(lastFrame()).toContain('Current: /home');

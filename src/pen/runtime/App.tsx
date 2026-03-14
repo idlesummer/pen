@@ -1,5 +1,5 @@
 import type { RoutingTable } from './routing/composer'
-import { RouterProvider } from '@/pen/api'
+import { NavigationProvider } from '@/pen/api'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { NotFoundBoundary } from './components/NotFoundBoundary'
 import { ErrorScreen } from './components/ErrorScreen'
@@ -18,11 +18,11 @@ export type AppProps = {
 export function App({ initialUrl, routingTable }: AppProps) {
   return (
     <ErrorBoundary fallback={ErrorScreen}>
-      <RouterProvider initialUrl={initialUrl}>
+      <NavigationProvider initialUrl={initialUrl}>
         <NotFoundBoundary fallback={NotFoundScreen}>
           <FileRouter routingTable={routingTable} />
         </NotFoundBoundary>
-      </RouterProvider>
+      </NavigationProvider>
     </ErrorBoundary>
   )
 }
