@@ -26,9 +26,9 @@ export function NavigationProvider({ initialUrl, children }: NavigationProviderP
         history: navigation.history.map(location => location.url),
         position: navigation.position,
         push:    (url, searchParams) => dispatch({ type: 'push', url, searchParams }),
-        replace: (url)               => dispatch({ type: 'replace', url }),
-        back:    ()                  => dispatch({ type: 'back' }),
-        forward: ()                  => dispatch({ type: 'forward' }),
+        replace: (url) => dispatch({ type: 'replace', url }),
+        back:    ()    => dispatch({ type: 'back' }),
+        forward: ()    => dispatch({ type: 'forward' }),
       }}
     >
       {children}
