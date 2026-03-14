@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
 import { composeRoute } from './composer'
 
@@ -46,7 +47,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
  * Tries to match a concrete URL against a pattern that may contain `:param` segments.
  * Returns the extracted params on success, or null if the URL doesn't match.
  */
-export function matchDynamic(url: string, pattern: string, paramNames: string[]): Record<string, string> | null {
+export function matchDynamic(url: string, pattern: string, paramNames: string[]): DynamicParams | null {
   if (paramNames.length === 0)
     return null // not a dynamic pattern
 
@@ -55,7 +56,7 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
   if (urlParts.length !== patternParts.length)
     return null
 
-  const params: Record<string, string> = {}
+  const params: DynamicParams = {}
   for (let i = 0; i < patternParts.length; i++) {
     const patternPart = patternParts[i]!
     const urlPart = urlParts[i]!
