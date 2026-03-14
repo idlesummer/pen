@@ -1,11 +1,10 @@
-// examples/router-2/src/app/layout.tsx
-import { useState, useEffect, useRef } from 'react'
-import { Box, Text } from 'ink'
-import { useInput } from 'ink'
-import { useRouter } from '@idlesummer/pen'
 import type { PropsWithChildren } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { Box, Text, useInput } from 'ink'
+import { usePathname, useRouter } from '@idlesummer/pen'
 
 export default function RootLayout({ children }: PropsWithChildren) {
+  const url = usePathname()
   const router = useRouter()
 
   const pushAt = useRef<number | null>(null)
@@ -16,7 +15,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       setLastMs(performance.now() - pushAt.current)
       pushAt.current = null
     }
-  }, [router.url])
+  }, [url])
 
   useInput((input) => {
     pushAt.current = performance.now()
@@ -31,7 +30,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <Box borderStyle="round" flexDirection="column">
       {/* Header */}
       <Box paddingX={1} borderStyle="single" borderBottom borderTop={false} borderLeft={false} borderRight={false} gap={2}>
-        <Text dimColor>{router.url}</Text>
+        <Text dimColor>{url}</Text>
         {lastMs !== null && (
           <Text dimColor>switch: <Text color="yellow">{lastMs.toFixed(2)}ms</Text></Text>
         )}
