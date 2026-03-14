@@ -1,10 +1,6 @@
-import { useContext } from 'react'
-import { RouterContext } from '../RouterProvider'
+import { useNavigate } from './use-navigate'
 
-// Step 3: Tune into the channel and receive the broadcast
 export function useRouter() {
-  const context = useContext(RouterContext)
-  if (!context)
-    throw new Error('useRouter must be used within a RouterProvider')
-  return context
+  const { push, replace, back, forward } = useNavigate()
+  return { push, replace, back, forward }
 }

@@ -1,10 +1,9 @@
 // Types
-export type { RouterContextValue, RouterProviderProps } from './RouterProvider'
+export type { NavigationContextValue, NavigationProviderProps } from './NavigationProvider'
 
-// Provider
-export { RouterProvider, RouterContext } from './RouterProvider'
+// Context
+export { NavigationContext, NavigationProvider } from './NavigationProvider'
 
 // Hooks
 export { useNavigate } from './hooks/use-navigate'
-export { useRouter } from './hooks/use-router'
 export { useParams } from './hooks/use-params'
