@@ -1,5 +1,5 @@
 // Types
-export type { NavigationContextValue, NavigationProviderProps } from './NavigationProvider'
+export type { NavigationProviderProps, NavigationContextValue } from './NavigationProvider'
 
 // Context
 export { NavigationContext, NavigationProvider } from './NavigationProvider'
