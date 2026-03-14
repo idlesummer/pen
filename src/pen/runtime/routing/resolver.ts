@@ -47,7 +47,8 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
  * Returns the extracted params on success, or null if the URL doesn't match.
  */
 export function matchDynamic(url: string, pattern: string, paramNames: string[]): Record<string, string> | null {
-  if (paramNames.length === 0) return null // not a dynamic pattern
+  if (paramNames.length === 0)
+    return null // not a dynamic pattern
 
   const urlParts = url.split('/').filter(Boolean)
   const patternParts = pattern.split('/').filter(Boolean)
@@ -61,7 +62,6 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
 
     if (patternPart.startsWith(':')) {
       const name = patternPart.slice(1)
-      if (!paramNames.includes(name)) return null
       params[name] = decodeURIComponent(urlPart)
     }
     else if (patternPart !== urlPart) {
