@@ -21,7 +21,7 @@ export function FileRouter({ routingTable }: FileRouterProps): ReactElement {
   const { element, params } = routeResolver(url)
 
   return (
-    <DynamicParamsProvider params={params}>
+    <DynamicParamsProvider params={params ?? {}}>
       {element}
     </DynamicParamsProvider>
   )
