@@ -1,5 +1,6 @@
 import { useNavigate } from './use-navigate'
 
 export function usePathname() {
-  return useNavigate().url
+  const { url } = useNavigate()
+  return url
 }

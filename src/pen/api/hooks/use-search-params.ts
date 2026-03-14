@@ -1,5 +1,6 @@
 import { useNavigate } from './use-navigate'
 
 export function useSearchParams() {
-  return useNavigate().searchParams
+  const { searchParams } = useNavigate()
+  return searchParams
 }

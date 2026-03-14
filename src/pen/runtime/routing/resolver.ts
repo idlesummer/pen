@@ -2,19 +2,25 @@ import type { ReactElement } from 'react'
 import type { RoutingTable } from './composer'
 import { composeRoute } from './composer'
 
-export type RouteResolver = (url: string) => ReactElement
+export type RouteResolver = (url: string) => RouteMatch
+export type RouteMatch = {
+  element: ReactElement
+  params: Record<string, string>
+}
 
 export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const { routeChainMap } = routingTable
-  const elementCache: Record<string, ReactElement> = {}
+  const elementCache: Record<string, RouteMatch> = {}
 
   const resolveRoute: RouteResolver = (url) => {
     if (elementCache[url])
       return elementCache[url]
 
     // 1. Exact match (static routes always win)
-    if (routeChainMap[url])
-      return (elementCache[url] = composeRoute(url, routingTable, {}))
+    if (routeChainMap[url]) {
+      const element = composeRoute(url, routingTable)
+      return (elementCache[url] = { element, params: {} })
+    }
 
     // 2. Dynamic match — try each pattern with params
     for (const [pattern, route] of Object.entries(routeChainMap)) {
@@ -22,12 +28,15 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
         continue
 
       const params = matchDynamic(url, pattern, route.params)
-      if (params !== null)
-        return (elementCache[url] = composeRoute(pattern, routingTable, params))
+      if (params !== null) {
+        const element = composeRoute(pattern, routingTable)
+        return (elementCache[url] = { element, params })
+      }
     }
 
     // 3. No match — composeRoute will throw NotFoundError
-    return composeRoute(url, routingTable, {})
+    const element = composeRoute(url, routingTable)
+    return ({ element, params: {} })
   }
 
   return resolveRoute

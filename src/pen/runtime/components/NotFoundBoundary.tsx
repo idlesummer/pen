@@ -1,5 +1,5 @@
 import { Component, type ComponentType, type PropsWithChildren } from 'react'
-import { useRouter } from '@/pen/api'
+import { usePathname } from '@/pen/api'
 import { NotFoundError } from '../errors'
 
 /** Props passed to not-found.tsx components */
@@ -67,7 +67,7 @@ export interface NotFoundBoundaryProps extends PropsWithChildren {
  * Injects the current URL so the boundary can reset on navigation.
  */
 export function NotFoundBoundary({ fallback, children }: NotFoundBoundaryProps) {
-  const { url } = useRouter()
+  const url = usePathname()
   return (
     <NotFoundErrorBoundary fallback={fallback} url={url}>
       {children}
