@@ -62,7 +62,7 @@ export function matchDynamic(url: string, pattern: string, paramNames: string[])
     const urlPart = urlParts[i]!
 
     if (patternPart.startsWith(':'))
-      params[patternPart.slice(1)] = urlPart
+      params[patternPart.slice(1)] = decodeURIComponent(urlPart)
 
     else if (patternPart !== urlPart)
       return null
