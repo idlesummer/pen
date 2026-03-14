@@ -12,5 +12,8 @@ export { ErrorScreen } from './components/ErrorScreen'
 export { NotFoundScreen } from './components/NotFoundScreen'
 export { FileRouter } from './components/FileRouter'
 
+// Context and Providers
+export { DynamicParamsContext, DynamicParamsProvider } from './providers/DynamicParamsProvider'
+
 // Errors
 export { NotFoundError } from './errors'

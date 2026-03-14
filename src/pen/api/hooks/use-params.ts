@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { ParamsContext } from '@/pen/runtime/params-context'
+import { DynamicParamsContext } from '@/pen/runtime'
 
 /**
  * Returns the dynamic route params for the current URL.
@@ -10,5 +10,6 @@ import { ParamsContext } from '@/pen/runtime/params-context'
  * const { id } = useParams() // { id: "42" }
  */
 export function useParams(): Record<string, string> {
-  return useContext(ParamsContext)
+  const context = useContext(DynamicParamsContext)
+  return context
 }
