@@ -30,8 +30,8 @@ export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): R
     visit: segment => {
       if (!segment.roles.screen) return
       const url = segment.url
-      const chain = createSegmentChain(segment, genDir)
       const params = collectParams(segment)
+      const chain = createSegmentChain(segment, genDir)
       routes[url] = { url, params, chain }
     },
   })
@@ -60,6 +60,7 @@ function createSegmentChain(segment: SegmentNode, genDir: string) {
     visit: ancestorSegment => {
       const roles: SegmentRoles = {}
       const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
+      if (!entries.length) return // skip segments with no roles
 
       for (const [name, path] of entries) {
         if (name !== 'screen' || ancestorSegment === segment) { // Skip ancestor screens
