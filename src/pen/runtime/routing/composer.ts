@@ -42,3 +42,29 @@ export function composeRoute(url: string, routingTable: RoutingTable): ReactElem
 
   return element
 }
+
+/**
+ * Composes a not-found element for a URL that doesn't match any route.
+ * Finds the root chain's not-found component and wraps it in root layouts.
+ * Returns null if no custom not-found component exists in the routing table.
+ */
+export function composeNotFoundRoute(url: string, routingTable: RoutingTable): ReactElement | null {
+  const { routeChainMap, pathComponentMap } = routingTable
+  const rootRoute = routeChainMap['/']
+  if (!rootRoute) return null
+
+  const notFoundPath = rootRoute.chain.find(s => s['not-found'])?.['not-found']
+  if (!notFoundPath) return null
+
+  const NotFoundComponent = pathComponentMap[notFoundPath] as ComponentType<NotFoundComponentProps>
+  let element: ReactElement = createElement(NotFoundComponent, { url })
+
+  for (const segment of rootRoute.chain) {
+    if (segment['layout']) {
+      const Layout = pathComponentMap[segment['layout']]!
+      element = createElement(Layout, { key: segment['layout'] }, element)
+    }
+  }
+
+  return element
+}
