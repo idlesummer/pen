@@ -13,45 +13,19 @@ export type RoutingTable = {
   pathComponentMap: PathComponentMap
 }
 
-/** Renders a screen element. */
+/**
+ * Renders a screen route. Assumes `url` exists in `routeChainMap`.
+ * Throws NotFoundError if the route has no screen.
+ */
 export function composeScreenRoute(url: string, routingTable: RoutingTable): ReactElement {
   const { routeChainMap, pathComponentMap } = routingTable
-  const route = routeChainMap[url]
-  if (!route) throw new NotFoundError(url)
-
-  const screenPath = route.chain[0]?.['screen']
+  const route = routeChainMap[url]!
+  const screenPath = route.chain[0]?.['screen'] // route exists but screen might not
   const leaf = screenPath
     ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
     : createElement(() => { throw new NotFoundError(url) }) // throw if route exists but has no screen
 
   return composeRoute(route, pathComponentMap, leaf)
-}
-
-/** Renders an ancestor's shell but throws inside the NotFoundBoundary. */
-function composeNotFoundRoute(ancestorUrl: string, notFoundUrl: string, routingTable: RoutingTable): ReactElement {
-  const { routeChainMap, pathComponentMap } = routingTable
-  const route = routeChainMap[ancestorUrl]!
-  const leaf = createElement(() => { throw new NotFoundError(notFoundUrl) })
-  return composeRoute(route, pathComponentMap, leaf)
-}
-
-function composeRoute(route: RouteChain, pathComponentMap: PathComponentMap, leaf: ReactElement): ReactElement {
-  let element = leaf
-  for (const segment of route.chain) {
-    if (segment['not-found']) {
-      const fallback = pathComponentMap[segment['not-found']] as ComponentType<NotFoundComponentProps>
-      element = createElement(NotFoundBoundary, { key: segment['not-found'], fallback }, element)
-    }
-    if (segment['error']) {
-      const fallback = pathComponentMap[segment['error']] as ComponentType<ErrorComponentProps>
-      element = createElement(ErrorBoundary, { key: segment['error'], fallback }, element)
-    }
-    if (segment['layout']) {
-      const Layout = pathComponentMap[segment['layout']]!
-      element = createElement(Layout, { key: segment['layout'] }, element)
-    }
-  }
-  return element
 }
 
 /**
@@ -74,6 +48,17 @@ export function composeNearestNotFoundRoute(url: string, routingTable: RoutingTa
   throw new NotFoundError(url)
 }
 
+/**
+ * Renders an ancestor's shell with a throwing leaf so the NotFoundBoundary shows the not-found UI.
+ * Assumes `ancestorUrl` exists in `routeChainMap`.
+ */
+function composeNotFoundRoute(ancestorUrl: string, notFoundUrl: string, routingTable: RoutingTable): ReactElement {
+  const { routeChainMap, pathComponentMap } = routingTable
+  const route = routeChainMap[ancestorUrl]!
+  const leaf = createElement(() => { throw new NotFoundError(notFoundUrl) })
+  return composeRoute(route, pathComponentMap, leaf)
+}
+
 /** Returns the parent URL by stripping the last path segment, or null if already at root. */
 function getParentUrl(url: string): string | null {
   if (url === '/')
@@ -81,4 +66,23 @@ function getParentUrl(url: string): string | null {
 
   const lastSlash = url.lastIndexOf('/', url.length-2)
   return url.slice(0, lastSlash+1)
+}
+
+function composeRoute(route: RouteChain, pathComponentMap: PathComponentMap, leaf: ReactElement): ReactElement {
+  let element = leaf
+  for (const segment of route.chain) {
+    if (segment['not-found']) {
+      const fallback = pathComponentMap[segment['not-found']] as ComponentType<NotFoundComponentProps>
+      element = createElement(NotFoundBoundary, { key: segment['not-found'], fallback }, element)
+    }
+    if (segment['error']) {
+      const fallback = pathComponentMap[segment['error']] as ComponentType<ErrorComponentProps>
+      element = createElement(ErrorBoundary, { key: segment['error'], fallback }, element)
+    }
+    if (segment['layout']) {
+      const Layout = pathComponentMap[segment['layout']]!
+      element = createElement(Layout, { key: segment['layout'] }, element)
+    }
+  }
+  return element
 }
