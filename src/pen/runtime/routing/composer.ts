@@ -13,15 +13,17 @@ export type RoutingTable = {
   pathComponentMap: PathComponentMap
 }
 
-export function composeRoute(url: string, routingTable: RoutingTable): ReactElement {
+export function composeRoute(url: string, routingTable: RoutingTable, notFoundUrl?: string): ReactElement {
   const { routeChainMap, pathComponentMap } = routingTable
   const route = routeChainMap[url]
-  if (!route) throw new NotFoundError(url)
+  if (!route) throw new NotFoundError(notFoundUrl ?? url)
 
   const screenPath = route.chain[0]?.['screen']
-  let element = screenPath
-    ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
-    : createElement(() => { throw new NotFoundError(url) })
+  let element = notFoundUrl != null
+    ? createElement(() => { throw new NotFoundError(notFoundUrl) })
+    : screenPath
+      ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
+      : createElement(() => { throw new NotFoundError(url) })
 
   for (const segment of route.chain) {
     if (segment['not-found']) {
@@ -55,7 +57,7 @@ export function composeNearestAncestorRoute(url: string, routingTable: RoutingTa
   while (ancestorUrl !== null) {  // while not at root
     const route = routeChainMap[ancestorUrl]
     if (route?.chain.some(segment => segment['not-found']))
-      return composeRoute(ancestorUrl, routingTable)
+      return composeRoute(ancestorUrl, routingTable, url)
 
     ancestorUrl = getParentUrl(ancestorUrl)
   }
