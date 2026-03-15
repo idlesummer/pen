@@ -3,10 +3,9 @@ import { ancestors, traverse } from '@/lib/tree'
 import { relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 
-export type RouteChainMap = Record<string, Route>
-export type Route = {
-  url: string
-  params: string[]  // param names extracted from dynamic segments, root→leaf order
+export type RouteChainMap = Record<string, RouteChain>
+export type RouteChain = {
+  route: string
   chain: SegmentRoles[]
 }
 
@@ -29,26 +28,12 @@ export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): R
     expand: parentSegment => parentSegment.children ?? [],
     visit: segment => {
       if (!segment.roles.screen) return
-      const url = segment.url
-      const params = collectParams(segment)
+      const route = segment.route
       const chain = createSegmentChain(segment, genDir)
-      routes[url] = { url, params, chain }
+      routes[route] = { route, chain }
     },
   })
   return routes
-}
-
-/** Collects dynamic param names from root → leaf order. */
-function collectParams(segment: SegmentNode): string[] {
-  const params: string[] = []
-  ancestors(segment, {
-    parent: ancestorSegment => ancestorSegment.parent,
-    visit: ancestorSegment => {
-      if (ancestorSegment.param)
-        params.push(ancestorSegment.param)
-    },
-  })
-  return params.reverse() // ancestors() goes leaf→root; flip to root→leaf
 }
 
 /** Builds ancestor chain from leaf → root order. */

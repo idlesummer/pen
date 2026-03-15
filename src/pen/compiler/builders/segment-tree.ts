@@ -8,7 +8,7 @@ export type SegmentRole = typeof SEGMENT_ROLES[number]
 
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
-  url: `${string}/`
+  route: `${string}/`
   segment: string
   param?: string // e.g. "id" from [id]
   type: 'page' | 'group' | 'dynamic'
@@ -38,7 +38,7 @@ function buildSegmentTree(fileTree: FileNode) {
 
   const root: SegmentNode = {
     segment: '',
-    url: '/',
+    route: '/',
     type: 'page',
     roles: {},
     children: [],
@@ -57,7 +57,7 @@ function buildSegmentTree(fileTree: FileNode) {
 }
 
 function bindSegmentTree(segmentTree: SegmentNode) {
-  const screens: Record<SegmentNode['url'], string> = {}
+  const screens: Record<SegmentNode['route'], string> = {}
 
   traverse(segmentTree, {
     expand: segment => segment.children ?? [],
@@ -73,14 +73,14 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
   const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
   const param = isDynamic ? file.name.slice(1, -1) : undefined
 
-  let url: SegmentNode['url']
-  if (isGroup) url = parent.url
-  else if (isDynamic) url = `${parent.url}:${param}/`
-  else url = `${posix.join(parent.url, file.name)}/`
+  let route: SegmentNode['route']
+  if (isGroup) route = parent.route
+  else if (isDynamic) route = `${parent.route}:${param}/`
+  else route = `${posix.join(parent.route, file.name)}/`
 
   const segmentNode: SegmentNode = {
     segment: file.name,
-    url,
+    route,
     type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
     param,
     roles: {},
@@ -99,11 +99,11 @@ function bindFileToSegmentRoles(segment: SegmentNode) {
   }
 }
 
-function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['url'], string>) {
+function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['route'], string>) {
   if (!segment.roles.screen) return
 
-  const existing = screens[segment.url]
+  const existing = screens[segment.route]
   if (existing)
-    throw new DuplicateScreenError(segment.url, [existing, segment.file.absPath])
-  screens[segment.url] = segment.file.absPath
+    throw new DuplicateScreenError(segment.route, [existing, segment.file.absPath])
+  screens[segment.route] = segment.file.absPath
 }
