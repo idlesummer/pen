@@ -11,7 +11,7 @@ export type RouteMatch = {
 
 export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const { routeChainMap } = routingTable
-  const routeMatchCache: Record<string, RouteMatch> = {}
+  const routeMatchCache: Record<string, RouteMatch> = {}  // persisting cache for new matches
 
   const resolveRoute: RouteResolver = (url) => {
     if (routeMatchCache[url])
