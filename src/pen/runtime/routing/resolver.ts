@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
-import { composeRoute } from './composer'
+import { composeRoute, composeNearestAncestorRoute } from './composer'
 
 export type RouteResolver = (url: string) => RouteMatch
 export type RouteMatch = {
@@ -37,9 +37,9 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       }
     }
 
-    // 3. No match — composeRoute will throw NotFoundError
-    const element = composeRoute(url, routingTable)
-    return { element }
+    // 3. No match — walk up to find nearest ancestor with a not-found boundary
+    const element = composeNearestAncestorRoute(url, routingTable)
+    return (routeMatchCache[url] = { element })
   }
 
   return resolveRoute

@@ -27,7 +27,6 @@ export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): R
   traverse(segmentTree, {
     expand: parentSegment => parentSegment.children ?? [],
     visit: segment => {
-      if (!segment.roles.screen) return
       const route = segment.route
       const chain = createSegmentChain(segment, genDir)
       routes[route] = { route, chain }

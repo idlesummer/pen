@@ -18,9 +18,10 @@ export function composeRoute(url: string, routingTable: RoutingTable): ReactElem
   const route = routeChainMap[url]
   if (!route) throw new NotFoundError(url)
 
-  const screenPath = route.chain[0]!['screen']!
-  const Screen = pathComponentMap[screenPath]!
-  let element = createElement(Screen, { key: screenPath })
+  const screenPath = route.chain[0]?.['screen']
+  let element = screenPath
+    ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
+    : createElement(() => { throw new NotFoundError(url) })
 
   for (const segment of route.chain) {
     if (segment['not-found']) {
@@ -41,4 +42,33 @@ export function composeRoute(url: string, routingTable: RoutingTable): ReactElem
   }
 
   return element
+}
+
+/**
+ * Finds the nearest ancestor with a not-found boundary and renders it.
+ * Only called when `url` has no matching route.
+ */
+export function composeNearestAncestorRoute(url: string, routingTable: RoutingTable): ReactElement {
+  const { routeChainMap } = routingTable
+  let ancestorUrl = getParentUrl(url)
+
+  while (ancestorUrl !== null) {  // while not at root
+    const route = routeChainMap[ancestorUrl]
+    if (route?.chain.some(segment => segment['not-found']))
+      return composeRoute(ancestorUrl, routingTable)
+
+    ancestorUrl = getParentUrl(ancestorUrl)
+  }
+
+  // No ancestor has a not-found — let composeRoute throw as usual
+  throw new NotFoundError(url)
+}
+
+/** Returns the parent URL by stripping the last path segment, or null if already at root. */
+function getParentUrl(url: string): string | null {
+  if (url === '/')
+    return null
+
+  const lastSlash = url.lastIndexOf('/', url.length-2)
+  return url.slice(0, lastSlash+1)
 }
