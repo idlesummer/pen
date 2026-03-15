@@ -1,4 +1,4 @@
-import type { ReactElement, ComponentType } from 'react'
+import type { ComponentType, ReactElement } from 'react'
 import type { RouteChain, RouteChainMap } from '@/pen/compiler'
 import type { ErrorComponentProps } from '../components/ErrorBoundary'
 import type { NotFoundComponentProps } from '../components/NotFoundBoundary'
