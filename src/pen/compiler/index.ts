@@ -1,7 +1,7 @@
 // Types
 export type { FileNode } from './builders/file-tree'
 export type { SegmentNode, SegmentRoles } from './builders/segment-tree'
-export type { RouteChainMap, Route } from './builders/route-chain-map'
+export type { RouteChainMap, RouteChain } from './builders/route-chain-map'
 
 // Functions and constants
 export { createFileTree } from './builders/file-tree'

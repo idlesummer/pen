@@ -32,7 +32,7 @@ describe('createSegmentTree — dynamic routes', () => {
     const tree = createSegmentTree(appDir)
     const dynamicChild = tree.children![0]!
 
-    expect(dynamicChild.url).toBe('/:slug/')
+    expect(dynamicChild.route).toBe('/:slug/')
   })
 
   it('produces both static and dynamic children as siblings', () => {
@@ -70,11 +70,11 @@ describe('createSegmentTree — dynamic routes', () => {
 
     expect(userId.type).toBe('dynamic')
     expect(userId.param).toBe('userId')
-    expect(userId.url).toBe('/users/:userId/')
+    expect(userId.route).toBe('/users/:userId/')
 
     expect(postId.type).toBe('dynamic')
     expect(postId.param).toBe('postId')
-    expect(postId.url).toBe('/users/:userId/posts/:postId/')
+    expect(postId.route).toBe('/users/:userId/posts/:postId/')
   })
 
   it('leaves static segments unchanged', () => {
@@ -87,6 +87,6 @@ describe('createSegmentTree — dynamic routes', () => {
 
     expect(about.type).toBe('page')
     expect(about.param).toBeUndefined()
-    expect(about.url).toBe('/about/')
+    expect(about.route).toBe('/about/')
   })
 })
