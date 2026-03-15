@@ -1,4 +1,4 @@
-// examples/router-2/src/app/about/screen.tsx
+// examples/basic-app/src/app/about/screen.tsx
 import { Box, Text } from 'ink'
 import { text } from './_test'
 

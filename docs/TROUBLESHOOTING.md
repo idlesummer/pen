@@ -112,7 +112,7 @@ npx pen build
 
 ## Runtime Issues
 
-### "useRouter must be used within a RouterProvider"
+### "useRouter must be used within a NavigationProvider"
 
 **Problem:** Your component crashes with this error.
 
@@ -441,24 +441,24 @@ cat .pen/dist/entry.js | wc -l
 
 ### Can't test components with router hooks
 
-**Problem:** Tests fail with "useRouter must be used within RouterProvider".
+**Problem:** Tests fail with "useRouter must be used within NavigationProvider".
 
 **Cause:** Component needs router context.
 
 **Solution:**
 
-Wrap your test component in RouterProvider:
+Wrap your test component in NavigationProvider:
 
 ```tsx
 import { render } from 'ink-testing-library';
-import { RouterProvider } from '@idlesummer/pen';
+import { NavigationProvider } from '@idlesummer/pen';
 import MyComponent from './MyComponent';
 
 test('my test', () => {
   const { lastFrame } = render(
-    <RouterProvider initialUrl="/test">
+    <NavigationProvider initialUrl="/test">
       <MyComponent />
-    </RouterProvider>
+    </NavigationProvider>
   );
 
   expect(lastFrame()).toContain('expected output');

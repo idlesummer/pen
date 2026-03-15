@@ -39,5 +39,6 @@ export function composeRoute(url: string, routingTable: RoutingTable): ReactElem
       element = createElement(Layout, props, element)
     }
   }
+
   return element
 }

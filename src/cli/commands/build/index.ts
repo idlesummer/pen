@@ -8,17 +8,19 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
 import { buildRouteChainMap } from './tasks/build-route-chain-map'
+import { writeFileTree } from './tasks/write-file-tree'
+import { writeSegmentTree } from './tasks/write-segment-tree'
 import { writeRouteChainMap } from './tasks/write-route-chain-map'
+import { writePathComponentMap } from './tasks/write-path-component-map'
 import { writeEntry } from './tasks/write-entry'
 import { compileApplication } from './tasks/compile-application'
-import { writePathComponentMap } from './tasks/write-path-component-map'
 
 export const build: CLICommand = {
   name: 'build',
   desc: 'Build the routing structure and compile application',
   action: async () => {
     try {
-      const { appDir, outDir } = await loadConfig()
+      const { appDir, outDir, emitMetadata } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
       console.log(pc.dim( `  entry:  ${appDir}`))
@@ -30,6 +32,8 @@ export const build: CLICommand = {
         buildFileTree,
         buildSegmentTree,
         buildRouteChainMap,
+        emitMetadata && writeFileTree,
+        emitMetadata && writeSegmentTree,
         writeRouteChainMap,
         writePathComponentMap,
         writeEntry,

@@ -8,9 +8,10 @@ export type SegmentRole = typeof SEGMENT_ROLES[number]
 
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
+  route: `${string}/`
   segment: string
-  url: `${string}/`
-  type: 'page' | 'group'
+  param?: string // e.g. "id" from [id]
+  type: 'page' | 'group' | 'dynamic'
   roles: SegmentRoles
   parent?: SegmentNode
   children?: SegmentNode[]
@@ -37,7 +38,7 @@ function buildSegmentTree(fileTree: FileNode) {
 
   const root: SegmentNode = {
     segment: '',
-    url: '/',
+    route: '/',
     type: 'page',
     roles: {},
     children: [],
@@ -56,12 +57,12 @@ function buildSegmentTree(fileTree: FileNode) {
 }
 
 function bindSegmentTree(segmentTree: SegmentNode) {
-  const screens: Record<SegmentNode['url'], string> = {}
+  const screens: Record<SegmentNode['route'], string> = {}
 
   traverse(segmentTree, {
     expand: segment => segment.children ?? [],
     visit: segment => {
-      assignRoles(segment)
+      bindFileToSegmentRoles(segment)
       validateScreenUniqueness(segment, screens)
     },
   })
@@ -69,10 +70,19 @@ function bindSegmentTree(segmentTree: SegmentNode) {
 
 function createSegmentNode(file: FileNode, parent: SegmentNode) {
   const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
+  const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
+  const param = isDynamic ? file.name.slice(1, -1) : undefined
+
+  let route: SegmentNode['route']
+  if (isGroup) route = parent.route
+  else if (isDynamic) route = `${parent.route}:${param}/`
+  else route = `${posix.join(parent.route, file.name)}/`
+
   const segmentNode: SegmentNode = {
     segment: file.name,
-    url: isGroup ? parent.url : `${posix.join(parent.url, file.name)}/`,
-    type: isGroup ? 'group' : 'page',
+    route,
+    type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
+    param,
     roles: {},
     parent,
     children: [],
@@ -81,7 +91,7 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
   return segmentNode
 }
 
-function assignRoles(segment: SegmentNode) {
+function bindFileToSegmentRoles(segment: SegmentNode) {
   for (const child of segment.file.children ?? []) {
     const { name, ext } = parse(child.name)
     if (ext === '.tsx' && SEGMENT_ROLES.includes(name as SegmentRole))
@@ -89,11 +99,11 @@ function assignRoles(segment: SegmentNode) {
   }
 }
 
-function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['url'], string>) {
+function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['route'], string>) {
   if (!segment.roles.screen) return
 
-  const existing = screens[segment.url]
+  const existing = screens[segment.route]
   if (existing)
-    throw new DuplicateScreenError(segment.url, [existing, segment.file.absPath])
-  screens[segment.url] = segment.file.absPath
+    throw new DuplicateScreenError(segment.route, [existing, segment.file.absPath])
+  screens[segment.route] = segment.file.absPath
 }

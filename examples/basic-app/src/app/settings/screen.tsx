@@ -1,4 +1,4 @@
-// examples/router-2/src/app/settings/screen.tsx
+// examples/basic-app/src/app/settings/screen.tsx
 import { Box, Text } from 'ink'
 
 export default function SettingsScreen() {

@@ -286,7 +286,7 @@ Understanding the architecture helps when contributing:
    - Top-level component
    - Sets up error boundary and router
 
-2. **RouterProvider** (`src/core/router/RouterProvider.tsx`)
+2. **NavigationProvider** (`src/core/router/NavigationProvider.tsx`)
    - Manages navigation state
    - Provides context to children
 

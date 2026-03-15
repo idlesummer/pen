@@ -3,9 +3,9 @@ import { ancestors, traverse } from '@/lib/tree'
 import { relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 
-export type RouteChainMap = Record<string, Route>
-export type Route = {
-  url: string
+export type RouteChainMap = Record<string, RouteChain>
+export type RouteChain = {
+  route: string
   chain: SegmentRoles[]
 }
 
@@ -28,9 +28,9 @@ export function createRouteChainMap(segmentTree: SegmentNode, outDir: string): R
     expand: parentSegment => parentSegment.children ?? [],
     visit: segment => {
       if (!segment.roles.screen) return
-      const url = segment.url
+      const route = segment.route
       const chain = createSegmentChain(segment, genDir)
-      routes[url] = { url, chain }
+      routes[route] = { route, chain }
     },
   })
   return routes
@@ -45,6 +45,7 @@ function createSegmentChain(segment: SegmentNode, genDir: string) {
     visit: ancestorSegment => {
       const roles: SegmentRoles = {}
       const entries = Object.entries(ancestorSegment.roles) as [keyof SegmentRoles, string][]
+      if (!entries.length) return // skip segments with no roles
 
       for (const [name, path] of entries) {
         if (name !== 'screen' || ancestorSegment === segment) { // Skip ancestor screens
