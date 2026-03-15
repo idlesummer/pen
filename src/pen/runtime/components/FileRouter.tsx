@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react'
 import type { RoutingTable } from '../routing/composer'
 import { useMemo } from 'react'
-import { useRouter } from '@/pen/api'
+import { usePathname } from '@/pen/api'
+import { DynamicParamsProvider } from '../providers/DynamicParamsProvider'
 import { createRouteResolver } from '../routing/resolver'
 
 export type FileRouterProps = {
@@ -16,6 +17,12 @@ export function FileRouter({ routingTable }: FileRouterProps): ReactElement {
   // routingTable is static — created once from generated files, never changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const routeResolver = useMemo(() => createRouteResolver(routingTable), [])
-  const { url } = useRouter()
-  return routeResolver(url)
+  const url = usePathname()
+  const { element, params } = routeResolver(url)
+
+  return (
+    <DynamicParamsProvider params={params ?? {}}>
+      {element}
+    </DynamicParamsProvider>
+  )
 }

@@ -1,9 +1,8 @@
-import { useRouter } from './use-router'
+import { useContext } from 'react'
+import { NavigationContext } from '../NavigationProvider'
 
-/**
- * Get navigation functions without url/data
- */
 export function useNavigate() {
-  const { push, replace, back, forward } = useRouter()
-  return { push, replace, back, forward }
+  const context = useContext(NavigationContext)
+  if (!context) throw new Error('useRouter must be used within a NavigationProvider')
+  return context
 }

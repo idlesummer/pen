@@ -257,7 +257,7 @@ export async function run(initialUrl: string) {
 ```
 App
 └── ErrorBoundary (catches fatal errors)
-    └── RouterProvider (navigation context)
+    └── NavigationProvider (navigation context)
         └── NotFoundBoundary (catches 404s)
             └── FileRouter (matches + composes route)
                 └── [Composed Route Tree]
@@ -314,7 +314,7 @@ Routes are composed **inside-out** (leaf → root):
 ### Router State Management
 
 ```typescript
-interface RouterContext {
+interface NavigationContext {
   url: string              // Current URL
   history: string[]        // Navigation stack
   index: number            // Current position
@@ -472,7 +472,7 @@ User runs: pen start
 
 3. Route Matching
    User navigates to URL
-     ↓ RouterProvider updates context
+     ↓ NavigationProvider updates context
    FileRouter receives new URL
      ↓ matchRoute()
    Route | null

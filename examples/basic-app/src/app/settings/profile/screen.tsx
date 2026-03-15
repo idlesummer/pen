@@ -1,4 +1,4 @@
-// examples/router-2/src/app/settings/profile/screen.tsx
+// examples/basic-app/src/app/settings/profile/screen.tsx
 import { Box, Text } from 'ink'
 
 export default function ProfileScreen() {
