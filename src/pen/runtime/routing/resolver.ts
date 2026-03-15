@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
-import { composeRoute, composeNearestAncestorRoute } from './composer'
+import { composeScreenRoute, composeNearestNotFoundRoute } from './composer'
 
 export type RouteResolver = (url: string) => RouteMatch
 export type RouteMatch = {
@@ -14,16 +14,17 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const routeMatchCache: Record<string, RouteMatch> = {}  // persisting cache for new matches
 
   const resolveRoute: RouteResolver = (url) => {
+    // 1. Return cached route
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
-    // 1. Exact match (static routes always win)
+    // 2. Exact match (static routes always win)
     if (routeChainMap[url]) {
-      const element = composeRoute(url, routingTable)
+      const element = composeScreenRoute(url, routingTable)
       return (routeMatchCache[url] = { element })
     }
 
-    // 2. Dynamic match — try each pattern with params
+    // 3. Dynamic match - try each pattern with params
     const urlSegments = toSegments(url)
     for (const routePattern of Object.keys(routeChainMap)) {
       if (!routePattern.includes(':'))
@@ -32,13 +33,13 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       const routeSegments = toSegments(routePattern)
       const params = matchDynamicRoutePattern(urlSegments, routeSegments)
       if (params !== null) {
-        const element = composeRoute(routePattern, routingTable)
+        const element = composeScreenRoute(routePattern, routingTable)
         return (routeMatchCache[url] = { element, params })
       }
     }
 
-    // 3. No match — walk up to find nearest ancestor with a not-found boundary
-    const element = composeNearestAncestorRoute(url, routingTable)
+    // 4. No match - walk up to find nearest ancestor with a not-found boundary
+    const element = composeNearestNotFoundRoute(url, routingTable)
     return (routeMatchCache[url] = { element })
   }
 
