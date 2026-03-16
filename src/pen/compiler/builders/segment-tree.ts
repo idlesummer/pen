@@ -13,7 +13,6 @@ export type SegmentNode = {
   param?: string // e.g. "id" from [id]
   type: 'page' | 'group' | 'dynamic'
   roles?: SegmentRoles
-  parent?: SegmentNode
   children?: SegmentNode[]
 }
 
@@ -41,7 +40,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     expand: ({ fileNode, segmentNode }) =>
       (fileNode.children ?? [])
         .filter(file => file.children && !file.name.startsWith('_'))
-        .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode) }))
+        .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
         .sort((a, b) => a.segmentNode.name.localeCompare(b.segmentNode.name)),
 
     attach: (child, parent) =>
@@ -73,21 +72,20 @@ function validateScreenUniqueness(segment: SegmentNode, fileNode: FileNode, scre
   screens[segment.route] = fileNode.absPath
 }
 
-function createSegmentNode(file: FileNode, parent: SegmentNode): SegmentNode {
+function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
   const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
   const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
   const param = isDynamic ? file.name.slice(1, -1) : undefined
 
   let route: SegmentNode['route']
-  if (isGroup)        route = parent.route
-  else if (isDynamic) route = `${parent.route}:${param}/`
-  else                route = `${posix.join(parent.route, file.name)}/`
+  if (isGroup)        route = parentRoute
+  else if (isDynamic) route = `${parentRoute}:${param}/`
+  else                route = `${posix.join(parentRoute, file.name)}/`
 
   return {
     name: file.name,
     route,
     type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
     param,
-    parent,
   }
 }
