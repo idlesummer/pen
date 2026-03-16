@@ -4,7 +4,7 @@ import { removeExtension } from '@/lib/path-utils'
 import { traverse } from '@/lib/tree'
 
 export type RouteTreeNode = {
-  segment: string        // raw directory name: "users", "[id]", "(auth)", ""
+  name: string           // raw directory name: "users", "[id]", "(auth)", ""
   param?: string         // dynamic param name, e.g. "id" from "[id]"
   roles: SegmentRoles    // relativized import paths for layout/screen/error/not-found
   children?: RouteTreeNode[]
@@ -40,7 +40,7 @@ export function createRouteTree(segmentTree: SegmentNode, outDir: string): Route
 
 function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
   return {
-    segment: segmentNode.segment,
+    name: segmentNode.name,
     roles: relativizeRoles(segmentNode.roles, genDir),
     ...(segmentNode.param !== undefined && { param: segmentNode.param }),
   }
