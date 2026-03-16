@@ -44,7 +44,7 @@ function collectComponentPaths(routeTree: RouteTreeNode) {
 
   function traverse(node: RouteTreeNode) {
     for (const role of SEGMENT_ROLES) {
-      if (node.roles[role]) paths.add(node.roles[role]!)
+      if (node.roles?.[role]) paths.add(node.roles[role]!)
     }
     for (const child of node.children ?? []) traverse(child)
   }

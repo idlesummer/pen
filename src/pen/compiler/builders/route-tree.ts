@@ -6,7 +6,7 @@ import { traverse } from '@/lib/tree'
 export type RouteTreeNode = {
   name: string           // raw directory name: "users", "[id]", "(auth)", ""
   param?: string         // dynamic param name, e.g. "id" from "[id]"
-  roles: SegmentRoles    // relativized import paths for layout/screen/error/not-found
+  roles?: SegmentRoles   // relativized import paths for layout/screen/error/not-found
   children?: RouteTreeNode[]
 }
 
@@ -39,9 +39,10 @@ export function createRouteTree(segmentTree: SegmentNode, outDir: string): Route
 }
 
 function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
+  const roles = relativizeRoles(segmentNode.roles, genDir)
   return {
     name: segmentNode.name,
-    roles: relativizeRoles(segmentNode.roles, genDir),
+    ...(Object.keys(roles).length && { roles }),
     ...(segmentNode.param !== undefined && { param: segmentNode.param }),
   }
 }
