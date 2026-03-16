@@ -51,25 +51,6 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   return segmentTree
 }
 
-function createSegmentNode(file: FileNode, parent: SegmentNode): SegmentNode {
-  const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
-  const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
-  const param = isDynamic ? file.name.slice(1, -1) : undefined
-
-  let route: SegmentNode['route']
-  if (isGroup)        route = parent.route
-  else if (isDynamic) route = `${parent.route}:${param}/`
-  else                route = `${posix.join(parent.route, file.name)}/`
-
-  return {
-    name: file.name,
-    route,
-    type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
-    param,
-    parent,
-  }
-}
-
 function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
   for (const child of fileNode.children ?? []) {
     const { name, ext } = parse(child.name)
@@ -90,4 +71,23 @@ function validateScreenUniqueness(segment: SegmentNode, fileNode: FileNode, scre
   if (absPath)
     throw new DuplicateScreenError(segment.route, [absPath, fileNode.absPath])
   screens[segment.route] = fileNode.absPath
+}
+
+function createSegmentNode(file: FileNode, parent: SegmentNode): SegmentNode {
+  const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
+  const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
+  const param = isDynamic ? file.name.slice(1, -1) : undefined
+
+  let route: SegmentNode['route']
+  if (isGroup)        route = parent.route
+  else if (isDynamic) route = `${parent.route}:${param}/`
+  else                route = `${posix.join(parent.route, file.name)}/`
+
+  return {
+    name: file.name,
+    route,
+    type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
+    param,
+    parent,
+  }
 }
