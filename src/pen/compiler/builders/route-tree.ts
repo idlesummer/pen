@@ -1,5 +1,5 @@
 import type { SegmentNode, SegmentRoles, SegmentRole } from './segment-tree'
-import { relative } from 'path'
+import { join, relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 import { traverse } from '@/lib/tree'
 
@@ -21,25 +21,29 @@ export type RouteTreeNode = {
  * @param outDir - Output directory (to calculate relative import paths)
  */
 export function createRouteTree(segmentTree: SegmentNode, outDir: string): RouteTreeNode {
-  const genDir = `${outDir}/generated`
+  const genDir = join(outDir, 'generated')
+  const routeNode = createRouteNode(segmentTree, genDir)
+  const nodePair = { segmentNode: segmentTree, routeNode }
 
-  // traverse works on a single node type, so use a pair to carry both trees in sync
-  type Pair = { seg: SegmentNode, tree: RouteTreeNode }
-
-  const root = makeNode(segmentTree, genDir)
-
-  traverse<Pair>({ seg: segmentTree, tree: root }, {
-    expand: ({ seg }) => (seg.children ?? []).map(child => ({ seg: child, tree: makeNode(child, genDir) })),
-    attach: (child, parent) => (parent.tree.children ??= []).push(child.tree),
+  traverse(nodePair, {
+    expand: ({ segmentNode }) =>
+      (segmentNode.children ?? []).map(child => ({
+        segmentNode: child,
+        routeNode: createRouteNode(child, genDir),
+      })),
+    attach: (child, parent) =>
+      (parent.routeNode.children ??= []).push(child.routeNode),
   })
 
-  return root
+  return routeNode
 }
 
-function makeNode(node: SegmentNode, genDir: string): RouteTreeNode {
-  const treeNode: RouteTreeNode = { segment: node.segment, roles: relativizeRoles(node.roles, genDir) }
-  if (node.param !== undefined) treeNode.param = node.param
-  return treeNode
+function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
+  return {
+    segment: segmentNode.segment,
+    roles: relativizeRoles(segmentNode.roles, genDir),
+    ...(segmentNode.param !== undefined && { param: segmentNode.param }),
+  }
 }
 
 function relativizeRoles(roles: SegmentRoles, genDir: string): SegmentRoles {
