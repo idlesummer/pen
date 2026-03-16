@@ -45,6 +45,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     attach: (child, parent) =>
       (parent.segmentNode.children!.push(child.segmentNode)),
   })
+
   return segmentTree
 }
 
