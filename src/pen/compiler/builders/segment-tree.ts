@@ -59,7 +59,7 @@ function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
     segment.roles ??= {}
     segment.roles[name as SegmentRole] = child.absPath
   }
-  segment.children = []
+  segment.children = [] // ensures children field appear last in the object
 }
 
 function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
