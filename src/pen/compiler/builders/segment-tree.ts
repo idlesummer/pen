@@ -92,8 +92,11 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
 function bindFileToSegmentRoles(segment: SegmentNode) {
   for (const child of segment.file.children ?? []) {
     const { name, ext } = parse(child.name)
-    if (ext === '.tsx' && SEGMENT_ROLES.includes(name as SegmentRole))
-      ;(segment.roles ??= {})[name as SegmentRole] = child.absPath
+    if (ext !== '.tsx' || !SEGMENT_ROLES.includes(name as SegmentRole))
+      continue
+
+    segment.roles ??= {}
+    segment.roles[name as SegmentRole] = child.absPath
   }
 }
 
