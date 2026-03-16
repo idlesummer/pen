@@ -39,20 +39,21 @@ export function createRouteTree(segmentTree: SegmentNode, outDir: string): Route
 }
 
 function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
-  const roles = segmentNode.roles && relativizeRoles(segmentNode.roles, genDir)
-  return {
-    name: segmentNode.name,
-    ...(roles && Object.keys(roles).length && { roles }),
-    ...(segmentNode.param !== undefined && { param: segmentNode.param }),
-  }
+  const { name, param, roles: segmentRoles } = segmentNode
+  const roles = segmentRoles && resolveRoleImports(segmentRoles, genDir)
+  const routeNode: RouteTreeNode = { name }
+
+  if (roles && Object.keys(roles).length) routeNode.roles = roles
+  if (param !== undefined)                routeNode.param = param
+  return routeNode
 }
 
-function relativizeRoles(roles: SegmentRoles, genDir: string): SegmentRoles {
-  const result: SegmentRoles = {}
+function resolveRoleImports (roles: SegmentRoles, genDir: string): SegmentRoles {
+  const segmentRoles: SegmentRoles = {}
   for (const [name, path] of Object.entries(roles) as [SegmentRole, string][]) {
     const importPath = removeExtension(path)
     const relPath = relative(genDir, importPath).replace(/\\/g, '/')
-    result[name] = `${relPath}.js`
+    segmentRoles[name] = `${relPath}.js`
   }
-  return result
+  return segmentRoles
 }
