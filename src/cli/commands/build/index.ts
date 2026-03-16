@@ -7,10 +7,10 @@ import { CLI_NAME, VERSION } from '@/pen/constants'
 // Import individual tasks
 import { buildFileTree } from './tasks/build-file-tree'
 import { buildSegmentTree } from './tasks/build-segment-tree'
-import { buildRouteChainMap } from './tasks/build-route-chain-map'
+import { buildRouteTree } from './tasks/build-route-tree'
 import { writeFileTree } from './tasks/write-file-tree'
 import { writeSegmentTree } from './tasks/write-segment-tree'
-import { writeRouteChainMap } from './tasks/write-route-chain-map'
+import { writeRouteTree } from './tasks/write-route-tree'
 import { writePathComponentMap } from './tasks/write-path-component-map'
 import { writeEntry } from './tasks/write-entry'
 import { compileApplication } from './tasks/compile-application'
@@ -31,10 +31,10 @@ export const build: CLICommand = {
       const pipeline = pipe([
         buildFileTree,
         buildSegmentTree,
-        buildRouteChainMap,
+        buildRouteTree,
         emitMetadata && writeFileTree,
         emitMetadata && writeSegmentTree,
-        writeRouteChainMap,
+        writeRouteTree,
         writePathComponentMap,
         writeEntry,
         compileApplication,
