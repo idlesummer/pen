@@ -28,15 +28,15 @@ export function createFileTree(appPath: string): FileNode {
   const root: FileNode = { name, relPath, absPath, children: [] }
 
   traverse(root, {
-    attach: (child, parent) => parent.children!.push(child),
     expand: (file) => {
       if (!file.children) return []
-
       return readdirSync(file.absPath, { withFileTypes: true })
-        .filter(d => d.isFile() || d.isDirectory())
-        .map(d => createFileNode(d, file))
-        .sort((a, b) => a.name.localeCompare(b.name))
+      .filter(d => d.isFile() || d.isDirectory())
+      .map(d => createFileNode(d, file))
+      .sort((a, b) => a.name.localeCompare(b.name))
     },
+    attach: (child, parent) =>
+      (parent.children!.push(child)),
   })
   return root
 }
