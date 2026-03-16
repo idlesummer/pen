@@ -142,7 +142,7 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
 function buildChain(path: RouteTreeNode[]): SegmentRoles[] {
   const chain: SegmentRoles[] = []
   for (let i = path.length - 1; i >= 0; i--) {
-    const roles = { ...path[i]!.roles }
+    const roles = { ...path[i]!.roles ?? {} }
     if (i < path.length - 1) delete roles.screen  // only leaf contributes screen
     if (Object.keys(roles).length) chain.push(roles)
   }
