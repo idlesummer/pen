@@ -22,8 +22,8 @@ export type RouteTreeNode = {
  */
 export function createRouteTree(segmentTree: SegmentNode, outDir: string): RouteTreeNode {
   const genDir = join(outDir, 'generated')
-  const routeNode = createRouteNode(segmentTree, genDir)
-  const nodePair = { segmentNode: segmentTree, routeNode }
+  const routeTree = createRouteNode(segmentTree, genDir)
+  const nodePair = { segmentNode: segmentTree, routeNode: routeTree }
 
   traverse(nodePair, {
     expand: ({ segmentNode }) =>
@@ -35,7 +35,7 @@ export function createRouteTree(segmentTree: SegmentNode, outDir: string): Route
       (parent.routeNode.children ??= []).push(child.routeNode),
   })
 
-  return routeNode
+  return routeTree
 }
 
 function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
