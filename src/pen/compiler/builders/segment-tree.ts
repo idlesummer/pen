@@ -28,14 +28,14 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   if (fileTree.children === undefined)
     throw new RootIsFileError(fileTree.absPath)
 
-  const segmentTree: SegmentNode = { name: '', route: '/', type: 'page' }
+  const segmentTree: SegmentNode = { name: '', route: '/', type: 'page' } // special case root
   const screens: Record<SegmentNode['route'], string> = {}
   const nodePair = { fileNode: fileTree, segmentNode: segmentTree }
 
   traverse(nodePair, {
     visit: ({ fileNode, segmentNode }) => {
       bindFileToSegmentRoles(segmentNode, fileNode)
-      validateScreenUniqueness(segmentNode, fileNode, screens)
+      validateUniqueScreen(segmentNode, fileNode, screens)
     },
     expand: ({ fileNode, segmentNode }) =>
       (fileNode.children ?? [])
@@ -62,7 +62,7 @@ function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
   segment.children = []
 }
 
-function validateScreenUniqueness(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
+function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
   if (!segment.roles?.screen)
     return
 
