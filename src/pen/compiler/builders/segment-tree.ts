@@ -51,28 +51,6 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   return segmentTree
 }
 
-function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
-  for (const child of fileNode.children ?? []) {
-    const { name, ext } = parse(child.name)
-    if (ext !== '.tsx' || !SEGMENT_ROLES.includes(name as SegmentRole))
-      continue
-
-    segment.roles ??= {}
-    segment.roles[name as SegmentRole] = child.absPath
-    segment.children = [] // this is so that children appears last
-  }
-}
-
-function validateScreenUniqueness(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
-  if (!segment.roles?.screen)
-    return
-
-  const absPath = screens[segment.route]
-  if (absPath)
-    throw new DuplicateScreenError(segment.route, [absPath, fileNode.absPath])
-  screens[segment.route] = fileNode.absPath
-}
-
 function createSegmentNode(file: FileNode, parent: SegmentNode): SegmentNode {
   const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
   const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
@@ -89,6 +67,27 @@ function createSegmentNode(file: FileNode, parent: SegmentNode): SegmentNode {
     type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
     param,
     parent,
-    children: [],
   }
+}
+
+function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
+  for (const child of fileNode.children ?? []) {
+    const { name, ext } = parse(child.name)
+    if (ext !== '.tsx' || !SEGMENT_ROLES.includes(name as SegmentRole))
+      continue
+
+    segment.roles ??= {}
+    segment.roles[name as SegmentRole] = child.absPath
+  }
+  segment.children = []
+}
+
+function validateScreenUniqueness(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
+  if (!segment.roles?.screen)
+    return
+
+  const absPath = screens[segment.route]
+  if (absPath)
+    throw new DuplicateScreenError(segment.route, [absPath, fileNode.absPath])
+  screens[segment.route] = fileNode.absPath
 }
