@@ -5,7 +5,6 @@ import { RootIsFileError, DuplicateScreenError } from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
-
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
   route: `${string}/`
@@ -46,46 +45,38 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     attach: (child, parent) =>
       (parent.segmentNode.children!.push(child.segmentNode)),
   })
-
   return segmentTree
 }
 
 function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
   for (const child of fileNode.children ?? []) {
-    const { name, ext } = parse(child.name)
-    if (ext !== '.tsx' || !SEGMENT_ROLES.includes(name as SegmentRole))
-      continue
-
-    segment.roles ??= {}
-    segment.roles[name as SegmentRole] = child.absPath
+    const { name, ext } = parse(child.name) as { name: SegmentRole, ext: string }
+    if (ext === '.tsx' && SEGMENT_ROLES.includes(name)) {
+      segment.roles ??= {}
+      segment.roles[name] = child.absPath
+    }
   }
   segment.children = [] // ensures children field appear last in the object
 }
 
 function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
-  if (!segment.roles?.screen)
-    return
+  if (!segment.roles?.screen) return
 
   const absPath = screens[segment.route]
-  if (absPath)
-    throw new DuplicateScreenError(segment.route, [absPath, fileNode.absPath])
+  if (absPath) throw new DuplicateScreenError(segment.route, [absPath, fileNode.absPath])
   screens[segment.route] = fileNode.absPath
 }
 
 function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
-  const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
+  const isGroup   = file.name.startsWith('(') && file.name.endsWith(')')
   const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
-  const param = isDynamic ? file.name.slice(1, -1) : undefined
+  const param     = isDynamic ? file.name.slice(1, -1) : undefined
+  const route: SegmentNode['route']
+    = isGroup ? parentRoute
+    : isDynamic ? `${parentRoute}:${param}/`
+    : `${posix.join(parentRoute, file.name)}/`
 
-  let route: SegmentNode['route']
-  if (isGroup)        route = parentRoute
-  else if (isDynamic) route = `${parentRoute}:${param}/`
-  else                route = `${posix.join(parentRoute, file.name)}/`
-
-  return {
-    name: file.name,
-    route,
-    type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
-    param,
-  }
+  const name = file.name
+  const type = isGroup ? 'group' : isDynamic ? 'dynamic' : 'page'
+  return { name, route, type, param }
 }
