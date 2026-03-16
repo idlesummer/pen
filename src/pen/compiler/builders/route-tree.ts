@@ -39,7 +39,7 @@ export function createRouteTree(segmentTree: SegmentNode, outDir: string): Route
 }
 
 function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
-  const roles = relativizeRoles(segmentNode.roles, genDir)
+  const roles = relativizeRoles(segmentNode.roles ?? {}, genDir)
   return {
     name: segmentNode.name,
     ...(Object.keys(roles).length && { roles }),

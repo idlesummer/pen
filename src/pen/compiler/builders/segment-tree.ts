@@ -12,7 +12,7 @@ export type SegmentNode = {
   name: string
   param?: string // e.g. "id" from [id]
   type: 'page' | 'group' | 'dynamic'
-  roles: SegmentRoles
+  roles?: SegmentRoles
   parent?: SegmentNode
   children?: SegmentNode[]
   file: FileNode
@@ -40,7 +40,6 @@ function buildSegmentTree(fileTree: FileNode) {
     name: '',
     route: '/',
     type: 'page',
-    roles: {},
     children: [],
     file: fileTree,
   }
@@ -83,7 +82,6 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
     route,
     type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
     param,
-    roles: {},
     parent,
     children: [],
     file,
@@ -95,12 +93,12 @@ function bindFileToSegmentRoles(segment: SegmentNode) {
   for (const child of segment.file.children ?? []) {
     const { name, ext } = parse(child.name)
     if (ext === '.tsx' && SEGMENT_ROLES.includes(name as SegmentRole))
-      segment.roles[name as SegmentRole] = child.absPath
+      ;(segment.roles ??= {})[name as SegmentRole] = child.absPath
   }
 }
 
 function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['route'], string>) {
-  if (!segment.roles.screen) return
+  if (!segment.roles?.screen) return
 
   const existing = screens[segment.route]
   if (existing)
