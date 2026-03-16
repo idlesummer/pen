@@ -31,6 +31,7 @@ export function createFileTree(appPath: string): FileNode {
     expand: (file) => {
       if (!file.children)
         return []
+
       return readdirSync(file.absPath, { withFileTypes: true })
       .filter(d => d.isFile() || d.isDirectory())
       .map(d => createFileNode(d, file))
