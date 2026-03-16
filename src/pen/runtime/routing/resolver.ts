@@ -85,7 +85,7 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
         result = tryFull(child, idx, params)  // groups don't consume segments
       } else if (child.param) {
         result = tryFull(child, idx + 1, { ...params, [child.param]: urlSeg })
-      } else if (child.segment === urlSeg) {
+      } else if (child.name === urlSeg) {
         result = tryFull(child, idx + 1, params)
       }
 
@@ -113,7 +113,7 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
         const result = deepestPartial(child, idx + 1, { ...params, [child.param]: urlSeg })
         return { path: [node, ...result.path], params: result.params }
       }
-      if (child.segment === urlSeg) {
+      if (child.name === urlSeg) {
         const result = deepestPartial(child, idx + 1, params)
         return { path: [node, ...result.path], params: result.params }
       }
@@ -157,7 +157,7 @@ function stripScreen(chain: SegmentRoles[]): SegmentRoles[] {
 }
 
 function isGroup(node: RouteTreeNode): boolean {
-  return node.segment.startsWith('(') && node.segment.endsWith(')')
+  return node.name.startsWith('(') && node.name.endsWith(')')
 }
 
 /** Splits a URL into its path segments, expecting leading and trailing slashes (e.g. `/users/42/`). */

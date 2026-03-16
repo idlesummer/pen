@@ -26,11 +26,11 @@ const pathComponentMap: PathComponentMap = {
  *   /users/    (screen)
  */
 const staticTree: RouteTreeNode = {
-  segment: '',
+  name: '',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
-    { segment: 'about', roles: { screen: './screen.js' } },
-    { segment: 'users', roles: { screen: './screen.js' } },
+    { name: 'about', roles: { screen: './screen.js' } },
+    { name: 'users', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -42,19 +42,19 @@ const staticTree: RouteTreeNode = {
  *   /users/[id]/posts/  (screen)
  */
 const dynamicTree: RouteTreeNode = {
-  segment: '',
+  name: '',
   roles: { layout: './layout.js' },
   children: [
     {
-      segment: 'users',
+      name: 'users',
       roles: { screen: './screen.js', 'not-found': './not-found.js' },
       children: [
         {
-          segment: '[id]',
+          name: '[id]',
           param: 'id',
           roles: { screen: './screen.js' },
           children: [
-            { segment: 'posts', roles: { screen: './screen.js' } },
+            { name: 'posts', roles: { screen: './screen.js' } },
           ],
         },
       ],
@@ -69,14 +69,14 @@ const dynamicTree: RouteTreeNode = {
  *   (auth)/profile/  (screen)
  */
 const groupTree: RouteTreeNode = {
-  segment: '',
+  name: '',
   roles: { layout: './layout.js' },
   children: [
     {
-      segment: '(auth)',
+      name: '(auth)',
       roles: { 'not-found': './not-found.js' },
       children: [
-        { segment: 'profile', roles: { screen: './screen.js' } },
+        { name: 'profile', roles: { screen: './screen.js' } },
       ],
     },
   ],
@@ -101,7 +101,7 @@ describe('createRouteResolver', () => {
     })
 
     it('resolves the root route', () => {
-      const tree: RouteTreeNode = { segment: '', roles: { screen: './screen.js' } }
+      const tree: RouteTreeNode = { name: '', roles: { screen: './screen.js' } }
       const resolve = createRouteResolver({ routeTree: tree, pathComponentMap })
       const { element } = resolve('/')
       expect(element).toBeDefined()
@@ -150,9 +150,9 @@ describe('createRouteResolver', () => {
 
     it('throws NotFoundError when no ancestor has a not-found boundary', () => {
       const tree: RouteTreeNode = {
-        segment: '',
+        name: '',
         roles: { layout: './layout.js' },
-        children: [{ segment: 'about', roles: { screen: './screen.js' } }],
+        children: [{ name: 'about', roles: { screen: './screen.js' } }],
       }
       const resolve = createRouteResolver({ routeTree: tree, pathComponentMap })
       expect(() => resolve('/missing/')).toThrow(NotFoundError)

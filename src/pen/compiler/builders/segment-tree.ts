@@ -9,7 +9,7 @@ export type SegmentRole = typeof SEGMENT_ROLES[number]
 export type SegmentRoles = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
   route: `${string}/`
-  segment: string
+  name: string
   param?: string // e.g. "id" from [id]
   type: 'page' | 'group' | 'dynamic'
   roles: SegmentRoles
@@ -37,7 +37,7 @@ function buildSegmentTree(fileTree: FileNode) {
     throw new RootIsFileError(fileTree.absPath)
 
   const root: SegmentNode = {
-    segment: '',
+    name: '',
     route: '/',
     type: 'page',
     roles: {},
@@ -51,7 +51,7 @@ function buildSegmentTree(fileTree: FileNode) {
       (segment.file.children ?? [])
         .filter(file => file.children && !file.name.startsWith('_'))
         .map(file => createSegmentNode(file, segment))
-        .sort((a, b) => a.segment.localeCompare(b.segment)),
+        .sort((a, b) => a.name.localeCompare(b.name)),
   })
   return root
 }
@@ -79,7 +79,7 @@ function createSegmentNode(file: FileNode, parent: SegmentNode) {
   else route = `${posix.join(parent.route, file.name)}/`
 
   const segmentNode: SegmentNode = {
-    segment: file.name,
+    name: file.name,
     route,
     type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
     param,
