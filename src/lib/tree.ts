@@ -42,7 +42,7 @@ export function traverse<TNode>(root: TNode, callbacks: TraverseCallbacks<TNode>
 
   while (stack.length) {
     const node = stack.pop()!
-    if (visit?.(node)) return
+    if (visit?.(node) === true) return
 
     // Process children in reverse so
     // they're popped in correct order
