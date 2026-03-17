@@ -23,7 +23,7 @@ export type RoutingTable = {
  */
 export function composeChain(chain: SegmentRoles[], url: string, pathComponentMap: PathComponentMap): ReactElement {
   const screenPath = chain[0]?.['screen']
-  let element: ReactElement = screenPath
+  let element = screenPath
     ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
     : createElement(() => { throw new NotFoundError(url) })
 
