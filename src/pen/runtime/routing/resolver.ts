@@ -35,7 +35,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
     // so NotFoundError is thrown and caught by the boundary).
     const { path, params } = deepestPartial(routeTree, segments, 0, {})
     for (let i = path.length - 1; i >= 0; i--) {
-      const ancestorChain = buildChain(path.slice(0, i + 1))
+      const ancestorChain = buildChain(path.slice(0, i+1))
       if (ancestorChain.some(seg => seg['not-found'])) {
         const chainWithoutScreen = stripScreen(ancestorChain)
         const element = composeChain(chainWithoutScreen, url, pathComponentMap)
@@ -60,9 +60,9 @@ type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
  * Returns the root-to-leaf path and captured params on success, null on miss.
  * Groups are transparent — they are entered without consuming a URL segment.
  */
-function matchRoute(root: RouteTreeNode, segments: string[]): MatchResult | null {
+function matchRoute(routeTree: RouteTreeNode, segments: string[]): MatchResult | null {
   let result: MatchResult | null = null
-  const frame = { node: root, idx: 0, params: {}, path: [root] }
+  const frame = { routeNode: routeTree, idx: 0, params: {}, path: [routeTree] }
 
   traverse(frame, {
     visit: ({ idx, params, path }) => {
@@ -70,17 +70,17 @@ function matchRoute(root: RouteTreeNode, segments: string[]): MatchResult | null
       result = { path, params }
       return true  // stop traversal
     },
-    expand: ({ node, idx, params, path }) => {
+    expand: ({ routeNode, idx, params, path }) => {
       const urlSeg = segments[idx]!
       const frames: typeof frame[] = []
-      for (const child of node.children ?? []) {
+      for (const child of routeNode.children ?? []) {
         const childPath = [...path, child]
         if (child.group)
-          frames.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
+          frames.push({ routeNode: child, idx, params, path: childPath })                                    // groups don't consume segments
         else if (child.param)
-          frames.push({ node: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
+          frames.push({ routeNode: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
         else if (child.name === urlSeg)
-          frames.push({ node: child, idx: idx+1, params, path: childPath })
+          frames.push({ routeNode: child, idx: idx+1, params, path: childPath })
       }
       return frames
     },
