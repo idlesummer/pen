@@ -29,13 +29,11 @@ export function createFileTree(appPath: string): FileNode {
 
   traverse(root, {
     expand: (file) => {
-      if (!file.children)
-        return []
-
-      return readdirSync(file.absPath, { withFileTypes: true })
-      .filter(d => d.isFile() || d.isDirectory())
-      .map(d => createFileNode(d, file))
-      .sort((a, b) => a.name.localeCompare(b.name))
+      return !file.children ? [] :
+        readdirSync(file.absPath, { withFileTypes: true })
+          .filter(d => d.isFile() || d.isDirectory())
+          .map(d => createFileNode(d, file))
+          .sort((a, b) => a.name.localeCompare(b.name))
     },
     attach: (child, parent) =>
       (parent.children!.push(child)),
