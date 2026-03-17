@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import type { RouteTreeNode, SegmentRoles } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
+import { traverse } from '@/lib/tree'
 import { composeChain } from './composer'
 import { NotFoundError } from '../errors'
 
@@ -61,32 +62,35 @@ type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
  */
 function tryMatch(root: RouteTreeNode, segments: string[], startIdx: number, startParams: DynamicParams): MatchResult | null {
   type Frame = { node: RouteTreeNode; idx: number; params: DynamicParams; path: RouteTreeNode[] }
-  const stack: Frame[] = [{ node: root, idx: startIdx, params: startParams, path: [root] }]
 
-  while (stack.length) {
-    const { node, idx, params, path } = stack.pop()!
+  let result: MatchResult | null = null
 
-    if (idx === segments.length)
-      return { path, params }
-
-    const urlSeg = segments[idx]!
-    const children = node.children ?? []
-
-    // Push in reverse so leftmost child is popped first (preserves left-to-right match order)
-    for (let i = children.length - 1; i >= 0; i--) {
-      const child = children[i]!
-      const childPath = [...path, child]
-
-      if (isGroup(child))
-        stack.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
-      else if (child.param)
-        stack.push({ node: child, idx: idx + 1, params: { ...params, [child.param]: urlSeg }, path: childPath })
-      else if (child.name === urlSeg)
-        stack.push({ node: child, idx: idx + 1, params, path: childPath })
+  traverse<Frame>(
+    { node: root, idx: startIdx, params: startParams, path: [root] },
+    {
+      visit: ({ idx, params, path }) => {
+        if (idx !== segments.length) return
+        result = { path, params }
+        return true  // stop traversal
+      },
+      expand: ({ node, idx, params, path }) => {
+        const urlSeg = segments[idx]!
+        const frames: Frame[] = []
+        for (const child of node.children ?? []) {
+          const childPath = [...path, child]
+          if (isGroup(child))
+            frames.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
+          else if (child.param)
+            frames.push({ node: child, idx: idx + 1, params: { ...params, [child.param]: urlSeg }, path: childPath })
+          else if (child.name === urlSeg)
+            frames.push({ node: child, idx: idx + 1, params, path: childPath })
+        }
+        return frames
+      },
     }
-  }
+  )
 
-  return null
+  return result
 }
 
 /**
