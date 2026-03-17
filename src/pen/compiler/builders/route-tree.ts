@@ -1,4 +1,4 @@
-import type { SegmentNode, SegmentRole, SegmentRoles  } from './segment-tree'
+import type { SegmentNode, SegmentRole, SegmentRoleChain  } from './segment-tree'
 import { join, relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 import { traverse } from '@/lib/tree'
@@ -7,7 +7,7 @@ export type RouteTreeNode = {
   name: string           // raw directory name: "users", "[id]", "(auth)", ""
   param?: string         // dynamic param name, e.g. "id" from "[id]"
   group?: true           // true for route groups, e.g. "(auth)" — don't consume URL segments
-  roles?: SegmentRoles   // relativized import paths for layout/screen/error/not-found
+  roles?: SegmentRoleChain   // relativized import paths for layout/screen/error/not-found
   children?: RouteTreeNode[]
 }
 
@@ -50,8 +50,8 @@ function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNod
   return routeNode
 }
 
-function resolveRoleImports (roles: SegmentRoles, genDir: string): SegmentRoles {
-  const segmentRoles: SegmentRoles = {}
+function resolveRoleImports (roles: SegmentRoleChain, genDir: string): SegmentRoleChain {
+  const segmentRoles: SegmentRoleChain = {}
   for (const [name, path] of Object.entries(roles) as [SegmentRole, string][]) {
     const importPath = removeExtension(path)
     const relPath = relative(genDir, importPath).replace(/\\/g, '/')

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { RouteTreeNode, SegmentRoles } from '@/pen/compiler'
+import type { RouteTreeNode, SegmentRoleChain } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
 import { traverse } from '@/lib/tree'
@@ -65,27 +65,26 @@ function matchRoute(root: RouteTreeNode, segments: string[], startIdx: number, s
   const frame = { node: root, idx: startIdx, params: startParams, path: [root] }
 
   traverse(frame, {
-      visit: ({ idx, params, path }) => {
-        if (idx !== segments.length) return
-        result = { path, params }
-        return true  // stop traversal
-      },
-      expand: ({ node, idx, params, path }) => {
-        const urlSeg = segments[idx]!
-        const frames: typeof frame[] = []
-        for (const child of node.children ?? []) {
-          const childPath = [...path, child]
-          if (child.group)
-            frames.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
-          else if (child.param)
-            frames.push({ node: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
-          else if (child.name === urlSeg)
-            frames.push({ node: child, idx: idx+1, params, path: childPath })
-        }
-        return frames
-      },
+    visit: ({ idx, params, path }) => {
+      if (idx !== segments.length) return
+      result = { path, params }
+      return true  // stop traversal
     },
-  )
+    expand: ({ node, idx, params, path }) => {
+      const urlSeg = segments[idx]!
+      const frames: typeof frame[] = []
+      for (const child of node.children ?? []) {
+        const childPath = [...path, child]
+        if (child.group)
+          frames.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
+        else if (child.param)
+          frames.push({ node: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
+        else if (child.name === urlSeg)
+          frames.push({ node: child, idx: idx+1, params, path: childPath })
+      }
+      return frames
+    },
+  })
 
   return result
 }
@@ -97,7 +96,8 @@ function matchRoute(root: RouteTreeNode, segments: string[], startIdx: number, s
  * group child when no real child matches so its boundaries stay reachable.
  */
 function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, params: DynamicParams): MatchResult {
-  if (idx >= segments.length) return { path: [node], params }
+  if (idx >= segments.length)
+    return { path: [node], params }
 
   const urlSeg = segments[idx]!
 
@@ -112,9 +112,9 @@ function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, pa
     }
   }
 
-  for (const child of node.children ?? []) {
-    if (child.group) return { path: [node, child], params }
-  }
+  for (const child of node.children ?? [])
+    if (child.group)
+      return { path: [node, child], params }
 
   return { path: [node], params }
 }
@@ -122,12 +122,12 @@ function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, pa
 // ===== Chain Building =====
 
 /**
- * Converts a root-to-leaf path of tree nodes into a leaf-to-root chain of SegmentRoles.
+ * Converts a root-to-leaf path of tree nodes into a leaf-to-root chain of SegmentRoleChain.
  * Screens are stripped from all non-leaf nodes (only the leaf's screen renders).
  * Nodes with no remaining roles after stripping are omitted from the chain.
  */
-function buildChain(path: RouteTreeNode[]): SegmentRoles[] {
-  const chain: SegmentRoles[] = []
+function buildChain(path: RouteTreeNode[]): SegmentRoleChain[] {
+  const chain: SegmentRoleChain[] = []
   for (let i = path.length - 1; i >= 0; i--) {
     const roles = { ...path[i]!.roles ?? {} }
     if (i < path.length - 1) delete roles.screen  // only leaf contributes screen
@@ -137,7 +137,7 @@ function buildChain(path: RouteTreeNode[]): SegmentRoles[] {
 }
 
 /** Returns a copy of the chain with the screen removed from the first entry. */
-function stripScreen(chain: SegmentRoles[]): SegmentRoles[] {
+function stripScreen(chain: SegmentRoleChain[]): SegmentRoleChain[] {
   if (!chain.length) return chain
   const { screen: _, ...rest } = chain[0]!
   return [rest, ...chain.slice(1)]
