@@ -21,7 +21,7 @@ export type RoutingTable = {
  * @param url - The URL being rendered, used in NotFoundError messages.
  * @param pathComponentMap - Map of import paths to loaded components.
  */
-export function composeChain(chain: SegmentLayer[], url: string, pathComponentMap: PathComponentMap): ReactElement {
+export function composeSegmentLayerChain(chain: SegmentLayer[], url: string, pathComponentMap: PathComponentMap): ReactElement {
   const screenPath = chain[0]?.['screen']
   let element = screenPath
     ? createElement(pathComponentMap[screenPath]!, { key: screenPath })

@@ -3,7 +3,7 @@ import type { RouteTreeNode, SegmentLayer } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
 import { traverse } from '@/lib/tree'
-import { composeChain } from './composer'
+import { composeSegmentLayerChain } from './composer'
 import { NotFoundError } from '../errors'
 
 export type RouteResolver = (url: string) => RouteMatch
@@ -14,34 +14,35 @@ export type RouteMatch = {
 
 export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const { routeTree, pathComponentMap } = routingTable
-  const routeMatchCache: Record<string, RouteMatch> = {}  // persisting cache for new matches
+  const routeMatchCache: Record<string, RouteMatch> = {}
 
   return (url) => {
-    // Return match from cache
+    // 1, Return cached element
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
     const segments = toSegments(url)
     const routePath = matchRoutePath(routeTree, segments)
 
-    // Construct and cache new routes
+    // 2. Create element if not cached
     if (routePath) {
-      const chain = buildChain(routePath.nodes)
-      const element = composeChain(chain, url, pathComponentMap)
+      const params = extractParams(routePath, segments)
+      const chain = buildSegmentLayerChain(routePath)
+      const element = composeSegmentLayerChain(chain, url, pathComponentMap)
       const result: RouteMatch = { element }
-      if (Object.keys(routePath.params).length) result.params = routePath.params
+      if (Object.keys(params).length) result.params = params
       return (routeMatchCache[url] = result)
     }
 
     // No match — walk back from deepest matched node to find nearest ancestor
     // with a not-found boundary, then render that ancestor's chain (screen stripped
     // so NotFoundError is thrown and caught by the boundary).
-    const { nodes, params } = deepestPartial(routeTree, segments, 0, {})
-    for (let i = nodes.length - 1; i >= 0; i--) {
-      const ancestorChain = buildChain(nodes.slice(0, i+1))
-      if (ancestorChain.some(seg => seg['not-found'])) {
-        const chainWithoutScreen = stripScreen(ancestorChain)
-        const element = composeChain(chainWithoutScreen, url, pathComponentMap)
+    const partialPath = deepestPartial(routeTree, segments, 0)
+    for (let i = partialPath.length - 1; i >= 0; i--) {
+      const ancestorChain = buildSegmentLayerChain(partialPath.slice(0, i + 1))
+      if (ancestorChain.some(layer => layer['not-found'])) {
+        const params = extractParams(partialPath, segments)
+        const element = composeSegmentLayerChain(stripScreen(ancestorChain), url, pathComponentMap)
         const result: RouteMatch = { element }
         if (Object.keys(params).length) result.params = params
         return (routeMatchCache[url] = result)
@@ -54,42 +55,36 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 
 // ===== Tree Walk =====
 
-type MatchResult = { nodes: RouteTreeNode[], params: DynamicParams }
-
 /**
  * Tries to match a URL against the route tree, treating it like a flat route map.
- * Returns the root-to-leaf node sequence and captured params on success, null on miss.
+ * Returns the root-to-leaf node sequence on success, null on miss.
  * Groups are transparent — they are entered without consuming a URL segment.
  */
-function matchRoutePath(routeTree: RouteTreeNode, segments: string[]): MatchResult | null {
-  let result: MatchResult | null = null
-  const frame = { idx: 0, params: {}, nodes: [routeTree] }
+function matchRoutePath(routeTree: RouteTreeNode, segments: string[]): RouteTreeNode[] | null {
+  let routePath: RouteTreeNode[] | null = null
+  const frame = { idx: 0, path: [routeTree] }
 
   traverse(frame, {
-    visit: ({ idx, params, nodes }) => {
-      if (idx !== segments.length) return
-      result = { nodes, params }
-      return true  // stop traversal
-    },
-    expand: ({ idx, params, nodes }) => {
-      const routeNode = nodes[nodes.length-1]!
+    visit: ({ idx, path }) =>
+      (idx === segments.length) && (routePath = path, true),
+
+    expand: ({ idx, path }) => {
+      const routeNode = path[path.length-1]!
       const segmentName = segments[idx]!
       const frames: typeof frame[] = []
 
       for (const child of routeNode.children ?? []) {
-        const childNodes = [...nodes, child]
+        const newPath = [...path, child]
         if (child.group)
-          frames.push({ idx, params, nodes: childNodes })                                    // groups don't consume segments
-        else if (child.param)
-          frames.push({ idx: idx+1, params: { ...params, [child.param]: segmentName }, nodes: childNodes })
-        else if (child.name === segmentName)
-          frames.push({ idx: idx+1, params, nodes: childNodes })
+          frames.push({ idx, path: newPath })               // groups don't consume segments
+        else if (child.name === segmentName || child.param) // if static or dynamic match
+          frames.push({ idx: idx+1, path: newPath })
       }
       return frames
     },
   })
 
-  return result
+  return routePath
 }
 
 /**
@@ -98,28 +93,37 @@ function matchRoutePath(routeTree: RouteTreeNode, segments: string[]): MatchResu
  * child at each level (dynamic preferred over none); appends the first
  * group child when no real child matches so its boundaries stay reachable.
  */
-function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, params: DynamicParams): MatchResult {
+function deepestPartial(node: RouteTreeNode, segments: string[], idx: number): RouteTreeNode[] {
   if (idx >= segments.length)
-    return { nodes: [node], params }
+    return [node]
 
   const urlSeg = segments[idx]!
 
   for (const child of node.children ?? []) {
-    if (child.param) {
-      const result = deepestPartial(child, segments, idx + 1, { ...params, [child.param]: urlSeg })
-      return { nodes: [node, ...result.nodes], params: result.params }
-    }
-    if (child.name === urlSeg) {
-      const result = deepestPartial(child, segments, idx + 1, params)
-      return { nodes: [node, ...result.nodes], params: result.params }
-    }
+    if (child.param)
+      return [node, ...deepestPartial(child, segments, idx + 1)]
+    if (child.name === urlSeg)
+      return [node, ...deepestPartial(child, segments, idx + 1)]
   }
 
   for (const child of node.children ?? [])
     if (child.group)
-      return { nodes: [node, child], params }
+      return [node, child]
 
-  return { nodes: [node], params }
+  return [node]
+}
+
+/** Derives dynamic params by walking the matched path and segments together. */
+function extractParams(nodes: RouteTreeNode[], segments: string[]): DynamicParams {
+  const params: DynamicParams = {}
+  let idx = 0
+  for (let i = 1; i < nodes.length; i++) {  // skip root
+    const node = nodes[i]!
+    if (node.group) continue
+    if (node.param) params[node.param] = segments[idx]!
+    idx++
+  }
+  return params
 }
 
 // ===== Chain Building =====
@@ -129,13 +133,19 @@ function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, pa
  * Screens are stripped from all non-leaf nodes (only the leaf's screen renders).
  * Nodes with no remaining roles after stripping are omitted from the chain.
  */
-function buildChain(nodes: RouteTreeNode[]): SegmentLayer[] {
+function buildSegmentLayerChain(routePath: RouteTreeNode[]): SegmentLayer[] {
   const chain: SegmentLayer[] = []
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const roles = { ...nodes[i]!.roles ?? {} }
-    if (i < nodes.length - 1) delete roles.screen  // only leaf contributes screen
-    if (Object.keys(roles).length) chain.push(roles)
+
+  const leaf = routePath[routePath.length - 1]!
+  if (leaf.roles && Object.keys(leaf.roles).length)
+    chain.push({ ...leaf.roles })
+
+  for (let i = routePath.length-2; i >= 0; i--) {
+    const { screen: _, ...roles } = routePath[i]!.roles ?? {}
+    if (Object.keys(roles).length)
+      chain.push(roles)
   }
+
   return chain
 }
 
