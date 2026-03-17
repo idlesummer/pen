@@ -5,13 +5,13 @@ import { RootIsFileError, DuplicateScreenError } from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
-export type SegmentRoleChain = Partial<Record<SegmentRole, string>>
+export type SegmentLayer = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
   route: `${string}/`
   name: string
   param?: string // e.g. "id" from [id]
   type: 'page' | 'group' | 'dynamic'
-  roles?: SegmentRoleChain
+  roles?: SegmentLayer
   children?: SegmentNode[]
 }
 
