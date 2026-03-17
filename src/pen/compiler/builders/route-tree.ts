@@ -44,8 +44,8 @@ function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNod
   const roles = segmentRoles && resolveRoleImports(segmentRoles, genDir)
   const routeNode: RouteTreeNode = { name }
 
-  if (roles && Object.keys(roles).length) routeNode.roles = roles
   if (param !== undefined)                routeNode.param = param
+  if (roles && Object.keys(roles).length) routeNode.roles = roles
   if (name.startsWith('(') && name.endsWith(')')) routeNode.group = true
   return routeNode
 }
