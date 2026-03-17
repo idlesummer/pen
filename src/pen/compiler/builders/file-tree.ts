@@ -31,8 +31,8 @@ export function createFileTree(appPath: string): FileNode {
     expand: (file) => {
       return !file.children ? [] :
         readdirSync(file.absPath, { withFileTypes: true })
-          .filter(d => d.isFile() || d.isDirectory())
-          .map(d => createFileNode(d, file))
+          .filter(dirent => dirent.isFile() || dirent.isDirectory())
+          .map(dirent => createFileNode(dirent, file))
           .sort((a, b) => a.name.localeCompare(b.name))
     },
     attach: (child, parent) =>
