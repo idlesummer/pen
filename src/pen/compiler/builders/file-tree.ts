@@ -49,10 +49,11 @@ function validateDirectory(path: string) {
 }
 
 function createFileNode(dirent: Dirent, parent: FileNode) {
-  const relPath = posix.join(parent.relPath, dirent.name)
-  const absPath = join(parent.absPath, dirent.name)
+  const name = dirent.name
+  const relPath = posix.join(parent.relPath, name)
+  const absPath = join(parent.absPath, name)
 
   return dirent.isDirectory()
-    ? { name: dirent.name, relPath, absPath, children: [] }
-    : { name: dirent.name, relPath, absPath }
+    ? { name, relPath, absPath, children: [] }
+    : { name, relPath, absPath }
 }
