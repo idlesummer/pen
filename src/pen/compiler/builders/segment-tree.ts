@@ -52,19 +52,16 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
 function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
   for (const child of fileNode.children ?? []) {
     const { name, ext } = parse(child.name) as { name: SegmentRole, ext: string }
-    if (ext === '.tsx' && SEGMENT_ROLES.includes(name)) {
-      segment.roles ??= {}
-      segment.roles[name] = child.absPath
-    }
+    if (ext === '.tsx' && SEGMENT_ROLES.includes(name))
+      (segment.roles ??= {})[name] = child.absPath
   }
   segment.children = [] // ensures children field appear last in the object
 }
 
 function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
   if (!segment.roles?.screen) return
-
-  const absPath = screens[segment.route]
-  if (absPath) throw new DuplicateScreenError(segment.route, [absPath, fileNode.absPath])
+  if (screens[segment.route])
+    throw new DuplicateScreenError(segment.route, [screens[segment.route]!, fileNode.absPath])
   screens[segment.route] = fileNode.absPath
 }
 
