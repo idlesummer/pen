@@ -75,7 +75,7 @@ function matchRoute(root: RouteTreeNode, segments: string[], startIdx: number, s
         const frames: typeof frame[] = []
         for (const child of node.children ?? []) {
           const childPath = [...path, child]
-          if (isGroup(child))
+          if (child.group)
             frames.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
           else if (child.param)
             frames.push({ node: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
@@ -113,7 +113,7 @@ function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, pa
   }
 
   for (const child of node.children ?? []) {
-    if (isGroup(child)) return { path: [node, child], params }
+    if (child.group) return { path: [node, child], params }
   }
 
   return { path: [node], params }
@@ -141,10 +141,6 @@ function stripScreen(chain: SegmentRoles[]): SegmentRoles[] {
   if (!chain.length) return chain
   const { screen: _, ...rest } = chain[0]!
   return [rest, ...chain.slice(1)]
-}
-
-function isGroup(node: RouteTreeNode): boolean {
-  return node.name.startsWith('(') && node.name.endsWith(')')
 }
 
 /** Splits a URL into its path segments, expecting leading and trailing slashes (e.g. `/users/42/`). */
