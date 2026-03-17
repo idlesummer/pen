@@ -62,7 +62,7 @@ type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
  */
 function matchRoute(routeTree: RouteTreeNode, segments: string[]): MatchResult | null {
   let result: MatchResult | null = null
-  const frame = { routeNode: routeTree, idx: 0, params: {}, path: [routeTree] }
+  const frame = { idx: 0, params: {}, path: [routeTree] }
 
   traverse(frame, {
     visit: ({ idx, params, path }) => {
@@ -70,17 +70,18 @@ function matchRoute(routeTree: RouteTreeNode, segments: string[]): MatchResult |
       result = { path, params }
       return true  // stop traversal
     },
-    expand: ({ routeNode, idx, params, path }) => {
+    expand: ({ idx, params, path }) => {
+      const routeNode = path.at(-1)!
       const urlSeg = segments[idx]!
       const frames: typeof frame[] = []
       for (const child of routeNode.children ?? []) {
         const childPath = [...path, child]
         if (child.group)
-          frames.push({ routeNode: child, idx, params, path: childPath })                                    // groups don't consume segments
+          frames.push({ idx, params, path: childPath })                                    // groups don't consume segments
         else if (child.param)
-          frames.push({ routeNode: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
+          frames.push({ idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
         else if (child.name === urlSeg)
-          frames.push({ routeNode: child, idx: idx+1, params, path: childPath })
+          frames.push({ idx: idx+1, params, path: childPath })
       }
       return frames
     },
