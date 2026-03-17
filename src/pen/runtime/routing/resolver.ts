@@ -20,7 +20,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       return routeMatchCache[url]
 
     const segments = toSegments(url)
-    const full = matchRoute(routeTree, segments, 0, {})
+    const full = matchRoute(routeTree, segments)
 
     if (full) {
       const chain = buildChain(full.path)
@@ -60,9 +60,9 @@ type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
  * Returns the root-to-leaf path and captured params on success, null on miss.
  * Groups are transparent — they are entered without consuming a URL segment.
  */
-function matchRoute(root: RouteTreeNode, segments: string[], startIdx: number, startParams: DynamicParams): MatchResult | null {
+function matchRoute(root: RouteTreeNode, segments: string[]): MatchResult | null {
   let result: MatchResult | null = null
-  const frame = { node: root, idx: startIdx, params: startParams, path: [root] }
+  const frame = { node: root, idx: 0, params: {}, path: [root] }
 
   traverse(frame, {
     visit: ({ idx, params, path }) => {
