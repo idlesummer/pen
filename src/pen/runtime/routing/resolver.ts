@@ -59,24 +59,31 @@ type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
  * Returns the root-to-leaf path and captured params on success, null on miss.
  * Groups are transparent — they are entered without consuming a URL segment.
  */
-function tryMatch(node: RouteTreeNode, segments: string[], idx: number, params: DynamicParams): MatchResult | null {
-  if (idx === segments.length)
-    return { path: [node], params }
+function tryMatch(root: RouteTreeNode, segments: string[], startIdx: number, startParams: DynamicParams): MatchResult | null {
+  type Frame = { node: RouteTreeNode; idx: number; params: DynamicParams; path: RouteTreeNode[] }
+  const stack: Frame[] = [{ node: root, idx: startIdx, params: startParams, path: [root] }]
 
-  const urlSeg = segments[idx]!
+  while (stack.length) {
+    const { node, idx, params, path } = stack.pop()!
 
-  for (const child of node.children ?? []) {
-    let result: MatchResult | null = null
+    if (idx === segments.length)
+      return { path, params }
 
-    if (isGroup(child))
-      result = tryMatch(child, segments, idx, params)  // groups don't consume segments
-    else if (child.param)
-      result = tryMatch(child, segments, idx + 1, { ...params, [child.param]: urlSeg })
-    else if (child.name === urlSeg)
-      result = tryMatch(child, segments, idx + 1, params)
+    const urlSeg = segments[idx]!
+    const children = node.children ?? []
 
-    if (result)
-      return { path: [node, ...result.path], params: result.params }
+    // Push in reverse so leftmost child is popped first (preserves left-to-right match order)
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i]!
+      const childPath = [...path, child]
+
+      if (isGroup(child))
+        stack.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
+      else if (child.param)
+        stack.push({ node: child, idx: idx + 1, params: { ...params, [child.param]: urlSeg }, path: childPath })
+      else if (child.name === urlSeg)
+        stack.push({ node: child, idx: idx + 1, params, path: childPath })
+    }
   }
 
   return null
