@@ -6,6 +6,7 @@ import { traverse } from '@/lib/tree'
 export type RouteTreeNode = {
   name: string           // raw directory name: "users", "[id]", "(auth)", ""
   param?: string         // dynamic param name, e.g. "id" from "[id]"
+  group?: true           // true for route groups, e.g. "(auth)" — don't consume URL segments
   roles?: SegmentRoles   // relativized import paths for layout/screen/error/not-found
   children?: RouteTreeNode[]
 }
@@ -45,6 +46,7 @@ function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNod
 
   if (roles && Object.keys(roles).length) routeNode.roles = roles
   if (param !== undefined)                routeNode.param = param
+  if (name.startsWith('(') && name.endsWith(')')) routeNode.group = true
   return routeNode
 }
 

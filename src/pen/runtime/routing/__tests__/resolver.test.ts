@@ -74,6 +74,7 @@ const groupTree: RouteTreeNode = {
   children: [
     {
       name: '(auth)',
+      group: true,
       roles: { 'not-found': './not-found.js' },
       children: [
         { name: 'profile', roles: { screen: './screen.js' } },
