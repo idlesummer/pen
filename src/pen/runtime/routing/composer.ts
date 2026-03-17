@@ -1,5 +1,5 @@
 import type { ReactElement, ComponentType } from 'react'
-import type { RouteTreeNode, SegmentRoleChain } from '@/pen/compiler'
+import type { RouteTreeNode, SegmentLayer } from '@/pen/compiler'
 import type { ErrorComponentProps } from '../components/ErrorBoundary'
 import type { NotFoundComponentProps } from '../components/NotFoundBoundary'
 import { createElement } from 'react'
@@ -21,7 +21,7 @@ export type RoutingTable = {
  * @param url - The URL being rendered, used in NotFoundError messages.
  * @param pathComponentMap - Map of import paths to loaded components.
  */
-export function composeChain(chain: SegmentRoleChain[], url: string, pathComponentMap: PathComponentMap): ReactElement {
+export function composeChain(chain: SegmentLayer[], url: string, pathComponentMap: PathComponentMap): ReactElement {
   const screenPath = chain[0]?.['screen']
   let element = screenPath
     ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
