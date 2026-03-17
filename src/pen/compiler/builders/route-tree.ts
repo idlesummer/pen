@@ -1,4 +1,4 @@
-import type { SegmentNode, SegmentRoles, SegmentRole } from './segment-tree'
+import type { SegmentNode, SegmentRole, SegmentRoles  } from './segment-tree'
 import { join, relative } from 'path'
 import { removeExtension } from '@/lib/path-utils'
 import { traverse } from '@/lib/tree'
