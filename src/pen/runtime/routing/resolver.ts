@@ -14,8 +14,7 @@ export type RouteMatch = {
 export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const { routeTree, pathComponentMap } = routingTable
   const routeMatchCache: Record<string, RouteMatch> = {}  // persisting cache for new matches
-
-  return (url: string): RouteMatch => {
+  const resolveRoute = (url: string): RouteMatch => {
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
@@ -45,6 +44,8 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 
     throw new NotFoundError(url)
   }
+
+  return resolveRoute
 }
 
 // ===== Tree Walk =====
@@ -68,11 +69,7 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
   const segments = toSegments(url)
 
   // Attempt a full match — returns the complete root-to-leaf path or null
-  function tryFull(
-    node: RouteTreeNode,
-    idx: number,
-    params: DynamicParams,
-  ): { path: RouteTreeNode[], params: DynamicParams } | null {
+  function tryFull(node: RouteTreeNode, idx: number, params: DynamicParams): { path: RouteTreeNode[], params: DynamicParams } | null {
     if (idx === segments.length)
       return { path: [node], params }
 
@@ -81,15 +78,15 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
     for (const child of node.children ?? []) {
       let result: ReturnType<typeof tryFull> = null
 
-      if (isGroup(child)) {
+      if (isGroup(child))
         result = tryFull(child, idx, params)  // groups don't consume segments
-      } else if (child.param) {
+      else if (child.param)
         result = tryFull(child, idx + 1, { ...params, [child.param]: urlSeg })
-      } else if (child.name === urlSeg) {
+      else if (child.name === urlSeg)
         result = tryFull(child, idx + 1, params)
-      }
 
-      if (result) return { path: [node, ...result.path], params: result.params }
+      if (result)
+        return { path: [node, ...result.path], params: result.params }
     }
 
     return null
@@ -99,11 +96,7 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
   if (full) return { ...full, fullMatch: true }
 
   // No full match — find deepest partial match for not-found ancestor resolution
-  function deepestPartial(
-    node: RouteTreeNode,
-    idx: number,
-    params: DynamicParams,
-  ): { path: RouteTreeNode[], params: DynamicParams } {
+  function deepestPartial(node: RouteTreeNode, idx: number, params: DynamicParams): { path: RouteTreeNode[], params: DynamicParams } {
     if (idx >= segments.length) return { path: [node], params }
 
     const urlSeg = segments[idx]!
