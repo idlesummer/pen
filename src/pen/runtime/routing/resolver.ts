@@ -62,8 +62,8 @@ type WalkResult = {
  * Returns the full matched path when all URL segments resolve to a leaf node
  * with a screen, or the deepest partial path otherwise.
  *
- * Groups (segment names wrapped in parentheses) are transparent — they
- * participate in the ancestor chain but do not consume URL segments.
+ * Route groups are collapsed at compile time and do not appear in the tree —
+ * their boundaries are carried on real nodes as groupRoles/fallbackGroupRoles.
  */
 function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
   const segments = toSegments(url)
@@ -78,9 +78,7 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
     for (const child of node.children ?? []) {
       let result: ReturnType<typeof tryFull> = null
 
-      if (isGroup(child))
-        result = tryFull(child, idx, params)  // groups don't consume segments
-      else if (child.param)
+      if (child.param)
         result = tryFull(child, idx + 1, { ...params, [child.param]: urlSeg })
       else if (child.name === urlSeg)
         result = tryFull(child, idx + 1, params)
@@ -112,12 +110,6 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
       }
     }
 
-    // No direct child matched — include the first group child in the path so its
-    // not-found/error boundaries remain reachable during ancestor resolution.
-    for (const child of node.children ?? []) {
-      if (isGroup(child)) return { path: [node, child], params }
-    }
-
     return { path: [node], params }
   }
 
@@ -130,14 +122,32 @@ function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
 /**
  * Converts a root-to-leaf path of tree nodes into a leaf-to-root chain of SegmentRoles.
  * Screens are stripped from all non-leaf nodes (only the leaf's screen renders).
+ * Group boundaries (groupRoles, innermost-first) are spliced in after each node's own roles.
+ * For the chain's leaf, fallbackGroupRoles are appended to expose group not-found boundaries
+ * when no child matched (partial-match ancestor resolution).
  * Nodes with no remaining roles after stripping are omitted from the chain.
  */
 function buildChain(path: RouteTreeNode[]): SegmentRoles[] {
   const chain: SegmentRoles[] = []
   for (let i = path.length - 1; i >= 0; i--) {
-    const roles = { ...path[i]!.roles ?? {} }
+    const node = path[i]!
+    const roles = { ...node.roles ?? {} }
     if (i < path.length - 1) delete roles.screen  // only leaf contributes screen
     if (Object.keys(roles).length) chain.push(roles)
+
+    // Splice in group boundaries innermost-first (groupRoles is ordered outer→inner)
+    if (node.groupRoles) {
+      for (let j = node.groupRoles.length - 1; j >= 0; j--) {
+        const gr = node.groupRoles[j]!
+        if (Object.keys(gr).length) chain.push(gr)
+      }
+    }
+
+    // For the leaf, expose fallback group boundaries so partial-match ancestor
+    // resolution can find not-found/error boundaries from unmatched child groups
+    if (i === path.length - 1 && node.fallbackGroupRoles) {
+      if (Object.keys(node.fallbackGroupRoles).length) chain.push(node.fallbackGroupRoles)
+    }
   }
   return chain
 }
@@ -147,10 +157,6 @@ function stripScreen(chain: SegmentRoles[]): SegmentRoles[] {
   if (!chain.length) return chain
   const { screen: _, ...rest } = chain[0]!
   return [rest, ...chain.slice(1)]
-}
-
-function isGroup(node: RouteTreeNode): boolean {
-  return node.name.startsWith('(') && node.name.endsWith(')')
 }
 
 /** Splits a URL into its path segments, expecting leading and trailing slashes (e.g. `/users/42/`). */

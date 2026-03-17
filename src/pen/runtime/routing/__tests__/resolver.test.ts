@@ -63,21 +63,23 @@ const dynamicTree: RouteTreeNode = {
 }
 
 /**
- * Tree with a group node:
+ * Compiled tree with a collapsed group — groups are stripped at build time:
  *   /                (layout)
- *   (auth)/          (not-found boundary via group)
- *   (auth)/profile/  (screen)
+ *   (auth) group     (not-found boundary — collapsed into children and fallbackGroupRoles)
+ *   /profile/        (screen, groupRoles carries auth not-found)
+ *
+ * root.fallbackGroupRoles  — auth boundary reachable when no child matches
+ * profile.groupRoles       — auth boundary included in chain on full match
  */
 const groupTree: RouteTreeNode = {
   name: '',
   roles: { layout: './layout.js' },
+  fallbackGroupRoles: { 'not-found': './not-found.js' },
   children: [
     {
-      name: '(auth)',
-      roles: { 'not-found': './not-found.js' },
-      children: [
-        { name: 'profile', roles: { screen: './screen.js' } },
-      ],
+      name: 'profile',
+      roles: { screen: './screen.js' },
+      groupRoles: [{ 'not-found': './not-found.js' }],
     },
   ],
 }
