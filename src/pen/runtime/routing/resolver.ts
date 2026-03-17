@@ -15,23 +15,24 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
   const { routeTree, pathComponentMap } = routingTable
   const routeMatchCache: Record<string, RouteMatch> = {}  // persisting cache for new matches
   const resolveRoute: RouteResolver = (url) => {
-    // 1. Return cached element
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
-    const { path, params, fullMatch } = walkRouteTree(routeTree, url)
+    const segments = toSegments(url)
+    const full = tryMatch(routeTree, segments, 0, {})
 
-    if (fullMatch) {
-      const chain = buildChain(path)
+    if (full) {
+      const chain = buildChain(full.path)
       const element = composeChain(chain, url, pathComponentMap)
       const result: RouteMatch = { element }
-      if (Object.keys(params).length) result.params = params
+      if (Object.keys(full.params).length) result.params = full.params
       return (routeMatchCache[url] = result)
     }
 
     // No full match — walk back from deepest matched node to find nearest ancestor
     // with a not-found boundary, then render that ancestor's chain (screen stripped
     // so NotFoundError is thrown and caught by the boundary).
+    const { path, params } = deepestPartial(routeTree, segments, 0, {})
     for (let i = path.length - 1; i >= 0; i--) {
       const ancestorChain = buildChain(path.slice(0, i + 1))
       if (ancestorChain.some(seg => seg['not-found'])) {
@@ -52,16 +53,6 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 // ===== Tree Walk =====
 
 type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
-type WalkResult  = MatchResult & { fullMatch: boolean }
-
-function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
-  const segments = toSegments(url)
-  const full = tryMatch(root, segments, 0, {})
-  if (full) return { ...full, fullMatch: true }
-
-  const partial = deepestPartial(root, segments, 0, {})
-  return { ...partial, fullMatch: false }
-}
 
 /**
  * Tries to match a URL against the route tree, treating it like a flat route map.
