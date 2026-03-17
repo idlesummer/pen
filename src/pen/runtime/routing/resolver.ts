@@ -20,7 +20,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       return routeMatchCache[url]
 
     const segments = toSegments(url)
-    const full = tryMatch(routeTree, segments, 0, {})
+    const full = matchRoute(routeTree, segments, 0, {})
 
     if (full) {
       const chain = buildChain(full.path)
@@ -60,14 +60,11 @@ type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
  * Returns the root-to-leaf path and captured params on success, null on miss.
  * Groups are transparent — they are entered without consuming a URL segment.
  */
-function tryMatch(root: RouteTreeNode, segments: string[], startIdx: number, startParams: DynamicParams): MatchResult | null {
-  type Frame = { node: RouteTreeNode; idx: number; params: DynamicParams; path: RouteTreeNode[] }
-
+function matchRoute(root: RouteTreeNode, segments: string[], startIdx: number, startParams: DynamicParams): MatchResult | null {
   let result: MatchResult | null = null
+  const frame = { node: root, idx: startIdx, params: startParams, path: [root] }
 
-  traverse<Frame>(
-    { node: root, idx: startIdx, params: startParams, path: [root] },
-    {
+  traverse(frame, {
       visit: ({ idx, params, path }) => {
         if (idx !== segments.length) return
         result = { path, params }
@@ -75,19 +72,19 @@ function tryMatch(root: RouteTreeNode, segments: string[], startIdx: number, sta
       },
       expand: ({ node, idx, params, path }) => {
         const urlSeg = segments[idx]!
-        const frames: Frame[] = []
+        const frames: typeof frame[] = []
         for (const child of node.children ?? []) {
           const childPath = [...path, child]
           if (isGroup(child))
             frames.push({ node: child, idx, params, path: childPath })                                    // groups don't consume segments
           else if (child.param)
-            frames.push({ node: child, idx: idx + 1, params: { ...params, [child.param]: urlSeg }, path: childPath })
+            frames.push({ node: child, idx: idx+1, params: { ...params, [child.param]: urlSeg }, path: childPath })
           else if (child.name === urlSeg)
-            frames.push({ node: child, idx: idx + 1, params, path: childPath })
+            frames.push({ node: child, idx: idx+1, params, path: childPath })
         }
         return frames
       },
-    }
+    },
   )
 
   return result
@@ -95,7 +92,7 @@ function tryMatch(root: RouteTreeNode, segments: string[], startIdx: number, sta
 
 /**
  * Finds the deepest partial match for not-found ancestor resolution.
- * Called only after tryMatch returns null. Follows the closest matching
+ * Called only after matchRoute returns null. Follows the closest matching
  * child at each level (dynamic preferred over none); appends the first
  * group child when no real child matches so its boundaries stay reachable.
  */
