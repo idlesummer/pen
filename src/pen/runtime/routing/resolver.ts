@@ -51,79 +51,73 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 
 // ===== Tree Walk =====
 
-type WalkResult = {
-  path: RouteTreeNode[]    // root-to-leaf matched path
-  params: DynamicParams
-  fullMatch: boolean
+type MatchResult = { path: RouteTreeNode[], params: DynamicParams }
+type WalkResult  = MatchResult & { fullMatch: boolean }
+
+function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
+  const segments = toSegments(url)
+  const full = tryMatch(root, segments, 0, {})
+  if (full) return { ...full, fullMatch: true }
+
+  const partial = deepestPartial(root, segments, 0, {})
+  return { ...partial, fullMatch: false }
 }
 
 /**
- * Walks the route tree segment-by-segment to match a URL.
- *
- * Returns the full matched path when all URL segments resolve to a leaf node
- * with a screen, or the deepest partial path otherwise.
- *
- * Groups (segment names wrapped in parentheses) are transparent — they
- * participate in the ancestor chain but do not consume URL segments.
+ * Tries to match a URL against the route tree, treating it like a flat route map.
+ * Returns the root-to-leaf path and captured params on success, null on miss.
+ * Groups are transparent — they are entered without consuming a URL segment.
  */
-function walkRouteTree(root: RouteTreeNode, url: string): WalkResult {
-  const segments = toSegments(url)
-
-  // Attempt a full match — returns the complete root-to-leaf path or null
-  function tryFull(node: RouteTreeNode, idx: number, params: DynamicParams): { path: RouteTreeNode[], params: DynamicParams } | null {
-    if (idx === segments.length)
-      return { path: [node], params }
-
-    const urlSeg = segments[idx]!
-
-    for (const child of node.children ?? []) {
-      let result: ReturnType<typeof tryFull> = null
-
-      if (isGroup(child))
-        result = tryFull(child, idx, params)  // groups don't consume segments
-      else if (child.param)
-        result = tryFull(child, idx + 1, { ...params, [child.param]: urlSeg })
-      else if (child.name === urlSeg)
-        result = tryFull(child, idx + 1, params)
-
-      if (result)
-        return { path: [node, ...result.path], params: result.params }
-    }
-
-    return null
-  }
-
-  const full = tryFull(root, 0, {})
-  if (full) return { ...full, fullMatch: true }
-
-  // No full match — find deepest partial match for not-found ancestor resolution
-  function deepestPartial(node: RouteTreeNode, idx: number, params: DynamicParams): { path: RouteTreeNode[], params: DynamicParams } {
-    if (idx >= segments.length) return { path: [node], params }
-
-    const urlSeg = segments[idx]!
-
-    for (const child of node.children ?? []) {
-      if (child.param) {
-        const result = deepestPartial(child, idx + 1, { ...params, [child.param]: urlSeg })
-        return { path: [node, ...result.path], params: result.params }
-      }
-      if (child.name === urlSeg) {
-        const result = deepestPartial(child, idx + 1, params)
-        return { path: [node, ...result.path], params: result.params }
-      }
-    }
-
-    // No direct child matched — include the first group child in the path so its
-    // not-found/error boundaries remain reachable during ancestor resolution.
-    for (const child of node.children ?? []) {
-      if (isGroup(child)) return { path: [node, child], params }
-    }
-
+function tryMatch(node: RouteTreeNode, segments: string[], idx: number, params: DynamicParams): MatchResult | null {
+  if (idx === segments.length)
     return { path: [node], params }
+
+  const urlSeg = segments[idx]!
+
+  for (const child of node.children ?? []) {
+    let result: MatchResult | null = null
+
+    if (isGroup(child))
+      result = tryMatch(child, segments, idx, params)  // groups don't consume segments
+    else if (child.param)
+      result = tryMatch(child, segments, idx + 1, { ...params, [child.param]: urlSeg })
+    else if (child.name === urlSeg)
+      result = tryMatch(child, segments, idx + 1, params)
+
+    if (result)
+      return { path: [node, ...result.path], params: result.params }
   }
 
-  const partial = deepestPartial(root, 0, {})
-  return { ...partial, fullMatch: false }
+  return null
+}
+
+/**
+ * Finds the deepest partial match for not-found ancestor resolution.
+ * Called only after tryMatch returns null. Follows the closest matching
+ * child at each level (dynamic preferred over none); appends the first
+ * group child when no real child matches so its boundaries stay reachable.
+ */
+function deepestPartial(node: RouteTreeNode, segments: string[], idx: number, params: DynamicParams): MatchResult {
+  if (idx >= segments.length) return { path: [node], params }
+
+  const urlSeg = segments[idx]!
+
+  for (const child of node.children ?? []) {
+    if (child.param) {
+      const result = deepestPartial(child, segments, idx + 1, { ...params, [child.param]: urlSeg })
+      return { path: [node, ...result.path], params: result.params }
+    }
+    if (child.name === urlSeg) {
+      const result = deepestPartial(child, segments, idx + 1, params)
+      return { path: [node, ...result.path], params: result.params }
+    }
+  }
+
+  for (const child of node.children ?? []) {
+    if (isGroup(child)) return { path: [node, child], params }
+  }
+
+  return { path: [node], params }
 }
 
 // ===== Chain Building =====
