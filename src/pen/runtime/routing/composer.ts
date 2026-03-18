@@ -16,20 +16,20 @@ export type RoutingTable = {
 /** Composes a React element from a pre-built segment layer chain, rendering the leaf screen. */
 export function composeSegmentLayerChain(chain: SegmentLayer[], componentMap: PathComponentMap, url: string): ReactElement {
   const screenPath = chain[0]?.['screen']
-  const inner = screenPath
+  const leaf = screenPath
     ? createElement(componentMap[screenPath]!, { key: screenPath })
     : createElement(() => { throw new NotFoundError(url) })
-  return compose(chain, componentMap, inner)
+  return compose(chain, componentMap, leaf)
 }
 
-/** Composes a React element from a not-found chain, throwing NotFoundError as the inner element. */
+/** Composes a React element from a not-found chain, throwing NotFoundError as the leaf element. */
 export function composeNotFoundChain(chain: SegmentLayer[], componentMap: PathComponentMap, url: string): ReactElement {
-  const inner = createElement(() => { throw new NotFoundError(url) })
-  return compose(chain, componentMap, inner)
+  const leaf = createElement(() => { throw new NotFoundError(url) })
+  return compose(chain, componentMap, leaf)
 }
 
-function compose(chain: SegmentLayer[], componentMap: PathComponentMap, inner: ReactElement): ReactElement {
-  let element = inner
+function compose(chain: SegmentLayer[], componentMap: PathComponentMap, leaf: ReactElement): ReactElement {
+  let element = leaf
 
   for (const segment of chain) {
     if (segment['not-found']) {
