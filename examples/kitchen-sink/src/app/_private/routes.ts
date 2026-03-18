@@ -9,7 +9,8 @@ export const ROUTES = [
   { key: '[4]', path: '/memory/',       desc: 'useMemoryMonitor demo' },
   { key: '[5]', path: '/search-params/', desc: 'useSearchParams demo (pass data via push)' },
   { key: '[6]', path: '/users/',        desc: 'Users list (nested layout)' },
-  { key: '[7]', path: '/users/42/',     desc: 'Dynamic [id] + useParams + useSearchParams' },
+  { key: '[7]', path: '/users/42/',      desc: 'Dynamic [id] + useParams + useSearchParams' },
+  { key: '[8]', path: '/type/',          desc: 'useInput freeform typing (nav disabled while here)' },
 ]
 
 export const USERS = [
