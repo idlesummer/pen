@@ -40,5 +40,5 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
     },
   })
 
-  return { routePath, partial: bestDepth !== -1 }
+  return { routePath, hasMatch: bestDepth === -1 }
 }
