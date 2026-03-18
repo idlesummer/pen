@@ -21,10 +21,10 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       return routeMatchCache[url]
 
     const segments = toSegments(url)
-    const { full: routePath, partial: partialPath } = matchRoutePath(routeTree, segments)
+    const { routePath, partial } = matchRoutePath(routeTree, segments)
 
     // 2. Create element if not cached
-    if (routePath) {
+    if (!partial) {
       const params = extractParams(routePath, segments)
       const chain = buildSegmentLayerChain(routePath)
       const element = composeSegmentLayerChain(chain, url, pathComponentMap)
@@ -36,10 +36,10 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
     // No match — walk back from deepest matched node to find nearest ancestor
     // with a not-found boundary, then render that ancestor's chain (screen stripped
     // so NotFoundError is thrown and caught by the boundary).
-    for (let i = partialPath.length - 1; i >= 0; i--) {
-      const ancestorChain = buildSegmentLayerChain(partialPath.slice(0, i + 1))
+    for (let i = routePath.length - 1; i >= 0; i--) {
+      const ancestorChain = buildSegmentLayerChain(routePath.slice(0, i + 1))
       if (ancestorChain.some(layer => layer['not-found'])) {
-        const params = extractParams(partialPath, segments)
+        const params = extractParams(routePath, segments)
         const element = composeSegmentLayerChain(stripScreen(ancestorChain), url, pathComponentMap)
         const result: RouteMatch = { element }
         if (Object.keys(params).length) result.params = params
@@ -62,7 +62,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 function matchRoutePath(
   routeTree: RouteTreeNode,
   segments: string[],
-): { full: RouteTreeNode[] | null; partial: RouteTreeNode[] } {
+): { routePath: RouteTreeNode[]; partial: boolean } {
   let full: RouteTreeNode[] | null = null
   let bestPartial: RouteTreeNode[] = [routeTree]
   let bestIdx = -1
@@ -95,7 +95,7 @@ function matchRoutePath(
     }
   }
 
-  return { full, partial: bestPartial }
+  return { routePath: full ?? bestPartial, partial: full === null }
 }
 
 /** Derives dynamic params by walking the matched path and segments together. */
