@@ -15,8 +15,7 @@ export type FileRouterProps = {
  */
 export function FileRouter({ routingTable }: FileRouterProps): ReactElement {
   // routingTable is static — created once from generated files, never changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const routeResolver = useMemo(() => createRouteResolver(routingTable), [])
+  const routeResolver = useMemo(() => createRouteResolver(routingTable), [routingTable])
   const url = usePathname()
   const { element, params } = routeResolver(url)
 
