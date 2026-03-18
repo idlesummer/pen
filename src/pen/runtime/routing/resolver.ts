@@ -32,7 +32,7 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
       return (routeMatchCache[url] = match)
     }
 
-    // No full match — find nearest ancestor with a not-found boundary and render it.
+    // 3. No full match — find nearest ancestor with a not-found boundary and render it.
     // Screen is stripped so NotFoundError bubbles up to the boundary.
     for (let i = routePath.length-1; i >= 0; i--) {
       const ancestorChain = buildSegmentLayerChain(routePath.slice(0, i+1))
