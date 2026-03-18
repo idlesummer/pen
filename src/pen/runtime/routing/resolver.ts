@@ -63,7 +63,7 @@ function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
 
   traverse({ idx: 0, path: routePath }, {
     visit: ({ idx, path }) =>
-      idx === segments.length && (routePath=path, true),
+      idx === segments.length && (routePath=path, bestDepth=-1, true),
 
     expand: ({ idx, path }) => {
       const routeNode = path[path.length-1]!
