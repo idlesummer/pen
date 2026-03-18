@@ -63,6 +63,36 @@ const dynamicTree: RouteTreeNode = {
 }
 
 /**
+ * Tree with sibling groups (mirrors basic-app settings structure):
+ *   /                         (layout)
+ *   (account)/profile/        (screen)
+ *   (appearance)/theme/       (screen)
+ *
+ * (account) sorts before (appearance), so the DFS explores (account) first.
+ * A match under (appearance) must still resolve as an exact match (not partial).
+ */
+const siblingGroupTree: RouteTreeNode = {
+  name: '',
+  roles: { layout: './layout.js', 'not-found': './not-found.js' },
+  children: [
+    {
+      name: '(account)',
+      group: true,
+      children: [
+        { name: 'profile', roles: { screen: './screen.js' } },
+      ],
+    },
+    {
+      name: '(appearance)',
+      group: true,
+      children: [
+        { name: 'theme', roles: { screen: './screen.js' } },
+      ],
+    },
+  ],
+}
+
+/**
  * Tree with a group node:
  *   /                (layout)
  *   (auth)/          (not-found boundary via group)
@@ -161,6 +191,15 @@ describe('createRouteResolver', () => {
   })
 
   describe('group nodes', () => {
+    it('resolves a route in a later sibling group when an earlier sibling group has no match', () => {
+      // Regression: DFS explores (account) first, hits dead-end, sets bestDepth — then
+      // correctly matches theme under (appearance). bestDepth must be cleared so partial=false.
+      const resolve = createRouteResolver({ routeTree: siblingGroupTree, pathComponentMap })
+      const { element, params } = resolve('/theme/')
+      expect(element).toBeDefined()
+      expect(params).toBeUndefined()
+    })
+
     it('resolves a route inside a group without consuming a URL segment', () => {
       const resolve = createRouteResolver({ routeTree: groupTree, pathComponentMap })
       const { element, params } = resolve('/profile/')
