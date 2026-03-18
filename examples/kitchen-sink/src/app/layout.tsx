@@ -20,6 +20,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
   }, [url])
 
   useInput((input) => {
+    // On the type screen, let the screen handle all input
+    if (url === '/type/') return
+
     pushAt.current = performance.now()
     switch (input) {
       case '1': router.push('/'); break
@@ -29,6 +32,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       case '5': router.push('/search-params', { greeting: 'hello from root', count: 42 }); break
       case '6': router.push('/users'); break
       case '7': router.push('/users/42', { role: 'admin' }); break
+      case '8': router.push('/type'); break
       case 'b': router.back(); break
       case 'f': router.forward(); break
       case 'r': router.replace('/'); break
@@ -49,7 +53,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
       {/* Navigation */}
       <Box paddingX={1} paddingTop={1}>
-        <Text dimColor>[1] Home  [2] About  [3] History  [4] Memory  [5] Params  [6] Users  [7] /users/42  [b] Back  [f] Forward  [r] Replace→/</Text>
+        <Text dimColor>[1] Home  [2] About  [3] History  [4] Memory  [5] Params  [6] Users  [7] /users/42  [8] Type  [b] Back  [f] Fwd  [r] Replace→/</Text>
       </Box>
 
       {/* Content */}
