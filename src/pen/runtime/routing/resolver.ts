@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import type { RouteTreeNode } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
-import { composeSegmentLayerChain } from './composer'
+import { composeSegmentLayerChain, composeNotFoundChain } from './composer'
 import { buildSegmentLayerChain } from './chainer'
 import { matchRoutePath } from './matcher'
 import { NotFoundError } from '../errors'
@@ -36,7 +36,7 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
     const notFoundIdx = chain.findIndex(layer => layer['not-found'])
     if (notFoundIdx !== -1) {
       const notFoundChain = chain.slice(notFoundIdx)
-      const element = composeSegmentLayerChain(notFoundChain, componentMap, url, true)
+      const element = composeNotFoundChain(notFoundChain, componentMap, url)
       const hasParams = Object.keys(params).length
       return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
