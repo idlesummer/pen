@@ -53,29 +53,21 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 }
 
 // ===== Tree Walk =====
-type MatchRoutePathResult = {
-  routePath: RouteTreeNode[]
-  partial: boolean
-}
-
 /**
  * Tries to match a URL against the route tree, treating it like a flat route map.
  * Groups are transparent — they are entered without consuming a URL segment.
  * Always returns the deepest partial path reached, used for not-found ancestor resolution
  * (appends the first group child at the dead-end so its boundaries stay reachable).
  */
-type Frame = { idx: number; path: RouteTreeNode[] }
-
-function matchRoutePath(routeTree: RouteTreeNode, segments: string[]): MatchRoutePathResult {
+function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
   let full: RouteTreeNode[] | null = null
   let bestPartial: RouteTreeNode[] = [routeTree]
   let bestDepth = -1
 
-  traverse<Frame>({ idx: 0, path: [routeTree] }, {
-    visit: ({ idx, path }) => {
-      if (idx === segments.length) { full = path; return true }
-      return false
-    },
+  traverse({ idx: 0, path: [routeTree] }, {
+    visit: ({ idx, path }) =>
+      idx === segments.length && (full = path, true),
+
     expand: ({ idx, path }) => {
       const node = path[path.length - 1]!
       const segmentName = segments[idx]!
