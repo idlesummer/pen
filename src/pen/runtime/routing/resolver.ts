@@ -2,7 +2,6 @@ import type { ReactElement } from 'react'
 import type { RouteTreeNode, SegmentLayer } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
-import { traverse } from '@/lib/tree'
 import { composeSegmentLayerChain } from './composer'
 import { NotFoundError } from '../errors'
 
@@ -22,7 +21,7 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       return routeMatchCache[url]
 
     const segments = toSegments(url)
-    const routePath = matchRoutePath(routeTree, segments)
+    const { full: routePath, partial: partialPath } = matchRoutePath(routeTree, segments)
 
     // 2. Create element if not cached
     if (routePath) {
@@ -37,7 +36,6 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
     // No match — walk back from deepest matched node to find nearest ancestor
     // with a not-found boundary, then render that ancestor's chain (screen stripped
     // so NotFoundError is thrown and caught by the boundary).
-    const partialPath = deepestPartial(routeTree, segments, 0)
     for (let i = partialPath.length - 1; i >= 0; i--) {
       const ancestorChain = buildSegmentLayerChain(partialPath.slice(0, i + 1))
       if (ancestorChain.some(layer => layer['not-found'])) {
@@ -57,60 +55,47 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 
 /**
  * Tries to match a URL against the route tree, treating it like a flat route map.
- * Returns the root-to-leaf node sequence on success, null on miss.
  * Groups are transparent — they are entered without consuming a URL segment.
+ * Always returns the deepest partial path reached, used for not-found ancestor resolution
+ * (appends the first group child at the dead-end so its boundaries stay reachable).
  */
-function matchRoutePath(routeTree: RouteTreeNode, segments: string[]): RouteTreeNode[] | null {
-  let routePath: RouteTreeNode[] | null = null
-  const frame = { idx: 0, path: [routeTree] }
+function matchRoutePath(
+  routeTree: RouteTreeNode,
+  segments: string[],
+): { full: RouteTreeNode[] | null; partial: RouteTreeNode[] } {
+  let full: RouteTreeNode[] | null = null
+  let bestPartial: RouteTreeNode[] = [routeTree]
+  let bestIdx = -1
 
-  traverse(frame, {
-    visit: ({ idx, path }) =>
-      (idx === segments.length) && (routePath = path, true),
+  const stack = [{ idx: 0, path: [routeTree] as RouteTreeNode[] }]
+  while (stack.length) {
+    const { idx, path } = stack.pop()!
+    const node = path[path.length - 1]!
 
-    expand: ({ idx, path }) => {
-      const routeNode = path[path.length-1]!
-      const segmentName = segments[idx]!
-      const frames: typeof frame[] = []
+    if (idx === segments.length) { full = path; break }
 
-      for (const child of routeNode.children ?? []) {
-        const newPath = [...path, child]
-        if (child.group)
-          frames.push({ idx, path: newPath })               // groups don't consume segments
-        else if (child.name === segmentName || child.param) // if static or dynamic match
-          frames.push({ idx: idx+1, path: newPath })
+    const segmentName = segments[idx]!
+    const next: typeof stack = []
+    for (const child of node.children ?? []) {
+      const newPath = [...path, child]
+      if (child.group)
+        next.push({ idx, path: newPath })               // groups don't consume segments
+      else if (child.name === segmentName || child.param) // static or dynamic match
+        next.push({ idx: idx + 1, path: newPath })
+    }
+
+    if (!next.length) {
+      if (idx > bestIdx) {
+        bestIdx = idx
+        const groupChild = node.children?.find(c => c.group)
+        bestPartial = groupChild ? [...path, groupChild] : path
       }
-      return frames
-    },
-  })
-
-  return routePath
-}
-
-/**
- * Finds the deepest partial match for not-found ancestor resolution.
- * Called only after matchRoutePath returns null. Follows the closest matching
- * child at each level (dynamic preferred over none); appends the first
- * group child when no real child matches so its boundaries stay reachable.
- */
-function deepestPartial(node: RouteTreeNode, segments: string[], idx: number): RouteTreeNode[] {
-  if (idx >= segments.length)
-    return [node]
-
-  const urlSeg = segments[idx]!
-
-  for (const child of node.children ?? []) {
-    if (child.param)
-      return [node, ...deepestPartial(child, segments, idx + 1)]
-    if (child.name === urlSeg)
-      return [node, ...deepestPartial(child, segments, idx + 1)]
+    } else {
+      stack.push(...next)
+    }
   }
 
-  for (const child of node.children ?? [])
-    if (child.group)
-      return [node, child]
-
-  return [node]
+  return { full, partial: bestPartial }
 }
 
 /** Derives dynamic params by walking the matched path and segments together. */
