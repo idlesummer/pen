@@ -12,8 +12,7 @@ export type RouteMatch = {
   params?: DynamicParams
 }
 
-export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
-  const { routeTree, pathComponentMap } = routingTable
+export function createRouteResolver({ routeTree, pathComponentMap }: RoutingTable): RouteResolver {
   const routeMatchCache: Record<string, RouteMatch> = {}
 
   return (url) => {
@@ -29,23 +28,22 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
       const params = extractParams(routePath, segments)
       const chain = buildSegmentLayerChain(routePath)
       const element = composeSegmentLayerChain(chain, url, pathComponentMap)
-      const result: RouteMatch = { element }
-      if (Object.keys(params).length) result.params = params
+      const result: RouteMatch = Object.keys(params).length ? { element, params } : { element }
       return (routeMatchCache[url] = result)
     }
 
     // No match — walk back from deepest matched node to find nearest ancestor
     // with a not-found boundary, then render that ancestor's chain (screen stripped
     // so NotFoundError is thrown and caught by the boundary).
-    for (let i = routePath.length - 1; i >= 0; i--) {
-      const ancestorChain = buildSegmentLayerChain(routePath.slice(0, i + 1))
-      if (ancestorChain.some(layer => layer['not-found'])) {
-        const params = extractParams(routePath, segments)
-        const element = composeSegmentLayerChain(stripScreen(ancestorChain), url, pathComponentMap)
-        const result: RouteMatch = { element }
-        if (Object.keys(params).length) result.params = params
-        return (routeMatchCache[url] = result)
-      }
+    for (let i = routePath.length-1; i >= 0; i--) {
+      const ancestorChain = buildSegmentLayerChain(routePath.slice(0, i+1))
+      if (!ancestorChain.some(layer => layer['not-found']))
+        continue
+
+      const params = extractParams(routePath, segments)
+      const element = composeSegmentLayerChain(stripScreen(ancestorChain), url, pathComponentMap)
+      const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
+      return (routeMatchCache[url] = match)
     }
 
     throw new NotFoundError(url)
@@ -60,41 +58,40 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
  * (appends the first group child at the dead-end so its boundaries stay reachable).
  */
 function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
-  let fullPath: RouteTreeNode[] | null = null
-  let bestPartial: RouteTreeNode[] = [routeTree]
-  let bestDepth = -1
+  let routePath: RouteTreeNode[] = [routeTree]
+  let bestDepth = -1  // -1 assumes exact match is found
 
-  traverse({ idx: 0, path: [routeTree] }, {
+  traverse({ idx: 0, path: routePath }, {
     visit: ({ idx, path }) =>
-      (idx === segments.length && (fullPath = path, true)),
+      idx === segments.length && (routePath=path, true),
 
     expand: ({ idx, path }) => {
       const routeNode = path[path.length-1]!
-      const segmentName = segments[idx]!
-      const nextFrames = (routeNode.children ?? []).flatMap(child => {
-        const newPath = [...path, child]
-        if (child.group) return [{ idx, path: newPath }]
-        if (child.name === segmentName || child.param) return [{ idx: idx+1, path: newPath }]
-        return []
-      })
-      if (!nextFrames.length && idx > bestDepth) {
+      const segment = segments[idx]!
+      const childFrames = (routeNode.children ?? []).flatMap(child => (
+        child.group ?            [{ idx, path:  path.concat(child) }] :
+        child.param ?            [{ idx: idx+1, path: path.concat(child) }] :
+        child.name === segment ? [{ idx: idx+1, path: path.concat(child) }] : []
+      ))
+
+      if (!childFrames.length && idx > bestDepth) {
+        const groupChild = routeNode.children?.find(child => child.group)
+        routePath = groupChild ? path.concat(groupChild) : path
         bestDepth = idx
-        const groupChild = routeNode.children?.find(c => c.group)
-        bestPartial = groupChild ? [...path, groupChild] : path
       }
-      return nextFrames
+      return childFrames
     },
   })
 
-  return { routePath: fullPath ?? bestPartial, partial: fullPath === null }
+  return { routePath, partial: bestDepth !== -1 }
 }
 
 /** Derives dynamic params by walking the matched path and segments together. */
-function extractParams(routeNode: RouteTreeNode[], segments: string[]): DynamicParams {
+function extractParams(routePath: RouteTreeNode[], segments: string[]): DynamicParams {
   const params: DynamicParams = {}
   let idx = 0
-  for (let i=1; i < routeNode.length; i++) {  // skip root
-    const node = routeNode[i]!
+  for (let i=1; i < routePath.length; i++) {  // skip root
+    const node = routePath[i]!
     if (node.group) continue
     if (node.param) params[node.param] = segments[idx]!
     idx++
