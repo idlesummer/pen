@@ -1,5 +1,5 @@
-import type { ReactElement, ComponentType } from 'react'
-import type { RouteChainMap } from '@/pen/compiler'
+import type { ComponentType, ReactElement } from 'react'
+import type { RouteTreeNode, SegmentLayer } from '@/pen/compiler'
 import type { ErrorComponentProps } from '../components/ErrorBoundary'
 import type { NotFoundComponentProps } from '../components/NotFoundBoundary'
 import { createElement } from 'react'
@@ -9,66 +9,45 @@ import { NotFoundError } from '../errors'
 
 export type PathComponentMap = Record<string, ComponentType>
 export type RoutingTable = {
-  routeChainMap: RouteChainMap
-  pathComponentMap: PathComponentMap
+  routeTree: RouteTreeNode
+  componentMap: PathComponentMap
 }
 
-export function composeRoute(url: string, routingTable: RoutingTable): ReactElement {
-  const { routeChainMap, pathComponentMap } = routingTable
-  const route = routeChainMap[url]
-  if (!route) throw new NotFoundError(url)
-
-  const screenPath = route.chain[0]?.['screen']
-  let element = screenPath
-    ? createElement(pathComponentMap[screenPath]!, { key: screenPath })
+/** Composes a React element from a pre-built segment layer chain, rendering the leaf screen. */
+export function composeSegmentLayerChain(chain: SegmentLayer[], componentMap: PathComponentMap, url: string): ReactElement {
+  const screenPath = chain[0]?.['screen']
+  const leaf = screenPath
+    ? createElement(componentMap[screenPath]!, { key: screenPath })
     : createElement(() => { throw new NotFoundError(url) })
+  return compose(chain, componentMap, leaf)
+}
 
-  for (const segment of route.chain) {
+/** Composes a React element from a not-found chain, throwing NotFoundError as the leaf element. */
+export function composeNotFoundChain(chain: SegmentLayer[], componentMap: PathComponentMap, url: string): ReactElement {
+  const leaf = createElement(() => { throw new NotFoundError(url) })
+  return compose(chain, componentMap, leaf)
+}
+
+function compose(chain: SegmentLayer[], componentMap: PathComponentMap, leaf: ReactElement): ReactElement {
+  let element = leaf
+
+  for (const segment of chain) {
     if (segment['not-found']) {
-      const fallback = pathComponentMap[segment['not-found']] as ComponentType<NotFoundComponentProps>
+      const fallback = componentMap[segment['not-found']] as ComponentType<NotFoundComponentProps>
       const props = { key: segment['not-found'], fallback }
       element = createElement(NotFoundBoundary, props, element)
     }
     if (segment['error']) {
-      const fallback = pathComponentMap[segment['error']] as ComponentType<ErrorComponentProps>
+      const fallback = componentMap[segment['error']] as ComponentType<ErrorComponentProps>
       const props = { key: segment['error'], fallback }
       element = createElement(ErrorBoundary, props, element)
     }
     if (segment['layout']) {
-      const Layout = pathComponentMap[segment['layout']]!
+      const Layout = componentMap[segment['layout']]!
       const props = { key: segment['layout'] }
       element = createElement(Layout, props, element)
     }
   }
 
   return element
-}
-
-/**
- * Finds the nearest ancestor with a not-found boundary and renders it.
- * Only called when `url` has no matching route.
- */
-export function composeNearestAncestorRoute(url: string, routingTable: RoutingTable): ReactElement {
-  const { routeChainMap } = routingTable
-  let ancestorUrl = getParentUrl(url)
-
-  while (ancestorUrl !== null) {  // while not at root
-    const route = routeChainMap[ancestorUrl]
-    if (route?.chain.some(segment => segment['not-found']))
-      return composeRoute(ancestorUrl, routingTable)
-
-    ancestorUrl = getParentUrl(ancestorUrl)
-  }
-
-  // No ancestor has a not-found — let composeRoute throw as usual
-  throw new NotFoundError(url)
-}
-
-/** Returns the parent URL by stripping the last path segment, or null if already at root. */
-function getParentUrl(url: string): string | null {
-  if (url === '/')
-    return null
-
-  const lastSlash = url.lastIndexOf('/', url.length-2)
-  return url.slice(0, lastSlash+1)
 }

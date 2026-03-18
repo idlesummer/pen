@@ -20,11 +20,14 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
   useInput((input) => {
     pushAt.current = performance.now()
-    if (input === '1') router.push('/')
-    else if (input === '2') router.push('/about/')
-    else if (input === '3') router.push('/settings/')
-    else if (input === '4') router.push('/settings/profile/')
-    else pushAt.current = null  // not a navigation key, discard
+    switch (input) {
+      case '1': router.push('/'); break
+      case '2': router.push('/about'); break
+      case '3': router.push('/settings/'); break
+      case '4': router.push('/settings/profile'); break
+      case '5': router.push('/settings/theme'); break
+      default: pushAt.current = null // not a navigation key, discard
+    }
   })
 
   return (
@@ -39,7 +42,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
       {/* Navigation */}
       <Box paddingX={1} paddingBottom={0}>
-        <Text dimColor>[1] Home  [2] About  [3] Settings  [4] Profile</Text>
+        <Text dimColor>[1] Home  [2] About  [3] Settings  [4] Profile [5] Theme</Text>
       </Box>
 
       {/* Content */}

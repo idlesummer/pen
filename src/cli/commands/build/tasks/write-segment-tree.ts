@@ -17,15 +17,11 @@ export const writeSegmentTree: Task<BuildContext> = {
       '',
       `import type { SegmentNode } from "${PACKAGE_NAME}"`,
       '',
-      `export const segmentTree: SegmentNode = ${JSON.stringify(ctx.segmentTree!, omitParent, 2)} as const`,
+      `export const segmentTree: SegmentNode = ${JSON.stringify(ctx.segmentTree!, null, 2)} as const`,
       '',
     ].join('\n')
 
     await mkdir(genDir, { recursive: true })
     await writeFile(outDir, code, 'utf-8')
   },
-}
-
-function omitParent(key: string, value: unknown) {
-  return key === 'parent' ? undefined : value
 }

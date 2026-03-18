@@ -1,0 +1,44 @@
+import type { RouteTreeNode } from '@/pen/compiler'
+import { traverse } from '@/lib/tree'
+
+/**
+ * Matches URL segments against the route tree using DFS.
+ * Groups are transparent — entered without consuming a URL segment.
+ *
+ * On full match: returns the root-to-leaf path with partial=false.
+ * On no match: returns the deepest partial path with partial=true,
+ * appending the first group child at the dead-end so not-found boundaries stay reachable.
+ *
+ * @param routeTree - Root node of the route tree
+ * @param segments - URL segments to match (e.g. ['users', '42'] from '/users/42/')
+ * @returns routePath - Root-to-leaf node sequence,
+ *          partial - whether the match is incomplete
+ */
+export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
+  let routePath: RouteTreeNode[] = [routeTree]
+  let bestDepth = -1  // -1 assumes exact match is found
+
+  traverse({ idx: 0, path: routePath }, {
+    visit: ({ idx, path }) =>
+      idx === segments.length && (routePath=path, bestDepth=-1, true),
+
+    expand: ({ idx, path }) => {
+      const routeNode = path[path.length-1]!
+      const segment = segments[idx]!
+      const childFrames = (routeNode.children ?? []).flatMap(child => (
+        child.group ?            [{ idx, path:  path.concat(child) }] :
+        child.param ?            [{ idx: idx+1, path: path.concat(child) }] :
+        child.name === segment ? [{ idx: idx+1, path: path.concat(child) }] : []
+      ))
+
+      if (!childFrames.length && idx > bestDepth) {
+        const groupChild = routeNode.children?.find(child => child.group)
+        routePath = groupChild ? path.concat(groupChild) : path
+        bestDepth = idx
+      }
+      return childFrames
+    },
+  })
+
+  return { routePath, hasMatch: bestDepth === -1 }
+}

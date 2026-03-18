@@ -1,7 +1,11 @@
 import type { ReactElement } from 'react'
+import type { RouteTreeNode } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
-import { composeRoute, composeNearestAncestorRoute } from './composer'
+import { composeSegmentLayerChain, composeNotFoundChain } from './composer'
+import { buildSegmentLayerChain } from './chainer'
+import { matchRoutePath } from './matcher'
+import { NotFoundError } from '../errors'
 
 export type RouteResolver = (url: string) => RouteMatch
 export type RouteMatch = {
@@ -9,66 +13,51 @@ export type RouteMatch = {
   params?: DynamicParams
 }
 
-export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
-  const { routeChainMap } = routingTable
-  const routeMatchCache: Record<string, RouteMatch> = {}  // persisting cache for new matches
-
-  const resolveRoute: RouteResolver = (url) => {
+export function createRouteResolver({ routeTree, componentMap }: RoutingTable): RouteResolver {
+  const routeMatchCache: Record<string, RouteMatch> = {}
+  return (url) => {
+    // 1. Return cached element
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
-    // 1. Exact match (static routes always win)
-    if (routeChainMap[url]) {
-      const element = composeRoute(url, routingTable)
-      return (routeMatchCache[url] = { element })
+    const segments = toSegments(url)
+    const { routePath, hasMatch } = matchRoutePath(routeTree, segments)
+    const chain = buildSegmentLayerChain(routePath)
+    const params = extractParams(routePath, segments)
+
+    // 2. Create element if not cached
+    if (hasMatch) {
+      const element = composeSegmentLayerChain(chain, componentMap, url)
+      const hasParams = Object.keys(params).length
+      return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
 
-    // 2. Dynamic match — try each pattern with params
-    const urlSegments = toSegments(url)
-    for (const routePattern of Object.keys(routeChainMap)) {
-      if (!routePattern.includes(':'))
-        continue
-
-      const routeSegments = toSegments(routePattern)
-      const params = matchDynamicRoutePattern(urlSegments, routeSegments)
-      if (params !== null) {
-        const element = composeRoute(routePattern, routingTable)
-        return (routeMatchCache[url] = { element, params })
-      }
+    // 3. No full match — find nearest ancestor with a not-found boundary and render it.
+    const notFoundIdx = chain.findIndex(layer => layer['not-found'])
+    if (notFoundIdx !== -1) {
+      const element = composeNotFoundChain(chain.slice(notFoundIdx), componentMap, url)
+      const hasParams = Object.keys(params).length
+      return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
-
-    // 3. No match — walk up to find nearest ancestor with a not-found boundary
-    const element = composeNearestAncestorRoute(url, routingTable)
-    return (routeMatchCache[url] = { element })
+    throw new NotFoundError(url)
   }
-
-  return resolveRoute
-}
-
-/**
- * Tries to match URL segments against a pattern that may contain `:param` segments.
- * Returns the extracted params on success, or null if the URL doesn't match.
- * Note: only call this for patterns that contain at least one `:param` segment.
- */
-export function matchDynamicRoutePattern(urlSegments: string[], routeSegments: string[]): DynamicParams | null {
-  if (urlSegments.length !== routeSegments.length)
-    return null
-
-  const params: DynamicParams = {}
-  for (let i = 0; i < routeSegments.length; i++) {
-    const urlSegment = urlSegments[i]!
-    const routeSegment = routeSegments[i]!
-
-    if (routeSegment.startsWith(':'))
-      params[routeSegment.slice(1)] = urlSegment
-
-    else if (urlSegment !== routeSegment)
-      return null
-  }
-  return params
 }
 
 /** Splits a URL into its path segments, expecting leading and trailing slashes (e.g. `/users/42/`). */
 function toSegments(url: string): string[] {
-  return url.slice(1, -1).split('/')
+  const inner = url.slice(1, -1)  // strip leading and trailing slashes
+  return inner ? inner.split('/') : []
+}
+
+/** Derives dynamic params by walking the matched path and segments together. */
+function extractParams(routePath: RouteTreeNode[], segments: string[]): DynamicParams {
+  const params: DynamicParams = {}
+  let idx = 0
+  for (let i=1; i < routePath.length; i++) {  // skip root
+    const routeNode = routePath[i]!
+    if (routeNode.group) continue
+    if (routeNode.param) params[routeNode.param] = segments[idx]!
+    idx++
+  }
+  return params
 }
