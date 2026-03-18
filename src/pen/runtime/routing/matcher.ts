@@ -31,9 +31,8 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
         child.name === segment ? [{ idx: idx+1, path: path.concat(child) }] : []
       ))
 
-      if (!childFrames.length && idx > bestDepth) {
-        const groupChild = routeNode.children?.find(child => child.group)
-        routePath = groupChild ? path.concat(groupChild) : path
+      if (!childFrames.length && idx > bestDepth) { // no children matched and deepest dead end so far
+        routePath = path
         bestDepth = idx
       }
       return childFrames
