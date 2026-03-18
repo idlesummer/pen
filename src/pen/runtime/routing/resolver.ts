@@ -22,25 +22,21 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
 
     const segments = toSegments(url)
     const { routePath, hasMatch } = matchRoutePath(routeTree, segments)
+    const chain = buildSegmentLayerChain(routePath)
+    const params = extractParams(routePath, segments)
 
     // 2. Create element if not cached
     if (hasMatch) {
-      const chain = buildSegmentLayerChain(routePath)
       const element = composeSegmentLayerChain(chain, componentMap, url)
-      const params = extractParams(routePath, segments)
       const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
       return (routeMatchCache[url] = match)
     }
 
     // 3. No full match — find nearest ancestor with a not-found boundary and render it.
-    // Screen is stripped so NotFoundError bubbles up to the boundary.
-    for (let i = routePath.length-1; i >= 0; i--) {
-      const ancestorChain = buildSegmentLayerChain(routePath.slice(0, i+1))
-      if (!ancestorChain.some(layer => layer['not-found']))
-        continue
-
-      const params = extractParams(routePath, segments)
-      const element = composeSegmentLayerChain(ancestorChain, componentMap, url, true)
+    const notFoundIdx = chain.findIndex(layer => layer['not-found'])
+    if (notFoundIdx !== -1) {
+      const notFoundChain = chain.slice(notFoundIdx)
+      const element = composeSegmentLayerChain(notFoundChain, componentMap, url, true)
       const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
       return (routeMatchCache[url] = match)
     }
@@ -59,9 +55,9 @@ function extractParams(routePath: RouteTreeNode[], segments: string[]): DynamicP
   const params: DynamicParams = {}
   let idx = 0
   for (let i=1; i < routePath.length; i++) {  // skip root
-    const node = routePath[i]!
-    if (node.group) continue
-    if (node.param) params[node.param] = segments[idx]!
+    const routeNode = routePath[i]!
+    if (routeNode.group) continue
+    if (routeNode.param) params[routeNode.param] = segments[idx]!
     idx++
   }
   return params
