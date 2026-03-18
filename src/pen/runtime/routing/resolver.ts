@@ -16,7 +16,7 @@ export type RouteMatch = {
 export function createRouteResolver({ routeTree, componentMap }: RoutingTable): RouteResolver {
   const routeMatchCache: Record<string, RouteMatch> = {}
   return (url) => {
-    // 1, Return cached element
+    // 1. Return cached element
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
