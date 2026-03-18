@@ -60,41 +60,41 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
  * (appends the first group child at the dead-end so its boundaries stay reachable).
  */
 function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
-  let full: RouteTreeNode[] | null = null
+  let fullPath: RouteTreeNode[] | null = null
   let bestPartial: RouteTreeNode[] = [routeTree]
   let bestDepth = -1
 
   traverse({ idx: 0, path: [routeTree] }, {
     visit: ({ idx, path }) =>
-      idx === segments.length && (full = path, true),
+      (idx === segments.length && (fullPath = path, true)),
 
     expand: ({ idx, path }) => {
-      const node = path[path.length - 1]!
+      const routeNode = path[path.length-1]!
       const segmentName = segments[idx]!
-      const next = (node.children ?? []).flatMap(child => {
+      const nextFrames = (routeNode.children ?? []).flatMap(child => {
         const newPath = [...path, child]
         if (child.group) return [{ idx, path: newPath }]
-        if (child.name === segmentName || child.param) return [{ idx: idx + 1, path: newPath }]
+        if (child.name === segmentName || child.param) return [{ idx: idx+1, path: newPath }]
         return []
       })
-      if (!next.length && idx > bestDepth) {
+      if (!nextFrames.length && idx > bestDepth) {
         bestDepth = idx
-        const groupChild = node.children?.find(c => c.group)
+        const groupChild = routeNode.children?.find(c => c.group)
         bestPartial = groupChild ? [...path, groupChild] : path
       }
-      return next
+      return nextFrames
     },
   })
 
-  return { routePath: full ?? bestPartial, partial: full === null }
+  return { routePath: fullPath ?? bestPartial, partial: fullPath === null }
 }
 
 /** Derives dynamic params by walking the matched path and segments together. */
-function extractParams(nodes: RouteTreeNode[], segments: string[]): DynamicParams {
+function extractParams(routeNode: RouteTreeNode[], segments: string[]): DynamicParams {
   const params: DynamicParams = {}
   let idx = 0
-  for (let i = 1; i < nodes.length; i++) {  // skip root
-    const node = nodes[i]!
+  for (let i=1; i < routeNode.length; i++) {  // skip root
+    const node = routeNode[i]!
     if (node.group) continue
     if (node.param) params[node.param] = segments[idx]!
     idx++
@@ -111,7 +111,6 @@ function extractParams(nodes: RouteTreeNode[], segments: string[]): DynamicParam
  */
 function buildSegmentLayerChain(routePath: RouteTreeNode[]): SegmentLayer[] {
   const chain: SegmentLayer[] = []
-
   const leaf = routePath[routePath.length - 1]!
   if (leaf.roles && Object.keys(leaf.roles).length)
     chain.push({ ...leaf.roles })
@@ -121,7 +120,6 @@ function buildSegmentLayerChain(routePath: RouteTreeNode[]): SegmentLayer[] {
     if (Object.keys(roles).length)
       chain.push(roles)
   }
-
   return chain
 }
 
