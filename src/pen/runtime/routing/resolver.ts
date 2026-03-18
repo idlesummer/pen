@@ -28,8 +28,8 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
     // 2. Create element if not cached
     if (hasMatch) {
       const element = composeSegmentLayerChain(chain, componentMap, url)
-      const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
-      return (routeMatchCache[url] = match)
+      const hasParams = Object.keys(params).length
+      return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
 
     // 3. No full match — find nearest ancestor with a not-found boundary and render it.
@@ -37,8 +37,8 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
     if (notFoundIdx !== -1) {
       const notFoundChain = chain.slice(notFoundIdx)
       const element = composeSegmentLayerChain(notFoundChain, componentMap, url, true)
-      const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
-      return (routeMatchCache[url] = match)
+      const hasParams = Object.keys(params).length
+      return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
     throw new NotFoundError(url)
   }
