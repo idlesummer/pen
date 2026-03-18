@@ -13,42 +13,39 @@ export type RouteMatch = {
   params?: DynamicParams
 }
 
-export function createRouteResolver({ routeTree, pathComponentMap }: RoutingTable): RouteResolver {
+export function createRouteResolver({ routeTree, componentMap }: RoutingTable): RouteResolver {
   const routeMatchCache: Record<string, RouteMatch> = {}
-  const resolveRoute: RouteResolver = (url) => {
+  return (url) => {
     // 1, Return cached element
     if (routeMatchCache[url])
       return routeMatchCache[url]
 
     const segments = toSegments(url)
-    const { routePath, partial } = matchRoutePath(routeTree, segments)
+    const { routePath, hasMatch } = matchRoutePath(routeTree, segments)
 
     // 2. Create element if not cached
-    if (!partial) {
+    if (hasMatch) {
       const chain = buildSegmentLayerChain(routePath)
-      const element = composeSegmentLayerChain(chain, pathComponentMap, url)
+      const element = composeSegmentLayerChain(chain, componentMap, url)
       const params = extractParams(routePath, segments)
       const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
       return (routeMatchCache[url] = match)
     }
 
-    // No match — walk back from deepest matched node to find nearest ancestor
-    // with a not-found boundary, then render that ancestor's chain (screen stripped
-    // so NotFoundError is thrown and caught by the boundary).
+    // No full match — find nearest ancestor with a not-found boundary and render it.
+    // Screen is stripped so NotFoundError bubbles up to the boundary.
     for (let i = routePath.length-1; i >= 0; i--) {
       const ancestorChain = buildSegmentLayerChain(routePath.slice(0, i+1))
       if (!ancestorChain.some(layer => layer['not-found']))
         continue
 
       const params = extractParams(routePath, segments)
-      const element = composeSegmentLayerChain(ancestorChain, pathComponentMap, url, true)
+      const element = composeSegmentLayerChain(ancestorChain, componentMap, url, true)
       const match: RouteMatch = Object.keys(params).length ? { element, params } : { element }
       return (routeMatchCache[url] = match)
     }
     throw new NotFoundError(url)
   }
-
-  return resolveRoute
 }
 
 /** Splits a URL into its path segments, expecting leading and trailing slashes (e.g. `/users/42/`). */

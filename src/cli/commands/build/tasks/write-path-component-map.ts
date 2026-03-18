@@ -28,7 +28,7 @@ export const writePathComponentMap: Task<BuildContext> = {
       '',
       imports,
       '',
-      'export const pathComponentMap = {',
+      'export const componentMap = {',
       map,
       '}',
       '',
