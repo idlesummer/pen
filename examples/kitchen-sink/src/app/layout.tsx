@@ -53,7 +53,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       </Box>
 
       {/* Navigation */}
-      <Box flexDirection="row" paddingX={1} paddingTop={1}>
+      <Box flexDirection="column" paddingX={1} paddingTop={1}>
         <Text dimColor>[1] Home  [2] About  [3] History  [4] Memory  [5] Params  [6] Users  [7] /users/42  [8] Type  [9] Go</Text>
         <Text dimColor>[b] Back  [f] Fwd  [r] Replace→/</Text>
       </Box>
