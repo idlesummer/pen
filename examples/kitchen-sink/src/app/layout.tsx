@@ -20,8 +20,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
   }, [url])
 
   useInput((input) => {
-    // On the type screen, let the screen handle all input
-    if (url === '/type/') return
+    // On input screens, let the screen handle all input
+    if (url === '/type/' || url === '/go/') return
 
     pushAt.current = performance.now()
     switch (input) {
@@ -33,6 +33,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       case '6': router.push('/users'); break
       case '7': router.push('/users/42', { role: 'admin' }); break
       case '8': router.push('/type'); break
+      case '9': router.push('/go'); break
       case 'b': router.back(); break
       case 'f': router.forward(); break
       case 'r': router.replace('/'); break
@@ -52,8 +53,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
       </Box>
 
       {/* Navigation */}
-      <Box flexDirection='column' paddingX={1} paddingTop={1}>
-        <Text dimColor>[1] Home  [2] About  [3] History  [4] Memory  [5] Params  [6] Users  [7] /users/42  [8] Type</Text>
+      <Box flexDirection="row" paddingX={1} paddingTop={1}>
+        <Text dimColor>[1] Home  [2] About  [3] History  [4] Memory  [5] Params  [6] Users  [7] /users/42  [8] Type  [9] Go</Text>
         <Text dimColor>[b] Back  [f] Fwd  [r] Replace→/</Text>
       </Box>
 
