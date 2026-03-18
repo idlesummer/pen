@@ -326,10 +326,10 @@ interface RouteChainMap {
 
 interface Route {
   url: string;
-  chain: SegmentRoles[];
+  chain: SegmentLayer[];
 }
 
-interface SegmentRoles {
+interface SegmentLayer {
   screen?: string;
   layout?: string;
   error?: string;

@@ -1,9 +1,10 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
+import type { RouteTreeNode } from '@/pen/compiler'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
-import { RouteChainMap, SEGMENT_ROLES } from '@/pen/compiler'
+import { SEGMENT_ROLES } from '@/pen/compiler'
 import { PACKAGE_NAME } from '@/pen/constants'
 
 export const writePathComponentMap: Task<BuildContext> = {
@@ -13,8 +14,8 @@ export const writePathComponentMap: Task<BuildContext> = {
     const genDir = join(ctx.outDir, 'generated')
     const outPath = join(genDir, 'path-component-map.ts')
 
-    // Collect all unique paths from routeChainMap
-    const paths = collectComponentPaths(ctx.routeChainMap!)
+    // Collect all unique paths from routeTree
+    const paths = collectComponentPaths(ctx.routeTree!)
     const entries = Array.from(paths)
 
     // Codegen for imports
@@ -27,7 +28,7 @@ export const writePathComponentMap: Task<BuildContext> = {
       '',
       imports,
       '',
-      'export const pathComponentMap = {',
+      'export const componentMap = {',
       map,
       '}',
       '',
@@ -38,16 +39,17 @@ export const writePathComponentMap: Task<BuildContext> = {
   },
 }
 
-function collectComponentPaths(routeChainMap: RouteChainMap) {
+function collectComponentPaths(routeTree: RouteTreeNode) {
   const paths = new Set<string>()
-  for (const route of Object.values(routeChainMap)) {
-    for (const segment of route.chain) {
-      for (const role of SEGMENT_ROLES) {
-        if (segment[role])
-          paths.add(segment[role])
-      }
+
+  function traverse(node: RouteTreeNode) {
+    for (const role of SEGMENT_ROLES) {
+      if (node.roles?.[role]) paths.add(node.roles[role]!)
     }
+    for (const child of node.children ?? []) traverse(child)
   }
+
+  traverse(routeTree)
   return paths
 }
 

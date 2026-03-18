@@ -28,15 +28,15 @@ export function createFileTree(appPath: string): FileNode {
   const root: FileNode = { name, relPath, absPath, children: [] }
 
   traverse(root, {
-    attach: (child, parent) => parent.children!.push(child),
     expand: (file) => {
-      if (!file.children) return []
-
-      return readdirSync(file.absPath, { withFileTypes: true })
-        .filter(d => d.isFile() || d.isDirectory())
-        .map(d => createFileNode(d, file))
-        .sort((a, b) => a.name.localeCompare(b.name))
+      return !file.children ? [] :
+        readdirSync(file.absPath, { withFileTypes: true })
+          .filter(dirent => dirent.isFile() || dirent.isDirectory())
+          .map(dirent => createFileNode(dirent, file))
+          .sort((a, b) => a.name.localeCompare(b.name))
     },
+    attach: (child, parent) =>
+      (parent.children!.push(child)),
   })
   return root
 }
@@ -49,10 +49,11 @@ function validateDirectory(path: string) {
 }
 
 function createFileNode(dirent: Dirent, parent: FileNode) {
-  const relPath = posix.join(parent.relPath, dirent.name)
-  const absPath = join(parent.absPath, dirent.name)
+  const name = dirent.name
+  const relPath = posix.join(parent.relPath, name)
+  const absPath = join(parent.absPath, name)
 
   return dirent.isDirectory()
-    ? { name: dirent.name, relPath, absPath, children: [] }
-    : { name: dirent.name, relPath, absPath }
+    ? { name, relPath, absPath, children: [] }
+    : { name, relPath, absPath }
 }

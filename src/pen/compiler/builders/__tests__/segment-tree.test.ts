@@ -45,8 +45,8 @@ describe('createSegmentTree — dynamic routes', () => {
     const children = tree.children!
 
     expect(children).toHaveLength(2)
-    expect(children.some(c => c.type === 'page' && c.segment === 'about')).toBe(true)
-    expect(children.some(c => c.type === 'dynamic' && c.segment === '[id]')).toBe(true)
+    expect(children.some(c => c.type === 'page' && c.name === 'about')).toBe(true)
+    expect(children.some(c => c.type === 'dynamic' && c.name === '[id]')).toBe(true)
   })
 
   it('supports nested dynamic segments', () => {

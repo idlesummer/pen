@@ -5,17 +5,14 @@ import { RootIsFileError, DuplicateScreenError } from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
-
-export type SegmentRoles = Partial<Record<SegmentRole, string>>
+export type SegmentLayer = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
   route: `${string}/`
-  segment: string
+  name: string
   param?: string // e.g. "id" from [id]
   type: 'page' | 'group' | 'dynamic'
-  roles: SegmentRoles
-  parent?: SegmentNode
+  roles?: SegmentLayer
   children?: SegmentNode[]
-  file: FileNode
 }
 
 /**
@@ -27,83 +24,57 @@ export type SegmentNode = {
  * @throws {DuplicateScreenError} If multiple screens map to the same URL
  */
 export function createSegmentTree(fileTree: FileNode): SegmentNode {
-  const tree = buildSegmentTree(fileTree) // Builds segment tree structure from file tree
-  bindSegmentTree(tree)                   // Binds roles to segments and validates tree structure
-  return tree
-}
-
-function buildSegmentTree(fileTree: FileNode) {
   if (fileTree.children === undefined)
     throw new RootIsFileError(fileTree.absPath)
 
-  const root: SegmentNode = {
-    segment: '',
-    route: '/',
-    type: 'page',
-    roles: {},
-    children: [],
-    file: fileTree,
-  }
-
-  traverse(root, {
-    attach: (child, parent) => parent.children!.push(child),
-    expand: segment =>
-      (segment.file.children ?? [])
-        .filter(file => file.children && !file.name.startsWith('_'))
-        .map(file => createSegmentNode(file, segment))
-        .sort((a, b) => a.segment.localeCompare(b.segment)),
-  })
-  return root
-}
-
-function bindSegmentTree(segmentTree: SegmentNode) {
+  const segmentTree: SegmentNode = { name: '', route: '/', type: 'page' } // special case root
   const screens: Record<SegmentNode['route'], string> = {}
+  const nodePair = { fileNode: fileTree, segmentNode: segmentTree }
 
-  traverse(segmentTree, {
-    expand: segment => segment.children ?? [],
-    visit: segment => {
-      bindFileToSegmentRoles(segment)
-      validateScreenUniqueness(segment, screens)
+  traverse(nodePair, {
+    visit: ({ fileNode, segmentNode }) => {
+      bindFileToSegmentRoles(segmentNode, fileNode)
+      validateUniqueScreen(segmentNode, fileNode, screens)
     },
+    expand: ({ fileNode, segmentNode }) =>
+      (fileNode.children ?? [])
+        .filter(file => file.children && !file.name.startsWith('_'))
+        .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
+        .sort((a, b) => a.segmentNode.name.localeCompare(b.segmentNode.name)),
+
+    attach: (child, parent) =>
+      (parent.segmentNode.children!.push(child.segmentNode)),
   })
+
+  return segmentTree
 }
 
-function createSegmentNode(file: FileNode, parent: SegmentNode) {
-  const isGroup = file.name.startsWith('(') && file.name.endsWith(')')
+function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
+  for (const child of fileNode.children ?? []) {
+    const { name, ext } = parse(child.name) as { name: SegmentRole, ext: string }
+    if (ext === '.tsx' && SEGMENT_ROLES.includes(name))
+      (segment.roles ??= {})[name] = child.absPath
+  }
+  segment.children = [] // ensures children field appear last in the object
+}
+
+function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
+  if (!segment.roles?.screen) return
+  if (screens[segment.route])
+    throw new DuplicateScreenError(segment.route, [screens[segment.route]!, fileNode.absPath])
+  screens[segment.route] = fileNode.absPath
+}
+
+function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
+  const isGroup   = file.name.startsWith('(') && file.name.endsWith(')')
   const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
-  const param = isDynamic ? file.name.slice(1, -1) : undefined
+  const param     = isDynamic ? file.name.slice(1, -1) : undefined
+  const route: SegmentNode['route']
+    = isGroup ? parentRoute
+    : isDynamic ? `${parentRoute}:${param}/`
+    : `${posix.join(parentRoute, file.name)}/`
 
-  let route: SegmentNode['route']
-  if (isGroup) route = parent.route
-  else if (isDynamic) route = `${parent.route}:${param}/`
-  else route = `${posix.join(parent.route, file.name)}/`
-
-  const segmentNode: SegmentNode = {
-    segment: file.name,
-    route,
-    type: isGroup ? 'group' : isDynamic ? 'dynamic' : 'page',
-    param,
-    roles: {},
-    parent,
-    children: [],
-    file,
-  }
-  return segmentNode
-}
-
-function bindFileToSegmentRoles(segment: SegmentNode) {
-  for (const child of segment.file.children ?? []) {
-    const { name, ext } = parse(child.name)
-    if (ext === '.tsx' && SEGMENT_ROLES.includes(name as SegmentRole))
-      segment.roles[name as SegmentRole] = child.absPath
-  }
-}
-
-function validateScreenUniqueness(segment: SegmentNode, screens: Record<SegmentNode['route'], string>) {
-  if (!segment.roles.screen) return
-
-  const existing = screens[segment.route]
-  if (existing)
-    throw new DuplicateScreenError(segment.route, [existing, segment.file.absPath])
-  screens[segment.route] = segment.file.absPath
+  const name = file.name
+  const type = isGroup ? 'group' : isDynamic ? 'dynamic' : 'page'
+  return { name, route, type, param }
 }

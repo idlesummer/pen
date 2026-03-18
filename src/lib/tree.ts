@@ -1,7 +1,7 @@
 /** Callbacks for tree traversal. */
 export type TraverseCallbacks<TNode> = {
-  /** Called when visiting each node (pre-order) */
-  visit?: (node: TNode) => void
+  /** Called when visiting each node (pre-order). Return true to stop traversal. */
+  visit?: (node: TNode) => unknown
   /** Returns children for a node (or creates them) */
   expand?: (node: TNode) => TNode[]
   /** Attaches a child to its parent */
@@ -28,6 +28,13 @@ export type TraverseCallbacks<TNode> = {
  *   expand: (node) => createChildren(node),
  *   attach: (child, parent) => parent.children.push(child)
  * })
+ *
+ * @example
+ * // Early termination
+ * traverse(tree, {
+ *   visit: (node) => (node.name === 'target')  // stops traversal
+ *   expand: (node) => node.children ?? []
+ * })
  */
 export function traverse<TNode>(root: TNode, callbacks: TraverseCallbacks<TNode>) {
   const { visit, expand, attach } = callbacks
@@ -35,7 +42,7 @@ export function traverse<TNode>(root: TNode, callbacks: TraverseCallbacks<TNode>
 
   while (stack.length) {
     const node = stack.pop()!
-    visit?.(node)
+    if (visit?.(node) === true) return
 
     // Process children in reverse so
     // they're popped in correct order
