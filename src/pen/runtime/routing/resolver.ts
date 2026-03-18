@@ -52,6 +52,10 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
 }
 
 // ===== Tree Walk =====
+type MatchRoutePathResult = {
+  routePath: RouteTreeNode[]
+  partial: boolean
+}
 
 /**
  * Tries to match a URL against the route tree, treating it like a flat route map.
@@ -59,15 +63,13 @@ export function createRouteResolver(routingTable: RoutingTable): RouteResolver {
  * Always returns the deepest partial path reached, used for not-found ancestor resolution
  * (appends the first group child at the dead-end so its boundaries stay reachable).
  */
-function matchRoutePath(
-  routeTree: RouteTreeNode,
-  segments: string[],
-): { routePath: RouteTreeNode[]; partial: boolean } {
+function matchRoutePath(routeTree: RouteTreeNode, segments: string[]): MatchRoutePathResult {
   let full: RouteTreeNode[] | null = null
   let bestPartial: RouteTreeNode[] = [routeTree]
-  let bestIdx = -1
+  let bestDepth = -1
 
-  const stack = [{ idx: 0, path: [routeTree] as RouteTreeNode[] }]
+  const stack = [{ idx: 0, path: [routeTree] }]
+
   while (stack.length) {
     const { idx, path } = stack.pop()!
     const node = path[path.length - 1]!
@@ -75,23 +77,20 @@ function matchRoutePath(
     if (idx === segments.length) { full = path; break }
 
     const segmentName = segments[idx]!
-    const next: typeof stack = []
-    for (const child of node.children ?? []) {
+    const matches = (node.children ?? []).flatMap(child => {
       const newPath = [...path, child]
-      if (child.group)
-        next.push({ idx, path: newPath })               // groups don't consume segments
-      else if (child.name === segmentName || child.param) // static or dynamic match
-        next.push({ idx: idx + 1, path: newPath })
-    }
+      if (child.group) return [{ idx, path: newPath }]
+      if (child.name === segmentName || child.param) return [{ idx: idx + 1, path: newPath }]
+      return []
+    })
 
-    if (!next.length) {
-      if (idx > bestIdx) {
-        bestIdx = idx
-        const groupChild = node.children?.find(c => c.group)
-        bestPartial = groupChild ? [...path, groupChild] : path
-      }
-    } else {
-      stack.push(...next)
+    if (matches.length)
+      stack.push(...matches)
+
+    else if (idx > bestDepth) {
+      bestDepth = idx
+      const groupChild = node.children?.find(c => c.group)
+      bestPartial = groupChild ? [...path, groupChild] : path
     }
   }
 
