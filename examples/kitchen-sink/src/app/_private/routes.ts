@@ -11,6 +11,7 @@ export const ROUTES = [
   { key: '[6]', path: '/users/',        desc: 'Users list (nested layout)' },
   { key: '[7]', path: '/users/42/',      desc: 'Dynamic [id] + useParams + useSearchParams' },
   { key: '[8]', path: '/type/',          desc: 'useInput freeform typing (nav disabled while here)' },
+  { key: '[9]', path: '/go/',            desc: 'type a URL and navigate to it' },
 ]
 
 export const USERS = [
