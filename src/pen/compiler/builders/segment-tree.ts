@@ -74,6 +74,27 @@ function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens:
   screens[segment.route] = fileNode.absPath
 }
 
+function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: string) {
+  const types = children.map(c => c.type)
+
+  if (types.includes('catchall') && types.includes('splat'))
+    throw new ConflictingCatchallError(parentAbsPath)
+
+  if (types.filter(t => t === 'catchall').length > 1)
+    throw new DuplicateCatchallError(parentAbsPath)
+
+  if (types.filter(t => t === 'splat').length > 1)
+    throw new DuplicateSplatError(parentAbsPath)
+
+  const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
+  if (new Set(params).size > 1)
+    throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
+
+  if (types.includes('splat') && children.some(c => c.type === 'static' && c.name === 'index'))
+    throw new SplatIndexConflictError(parentAbsPath)
+}
+
+
 function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
   const type: SegmentNode['type']
     = name.startsWith('(')     && name.endsWith(')')  ? 'group'
@@ -95,24 +116,4 @@ function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']
 const RANK = { group: 0, static: 1, dynamic: 2, catchall: 3, splat: 4 } as const
 function compareSegments(a: SegmentNode, b: SegmentNode): number {
   return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
-}
-
-function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: string) {
-  const types = children.map(c => c.type)
-
-  if (types.includes('catchall') && types.includes('splat'))
-    throw new ConflictingCatchallError(parentAbsPath)
-
-  if (types.filter(t => t === 'catchall').length > 1)
-    throw new DuplicateCatchallError(parentAbsPath)
-
-  if (types.filter(t => t === 'splat').length > 1)
-    throw new DuplicateSplatError(parentAbsPath)
-
-  const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
-  if (new Set(params).size > 1)
-    throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
-
-  if (types.includes('splat') && children.some(c => c.type === 'static' && c.name === 'index'))
-    throw new SplatIndexConflictError(parentAbsPath)
 }
