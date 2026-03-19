@@ -48,13 +48,13 @@ export class DuplicateCatchallError extends FileRouterError {
   }
 }
 
-export class DuplicateSplatError extends FileRouterError {
+export class DuplicateOptionalCatchallError extends FileRouterError {
   constructor(public path: string) {
     super(
       `Multiple [[...slug]] routes found in "${path}".\n\n` +
       'Only one [[...slug]] is allowed per directory.',
     )
-    this.name = 'DuplicateSplatError'
+    this.name = 'DuplicateOptionalCatchallError'
   }
 }
 
