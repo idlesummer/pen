@@ -4,9 +4,9 @@ import { removeExtension } from '@/lib/path-utils'
 import { traverse } from '@/lib/tree'
 
 export type RouteTreeNode = {
-  name: string           // raw directory name: "users", "[id]", "(auth)", ""
-  param?: string         // dynamic param name, e.g. "id" from "[id]"
-  group?: true           // true for route groups, e.g. "(auth)" — don't consume URL segments
+  name: string           // raw directory name: "users", "[id]", "(auth)", "[[...slug]]", etc.
+  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'optional-catchall'
+  param?: string         // param name for dynamic/catchall/optional-catchall nodes
   roles?: SegmentLayer   // relativized import paths for layout/screen/error/not-found
   children?: RouteTreeNode[]
 }
@@ -40,13 +40,12 @@ export function createRouteTree(segmentTree: SegmentNode, outDir: string): Route
 }
 
 function createRouteNode(segmentNode: SegmentNode, genDir: string): RouteTreeNode {
-  const { name, param, roles: segmentRoles } = segmentNode
+  const { name, type, param, roles: segmentRoles } = segmentNode
   const roles = segmentRoles && resolveRoleImports(segmentRoles, genDir)
-  const routeNode: RouteTreeNode = { name }
+  const routeNode: RouteTreeNode = { name, type }
 
   if (param !== undefined)                routeNode.param = param
   if (roles && Object.keys(roles).length) routeNode.roles = roles
-  if (name.startsWith('(') && name.endsWith(')')) routeNode.group = true
   return routeNode
 }
 

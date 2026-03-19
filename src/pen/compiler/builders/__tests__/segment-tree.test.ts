@@ -90,3 +90,52 @@ describe('createSegmentTree — dynamic routes', () => {
     expect(about.route).toBe('/about/')
   })
 })
+
+describe('createSegmentTree — catchall routes', () => {
+  it('detects a [...param] directory and sets type=catchall + param name', () => {
+    const appDir = dir('app', '/app', [
+      dir('[...slug]', '/app/[...slug]', [file('screen.tsx', '/app/[...slug]/screen.tsx')]),
+    ])
+
+    const tree = createSegmentTree(appDir)
+    const catchAll = tree.children![0]!
+
+    expect(catchAll.type).toBe('catchall')
+    expect(catchAll.param).toBe('slug')
+  })
+
+  it('uses :...param notation in the route pattern', () => {
+    const appDir = dir('app', '/app', [
+      dir('[...slug]', '/app/[...slug]', [file('screen.tsx', '/app/[...slug]/screen.tsx')]),
+    ])
+
+    const tree = createSegmentTree(appDir)
+    expect(tree.children![0]!.route).toBe('/:...slug/')
+  })
+
+  it('detects a [[...param]] directory and sets type=optional-catchall + param name', () => {
+    const appDir = dir('app', '/app', [
+      dir('[[...slug]]', '/app/[[...slug]]', [file('screen.tsx', '/app/[[...slug]]/screen.tsx')]),
+    ])
+
+    const tree = createSegmentTree(appDir)
+    const optionalCatchAll = tree.children![0]!
+
+    expect(optionalCatchAll.type).toBe('optional-catchall')
+    expect(optionalCatchAll.param).toBe('slug')
+  })
+
+  it('sorts children: static < dynamic < catchall < optional-catchall', () => {
+    const appDir = dir('app', '/app', [
+      dir('[[...opt]]',  '/app/[[...opt]]',  []),
+      dir('[...slug]',   '/app/[...slug]',   []),
+      dir('[id]',        '/app/[id]',        []),
+      dir('about',       '/app/about',       []),
+    ])
+
+    const tree = createSegmentTree(appDir)
+    const types = tree.children!.map(c => c.type)
+
+    expect(types).toEqual(['page', 'dynamic', 'catchall', 'optional-catchall'])
+  })
+})

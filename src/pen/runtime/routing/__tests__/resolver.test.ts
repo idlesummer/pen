@@ -26,11 +26,11 @@ const componentMap: PathComponentMap = {
  *   /users/    (screen)
  */
 const staticTree: RouteTreeNode = {
-  name: '',
+  name: '', type: 'page',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
-    { name: 'about', roles: { screen: './screen.js' } },
-    { name: 'users', roles: { screen: './screen.js' } },
+    { name: 'about', type: 'page', roles: { screen: './screen.js' } },
+    { name: 'users', type: 'page', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -42,19 +42,18 @@ const staticTree: RouteTreeNode = {
  *   /users/[id]/posts/  (screen)
  */
 const dynamicTree: RouteTreeNode = {
-  name: '',
+  name: '', type: 'page',
   roles: { layout: './layout.js' },
   children: [
     {
-      name: 'users',
+      name: 'users', type: 'page',
       roles: { screen: './screen.js', 'not-found': './not-found.js' },
       children: [
         {
-          name: '[id]',
-          param: 'id',
+          name: '[id]', type: 'dynamic', param: 'id',
           roles: { screen: './screen.js' },
           children: [
-            { name: 'posts', roles: { screen: './screen.js' } },
+            { name: 'posts', type: 'page', roles: { screen: './screen.js' } },
           ],
         },
       ],
@@ -72,21 +71,19 @@ const dynamicTree: RouteTreeNode = {
  * A match under (appearance) must still resolve as an exact match (not partial).
  */
 const siblingGroupTree: RouteTreeNode = {
-  name: '',
+  name: '', type: 'page',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
     {
-      name: '(account)',
-      group: true,
+      name: '(account)', type: 'group',
       children: [
-        { name: 'profile', roles: { screen: './screen.js' } },
+        { name: 'profile', type: 'page', roles: { screen: './screen.js' } },
       ],
     },
     {
-      name: '(appearance)',
-      group: true,
+      name: '(appearance)', type: 'group',
       children: [
-        { name: 'theme', roles: { screen: './screen.js' } },
+        { name: 'theme', type: 'page', roles: { screen: './screen.js' } },
       ],
     },
   ],
@@ -99,17 +96,42 @@ const siblingGroupTree: RouteTreeNode = {
  *   (auth)/profile/  (screen)
  */
 const groupTree: RouteTreeNode = {
-  name: '',
+  name: '', type: 'page',
   roles: { layout: './layout.js' },
   children: [
     {
-      name: '(auth)',
-      group: true,
+      name: '(auth)', type: 'group',
       roles: { 'not-found': './not-found.js' },
       children: [
-        { name: 'profile', roles: { screen: './screen.js' } },
+        { name: 'profile', type: 'page', roles: { screen: './screen.js' } },
       ],
     },
+  ],
+}
+
+/**
+ * Tree with a catch-all route:
+ *   /              (layout + not-found)
+ *   /[...slug]/    (screen) — matches 1+ segments
+ */
+const catchAllTree: RouteTreeNode = {
+  name: '', type: 'page',
+  roles: { layout: './layout.js', 'not-found': './not-found.js' },
+  children: [
+    { name: '[...slug]', type: 'catchall', param: 'slug', roles: { screen: './screen.js' } },
+  ],
+}
+
+/**
+ * Tree with an optional catch-all route:
+ *   /                (layout)
+ *   /[[...slug]]/    (screen) — matches 0+ segments (including root)
+ */
+const optionalCatchAllTree: RouteTreeNode = {
+  name: '', type: 'page',
+  roles: { layout: './layout.js' },
+  children: [
+    { name: '[[...slug]]', type: 'optional-catchall', param: 'slug', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -132,7 +154,7 @@ describe('createRouteResolver', () => {
     })
 
     it('resolves the root route', () => {
-      const tree: RouteTreeNode = { name: '', roles: { screen: './screen.js' } }
+      const tree: RouteTreeNode = { name: '', type: 'page', roles: { screen: './screen.js' } }
       const resolve = createRouteResolver({ routeTree: tree, componentMap })
       const { element } = resolve('/')
       expect(element).toBeDefined()
@@ -181,9 +203,9 @@ describe('createRouteResolver', () => {
 
     it('throws NotFoundError when no ancestor has a not-found boundary', () => {
       const tree: RouteTreeNode = {
-        name: '',
+        name: '', type: 'page',
         roles: { layout: './layout.js' },
-        children: [{ name: 'about', roles: { screen: './screen.js' } }],
+        children: [{ name: 'about', type: 'page', roles: { screen: './screen.js' } }],
       }
       const resolve = createRouteResolver({ routeTree: tree, componentMap })
       expect(() => resolve('/missing/')).toThrow(NotFoundError)
@@ -211,6 +233,49 @@ describe('createRouteResolver', () => {
       const resolve = createRouteResolver({ routeTree: groupTree, componentMap })
       const { element } = resolve('/missing/')
       expect(element).toBeDefined()
+    })
+  })
+
+  describe('catchall routes', () => {
+    it('matches a single segment and returns it as an array param', () => {
+      const resolve = createRouteResolver({ routeTree: catchAllTree, componentMap })
+      const { element, params } = resolve('/intro/')
+      expect(element).toBeDefined()
+      expect(params).toEqual({ slug: ['intro'] })
+    })
+
+    it('matches multiple segments and returns them as an array param', () => {
+      const resolve = createRouteResolver({ routeTree: catchAllTree, componentMap })
+      const { params } = resolve('/a/b/c/')
+      expect(params).toEqual({ slug: ['a', 'b', 'c'] })
+    })
+
+    it('does not match zero segments', () => {
+      const resolve = createRouteResolver({ routeTree: catchAllTree, componentMap })
+      // Root has not-found, so a partial match should render the not-found boundary
+      const { element } = resolve('/')
+      expect(element).toBeDefined() // not-found boundary renders
+    })
+  })
+
+  describe('optional-catchall routes', () => {
+    it('matches zero segments (root) and returns an empty array param', () => {
+      const resolve = createRouteResolver({ routeTree: optionalCatchAllTree, componentMap })
+      const { element, params } = resolve('/')
+      expect(element).toBeDefined()
+      expect(params).toEqual({ slug: [] })
+    })
+
+    it('matches a single segment', () => {
+      const resolve = createRouteResolver({ routeTree: optionalCatchAllTree, componentMap })
+      const { params } = resolve('/intro/')
+      expect(params).toEqual({ slug: ['intro'] })
+    })
+
+    it('matches multiple segments', () => {
+      const resolve = createRouteResolver({ routeTree: optionalCatchAllTree, componentMap })
+      const { params } = resolve('/a/b/c/')
+      expect(params).toEqual({ slug: ['a', 'b', 'c'] })
     })
   })
 })

@@ -57,7 +57,11 @@ function extractParams(routePath: RouteTreeNode[], segments: string[]): DynamicP
   let idx = 0
   for (let i=1; i < routePath.length; i++) {  // skip root
     const routeNode = routePath[i]!
-    if (routeNode.group) continue
+    if (routeNode.type === 'group') continue
+    if (routeNode.type === 'catchall' || routeNode.type === 'optional-catchall') {
+      if (routeNode.param) params[routeNode.param] = segments.slice(idx)
+      break
+    }
     if (routeNode.param) params[routeNode.param] = segments[idx]!
     idx++
   }

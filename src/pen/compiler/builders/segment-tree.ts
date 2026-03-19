@@ -9,10 +9,14 @@ export type SegmentLayer = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
   route: `${string}/`
   name: string
-  param?: string // e.g. "id" from [id]
-  type: 'page' | 'group' | 'dynamic'
+  param?: string // e.g. "id" from [id], "slug" from [...slug] or [[...slug]]
+  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'optional-catchall'
   roles?: SegmentLayer
   children?: SegmentNode[]
+}
+
+const TYPE_ORDER: Record<SegmentNode['type'], number> = {
+  group: 0, page: 1, dynamic: 2, catchall: 3, 'optional-catchall': 4,
 }
 
 /**
@@ -40,7 +44,9 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
       (fileNode.children ?? [])
         .filter(file => file.children && !file.name.startsWith('_'))
         .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
-        .sort((a, b) => a.segmentNode.name.localeCompare(b.segmentNode.name)),
+        .sort((a, b) =>
+          TYPE_ORDER[b.segmentNode.type] - TYPE_ORDER[a.segmentNode.type]
+          || b.segmentNode.name.localeCompare(a.segmentNode.name)),
 
     attach: (child, parent) =>
       (parent.segmentNode.children!.push(child.segmentNode)),
@@ -66,15 +72,29 @@ function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens:
 }
 
 function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
-  const isGroup   = file.name.startsWith('(') && file.name.endsWith(')')
-  const isDynamic = file.name.startsWith('[') && file.name.endsWith(']')
-  const param     = isDynamic ? file.name.slice(1, -1) : undefined
+  const isGroup           = file.name.startsWith('(') && file.name.endsWith(')')
+  const isOptionalCatchAll = /^\[\[\.\.\.(.+)\]\]$/.test(file.name)
+  const isCatchAll        = !isOptionalCatchAll && /^\[\.\.\.(.+)\]$/.test(file.name)
+  const isDynamic         = !isOptionalCatchAll && !isCatchAll
+                            && file.name.startsWith('[') && file.name.endsWith(']')
+
+  const param = isDynamic         ? file.name.slice(1, -1)
+    : isCatchAll                  ? file.name.slice(4, -1)   // "[...slug]" → "slug"
+    : isOptionalCatchAll          ? file.name.slice(5, -2)   // "[[...slug]]" → "slug"
+    : undefined
+
+  const type: SegmentNode['type'] = isGroup            ? 'group'
+    : isDynamic                                         ? 'dynamic'
+    : isCatchAll                                        ? 'catchall'
+    : isOptionalCatchAll                                ? 'optional-catchall'
+    : 'page'
+
   const route: SegmentNode['route']
-    = isGroup ? parentRoute
-    : isDynamic ? `${parentRoute}:${param}/`
+    = isGroup            ? parentRoute
+    : isDynamic          ? `${parentRoute}:${param}/`
+    : isCatchAll         ? `${parentRoute}:...${param}/`
+    : isOptionalCatchAll ? `${parentRoute}[[...${param}]]/`
     : `${posix.join(parentRoute, file.name)}/`
 
-  const name = file.name
-  const type = isGroup ? 'group' : isDynamic ? 'dynamic' : 'page'
-  return { name, route, type, param }
+  return { name: file.name, route, type, param }
 }
