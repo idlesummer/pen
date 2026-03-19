@@ -20,27 +20,29 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
 
   traverse({ idx: 0, path: routePath }, {
     visit: ({ idx, path }) => {
-      if (idx !== segments.length) return
+      if (idx !== segments.length)
+        return
+
       routePath = path
       bestDepth = -1
       // Don't short-circuit if this node has an splat child — it should take priority
       // since it provides a screen for the same URL at a deeper, more specific path.
-      const node = path[path.length-1]!
-      return !(node.children ?? []).some(c => c.type === 'splat')
+      const routeNode = path[path.length-1]!
+      return !(routeNode.children ?? []).some(c => c.type === 'splat')
     },
 
     expand: ({ idx, path }) => {
       const routeNode = path[path.length-1]!
       const segment = segments[idx]!
-      const childFrames = (routeNode.children ?? []).flatMap(child => (
-        child.type === 'group'             ? [{ idx,              path: path.concat(child) }] :
-        child.type === 'splat' ? [{ idx: segments.length, path: path.concat(child) }] :
-        child.type === 'catchall' && idx < segments.length
-                                           ? [{ idx: segments.length, path: path.concat(child) }] :
-        child.type === 'dynamic'           ? [{ idx: idx+1,       path: path.concat(child) }] :
-        child.name === segment             ? [{ idx: idx+1,       path: path.concat(child) }] : []
-      ))
-
+      const childFrames = (routeNode.children ?? []).flatMap(child => {
+        switch (child.type) {
+          case 'static':   return child.name === segment ? [{ idx: idx+1, path: path.concat(child) }] : []
+          case 'dynamic':  return [{ idx: idx+1, path: path.concat(child) }]
+          case 'catchall': return idx < segments.length ? [{ idx: segments.length, path: path.concat(child) }] : []
+          case 'splat':    return [{ idx: segments.length, path: path.concat(child) }]
+          case 'group':    return [{ idx, path: path.concat(child) }]
+        }
+      })
       if (!childFrames.length && idx > bestDepth) { // no children matched and deepest dead end so far
         routePath = path
         bestDepth = idx
