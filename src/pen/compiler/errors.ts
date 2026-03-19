@@ -1,6 +1,4 @@
-/**
- * Base error for all route-builder build errors
- */
+/** Base error for all route-builder build errors */
 export class FileRouterError extends Error {
   constructor(message: string) {
     super(message)
@@ -8,9 +6,9 @@ export class FileRouterError extends Error {
   }
 }
 
-// ============================================================================
-// File Tree Errors
-// ============================================================================
+
+// - File Tree Errors ----------------------------------------------------------------------------------------------------
+
 
 export class DirectoryNotFoundError extends FileRouterError {
   constructor(public path: string) {
@@ -36,9 +34,9 @@ export class RootIsFileError extends FileRouterError {
   }
 }
 
-// ============================================================================
-// Segment Tree Errors
-// ============================================================================
+
+// - Segment Tree Errors -------------------------------------------------------------------------------------------------
+
 
 export class DuplicateCatchallError extends FileRouterError {
   constructor(public path: string) {
@@ -90,9 +88,9 @@ export class SplatIndexConflictError extends FileRouterError {
   }
 }
 
-// ============================================================================
-// Route Tree Errors
-// ============================================================================
+
+// - Route Tree Errors ---------------------------------------------------------------------------------------------------
+
 
 export class DuplicateScreenError extends FileRouterError {
   constructor(
