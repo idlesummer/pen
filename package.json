@@ -1,6 +1,6 @@
 {
   "name": "@idlesummer/pen",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "File-based routing for React Ink apps (experimental)",
   "keywords": [
     "cli",
