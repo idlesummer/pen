@@ -81,8 +81,7 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
   if (types.filter(t => t === 'splat').length > 1)           throw new DuplicateSplatError(parentAbsPath)
 
   const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
-  if (new Set(params).size > 1)
-    throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
+  if (new Set(params).size > 1) throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
   if (types.includes('splat') && children.some(c => c.type === 'static' && c.name === 'index'))
     throw new SplatIndexConflictError(parentAbsPath)
 }
