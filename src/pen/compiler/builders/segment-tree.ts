@@ -15,7 +15,7 @@ export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
 export type SegmentLayer = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
-  route: `${string}`
+  route: string
   name: string
   param?: string // e.g. "id" from [id], "slug" from [...slug] or [[...slug]]
   type: 'static' | 'group' | 'dynamic' | 'catchall' | 'splat'
