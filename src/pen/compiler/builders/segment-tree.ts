@@ -45,6 +45,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
       bindFileToSegmentRoles(segmentNode, fileNode)
       validateUniqueScreen(segmentNode, fileNode, screens)
       validateChildSegmentTypes(segmentNode.children!, fileNode.absPath)
+      validateSegmentNode(segmentNode)
     },
     expand: ({ fileNode, segmentNode }) =>
       (fileNode.children ?? [])
@@ -98,6 +99,10 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
     throw new SplatIndexConflictError(parentAbsPath)
 }
 
+function validateSegmentNode(segment: SegmentNode) {
+  if (segment.param !== undefined && !segment.param) throw new EmptyParamNameError(segment.name)
+}
+
 function createSegmentNode(name: string, parentRoute: SegmentNode['route']): SegmentNode {
   const type: SegmentNode['type']
     = name.startsWith('(')     && name.endsWith(')')  ? 'group'
@@ -111,9 +116,6 @@ function createSegmentNode(name: string, parentRoute: SegmentNode['route']): Seg
     : type === 'catchall' ? name.slice(4, -1)
     : type === 'splat'    ? name.slice(5, -2)
     : undefined
-
-  if (param !== undefined && !param)
-    throw new EmptyParamNameError(name)
 
   const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
   return { name, route, type, param }
