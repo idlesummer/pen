@@ -15,14 +15,6 @@ export type SegmentNode = {
   children?: SegmentNode[]
 }
 
-const RANK = {
-  group: 0,
-  static: 1,
-  dynamic: 2,
-  catchall: 3,
-  splat: 4,
-} as const
-
 /**
  * Creates a segment tree from a file system tree.
  *
@@ -48,9 +40,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
       (fileNode.children ?? [])
         .filter(file => file.children && !file.name.startsWith('_'))
         .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
-        .sort((a, b) =>
-          RANK[b.segmentNode.type] - RANK[a.segmentNode.type]
-          || b.segmentNode.name.localeCompare(a.segmentNode.name)),
+        .sort((a, b) => compareSegments(a.segmentNode, b.segmentNode)),
 
     attach: (child, parent) =>
       (parent.segmentNode.children!.push(child.segmentNode)),
@@ -83,14 +73,17 @@ function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']
     : name.startsWith('[')     && name.endsWith(']')  ? 'dynamic'
     : 'static'
 
-  const param: string | undefined
+  const param
     = type === 'dynamic'  ? name.slice(1, -1)
     : type === 'catchall' ? name.slice(4, -1)
     : type === 'splat'    ? name.slice(5, -2)
     : undefined
 
-  const route: SegmentNode['route'] =
-    type === 'group' ? parentRoute : `${parentRoute}${name}/`
-
+  const route: SegmentNode['route'] = type === 'group' ? parentRoute : `${parentRoute}${name}/`
   return { name, route, type, param }
+}
+
+const RANK = { group: 0, static: 1, dynamic: 2, catchall: 3, splat: 4 } as const
+function compareSegments(a: SegmentNode, b: SegmentNode): number {
+  return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
 }
