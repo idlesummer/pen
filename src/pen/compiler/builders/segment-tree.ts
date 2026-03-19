@@ -58,6 +58,10 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   return segmentTree
 }
 
+
+// - Internal Helpers ----------------------------------------------------------------------------------------------------
+
+
 function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
   for (const child of fileNode.children ?? []) {
     const { name, ext } = parse(child.name) as { name: SegmentRole, ext: string }
@@ -79,10 +83,13 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
   if (types.includes('catchall') && types.includes('splat')) throw new ConflictingCatchallError(parentAbsPath)
   if (types.filter(t => t === 'catchall').length > 1)        throw new DuplicateCatchallError(parentAbsPath)
   if (types.filter(t => t === 'splat').length > 1)           throw new DuplicateSplatError(parentAbsPath)
+
   const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
-  if (new Set(params).size > 1)                              throw new DynamicSegmentsConflictError(parentAbsPath, params)
-  const hasStaticSibling = children.some(c => c.type === 'static')
-  if (types.includes('splat') && hasStaticSibling)           throw new SplatIndexConflictError(parentAbsPath)
+  if (params.length > 1)
+    throw new DynamicSegmentsConflictError(parentAbsPath, params)
+
+  if (types.includes('splat') && children.some(c => c.type === 'static'))
+    throw new SplatIndexConflictError(parentAbsPath)
 }
 
 function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
