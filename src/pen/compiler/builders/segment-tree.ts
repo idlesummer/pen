@@ -48,7 +48,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     expand: ({ fileNode, segmentNode }) =>
       (fileNode.children ?? [])
         .filter(file => file.children && !file.name.startsWith('_'))
-        .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
+        .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file.name, segmentNode.route) }))
         .sort((a, b) => compareSegments(a.segmentNode, b.segmentNode)),
 
     attach: (child, parent) =>
@@ -92,7 +92,7 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
     throw new SplatIndexConflictError(parentAbsPath)
 }
 
-function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
+function createSegmentNode(name: string, parentRoute: SegmentNode['route']): SegmentNode {
   const type: SegmentNode['type']
     = name.startsWith('(')     && name.endsWith(')')  ? 'group'
     : name.startsWith('[[...') && name.endsWith(']]') ? 'splat'
