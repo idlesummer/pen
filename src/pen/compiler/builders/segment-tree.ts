@@ -75,25 +75,22 @@ function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens:
   screens[segment.route] = fileNode.absPath
 }
 
-function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
-  const isGroup    = file.name.startsWith('(')    && file.name.endsWith(')')
-  const isSplat    = file.name.startsWith('[[...') && file.name.endsWith(']]')
-  const isCatchAll = !isSplat && file.name.startsWith('[...') && file.name.endsWith(']')
-  const isDynamic  = !isSplat && !isCatchAll && file.name.startsWith('[') && file.name.endsWith(']')
-
-  const param: string | undefined
-    = isDynamic  ? file.name.slice(1, -1)
-    : isCatchAll ? file.name.slice(4, -1)   // "[...slug]" → "slug"
-    : isSplat    ? file.name.slice(5, -2)   // "[[...slug]]" → "slug"
-    : undefined
-
+function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
   const type: SegmentNode['type']
-    = isGroup    ? 'group'
-    : isDynamic  ? 'dynamic'
-    : isCatchAll ? 'catchall'
-    : isSplat    ? 'splat'
+    = name.startsWith('(')     && name.endsWith(')')  ? 'group'
+    : name.startsWith('[[...') && name.endsWith(']]') ? 'splat'
+    : name.startsWith('[...')  && name.endsWith(']')  ? 'catchall'
+    : name.startsWith('[')     && name.endsWith(']')  ? 'dynamic'
     : 'static'
 
-  const route: SegmentNode['route'] = isGroup ? parentRoute : `${parentRoute}${file.name}/`
-  return { name: file.name, route, type, param }
+  const param: string | undefined
+    = type === 'dynamic'  ? name.slice(1, -1)
+    : type === 'catchall' ? name.slice(4, -1)
+    : type === 'splat'    ? name.slice(5, -2)
+    : undefined
+
+  const route: SegmentNode['route'] =
+    type === 'group' ? parentRoute : `${parentRoute}${name}/`
+
+  return { name, route, type, param }
 }
