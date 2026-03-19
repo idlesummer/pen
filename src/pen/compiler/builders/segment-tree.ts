@@ -15,7 +15,7 @@ export type SegmentNode = {
   children?: SegmentNode[]
 }
 
-const TYPE_ORDER: Record<SegmentNode['type'], number> = {
+const rank: Record<SegmentNode['type'], number> = {
   group: 0, page: 1, dynamic: 2, catchall: 3, splat: 4,
 }
 
@@ -45,7 +45,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
         .filter(file => file.children && !file.name.startsWith('_'))
         .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
         .sort((a, b) =>
-          TYPE_ORDER[b.segmentNode.type] - TYPE_ORDER[a.segmentNode.type]
+          rank[b.segmentNode.type] - rank[a.segmentNode.type]
           || b.segmentNode.name.localeCompare(a.segmentNode.name)),
 
     attach: (child, parent) =>
