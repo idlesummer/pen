@@ -24,7 +24,7 @@ describe('createSegmentTree — dynamic routes', () => {
     expect(dynamicChild.param).toBe('id')
   })
 
-  it('uses :param notation in the URL pattern', () => {
+  it('uses Next.js bracket notation in the URL pattern', () => {
     const appDir = dir('app', '/app', [
       dir('[slug]', '/app/[slug]', [file('screen.tsx', '/app/[slug]/screen.tsx')]),
     ])
@@ -32,7 +32,7 @@ describe('createSegmentTree — dynamic routes', () => {
     const tree = createSegmentTree(appDir)
     const dynamicChild = tree.children![0]!
 
-    expect(dynamicChild.route).toBe('/:slug/')
+    expect(dynamicChild.route).toBe('/[slug]/')
   })
 
   it('produces both static and dynamic children as siblings', () => {
@@ -70,11 +70,11 @@ describe('createSegmentTree — dynamic routes', () => {
 
     expect(userId.type).toBe('dynamic')
     expect(userId.param).toBe('userId')
-    expect(userId.route).toBe('/users/:userId/')
+    expect(userId.route).toBe('/users/[userId]/')
 
     expect(postId.type).toBe('dynamic')
     expect(postId.param).toBe('postId')
-    expect(postId.route).toBe('/users/:userId/posts/:postId/')
+    expect(postId.route).toBe('/users/[userId]/posts/[postId]/')
   })
 
   it('leaves static segments unchanged', () => {
@@ -104,13 +104,13 @@ describe('createSegmentTree — catchall routes', () => {
     expect(catchAll.param).toBe('slug')
   })
 
-  it('uses :...param notation in the route pattern', () => {
+  it('uses Next.js bracket notation in the route pattern', () => {
     const appDir = dir('app', '/app', [
       dir('[...slug]', '/app/[...slug]', [file('screen.tsx', '/app/[...slug]/screen.tsx')]),
     ])
 
     const tree = createSegmentTree(appDir)
-    expect(tree.children![0]!.route).toBe('/:...slug/')
+    expect(tree.children![0]!.route).toBe('/[...slug]/')
   })
 
   it('detects a [[...param]] directory and sets type=splat + param name', () => {

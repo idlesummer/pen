@@ -1,5 +1,5 @@
 import type { FileNode } from './file-tree'
-import { parse, posix } from 'path'
+import { parse } from 'path'
 import { traverse } from '@/lib/tree'
 import { RootIsFileError, DuplicateScreenError } from '../errors'
 
@@ -95,11 +95,7 @@ function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): S
     : 'static'
 
   const route: SegmentNode['route']
-    = isGroup    ? parentRoute
-    : isDynamic  ? `${parentRoute}:${param}/`
-    : isCatchAll ? `${parentRoute}:...${param}/`
-    : isSplat    ? `${parentRoute}[[...${param}]]/`
-    : `${posix.join(parentRoute, file.name)}/`
+    = isGroup ? parentRoute : `${parentRoute}${file.name}/`
 
   return { name: file.name, route, type, param }
 }
