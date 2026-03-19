@@ -43,7 +43,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     visit: ({ fileNode, segmentNode }) => {
       bindFileToSegmentRoles(segmentNode, fileNode)
       validateUniqueScreen(segmentNode, fileNode, screens)
-      validateSiblings(segmentNode.children!, fileNode.absPath)
+      validateChildSegmentTypes(segmentNode.children!, fileNode.absPath)
     },
     expand: ({ fileNode, segmentNode }) =>
       (fileNode.children ?? [])
@@ -97,7 +97,7 @@ function compareSegments(a: SegmentNode, b: SegmentNode): number {
   return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
 }
 
-function validateSiblings(children: SegmentNode[], parentAbsPath: string) {
+function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: string) {
   const types = children.map(c => c.type)
 
   if (types.includes('catchall') && types.includes('splat'))
