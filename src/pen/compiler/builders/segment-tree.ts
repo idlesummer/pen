@@ -112,7 +112,8 @@ function createSegmentNode(name: string, parentRoute: SegmentNode['route']): Seg
     : type === 'splat'    ? name.slice(5, -2)
     : undefined
 
-  if (param !== undefined && !param) throw new EmptyParamNameError(name)
+  if (param !== undefined && !param)
+    throw new EmptyParamNameError(name)
 
   const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
   return { name, route, type, param }
