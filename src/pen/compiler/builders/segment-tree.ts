@@ -5,11 +5,11 @@ import {
   RootIsFileError,
   DuplicateScreenError,
   ConflictingCatchallError,
+  ConflictingDynamicSegmentsError,
   DuplicateCatchallError,
   DuplicateOptionalCatchallError ,
-  ConflictingDynamicSegmentsError,
-  SplatIndexConflictError,
   EmptyParamNameError,
+  SplatIndexConflictError,
 } from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
