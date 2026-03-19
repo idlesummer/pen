@@ -7,7 +7,7 @@ import {
   ConflictingCatchallError,
   DuplicateCatchallError,
   DuplicateSplatError,
-  ConflictingDynamicSegmentsError,
+  DynamicSegmentsConflictError,
   SplatIndexConflictError,
 } from '../errors'
 
@@ -79,11 +79,10 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
   if (types.includes('catchall') && types.includes('splat')) throw new ConflictingCatchallError(parentAbsPath)
   if (types.filter(t => t === 'catchall').length > 1)        throw new DuplicateCatchallError(parentAbsPath)
   if (types.filter(t => t === 'splat').length > 1)           throw new DuplicateSplatError(parentAbsPath)
-
   const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
-  if (new Set(params).size > 1) throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
-  if (types.includes('splat') && children.some(c => c.type === 'static' && c.name === 'index'))
-    throw new SplatIndexConflictError(parentAbsPath)
+  if (new Set(params).size > 1)                              throw new DynamicSegmentsConflictError(parentAbsPath, params)
+  const hasStaticSibling = children.some(c => c.type === 'static')
+  if (types.includes('splat') && hasStaticSibling)           throw new SplatIndexConflictError(parentAbsPath)
 }
 
 function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
