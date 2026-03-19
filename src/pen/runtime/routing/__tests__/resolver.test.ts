@@ -26,11 +26,11 @@ const componentMap: PathComponentMap = {
  *   /users/    (screen)
  */
 const staticTree: RouteTreeNode = {
-  name: '', type: 'page',
+  name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
-    { name: 'about', type: 'page', roles: { screen: './screen.js' } },
-    { name: 'users', type: 'page', roles: { screen: './screen.js' } },
+    { name: 'about', type: 'static', roles: { screen: './screen.js' } },
+    { name: 'users', type: 'static', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -42,18 +42,18 @@ const staticTree: RouteTreeNode = {
  *   /users/[id]/posts/  (screen)
  */
 const dynamicTree: RouteTreeNode = {
-  name: '', type: 'page',
+  name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
     {
-      name: 'users', type: 'page',
+      name: 'users', type: 'static',
       roles: { screen: './screen.js', 'not-found': './not-found.js' },
       children: [
         {
           name: '[id]', type: 'dynamic', param: 'id',
           roles: { screen: './screen.js' },
           children: [
-            { name: 'posts', type: 'page', roles: { screen: './screen.js' } },
+            { name: 'posts', type: 'static', roles: { screen: './screen.js' } },
           ],
         },
       ],
@@ -71,19 +71,19 @@ const dynamicTree: RouteTreeNode = {
  * A match under (appearance) must still resolve as an exact match (not partial).
  */
 const siblingGroupTree: RouteTreeNode = {
-  name: '', type: 'page',
+  name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
     {
       name: '(account)', type: 'group',
       children: [
-        { name: 'profile', type: 'page', roles: { screen: './screen.js' } },
+        { name: 'profile', type: 'static', roles: { screen: './screen.js' } },
       ],
     },
     {
       name: '(appearance)', type: 'group',
       children: [
-        { name: 'theme', type: 'page', roles: { screen: './screen.js' } },
+        { name: 'theme', type: 'static', roles: { screen: './screen.js' } },
       ],
     },
   ],
@@ -96,14 +96,14 @@ const siblingGroupTree: RouteTreeNode = {
  *   (auth)/profile/  (screen)
  */
 const groupTree: RouteTreeNode = {
-  name: '', type: 'page',
+  name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
     {
       name: '(auth)', type: 'group',
       roles: { 'not-found': './not-found.js' },
       children: [
-        { name: 'profile', type: 'page', roles: { screen: './screen.js' } },
+        { name: 'profile', type: 'static', roles: { screen: './screen.js' } },
       ],
     },
   ],
@@ -115,7 +115,7 @@ const groupTree: RouteTreeNode = {
  *   /[...slug]/    (screen) — matches 1+ segments
  */
 const catchAllTree: RouteTreeNode = {
-  name: '', type: 'page',
+  name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
     { name: '[...slug]', type: 'catchall', param: 'slug', roles: { screen: './screen.js' } },
@@ -128,7 +128,7 @@ const catchAllTree: RouteTreeNode = {
  *   /[[...slug]]/    (screen) — matches 0+ segments (including root)
  */
 const optionalCatchAllTree: RouteTreeNode = {
-  name: '', type: 'page',
+  name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
     { name: '[[...slug]]', type: 'splat', param: 'slug', roles: { screen: './screen.js' } },
@@ -154,7 +154,7 @@ describe('createRouteResolver', () => {
     })
 
     it('resolves the root route', () => {
-      const tree: RouteTreeNode = { name: '', type: 'page', roles: { screen: './screen.js' } }
+      const tree: RouteTreeNode = { name: '', type: 'static', roles: { screen: './screen.js' } }
       const resolve = createRouteResolver({ routeTree: tree, componentMap })
       const { element } = resolve('/')
       expect(element).toBeDefined()
@@ -203,9 +203,9 @@ describe('createRouteResolver', () => {
 
     it('throws NotFoundError when no ancestor has a not-found boundary', () => {
       const tree: RouteTreeNode = {
-        name: '', type: 'page',
+        name: '', type: 'static',
         roles: { layout: './layout.js' },
-        children: [{ name: 'about', type: 'page', roles: { screen: './screen.js' } }],
+        children: [{ name: 'about', type: 'static', roles: { screen: './screen.js' } }],
       }
       const resolve = createRouteResolver({ routeTree: tree, componentMap })
       expect(() => resolve('/missing/')).toThrow(NotFoundError)
