@@ -95,7 +95,7 @@ export class SplatIndexConflictError extends FileRouterError {
 export class DuplicateScreenError extends FileRouterError {
   constructor(
     public url: string,
-    public files: string[],
+    public files: [string, string],
   ) {
     super(
       `Conflicting screen routes found at "${url}":\n` +
