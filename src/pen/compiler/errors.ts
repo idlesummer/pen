@@ -88,8 +88,19 @@ export class SplatIndexConflictError extends FileRouterError {
   }
 }
 
+export class EmptyParamNameError extends FileRouterError {
+  constructor(public name: string) {
+    super(
+      `Dynamic segment "${name}" has no param name.\n\n` +
+      'Rename the directory to include a param name, e.g. [id], [...slug], or [[...slug]].',
+    )
+    this.name = 'EmptyParamNameError'
+  }
+}
+
 
 // - Route Tree Errors ---------------------------------------------------------------------------------------------------
+
 
 
 export class DuplicateScreenError extends FileRouterError {

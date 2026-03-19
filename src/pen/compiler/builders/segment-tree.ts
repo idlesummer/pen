@@ -9,6 +9,7 @@ import {
   DuplicateOptionalCatchallError ,
   ConflictingDynamicSegmentsError,
   SplatIndexConflictError,
+  EmptyParamNameError,
 } from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
@@ -110,6 +111,8 @@ function createSegmentNode(name: string, parentRoute: SegmentNode['route']): Seg
     : type === 'catchall' ? name.slice(4, -1)
     : type === 'splat'    ? name.slice(5, -2)
     : undefined
+
+  if (param !== undefined && !param) throw new EmptyParamNameError(name)
 
   const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
   return { name, route, type, param }
