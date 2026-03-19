@@ -111,7 +111,7 @@ function createSegmentNode(name: string, parentRoute: SegmentNode['route']): Seg
     : type === 'splat'    ? name.slice(5, -2)
     : undefined
 
-  const route: SegmentNode['route'] = type === 'group' ? parentRoute : `${parentRoute}${name}/`
+  const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
   return { name, route, type, param }
 }
 
