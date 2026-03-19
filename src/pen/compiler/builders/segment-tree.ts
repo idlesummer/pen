@@ -15,9 +15,13 @@ export type SegmentNode = {
   children?: SegmentNode[]
 }
 
-const rank: Record<SegmentNode['type'], number> = {
-  group: 0, page: 1, dynamic: 2, catchall: 3, splat: 4,
-}
+const RANK = {
+  group: 0,
+  page: 1,
+  dynamic: 2,
+  catchall: 3,
+  splat: 4,
+} as const
 
 /**
  * Creates a segment tree from a file system tree.
@@ -45,7 +49,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
         .filter(file => file.children && !file.name.startsWith('_'))
         .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file, segmentNode.route) }))
         .sort((a, b) =>
-          rank[b.segmentNode.type] - rank[a.segmentNode.type]
+          RANK[b.segmentNode.type] - RANK[a.segmentNode.type]
           || b.segmentNode.name.localeCompare(a.segmentNode.name)),
 
     attach: (child, parent) =>
