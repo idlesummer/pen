@@ -131,7 +131,7 @@ const optionalCatchAllTree: RouteTreeNode = {
   name: '', type: 'page',
   roles: { layout: './layout.js' },
   children: [
-    { name: '[[...slug]]', type: 'optional-catchall', param: 'slug', roles: { screen: './screen.js' } },
+    { name: '[[...slug]]', type: 'splat', param: 'slug', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -258,7 +258,7 @@ describe('createRouteResolver', () => {
     })
   })
 
-  describe('optional-catchall routes', () => {
+  describe('splat routes', () => {
     it('matches zero segments (root) and returns an empty array param', () => {
       const resolve = createRouteResolver({ routeTree: optionalCatchAllTree, componentMap })
       const { element, params } = resolve('/')

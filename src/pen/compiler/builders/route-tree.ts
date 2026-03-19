@@ -5,8 +5,8 @@ import { traverse } from '@/lib/tree'
 
 export type RouteTreeNode = {
   name: string           // raw directory name: "users", "[id]", "(auth)", "[[...slug]]", etc.
-  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'optional-catchall'
-  param?: string         // param name for dynamic/catchall/optional-catchall nodes
+  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'splat'
+  param?: string         // param name for dynamic/catchall/splat nodes
   roles?: SegmentLayer   // relativized import paths for layout/screen/error/not-found
   children?: RouteTreeNode[]
 }

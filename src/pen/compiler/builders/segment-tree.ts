@@ -10,13 +10,13 @@ export type SegmentNode = {
   route: `${string}/`
   name: string
   param?: string // e.g. "id" from [id], "slug" from [...slug] or [[...slug]]
-  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'optional-catchall'
+  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'splat'
   roles?: SegmentLayer
   children?: SegmentNode[]
 }
 
 const TYPE_ORDER: Record<SegmentNode['type'], number> = {
-  group: 0, page: 1, dynamic: 2, catchall: 3, 'optional-catchall': 4,
+  group: 0, page: 1, dynamic: 2, catchall: 3, splat: 4,
 }
 
 /**
@@ -72,28 +72,27 @@ function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens:
 }
 
 function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): SegmentNode {
-  const isGroup           = file.name.startsWith('(') && file.name.endsWith(')')
-  const isOptionalCatchAll = /^\[\[\.\.\.(.+)\]\]$/.test(file.name)
-  const isCatchAll        = !isOptionalCatchAll && /^\[\.\.\.(.+)\]$/.test(file.name)
-  const isDynamic         = !isOptionalCatchAll && !isCatchAll
-                            && file.name.startsWith('[') && file.name.endsWith(']')
+  const isGroup    = file.name.startsWith('(') && file.name.endsWith(')')
+  const isSplat    = /^\[\[\.\.\.(.+)\]\]$/.test(file.name)
+  const isCatchAll = !isSplat && /^\[\.\.\.(.+)\]$/.test(file.name)
+  const isDynamic  = !isSplat && !isCatchAll && file.name.startsWith('[') && file.name.endsWith(']')
 
-  const param = isDynamic         ? file.name.slice(1, -1)
-    : isCatchAll                  ? file.name.slice(4, -1)   // "[...slug]" → "slug"
-    : isOptionalCatchAll          ? file.name.slice(5, -2)   // "[[...slug]]" → "slug"
+  const param = isDynamic  ? file.name.slice(1, -1)
+    : isCatchAll            ? file.name.slice(4, -1)   // "[...slug]" → "slug"
+    : isSplat               ? file.name.slice(5, -2)   // "[[...slug]]" → "slug"
     : undefined
 
-  const type: SegmentNode['type'] = isGroup            ? 'group'
-    : isDynamic                                         ? 'dynamic'
-    : isCatchAll                                        ? 'catchall'
-    : isOptionalCatchAll                                ? 'optional-catchall'
+  const type: SegmentNode['type'] = isGroup   ? 'group'
+    : isDynamic                               ? 'dynamic'
+    : isCatchAll                              ? 'catchall'
+    : isSplat                                 ? 'splat'
     : 'page'
 
   const route: SegmentNode['route']
-    = isGroup            ? parentRoute
-    : isDynamic          ? `${parentRoute}:${param}/`
-    : isCatchAll         ? `${parentRoute}:...${param}/`
-    : isOptionalCatchAll ? `${parentRoute}[[...${param}]]/`
+    = isGroup    ? parentRoute
+    : isDynamic  ? `${parentRoute}:${param}/`
+    : isCatchAll ? `${parentRoute}:...${param}/`
+    : isSplat    ? `${parentRoute}[[...${param}]]/`
     : `${posix.join(parentRoute, file.name)}/`
 
   return { name: file.name, route, type, param }

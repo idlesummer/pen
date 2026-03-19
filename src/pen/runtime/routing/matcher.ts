@@ -23,10 +23,10 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
       if (idx !== segments.length) return
       routePath = path
       bestDepth = -1
-      // Don't short-circuit if this node has an optional-catchall child — it should take priority
+      // Don't short-circuit if this node has an splat child — it should take priority
       // since it provides a screen for the same URL at a deeper, more specific path.
       const node = path[path.length-1]!
-      return !(node.children ?? []).some(c => c.type === 'optional-catchall')
+      return !(node.children ?? []).some(c => c.type === 'splat')
     },
 
     expand: ({ idx, path }) => {
@@ -34,7 +34,7 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
       const segment = segments[idx]!
       const childFrames = (routeNode.children ?? []).flatMap(child => (
         child.type === 'group'             ? [{ idx,              path: path.concat(child) }] :
-        child.type === 'optional-catchall' ? [{ idx: segments.length, path: path.concat(child) }] :
+        child.type === 'splat' ? [{ idx: segments.length, path: path.concat(child) }] :
         child.type === 'catchall' && idx < segments.length
                                            ? [{ idx: segments.length, path: path.concat(child) }] :
         child.type === 'dynamic'           ? [{ idx: idx+1,       path: path.concat(child) }] :
