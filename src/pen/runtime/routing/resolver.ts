@@ -39,6 +39,8 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
       const hasParams = Object.keys(params).length
       return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
+
+    // 4. Let root not-found boundary catch
     throw new NotFoundError(url)
   }
 }
