@@ -94,8 +94,6 @@ function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): S
     : isSplat    ? 'splat'
     : 'static'
 
-  const route: SegmentNode['route']
-    = isGroup ? parentRoute : `${parentRoute}${file.name}/`
-
+  const route: SegmentNode['route'] = isGroup ? parentRoute : `${parentRoute}${file.name}/`
   return { name: file.name, route, type, param }
 }
