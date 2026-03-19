@@ -1,7 +1,15 @@
 import type { FileNode } from './file-tree'
 import { parse } from 'path'
 import { traverse } from '@/lib/tree'
-import { RootIsFileError, DuplicateScreenError } from '../errors'
+import {
+  RootIsFileError,
+  DuplicateScreenError,
+  ConflictingCatchallError,
+  DuplicateCatchallError,
+  DuplicateSplatError,
+  ConflictingDynamicSegmentsError,
+  SplatIndexConflictError,
+} from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
@@ -35,6 +43,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     visit: ({ fileNode, segmentNode }) => {
       bindFileToSegmentRoles(segmentNode, fileNode)
       validateUniqueScreen(segmentNode, fileNode, screens)
+      validateSiblings(segmentNode.children!, fileNode.absPath)
     },
     expand: ({ fileNode, segmentNode }) =>
       (fileNode.children ?? [])
@@ -86,4 +95,24 @@ function createSegmentNode({ name }: FileNode, parentRoute: SegmentNode['route']
 const RANK = { group: 0, static: 1, dynamic: 2, catchall: 3, splat: 4 } as const
 function compareSegments(a: SegmentNode, b: SegmentNode): number {
   return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
+}
+
+function validateSiblings(children: SegmentNode[], parentAbsPath: string) {
+  const types = children.map(c => c.type)
+
+  if (types.includes('catchall') && types.includes('splat'))
+    throw new ConflictingCatchallError(parentAbsPath)
+
+  if (types.filter(t => t === 'catchall').length > 1)
+    throw new DuplicateCatchallError(parentAbsPath)
+
+  if (types.filter(t => t === 'splat').length > 1)
+    throw new DuplicateSplatError(parentAbsPath)
+
+  const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
+  if (new Set(params).size > 1)
+    throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
+
+  if (types.includes('splat') && children.some(c => c.type === 'static' && c.name === 'index'))
+    throw new SplatIndexConflictError(parentAbsPath)
 }
