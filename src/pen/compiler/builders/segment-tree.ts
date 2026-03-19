@@ -43,16 +43,17 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   traverse(nodePair, {
     visit: ({ fileNode, segmentNode }) => {
       bindFileToSegmentRoles(segmentNode, fileNode)
-      validateUniqueScreen(segmentNode, fileNode, screens)
-      validateChildSegmentTypes(segmentNode.children!, fileNode.absPath)
       validateSegmentNode(segmentNode)
+      validateUniqueScreen(segmentNode, fileNode, screens)
     },
-    expand: ({ fileNode, segmentNode }) =>
-      (fileNode.children ?? [])
+    expand: ({ fileNode, segmentNode }) => {
+      const children = (fileNode.children ?? [])
         .filter(file => file.children && !file.name.startsWith('_'))
         .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file.name, segmentNode.route) }))
-        .sort((a, b) => compareSegments(a.segmentNode, b.segmentNode)),
-
+        .sort((a, b) => compareSegments(a.segmentNode, b.segmentNode))
+      validateChildSegmentTypes(children.map(c => c.segmentNode), fileNode.absPath)
+      return children
+    },
     attach: (child, parent) =>
       (parent.segmentNode.children!.push(child.segmentNode)),
   })
@@ -71,6 +72,11 @@ function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
       (segment.roles ??= {})[name] = child.absPath
   }
   segment.children = [] // ensures children field appear last in the object
+}
+
+function validateSegmentNode(segment: SegmentNode) {
+  if (segment.param !== undefined && !segment.param)
+    throw new EmptyParamNameError(segment.name)
 }
 
 function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<string, string>) {
@@ -97,10 +103,6 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
 
   if (types.includes('splat') && children.some(c => c.type === 'static'))
     throw new SplatIndexConflictError(parentAbsPath)
-}
-
-function validateSegmentNode(segment: SegmentNode) {
-  if (segment.param !== undefined && !segment.param) throw new EmptyParamNameError(segment.name)
 }
 
 function createSegmentNode(name: string, parentRoute: SegmentNode['route']): SegmentNode {
