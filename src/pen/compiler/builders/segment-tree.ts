@@ -15,7 +15,7 @@ export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
 export type SegmentLayer = Partial<Record<SegmentRole, string>>
 export type SegmentNode = {
-  route: `${string}/`
+  route: `${string}`
   name: string
   param?: string // e.g. "id" from [id], "slug" from [...slug] or [[...slug]]
   type: 'static' | 'group' | 'dynamic' | 'catchall' | 'splat'
@@ -36,7 +36,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
     throw new RootIsFileError(fileTree.absPath)
 
   const segmentTree: SegmentNode = { name: '', route: '/', type: 'static' } // special case root
-  const screens: Record<SegmentNode['route'], string> = {}
+  const screens: Record<string, string> = {}
   const nodePair = { fileNode: fileTree, segmentNode: segmentTree }
 
   traverse(nodePair, {
@@ -71,7 +71,7 @@ function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
   segment.children = [] // ensures children field appear last in the object
 }
 
-function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<SegmentNode['route'], string>) {
+function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<string, string>) {
   if (!segment.roles?.screen) return
   if (screens[segment.route])
     throw new DuplicateScreenError(segment.route, [screens[segment.route]!, fileNode.absPath])
@@ -80,9 +80,14 @@ function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens:
 
 function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: string) {
   const types = children.map(c => c.type)
-  if (types.includes('catchall') && types.includes('splat')) throw new ConflictingCatchallError(parentAbsPath)
-  if (types.filter(t => t === 'catchall').length > 1)        throw new DuplicateCatchallError(parentAbsPath)
-  if (types.filter(t => t === 'splat').length > 1)           throw new DuplicateOptionalCatchallError(parentAbsPath)
+  if (types.includes('catchall') && types.includes('splat'))
+    throw new ConflictingCatchallError(parentAbsPath)
+
+  if (types.filter(t => t === 'catchall').length > 1)
+    throw new DuplicateCatchallError(parentAbsPath)
+
+  if (types.filter(t => t === 'splat').length > 1)
+    throw new DuplicateOptionalCatchallError(parentAbsPath)
 
   const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
   if (params.length > 1)
