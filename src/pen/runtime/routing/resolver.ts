@@ -32,7 +32,7 @@ export function createRouteResolver({ routeTree, componentMap }: RoutingTable): 
       return (routeMatchCache[url] = hasParams ? { element, params } : { element })
     }
 
-    // 3. No full match — find nearest ancestor with a not-found boundary and render it.
+    // 3. No full match - find nearest ancestor with a not-found boundary and render it.
     const notFoundIdx = chain.findIndex(layer => layer['not-found'])
     if (notFoundIdx !== -1) {
       const element = composeNotFoundChain(chain.slice(notFoundIdx), componentMap, url)
