@@ -70,13 +70,13 @@ export class DuplicateSplatError extends FileRouterError {
   }
 }
 
-export class DynamicSegmentsConflictError extends FileRouterError {
+export class ConflictingDynamicSegmentsError extends FileRouterError {
   constructor(public path: string, public params: string[]) {
     super(
       `Conflicting dynamic segments in "${path}": ${params.map(p => `[${p}]`).join(', ')}.\n\n` +
       'Only one dynamic segment name is allowed per directory level.',
     )
-    this.name = 'DynamicSegmentsConflictError'
+    this.name = 'ConflictingDynamicSegmentsError'
   }
 }
 

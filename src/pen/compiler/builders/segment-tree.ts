@@ -7,7 +7,7 @@ import {
   ConflictingCatchallError,
   DuplicateCatchallError,
   DuplicateSplatError,
-  DynamicSegmentsConflictError,
+  ConflictingDynamicSegmentsError,
   SplatIndexConflictError,
 } from '../errors'
 
@@ -86,7 +86,7 @@ function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: strin
 
   const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
   if (params.length > 1)
-    throw new DynamicSegmentsConflictError(parentAbsPath, params)
+    throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
 
   if (types.includes('splat') && children.some(c => c.type === 'static'))
     throw new SplatIndexConflictError(parentAbsPath)
