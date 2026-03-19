@@ -10,14 +10,14 @@ export type SegmentNode = {
   route: `${string}/`
   name: string
   param?: string // e.g. "id" from [id], "slug" from [...slug] or [[...slug]]
-  type: 'page' | 'group' | 'dynamic' | 'catchall' | 'splat'
+  type: 'static' | 'group' | 'dynamic' | 'catchall' | 'splat'
   roles?: SegmentLayer
   children?: SegmentNode[]
 }
 
 const RANK = {
   group: 0,
-  page: 1,
+  static: 1,
   dynamic: 2,
   catchall: 3,
   splat: 4,
@@ -35,7 +35,7 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   if (fileTree.children === undefined)
     throw new RootIsFileError(fileTree.absPath)
 
-  const segmentTree: SegmentNode = { name: '', route: '/', type: 'page' } // special case root
+  const segmentTree: SegmentNode = { name: '', route: '/', type: 'static' } // special case root
   const screens: Record<SegmentNode['route'], string> = {}
   const nodePair = { fileNode: fileTree, segmentNode: segmentTree }
 
@@ -90,7 +90,7 @@ function createSegmentNode(file: FileNode, parentRoute: SegmentNode['route']): S
     : isDynamic                               ? 'dynamic'
     : isCatchAll                              ? 'catchall'
     : isSplat                                 ? 'splat'
-    : 'page'
+    : 'static'
 
   const route: SegmentNode['route']
     = isGroup    ? parentRoute

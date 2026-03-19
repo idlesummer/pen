@@ -45,7 +45,7 @@ describe('createSegmentTree — dynamic routes', () => {
     const children = tree.children!
 
     expect(children).toHaveLength(2)
-    expect(children.some(c => c.type === 'page' && c.name === 'about')).toBe(true)
+    expect(children.some(c => c.type === 'static' && c.name === 'about')).toBe(true)
     expect(children.some(c => c.type === 'dynamic' && c.name === '[id]')).toBe(true)
   })
 
@@ -85,7 +85,7 @@ describe('createSegmentTree — dynamic routes', () => {
     const tree = createSegmentTree(appDir)
     const about = tree.children![0]!
 
-    expect(about.type).toBe('page')
+    expect(about.type).toBe('static')
     expect(about.param).toBeUndefined()
     expect(about.route).toBe('/about/')
   })
@@ -136,6 +136,6 @@ describe('createSegmentTree — catchall routes', () => {
     const tree = createSegmentTree(appDir)
     const types = tree.children!.map(c => c.type)
 
-    expect(types).toEqual(['page', 'dynamic', 'catchall', 'splat'])
+    expect(types).toEqual(['static', 'dynamic', 'catchall', 'splat'])
   })
 })
