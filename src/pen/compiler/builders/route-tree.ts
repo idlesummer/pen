@@ -111,11 +111,10 @@ function parseSegmentType(name: string): RouteNode['type'] {
   return 'static'
 }
 
-function parseParam(name: string, type: RouteNode['type']): string | undefined {
+function parseParam(name: string, type: RouteNode['type']): string | void {
   if (type === 'dynamic')           return name.slice(1, -1)
   if (type === 'required-catchall') return name.slice(4, -1)
   if (type === 'optional-catchall') return name.slice(5, -2)
-  return undefined
 }
 
 function scanRoles(absPath: string): Partial<Record<SegmentRole, string>> {
