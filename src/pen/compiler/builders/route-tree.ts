@@ -54,7 +54,6 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
   traverse({ absPath, routeNode: root, route: '/' } as Frame, {
     visit: ({ absPath, routeNode, route }) => {
       const rawRoles = scanRoles(absPath)                           // file: read role files
-
       if (rawRoles.screen) {                                        // route: duplicate screen check
         if (screens[route]) throw new DuplicateScreenError(route, [screens[route]!, rawRoles.screen])
         screens[route] = rawRoles.screen
