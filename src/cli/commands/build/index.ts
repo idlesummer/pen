@@ -4,12 +4,7 @@ import { pipe, duration, fileList } from '@idlesummer/tasker'
 import { loadConfig } from '@/pen/config'
 import { CLI_NAME, VERSION } from '@/pen/constants'
 
-// Import individual tasks
-import { buildFileTree } from './tasks/build-file-tree'
-import { buildSegmentTree } from './tasks/build-segment-tree'
 import { buildRouteTree } from './tasks/build-route-tree'
-import { writeFileTree } from './tasks/write-file-tree'
-import { writeSegmentTree } from './tasks/write-segment-tree'
 import { writeRouteTree } from './tasks/write-route-tree'
 import { writePathComponentMap } from './tasks/write-path-component-map'
 import { writeEntry } from './tasks/write-entry'
@@ -20,7 +15,7 @@ export const build: CLICommand = {
   desc: 'Build the routing structure and compile application',
   action: async () => {
     try {
-      const { appDir, outDir, emitMetadata } = await loadConfig()
+      const { appDir, outDir } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
       console.log(pc.dim( `  entry:  ${appDir}`))
@@ -29,11 +24,7 @@ export const build: CLICommand = {
       console.log()
 
       const pipeline = pipe([
-        buildFileTree,
-        buildSegmentTree,
         buildRouteTree,
-        emitMetadata && writeFileTree,
-        emitMetadata && writeSegmentTree,
         writeRouteTree,
         writePathComponentMap,
         writeEntry,
