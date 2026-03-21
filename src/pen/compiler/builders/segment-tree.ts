@@ -38,15 +38,22 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
   if (fileTree.children === undefined)
     throw new RootIsFileError(fileTree.absPath)
 
-  const segmentTree: SegmentNode = { name: '', route: '/', type: 'static' } // special case root
-  const screens: Record<string, string> = {}
-  const nodePair = { fileNode: fileTree, segmentNode: segmentTree }
+  const segmentTree = buildSegmentTree(fileTree)
+  validateRoutes(segmentTree)
+  return segmentTree
+}
 
-  traverse(nodePair, {
+
+// - Internal Helpers ----------------------------------------------------------------------------------------------------
+
+
+function buildSegmentTree(fileTree: FileNode): SegmentNode {
+  const root: SegmentNode = { name: '', route: '/', type: 'static' } // special case root
+
+  traverse({ fileNode: fileTree, segmentNode: root }, {
     visit: ({ fileNode, segmentNode }) => {
       bindFileToSegmentRoles(segmentNode, fileNode)
       validateSegmentNode(segmentNode)
-      validateUniqueScreen(segmentNode, fileNode, screens)
     },
     expand: ({ fileNode, segmentNode }) => {
       const children = expandChildren(fileNode, segmentNode.route)
@@ -57,11 +64,22 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
       (parent.segmentNode.children!.push(child.segmentNode)),
   })
 
-  return segmentTree
+  return root
 }
 
+function validateRoutes(root: SegmentNode): void {
+  const screens: Record<string, string> = {}
 
-// - Internal Helpers ----------------------------------------------------------------------------------------------------
+  traverse(root, {
+    visit: (node) => {
+      if (!node.roles?.screen) return
+      if (screens[node.route])
+        throw new DuplicateScreenError(node.route, [screens[node.route]!, node.roles.screen])
+      screens[node.route] = node.roles.screen
+    },
+    expand: (node) => node.children ?? [],
+  })
+}
 
 
 function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
@@ -76,13 +94,6 @@ function bindFileToSegmentRoles(segment: SegmentNode, fileNode: FileNode) {
 function validateSegmentNode(segment: SegmentNode) {
   if (segment.param !== undefined && !segment.param)
     throw new EmptyParamNameError(segment.name)
-}
-
-function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens: Record<string, string>) {
-  if (!segment.roles?.screen) return
-  if (screens[segment.route])
-    throw new DuplicateScreenError(segment.route, [screens[segment.route]!, fileNode.absPath])
-  screens[segment.route] = fileNode.absPath
 }
 
 function validateChildSegmentTypes(children: NodePair[], parentAbsPath: string) {
