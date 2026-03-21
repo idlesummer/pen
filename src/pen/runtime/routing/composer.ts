@@ -1,5 +1,5 @@
 import type { ComponentType, ReactElement } from 'react'
-import type { RouteTreeNode, SegmentLayer } from '@/pen/compiler'
+import type { RouteNode, SegmentLayer } from '@/pen/compiler'
 import type { ErrorComponentProps } from '../components/ErrorBoundary'
 import type { NotFoundComponentProps } from '../components/NotFoundBoundary'
 import { createElement } from 'react'
@@ -9,7 +9,7 @@ import { NotFoundError } from '../errors'
 
 export type PathComponentMap = Record<string, ComponentType>
 export type RoutingTable = {
-  routeTree: RouteTreeNode
+  routeTree: RouteNode
   componentMap: PathComponentMap
 }
 

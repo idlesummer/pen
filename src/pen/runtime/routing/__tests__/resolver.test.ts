@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { RouteTreeNode } from '@/pen/compiler'
+import type { RouteNode } from '@/pen/compiler'
 import type { PathComponentMap } from '../composer'
 import { createRouteResolver } from '../resolver'
 import { NotFoundError } from '../../errors'
@@ -25,7 +25,7 @@ const componentMap: PathComponentMap = {
  *   /about/    (screen)
  *   /users/    (screen)
  */
-const staticTree: RouteTreeNode = {
+const staticTree: RouteNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
@@ -41,7 +41,7 @@ const staticTree: RouteTreeNode = {
  *   /users/[id]/        (screen)
  *   /users/[id]/posts/  (screen)
  */
-const dynamicTree: RouteTreeNode = {
+const dynamicTree: RouteNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
@@ -70,7 +70,7 @@ const dynamicTree: RouteTreeNode = {
  * (account) sorts before (appearance), so the DFS explores (account) first.
  * A match under (appearance) must still resolve as an exact match (not partial).
  */
-const siblingGroupTree: RouteTreeNode = {
+const siblingGroupTree: RouteNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
@@ -95,7 +95,7 @@ const siblingGroupTree: RouteTreeNode = {
  *   (auth)/          (not-found boundary via group)
  *   (auth)/profile/  (screen)
  */
-const groupTree: RouteTreeNode = {
+const groupTree: RouteNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
@@ -114,7 +114,7 @@ const groupTree: RouteTreeNode = {
  *   /              (layout + not-found)
  *   /[...slug]/    (screen) — matches 1+ segments
  */
-const catchAllTree: RouteTreeNode = {
+const catchAllTree: RouteNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
@@ -127,7 +127,7 @@ const catchAllTree: RouteTreeNode = {
  *   /                (layout)
  *   /[[...slug]]/    (screen) — matches 0+ segments (including root)
  */
-const optionalCatchAllTree: RouteTreeNode = {
+const optionalCatchAllTree: RouteNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
@@ -154,7 +154,7 @@ describe('createRouteResolver', () => {
     })
 
     it('resolves the root route', () => {
-      const tree: RouteTreeNode = { name: '', type: 'static', roles: { screen: './screen.js' } }
+      const tree: RouteNode = { name: '', type: 'static', roles: { screen: './screen.js' } }
       const resolve = createRouteResolver({ routeTree: tree, componentMap })
       const { element } = resolve('/')
       expect(element).toBeDefined()
@@ -202,7 +202,7 @@ describe('createRouteResolver', () => {
     })
 
     it('throws NotFoundError when no ancestor has a not-found boundary', () => {
-      const tree: RouteTreeNode = {
+      const tree: RouteNode = {
         name: '', type: 'static',
         roles: { layout: './layout.js' },
         children: [{ name: 'about', type: 'static', roles: { screen: './screen.js' } }],

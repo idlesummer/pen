@@ -17,17 +17,17 @@ import {
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
 export type SegmentRole = typeof SEGMENT_ROLES[number]
 export type SegmentLayer = Partial<Record<SegmentRole, string>>
-export type RouteTreeNode = {
+export type RouteNode = {
   name: string
   type: 'static' | 'group' | 'dynamic' | 'required-catchall' | 'optional-catchall'
   param?: string
   roles?: SegmentLayer
-  children?: RouteTreeNode[]
+  children?: RouteNode[]
 }
 
 type Frame = {
   absPath: string
-  routeNode: RouteTreeNode
+  routeNode: RouteNode
   route: string
 }
 
@@ -35,18 +35,18 @@ type Frame = {
  * Builds a route tree directly from the filesystem in a single pass.
  *
  * Reads directories, interprets segment names, validates route structure,
- * and produces a JSON-serializable RouteTreeNode tree with relativized import paths.
+ * and produces a JSON-serializable RouteNode tree with relativized import paths.
  *
  * @param appPath - Path to the app directory
  * @param outDir - Output directory (to calculate relative import paths)
  */
-export function buildRouteTree(appPath: string, outDir: string): RouteTreeNode {
+export function buildRouteTree(appPath: string, outDir: string): RouteNode {
   const absPath = resolve(appPath)
   validateDirectory(absPath)
 
   const genDir = join(outDir, 'generated')
   const screens: Record<string, string> = {}
-  const root: RouteTreeNode = { name: '', type: 'static' }
+  const root: RouteNode = { name: '', type: 'static' }
 
   traverse({ absPath, routeNode: root, route: '/' } as Frame, {
     visit: ({ absPath, routeNode, route }) => {
@@ -91,7 +91,7 @@ function buildChildren(absPath: string, route: string): Frame[] {
       const type = parseSegmentType(name)
       const param = parseParam(name, type)
       const childRoute = type === 'group' ? route : `${route}${name}/`
-      const routeNode: RouteTreeNode = (param !== undefined)
+      const routeNode: RouteNode = (param !== undefined)
         ? { name, type, param }
         : { name, type }
       return { absPath: childAbsPath, routeNode, route: childRoute }
@@ -99,7 +99,7 @@ function buildChildren(absPath: string, route: string): Frame[] {
     .sort((a, b) => compareSegments(a.routeNode, b.routeNode))
 }
 
-function parseSegmentType(name: string): RouteTreeNode['type'] {
+function parseSegmentType(name: string): RouteNode['type'] {
   if (name.startsWith('(')     && name.endsWith(')'))  return 'group'
   if (name.startsWith('[[...') && name.endsWith(']]')) return 'optional-catchall'
   if (name.startsWith('[...')  && name.endsWith(']'))  return 'required-catchall'
@@ -107,7 +107,7 @@ function parseSegmentType(name: string): RouteTreeNode['type'] {
   return 'static'
 }
 
-function parseParam(name: string, type: RouteTreeNode['type']): string | undefined {
+function parseParam(name: string, type: RouteNode['type']): string | undefined {
   if (type === 'dynamic')           return name.slice(1, -1)
   if (type === 'required-catchall') return name.slice(4, -1)
   if (type === 'optional-catchall') return name.slice(5, -2)
@@ -170,6 +170,6 @@ function flattenGroups(frames: Frame[]): Frame[] {
 }
 
 const RANK = { group: 0, static: 1, dynamic: 2, 'required-catchall': 3, 'optional-catchall': 4 } as const
-function compareSegments(a: RouteTreeNode, b: RouteTreeNode): number {
+function compareSegments(a: RouteNode, b: RouteNode): number {
   return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
 }

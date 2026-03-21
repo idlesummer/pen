@@ -1,5 +1,5 @@
 // Types
-export type { RouteTreeNode, SegmentLayer, SegmentRole } from './builders/route-tree'
+export type { RouteNode, SegmentLayer, SegmentRole } from './builders/route-tree'
 
 // Functions and constants
 export { buildRouteTree, SEGMENT_ROLES } from './builders/route-tree'

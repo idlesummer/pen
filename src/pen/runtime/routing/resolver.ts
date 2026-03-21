@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { RouteTreeNode } from '@/pen/compiler'
+import type { RouteNode } from '@/pen/compiler'
 import type { DynamicParams } from '../providers/DynamicParamsProvider'
 import type { RoutingTable } from './composer'
 import { composeSegmentLayerChain, composeNotFoundChain } from './composer'
@@ -52,7 +52,7 @@ function toSegments(url: string): string[] {
 }
 
 /** Derives dynamic params by walking the matched path and segments together. */
-function extractParams(routePath: RouteTreeNode[], segments: string[]): DynamicParams {
+function extractParams(routePath: RouteNode[], segments: string[]): DynamicParams {
   const params: DynamicParams = {}
   let idx = 0
   for (let i=1; i < routePath.length; i++) {  // skip root

@@ -1,6 +1,6 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
-import type { RouteTreeNode } from '@/pen/compiler'
+import type { RouteNode } from '@/pen/compiler'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { duration } from '@idlesummer/tasker'
@@ -39,10 +39,10 @@ export const writePathComponentMap: Task<BuildContext> = {
   },
 }
 
-function collectComponentPaths(routeTree: RouteTreeNode) {
+function collectComponentPaths(routeTree: RouteNode) {
   const paths = new Set<string>()
 
-  function traverse(node: RouteTreeNode) {
+  function traverse(node: RouteNode) {
     for (const role of SEGMENT_ROLES) {
       if (node.roles?.[role]) paths.add(node.roles[role]!)
     }

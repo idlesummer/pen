@@ -1,4 +1,4 @@
-import type { RouteTreeNode } from '@/pen/compiler'
+import type { RouteNode } from '@/pen/compiler'
 import { traverse } from '@/lib/tree'
 
 /**
@@ -14,8 +14,8 @@ import { traverse } from '@/lib/tree'
  * @returns routePath - Root-to-leaf node sequence,
  *          partial - whether the match is incomplete
  */
-export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
-  let routePath: RouteTreeNode[] = [routeTree]
+export function matchRoutePath(routeTree: RouteNode, segments: string[]) {
+  let routePath: RouteNode[] = [routeTree]
   let bestDepth = -1  // -1 assumes exact match is found
 
   traverse({ idx: 0, path: routePath }, {
