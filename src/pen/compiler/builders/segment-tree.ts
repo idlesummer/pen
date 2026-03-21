@@ -123,7 +123,7 @@ function flattenGroups(children: NodePair[]): NodePair[] {
   return children.flatMap(({ fileNode, segmentNode }) =>
     segmentNode.type === 'group'
       ? flattenGroups(expandChildren(fileNode, segmentNode.route))
-      : [{ fileNode, segmentNode }]
+      : [{ fileNode, segmentNode }],
   )
 }
 
