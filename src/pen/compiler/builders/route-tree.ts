@@ -128,7 +128,7 @@ function scanRoles(absPath: string): SegmentLayer {
   return roles
 }
 
-function relativizeRoles(roles: Partial<Record<SegmentRole, string>>, genDir: string): SegmentLayer {
+function relativizeRoles(roles: SegmentLayer, genDir: string): SegmentLayer {
   const result: SegmentLayer = {}
   for (const [name, path] of Object.entries(roles) as [SegmentRole, string][]) {
     const relPath = relative(genDir, removeExtension(path)).replace(/\\/g, '/')
