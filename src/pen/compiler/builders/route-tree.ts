@@ -71,9 +71,8 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
       validateSiblings(segs, absPath)                              // segment: conflict checks
       return segs.sort(compareSegments).map(seg => toFrame(seg, route)) // route: build frames
     },
-    attach: (child, parent) => {
-      parent.routeNode.children!.push(child.routeNode)
-    },
+    attach: (child, parent) =>
+      parent.routeNode.children!.push(child.routeNode),
   })
 
   return root
