@@ -91,8 +91,9 @@ function buildChildren(absPath: string, route: string): Frame[] {
       const type = parseSegmentType(name)
       const param = parseParam(name, type)
       const childRoute = type === 'group' ? route : `${route}${name}/`
-      const routeNode: RouteTreeNode = { name, type }
-      if (param !== undefined) routeNode.param = param
+      const routeNode: RouteTreeNode = (param !== undefined)
+        ? { name, type, param }
+        : { name, type }
       return { absPath: childAbsPath, routeNode, route: childRoute }
     })
     .sort((a, b) => compareSegments(a.routeNode, b.routeNode))
