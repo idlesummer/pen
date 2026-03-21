@@ -61,7 +61,6 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
 
       if (Object.keys(rawRoles).length)                            // route: attach relativized roles
         routeNode.roles = relativizeRoles(rawRoles, genDir)
-
       routeNode.children = []                                      // route: init children (preserves field order)
     },
     expand: ({ absPath, route }) => {
