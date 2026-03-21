@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/pen/constants'
 import { build } from './commands/build'
+import { dev } from './commands/dev'
 import { init } from './commands/init'
 import { start } from './commands/start'
 
@@ -10,7 +11,7 @@ function configureProgram(program: Command) {
     .description(DESCRIPTION)
     .version(VERSION)
 
-  const commands = [build, init, start] as const
+  const commands = [build, dev, init, start] as const
   for (const { name, desc, action } of commands) {
     program
       .command(name)

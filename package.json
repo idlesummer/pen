@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@idlesummer/tasker": "^0.2.0",
+    "chokidar": "^4.0.3",
     "commander": "^14.0.2",
     "ora": "^9.0.0",
     "picomatch": "^4.0.3",
