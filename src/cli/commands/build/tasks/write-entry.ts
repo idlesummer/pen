@@ -28,6 +28,12 @@ export const writeEntry: Task<BuildContext> = {
       '  await waitUntilExit()',
       '}',
       '',
+      'export function mount(initialUrl: string) {',
+      '  const routingTable = { routeTree, componentMap }',
+      '  const element = createElement(App, { initialUrl, routingTable })',
+      '  return render(element)',
+      '}',
+      '',
     ].join('\n')
 
     await mkdir(genDir, { recursive: true })

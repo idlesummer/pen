@@ -1,6 +1,5 @@
 import { resolve, join } from 'path'
-import { spawn } from 'child_process'
-import type { ChildProcess } from 'child_process'
+import { pathToFileURL } from 'url'
 import { watch as rolldownWatch } from 'rolldown'
 import { watch as chokidarWatch } from 'chokidar'
 import nodeExternals from 'rollup-plugin-node-externals'
@@ -21,15 +20,25 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
   const entryTs = resolve(join(outDir, 'generated', 'entry.ts'))
   const entryJs = resolve(join(outDir, 'dist', 'entry.js'))
 
-  let appProcess: ChildProcess | null = null
+  let unmount: (() => void) | null = null
   let codegenRunning = false
 
-  function restartApp() {
-    if (appProcess) {
-      appProcess.kill()
-      appProcess = null
+  async function startApp() {
+    if (unmount) {
+      unmount()
+      unmount = null
     }
-    appProcess = spawn('node', [entryJs], { stdio: 'inherit' })
+    try {
+      // Cache-bust so Node re-evaluates the updated module
+      const entryUrl = pathToFileURL(entryJs).href + `?v=${Date.now()}`
+      const { mount } = await import(entryUrl)
+      const instance = mount('/')
+      unmount = instance.unmount
+    }
+    catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      process.stderr.write(pc.red('\nFailed to start app: ') + message + '\n')
+    }
   }
 
   async function runCodegen() {
@@ -41,7 +50,7 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
     }
     catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      console.error(pc.red('\nCodegen failed:'), message)
+      process.stderr.write(pc.red('\nCodegen failed: ') + message + '\n')
     }
     finally {
       codegenRunning = false
@@ -63,37 +72,32 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
     },
   })
 
-  bundleWatcher.on('event', (event) => {
+  bundleWatcher.on('event', async (event) => {
     if (event.code === 'BUNDLE_END') {
       event.result.close()
-      restartApp()
+      await startApp()
     }
     if (event.code === 'ERROR') {
-      console.error(pc.red('\nBuild error:'), event.error.message)
+      process.stderr.write(pc.red('\nBuild error: ') + event.error.message + '\n')
     }
   })
 
   // Chokidar handles new/deleted route files (not yet in Rolldown's module graph)
   const fsWatcher = chokidarWatch(appDir, { ignoreInitial: true })
 
-  fsWatcher.on('add', async (filePath) => {
-    console.log(pc.dim(`\n  + ${filePath}`))
+  fsWatcher.on('add', async () => {
     await runCodegen()
   })
 
-  fsWatcher.on('unlink', async (filePath) => {
-    console.log(pc.dim(`\n  - ${filePath}`))
+  fsWatcher.on('unlink', async () => {
     await runCodegen()
   })
-
-  console.log(pc.green('  Watching for changes...'))
-  console.log()
 
   return new Promise<void>(() => {
     process.on('SIGINT', () => {
       bundleWatcher.close()
       fsWatcher.close()
-      if (appProcess) appProcess.kill()
+      if (unmount) unmount()
       process.exit(0)
     })
   })
