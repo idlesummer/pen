@@ -25,10 +25,10 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
 
       routePath = path
       bestDepth = -1
-      // Don't short-circuit if this node has an splat child — it should take priority
+      // Don't short-circuit if this node has an optional-catchall child — it should take priority
       // since it provides a screen for the same URL at a deeper, more specific path.
       const routeNode = path[path.length-1]!
-      return !(routeNode.children ?? []).some(c => c.type === 'splat')
+      return !(routeNode.children ?? []).some(c => c.type === 'optional-catchall')
     },
 
     expand: ({ idx, path }) => {
@@ -36,13 +36,14 @@ export function matchRoutePath(routeTree: RouteTreeNode, segments: string[]) {
       const segment = segments[idx]!
       const childFrames = (routeNode.children ?? []).flatMap(child => {
         switch (child.type) {
-          case 'static':   return child.name === segment ? [{ idx: idx+1, path: path.concat(child) }] : []
-          case 'dynamic':  return [{ idx: idx+1, path: path.concat(child) }]
-          case 'catchall': return idx < segments.length ? [{ idx: segments.length, path: path.concat(child) }] : []
-          case 'splat':    return [{ idx: segments.length, path: path.concat(child) }]
-          case 'group':    return [{ idx, path: path.concat(child) }]
+          case 'static':            return child.name === segment ? [{ idx: idx+1,          path: path.concat(child) }] : []
+          case 'dynamic':           return                          [{ idx: idx+1,          path: path.concat(child) }]
+          case 'required-catchall': return idx < segments.length  ? [{ idx: segments.length, path: path.concat(child) }] : []
+          case 'optional-catchall': return                          [{ idx: segments.length, path: path.concat(child) }]
+          case 'group':             return                          [{ idx,                 path: path.concat(child) }]
         }
       })
+
       if (!childFrames.length && idx > bestDepth) { // no children matched and deepest dead end so far
         routePath = path
         bestDepth = idx

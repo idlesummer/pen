@@ -118,7 +118,7 @@ const catchAllTree: RouteTreeNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js', 'not-found': './not-found.js' },
   children: [
-    { name: '[...slug]', type: 'catchall', param: 'slug', roles: { screen: './screen.js' } },
+    { name: '[...slug]', type: 'required-catchall', param: 'slug', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -131,7 +131,7 @@ const optionalCatchAllTree: RouteTreeNode = {
   name: '', type: 'static',
   roles: { layout: './layout.js' },
   children: [
-    { name: '[[...slug]]', type: 'splat', param: 'slug', roles: { screen: './screen.js' } },
+    { name: '[[...slug]]', type: 'optional-catchall', param: 'slug', roles: { screen: './screen.js' } },
   ],
 }
 
@@ -236,7 +236,7 @@ describe('createRouteResolver', () => {
     })
   })
 
-  describe('catchall routes', () => {
+  describe('required-catchall routes', () => {
     it('matches a single segment and returns it as an array param', () => {
       const resolve = createRouteResolver({ routeTree: catchAllTree, componentMap })
       const { element, params } = resolve('/intro/')
@@ -258,7 +258,7 @@ describe('createRouteResolver', () => {
     })
   })
 
-  describe('splat routes', () => {
+  describe('optional-catchall routes', () => {
     it('matches zero segments (root) and returns an empty array param', () => {
       const resolve = createRouteResolver({ routeTree: optionalCatchAllTree, componentMap })
       const { element, params } = resolve('/')

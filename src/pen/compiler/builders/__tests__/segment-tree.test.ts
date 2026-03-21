@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import type { FileNode } from '../file-tree'
 import { createSegmentTree } from '../segment-tree'
+import {
+  ConflictingCatchallError,
+  ConflictingDynamicSegmentsError,
+  DuplicateCatchallError,
+  DuplicateOptionalCatchallError,
+  SplatIndexConflictError,
+} from '../../errors'
 
 /** Minimal helper to build a fake file-tree directory node. */
 function dir(name: string, absPath: string, children: FileNode[] = []): FileNode {
@@ -100,7 +107,7 @@ describe('createSegmentTree — catchall routes', () => {
     const tree = createSegmentTree(appDir)
     const catchAll = tree.children![0]!
 
-    expect(catchAll.type).toBe('catchall')
+    expect(catchAll.type).toBe('required-catchall')
     expect(catchAll.param).toBe('slug')
   })
 
@@ -121,21 +128,88 @@ describe('createSegmentTree — catchall routes', () => {
     const tree = createSegmentTree(appDir)
     const optionalCatchAll = tree.children![0]!
 
-    expect(optionalCatchAll.type).toBe('splat')
+    expect(optionalCatchAll.type).toBe('optional-catchall')
     expect(optionalCatchAll.param).toBe('slug')
   })
 
-  it('sorts children: static < dynamic < catchall < splat', () => {
+  it('sorts children: static < dynamic < required-catchall', () => {
     const appDir = dir('app', '/app', [
-      dir('[[...opt]]',  '/app/[[...opt]]',  []),
       dir('[...slug]',   '/app/[...slug]',   []),
       dir('[id]',        '/app/[id]',        []),
       dir('about',       '/app/about',       []),
     ])
 
     const tree = createSegmentTree(appDir)
-    const types = tree.children!.map(c => c.type)
+    expect(tree.children!.map(c => c.type)).toEqual(['static', 'dynamic', 'required-catchall'])
+  })
 
-    expect(types).toEqual(['static', 'dynamic', 'catchall', 'splat'])
+  it('sorts children: static < dynamic < optional-catchall', () => {
+    const appDir = dir('app', '/app', [
+      dir('[[...opt]]',  '/app/[[...opt]]',  []),
+      dir('[id]',        '/app/[id]',        []),
+    ])
+
+    const tree = createSegmentTree(appDir)
+    expect(tree.children!.map(c => c.type)).toEqual(['dynamic', 'optional-catchall'])
+  })
+})
+
+describe('createSegmentTree — group validation', () => {
+  it('throws ConflictingDynamicSegmentsError when two groups expose the same dynamic param', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [dir('[id]', '/app/(a)/[id]', [])]),
+      dir('(b)', '/app/(b)', [dir('[slug]', '/app/(b)/[slug]', [])]),
+    ])
+    expect(() => createSegmentTree(appDir)).toThrow(ConflictingDynamicSegmentsError)
+  })
+
+  it('throws DuplicateCatchallError when two groups both expose a required-catchall', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [dir('[...slug]', '/app/(a)/[...slug]', [])]),
+      dir('(b)', '/app/(b)', [dir('[...slug]', '/app/(b)/[...slug]', [])]),
+    ])
+    expect(() => createSegmentTree(appDir)).toThrow(DuplicateCatchallError)
+  })
+
+  it('throws ConflictingCatchallError when groups expose both required- and optional-catchall', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [dir('[...slug]',   '/app/(a)/[...slug]',   [])]),
+      dir('(b)', '/app/(b)', [dir('[[...slug]]', '/app/(b)/[[...slug]]', [])]),
+    ])
+    expect(() => createSegmentTree(appDir)).toThrow(ConflictingCatchallError)
+  })
+
+  it('throws DuplicateOptionalCatchallError when two groups both expose an optional-catchall', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [dir('[[...slug]]', '/app/(a)/[[...slug]]', [])]),
+      dir('(b)', '/app/(b)', [dir('[[...slug]]', '/app/(b)/[[...slug]]', [])]),
+    ])
+    expect(() => createSegmentTree(appDir)).toThrow(DuplicateOptionalCatchallError)
+  })
+
+  it('throws SplatIndexConflictError when a group exposes an optional-catchall alongside a static sibling', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [dir('[[...slug]]', '/app/(a)/[[...slug]]', [])]),
+      dir('about', '/app/about', []),
+    ])
+    expect(() => createSegmentTree(appDir)).toThrow(SplatIndexConflictError)
+  })
+
+  it('detects conflicts through nested groups', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [
+        dir('(b)', '/app/(a)/(b)', [dir('[id]', '/app/(a)/(b)/[id]', [])]),
+      ]),
+      dir('(c)', '/app/(c)', [dir('[slug]', '/app/(c)/[slug]', [])]),
+    ])
+    expect(() => createSegmentTree(appDir)).toThrow(ConflictingDynamicSegmentsError)
+  })
+
+  it('allows non-conflicting children across sibling groups', () => {
+    const appDir = dir('app', '/app', [
+      dir('(a)', '/app/(a)', [dir('profile', '/app/(a)/profile', [])]),
+      dir('(b)', '/app/(b)', [dir('settings', '/app/(b)/settings', [])]),
+    ])
+    expect(() => createSegmentTree(appDir)).not.toThrow()
   })
 })

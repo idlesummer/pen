@@ -19,10 +19,12 @@ export type SegmentNode = {
   route: string
   name: string
   param?: string // e.g. "id" from [id], "slug" from [...slug] or [[...slug]]
-  type: 'static' | 'group' | 'dynamic' | 'catchall' | 'splat'
+  type: 'static' | 'group' | 'dynamic' | 'required-catchall' | 'optional-catchall'
   roles?: SegmentLayer
   children?: SegmentNode[]
 }
+
+type NodePair = { fileNode: FileNode; segmentNode: SegmentNode }
 
 /**
  * Creates a segment tree from a file system tree.
@@ -47,11 +49,8 @@ export function createSegmentTree(fileTree: FileNode): SegmentNode {
       validateUniqueScreen(segmentNode, fileNode, screens)
     },
     expand: ({ fileNode, segmentNode }) => {
-      const children = (fileNode.children ?? [])
-        .filter(file => file.children && !file.name.startsWith('_'))
-        .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file.name, segmentNode.route) }))
-        .sort((a, b) => compareSegments(a.segmentNode, b.segmentNode))
-      validateChildSegmentTypes(children.map(c => c.segmentNode), fileNode.absPath)
+      const children = expandChildren(fileNode, segmentNode.route)
+      validateChildSegmentTypes(children, fileNode.absPath)
       return children
     },
     attach: (child, parent) =>
@@ -86,44 +85,63 @@ function validateUniqueScreen(segment: SegmentNode, fileNode: FileNode, screens:
   screens[segment.route] = fileNode.absPath
 }
 
-function validateChildSegmentTypes(children: SegmentNode[], parentAbsPath: string) {
-  const types = children.map(c => c.type)
-  if (types.includes('catchall') && types.includes('splat'))
+function validateChildSegmentTypes(children: NodePair[], parentAbsPath: string) {
+  const types = children.map(c => c.segmentNode.type)
+  if (types.includes('required-catchall') && types.includes('optional-catchall'))
     throw new ConflictingCatchallError(parentAbsPath)
 
-  if (types.filter(t => t === 'catchall').length > 1)
+  if (types.filter(t => t === 'required-catchall').length > 1)
     throw new DuplicateCatchallError(parentAbsPath)
 
-  if (types.filter(t => t === 'splat').length > 1)
+  if (types.filter(t => t === 'optional-catchall').length > 1)
     throw new DuplicateOptionalCatchallError(parentAbsPath)
 
-  const params = children.filter(c => c.type === 'dynamic').map(c => c.param!)
+  const params = children.filter(c => c.segmentNode.type === 'dynamic').map(c => c.segmentNode.param!)
   if (params.length > 1)
     throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
 
-  if (types.includes('splat') && children.some(c => c.type === 'static'))
+  if (types.includes('optional-catchall') && children.some(c => c.segmentNode.type === 'static'))
     throw new SplatIndexConflictError(parentAbsPath)
+
+  if (types.includes('group'))
+    validateChildSegmentTypes(flattenGroups(children), parentAbsPath)
+}
+
+/** Recursively replaces group nodes with their own children until no groups remain. */
+function flattenGroups(children: NodePair[]): NodePair[] {
+  return children.flatMap(({ fileNode, segmentNode }) =>
+    segmentNode.type === 'group'
+      ? flattenGroups(expandChildren(fileNode, segmentNode.route))
+      : [{ fileNode, segmentNode }]
+  )
+}
+
+function expandChildren(fileNode: FileNode, parentRoute: string): NodePair[] {
+  return (fileNode.children ?? [])
+    .filter(file => file.children && !file.name.startsWith('_'))
+    .map(file => ({ fileNode: file, segmentNode: createSegmentNode(file.name, parentRoute) }))
+    .sort((a, b) => compareSegments(a.segmentNode, b.segmentNode))
 }
 
 function createSegmentNode(name: string, parentRoute: SegmentNode['route']): SegmentNode {
   const type: SegmentNode['type']
     = name.startsWith('(')     && name.endsWith(')')  ? 'group'
-    : name.startsWith('[[...') && name.endsWith(']]') ? 'splat'
-    : name.startsWith('[...')  && name.endsWith(']')  ? 'catchall'
+    : name.startsWith('[[...') && name.endsWith(']]') ? 'optional-catchall'
+    : name.startsWith('[...')  && name.endsWith(']')  ? 'required-catchall'
     : name.startsWith('[')     && name.endsWith(']')  ? 'dynamic'
     : 'static'
 
   const param
-    = type === 'dynamic'  ? name.slice(1, -1)
-    : type === 'catchall' ? name.slice(4, -1)
-    : type === 'splat'    ? name.slice(5, -2)
+    = type === 'dynamic'            ? name.slice(1, -1)
+    : type === 'required-catchall'  ? name.slice(4, -1)
+    : type === 'optional-catchall'  ? name.slice(5, -2)
     : undefined
 
   const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
   return { name, route, type, param }
 }
 
-const RANK = { group: 0, static: 1, dynamic: 2, catchall: 3, splat: 4 } as const
+const RANK = { group: 0, static: 1, dynamic: 2, 'required-catchall': 3, 'optional-catchall': 4 } as const
 function compareSegments(a: SegmentNode, b: SegmentNode): number {
   return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
 }
