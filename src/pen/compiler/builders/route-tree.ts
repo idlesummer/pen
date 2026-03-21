@@ -25,11 +25,14 @@ export type RouteNode = {
   children?: RouteNode[]
 }
 
-type Frame = {
-  absPath: string
-  routeNode: RouteNode
-  route: string
-}
+// file concern: raw filesystem entry
+type DirEntry = { name: string; absPath: string }
+
+// segment concern: parsed routing semantics
+type Segment = DirEntry & { type: RouteNode['type']; param?: string }
+
+// route concern: full traversal frame with URL and tree node
+type Frame = { absPath: string; routeNode: RouteNode; route: string }
 
 /**
  * Builds a route tree directly from the filesystem in a single pass.
@@ -50,25 +53,23 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
 
   traverse({ absPath, routeNode: root, route: '/' } as Frame, {
     visit: ({ absPath, routeNode, route }) => {
-      const rawRoles = scanRoles(absPath)
+      const rawRoles = scanRoles(absPath)                           // file: read role files
 
-      if (rawRoles.screen) {
+      if (rawRoles.screen) {                                        // route: duplicate screen check
         if (screens[route]) throw new DuplicateScreenError(route, [screens[route]!, rawRoles.screen])
         screens[route] = rawRoles.screen
       }
 
-      if (Object.keys(rawRoles).length)
+      if (Object.keys(rawRoles).length)                            // route: attach relativized roles
         routeNode.roles = relativizeRoles(rawRoles, genDir)
 
-      if (routeNode.param !== undefined && !routeNode.param)
-        throw new EmptyParamNameError(routeNode.name)
-
-      routeNode.children = [] // ensures children field appears last in the object
+      routeNode.children = []                                      // route: init children (preserves field order)
     },
     expand: ({ absPath, route }) => {
-      const children = buildChildren(absPath, route)
-      validateChildTypes(children, absPath)
-      return children
+      const dirs = readDirs(absPath)                               // file: read + filter entries
+      const segs = dirs.map(toSegment)                             // segment: parse names → types/params
+      validateSiblings(segs, absPath)                              // segment: conflict checks
+      return segs.sort(compareSegments).map(seg => toFrame(seg, route)) // route: build frames
     },
     attach: (child, parent) => {
       parent.routeNode.children!.push(child.routeNode)
@@ -82,21 +83,25 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
 // - Internal Helpers ----------------------------------------------------------------------------------------------------
 
 
-function buildChildren(absPath: string, route: string): Frame[] {
+// file → segment → route transformation functions
+
+function readDirs(absPath: string): DirEntry[] {
   return readdirSync(absPath, { withFileTypes: true })
     .filter(d => d.isDirectory() && !d.name.startsWith('_'))
-    .map(d => {
-      const name = d.name
-      const childAbsPath = join(absPath, name)
-      const type = parseSegmentType(name)
-      const param = parseParam(name, type)
-      const childRoute = type === 'group' ? route : `${route}${name}/`
-      const routeNode: RouteNode = (param !== undefined)
-        ? { name, type, param }
-        : { name, type }
-      return { absPath: childAbsPath, routeNode, route: childRoute }
-    })
-    .sort((a, b) => compareSegments(a.routeNode, b.routeNode))
+    .map(d => ({ name: d.name, absPath: join(absPath, d.name) }))
+}
+
+function toSegment({ name, absPath }: DirEntry): Segment {
+  const type = parseSegmentType(name)
+  const param = parseParam(name, type)
+  if (param !== undefined && !param) throw new EmptyParamNameError(name)
+  return param !== undefined ? { name, absPath, type, param } : { name, absPath, type }
+}
+
+function toFrame({ name, absPath, type, param }: Segment, parentRoute: string): Frame {
+  const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
+  const routeNode: RouteNode = param !== undefined ? { name, type, param } : { name, type }
+  return { absPath, routeNode, route }
 }
 
 function parseSegmentType(name: string): RouteNode['type'] {
@@ -140,8 +145,8 @@ function validateDirectory(path: string) {
   if (!stat.isDirectory()) throw new NotADirectoryError(path)
 }
 
-function validateChildTypes(frames: Frame[], parentAbsPath: string) {
-  const types = frames.map(f => f.routeNode.type)
+function validateSiblings(segs: Segment[], parentAbsPath: string) {
+  const types = segs.map(s => s.type)
 
   if (types.includes('required-catchall') && types.includes('optional-catchall'))
     throw new ConflictingCatchallError(parentAbsPath)
@@ -150,26 +155,26 @@ function validateChildTypes(frames: Frame[], parentAbsPath: string) {
   if (types.filter(t => t === 'optional-catchall').length > 1)
     throw new DuplicateOptionalCatchallError(parentAbsPath)
 
-  const params = frames.filter(f => f.routeNode.type === 'dynamic').map(f => f.routeNode.param!)
+  const params = segs.filter(s => s.type === 'dynamic').map(s => s.param!)
   if (params.length > 1)
     throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
 
-  if (types.includes('optional-catchall') && frames.some(f => f.routeNode.type === 'static'))
+  if (types.includes('optional-catchall') && segs.some(s => s.type === 'static'))
     throw new SplatIndexConflictError(parentAbsPath)
 
   if (types.includes('group'))
-    validateChildTypes(flattenGroups(frames), parentAbsPath)
+    validateSiblings(flattenGroupSegs(segs), parentAbsPath)
 }
 
-function flattenGroups(frames: Frame[]): Frame[] {
-  return frames.flatMap(frame =>
-    frame.routeNode.type === 'group'
-      ? flattenGroups(buildChildren(frame.absPath, frame.route))
-      : [frame],
+function flattenGroupSegs(segs: Segment[]): Segment[] {
+  return segs.flatMap(seg =>
+    seg.type === 'group'
+      ? flattenGroupSegs(readDirs(seg.absPath).map(toSegment))
+      : [seg],
   )
 }
 
 const RANK = { group: 0, static: 1, dynamic: 2, 'required-catchall': 3, 'optional-catchall': 4 } as const
-function compareSegments(a: RouteNode, b: RouteNode): number {
+function compareSegments(a: Segment, b: Segment): number {
   return RANK[b.type] - RANK[a.type] || b.name.localeCompare(a.name)
 }
