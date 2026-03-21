@@ -141,7 +141,7 @@ function relativizeRoles(roles: Partial<Record<SegmentRole, string>>, genDir: st
 
 function validateDirectory(path: string) {
   const stat = statSync(path, { throwIfNoEntry: false })
-  if (!stat) throw new DirectoryNotFoundError(path)
+  if (!stat)               throw new DirectoryNotFoundError(path)
   if (!stat.isDirectory()) throw new NotADirectoryError(path)
 }
 
