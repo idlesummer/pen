@@ -117,13 +117,13 @@ function parseParam(name: string, type: RouteNode['type']): string | void {
   if (type === 'optional-catchall') return name.slice(5, -2)
 }
 
-function scanRoles(absPath: string): Partial<Record<SegmentRole, string>> {
-  const roles: Partial<Record<SegmentRole, string>> = {}
+function scanRoles(absPath: string): SegmentLayer {
+  const roles: SegmentLayer = {}
   for (const dirent of readdirSync(absPath, { withFileTypes: true })) {
     if (!dirent.isFile()) continue
-    const { name, ext } = parse(dirent.name)
-    if (ext === '.tsx' && (SEGMENT_ROLES as readonly string[]).includes(name))
-      roles[name as SegmentRole] = join(absPath, dirent.name)
+    const { name, ext } = parse(dirent.name) as { name: SegmentRole; ext: string }
+    if (ext === '.tsx' && SEGMENT_ROLES.includes(name))
+      roles[name] = join(absPath, dirent.name)
   }
   return roles
 }
