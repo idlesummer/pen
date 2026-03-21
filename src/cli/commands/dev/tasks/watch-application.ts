@@ -94,11 +94,15 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
   })
 
   return new Promise<void>(() => {
-    process.on('SIGINT', () => {
+    // 'exit' fires when process.exit() is called regardless of how we got here
+    // (Ink's exitOnCtrlC calls process.exit via the \x03 keypress in raw mode)
+    process.once('exit', () => {
       bundleWatcher.close()
       fsWatcher.close()
       if (unmount) unmount()
-      process.exit(0)
     })
+
+    // Fallback for non-raw-mode environments where Ctrl+C delivers SIGINT as a signal
+    process.once('SIGINT', () => process.exit(0))
   })
 }
