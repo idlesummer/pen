@@ -3,6 +3,7 @@ import { resolve, join, relative, parse } from 'path'
 import { traverse } from '@/lib/tree'
 import { removeExtension } from '@/lib/path-utils'
 import {
+  FileRouterError,
   DirectoryNotFoundError,
   NotADirectoryError,
   DuplicateScreenError,
@@ -12,6 +13,7 @@ import {
   ConflictingDynamicSegmentsError,
   SplatIndexConflictError,
   EmptyParamNameError,
+  RouteValidationErrors,
 } from '../errors'
 
 export const SEGMENT_ROLES = ['layout', 'screen', 'error', 'not-found'] as const
@@ -31,14 +33,24 @@ type DirEntry = { name: string; absPath: string }
 // segment concern: parsed routing semantics
 type Segment = DirEntry & { type: RouteNode['type']; param?: string }
 
-// route concern: full traversal frame with URL and tree node
-type Frame = { absPath: string; routeNode: RouteNode; route: string }
+// Internal node: full context needed for both passes
+type BuildNode = {
+  name: string
+  type: RouteNode['type']
+  param?: string
+  rawRoles: SegmentLayer   // absolute paths, relativized only at conversion
+  children: BuildNode[]
+  absPath: string
+  route: string
+}
+
+// route concern: full traversal frame
+type Frame = { absPath: string; buildNode: BuildNode; route: string }
 
 /**
- * Builds a route tree directly from the filesystem in a single pass.
- *
- * Reads directories, interprets segment names, validates route structure,
- * and produces a JSON-serializable RouteNode tree with relativized import paths.
+ * Builds a route tree directly from the filesystem in two passes:
+ *   1. Build  — reads the filesystem and constructs the full tree
+ *   2. Validate — walks the completed tree, collects all errors, then throws
  *
  * @param appPath - Path to the app directory
  * @param outDir - Output directory (to calculate relative import paths)
@@ -48,32 +60,42 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
   validateDirectory(absPath)
 
   const genDir = join(outDir, 'generated')
-  const screens: Record<string, string> = {}
-  const root: RouteNode = { name: '', type: 'static' }
+  const root: BuildNode = { name: '', type: 'static', rawRoles: {}, children: [], absPath, route: '/' }
 
-  traverse({ absPath, routeNode: root, route: '/' } as Frame, {
-    visit: ({ absPath, routeNode, route }) => {
-      const rawRoles = scanRoles(absPath)                           // file: read role files
-      if (rawRoles.screen) {                                        // route: duplicate screen check
-        if (screens[route]) throw new DuplicateScreenError(route, [screens[route]!, rawRoles.screen])
-        screens[route] = rawRoles.screen
-      }
-
-      if (Object.keys(rawRoles).length)                            // route: attach relativized roles
-        routeNode.roles = relativizeRoles(rawRoles, genDir)
-      routeNode.children = []                                      // route: init children (preserves field order)
+  // Pass 1: Build — read filesystem, construct tree (no validation)
+  traverse({ absPath, buildNode: root, route: '/' } as Frame, {
+    visit: ({ absPath, buildNode }) => {
+      buildNode.rawRoles = scanRoles(absPath)
     },
     expand: ({ absPath, route }) => {
-      const dirs = readDirs(absPath)                               // file: read + filter entries
-      const segs = dirs.map(toSegment)                             // segment: parse names → types/params
-      validateSiblings(segs, absPath)                              // segment: conflict checks
-      return segs.sort(compareSegments).map(seg => toFrame(seg, route)) // route: build frames
+      const dirs = readDirs(absPath)
+      const segs = dirs.map(toSegment)                         // EmptyParamNameError may throw here
+      return segs.sort(compareSegments).map(seg => toFrame(seg, route))
     },
-    attach: (child, parent) =>
-      parent.routeNode.children!.push(child.routeNode),
+    attach: (child, parent) => {
+      parent.buildNode.children.push(child.buildNode)
+    },
   })
 
-  return root
+  // Pass 2: Validate — walk completed tree, collect all errors
+  const errors: FileRouterError[] = []
+  const screens: Record<string, string> = {}
+
+  traverse(root, {
+    visit: (node) => {
+      if (node.rawRoles.screen) {
+        const existing = screens[node.route]
+        if (existing) errors.push(new DuplicateScreenError(node.route, [existing, node.rawRoles.screen]))
+        else screens[node.route] = node.rawRoles.screen
+      }
+      if (node.children.length) validateSiblings(node.children, node.absPath, errors)
+    },
+    expand: (node) => node.children,
+  })
+
+  if (errors.length) throw new RouteValidationErrors(errors)
+
+  return toRouteNode(root, genDir)
 }
 
 
@@ -97,8 +119,17 @@ function toSegment({ name, absPath }: DirEntry): Segment {
 
 function toFrame({ name, absPath, type, param }: Segment, parentRoute: string): Frame {
   const route = type === 'group' ? parentRoute : `${parentRoute}${name}/`
-  const routeNode: RouteNode = param !== undefined ? { name, type, param } : { name, type }
-  return { absPath, routeNode, route }
+  const buildNode: BuildNode = { name, type, rawRoles: {}, children: [], absPath, route }
+  if (param !== undefined) buildNode.param = param
+  return { absPath, buildNode, route }
+}
+
+function toRouteNode({ name, type, param, rawRoles, children }: BuildNode, genDir: string): RouteNode {
+  const node: RouteNode = { name, type }
+  if (param !== undefined) node.param = param
+  if (Object.keys(rawRoles).length) node.roles = relativizeRoles(rawRoles, genDir)
+  node.children = children.map(c => toRouteNode(c, genDir))
+  return node
 }
 
 function parseSegmentType(name: string): RouteNode['type'] {
@@ -141,32 +172,32 @@ function validateDirectory(path: string) {
   if (!stat.isDirectory()) throw new NotADirectoryError(path)
 }
 
-function validateSiblings(segs: Segment[], parentAbsPath: string) {
-  const types = segs.map(s => s.type)
+function validateSiblings(nodes: BuildNode[], parentAbsPath: string, errors: FileRouterError[]) {
+  const types = nodes.map(n => n.type)
 
   if (types.includes('required-catchall') && types.includes('optional-catchall'))
-    throw new ConflictingCatchallError(parentAbsPath)
+    errors.push(new ConflictingCatchallError(parentAbsPath))
   if (types.filter(t => t === 'required-catchall').length > 1)
-    throw new DuplicateCatchallError(parentAbsPath)
+    errors.push(new DuplicateCatchallError(parentAbsPath))
   if (types.filter(t => t === 'optional-catchall').length > 1)
-    throw new DuplicateOptionalCatchallError(parentAbsPath)
+    errors.push(new DuplicateOptionalCatchallError(parentAbsPath))
 
-  const params = segs.filter(s => s.type === 'dynamic').map(s => s.param!)
+  const params = nodes.filter(n => n.type === 'dynamic').map(n => n.param!)
   if (params.length > 1)
-    throw new ConflictingDynamicSegmentsError(parentAbsPath, params)
+    errors.push(new ConflictingDynamicSegmentsError(parentAbsPath, params))
 
-  if (types.includes('optional-catchall') && segs.some(s => s.type === 'static'))
-    throw new SplatIndexConflictError(parentAbsPath)
+  if (types.includes('optional-catchall') && nodes.some(n => n.type === 'static'))
+    errors.push(new SplatIndexConflictError(parentAbsPath))
 
   if (types.includes('group'))
-    validateSiblings(flattenGroupSegs(segs), parentAbsPath)
+    validateSiblings(flattenGroupNodes(nodes), parentAbsPath, errors)
 }
 
-function flattenGroupSegs(segs: Segment[]): Segment[] {
-  return segs.flatMap(seg =>
-    seg.type === 'group'
-      ? flattenGroupSegs(readDirs(seg.absPath).map(toSegment))
-      : [seg],
+function flattenGroupNodes(nodes: BuildNode[]): BuildNode[] {
+  return nodes.flatMap(node =>
+    node.type === 'group'
+      ? flattenGroupNodes(node.children)
+      : [node],
   )
 }
 

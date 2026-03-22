@@ -4,12 +4,27 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import { buildRouteTree } from '../route-tree'
 import {
+  FileRouterError,
+  RouteValidationErrors,
   ConflictingCatchallError,
   ConflictingDynamicSegmentsError,
   DuplicateCatchallError,
   DuplicateOptionalCatchallError,
   SplatIndexConflictError,
 } from '../../errors'
+
+function expectValidationError<T extends FileRouterError>(
+  fn: () => unknown,
+  ErrorClass: new (...args: any[]) => T,
+) {
+  try {
+    fn()
+    expect.fail(`Expected ${ErrorClass.name} to be thrown`)
+  } catch (e) {
+    expect(e).toBeInstanceOf(RouteValidationErrors)
+    expect((e as RouteValidationErrors).errors.some(err => err instanceof ErrorClass)).toBe(true)
+  }
+}
 
 let appDir: string
 let outDir: string
@@ -144,42 +159,42 @@ describe('buildRouteTree — group validation', () => {
     dir('(a)', '[id]')
     dir('(b)', '[slug]')
 
-    expect(build).toThrow(ConflictingDynamicSegmentsError)
+    expectValidationError(build, ConflictingDynamicSegmentsError)
   })
 
   it('throws DuplicateCatchallError when two groups both expose a required-catchall', () => {
     dir('(a)', '[...slug]')
     dir('(b)', '[...slug]')
 
-    expect(build).toThrow(DuplicateCatchallError)
+    expectValidationError(build, DuplicateCatchallError)
   })
 
   it('throws ConflictingCatchallError when groups expose both required- and optional-catchall', () => {
     dir('(a)', '[...slug]')
     dir('(b)', '[[...slug]]')
 
-    expect(build).toThrow(ConflictingCatchallError)
+    expectValidationError(build, ConflictingCatchallError)
   })
 
   it('throws DuplicateOptionalCatchallError when two groups both expose an optional-catchall', () => {
     dir('(a)', '[[...slug]]')
     dir('(b)', '[[...slug]]')
 
-    expect(build).toThrow(DuplicateOptionalCatchallError)
+    expectValidationError(build, DuplicateOptionalCatchallError)
   })
 
   it('throws SplatIndexConflictError when a group exposes an optional-catchall alongside a static sibling', () => {
     dir('(a)', '[[...slug]]')
     dir('about')
 
-    expect(build).toThrow(SplatIndexConflictError)
+    expectValidationError(build, SplatIndexConflictError)
   })
 
   it('detects conflicts through nested groups', () => {
     dir('(a)', '(b)', '[id]')
     dir('(c)', '[slug]')
 
-    expect(build).toThrow(ConflictingDynamicSegmentsError)
+    expectValidationError(build, ConflictingDynamicSegmentsError)
   })
 
   it('allows non-conflicting children across sibling groups', () => {

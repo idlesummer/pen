@@ -102,6 +102,15 @@ export class EmptyParamNameError extends FileRouterError {
 // - Route Tree Errors ---------------------------------------------------------------------------------------------------
 
 
+export class RouteValidationErrors extends FileRouterError {
+  constructor(public errors: FileRouterError[]) {
+    super(
+      `Found ${errors.length} route validation error${errors.length > 1 ? 's' : ''}:\n\n` +
+      errors.map((e, i) => `${i + 1}. ${e.message}`).join('\n\n'),
+    )
+    this.name = 'RouteValidationErrors'
+  }
+}
 
 export class DuplicateScreenError extends FileRouterError {
   constructor(
