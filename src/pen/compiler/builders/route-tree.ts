@@ -83,11 +83,15 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
   traverse(root, {
     visit: (node) => {
       if (node.rawRoles.screen) {
-        const existing = screens[node.route]
-        if (existing) errors.push(new DuplicateScreenError(node.route, [existing, node.rawRoles.screen]))
-        else screens[node.route] = node.rawRoles.screen
+        if (!screens[node.route])
+          screens[node.route] = node.rawRoles.screen
+        else {
+          const error = new DuplicateScreenError(node.route, [screens[node.route]!, node.rawRoles.screen])
+          errors.push(error)
+        }
       }
-      if (node.children.length) validateSiblings(node.children, node.absPath, errors)
+      if (node.children.length)
+        validateSiblings(node.children, node.absPath, errors)
     },
     expand: (node) => node.children,
   })
