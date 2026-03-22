@@ -51,26 +51,26 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
   const screens: Record<string, string> = {}
   const root: RouteNode = { name: '', type: 'static' }
 
-  traverse({ absPath, routeNode: root, route: '/' } as Frame, {
-    visit: ({ absPath, routeNode, route }) => {
-      const rawRoles = scanRoles(absPath)                           // file: read role files
-      if (rawRoles.screen) {                                        // route: duplicate screen check
-        if (screens[route]) throw new DuplicateScreenError(route, [screens[route]!, rawRoles.screen])
-        screens[route] = rawRoles.screen
-      }
+  function processRoles({ absPath, routeNode, route }: Frame): void {
+    const rawRoles = scanRoles(absPath)
+    if (rawRoles.screen) {
+      if (screens[route]) throw new DuplicateScreenError(route, [screens[route]!, rawRoles.screen])
+      screens[route] = rawRoles.screen
+    }
+    if (Object.keys(rawRoles).length)
+      routeNode.roles = relativizeRoles(rawRoles, genDir)
+  }
 
-      if (Object.keys(rawRoles).length)                            // route: attach relativized roles
-        routeNode.roles = relativizeRoles(rawRoles, genDir)
-      routeNode.children = []                                      // route: init children (preserves field order)
-    },
-    expand: ({ absPath, route }) => {
-      const dirs = readDirs(absPath)                               // file: read + filter entries
-      const segs = dirs.map(toSegment)                             // segment: parse names → types/params
-      validateSiblings(segs, absPath)                              // segment: conflict checks
-      return segs.sort(compareSegments).map(seg => toFrame(seg, route)) // route: build frames
-    },
-    attach: (child, parent) =>
-      parent.routeNode.children!.push(child.routeNode),
+  function expandChildren({ absPath, route }: Frame): Frame[] {
+    const segs = readDirs(absPath).map(toSegment)
+    validateSiblings(segs, absPath)
+    return segs.sort(compareSegments).map(seg => toFrame(seg, route))
+  }
+
+  traverse({ absPath, routeNode: root, route: '/' } as Frame, {
+    visit:  frame => { processRoles(frame); frame.routeNode.children = [] },
+    expand: expandChildren,
+    attach: (child, parent) => parent.routeNode.children!.push(child.routeNode),
   })
 
   return root
