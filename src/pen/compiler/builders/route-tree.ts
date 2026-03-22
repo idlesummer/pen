@@ -72,9 +72,8 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
       const segs = dirs.map(toSegment)                         // EmptyParamNameError may throw here
       return segs.sort(compareSegments).map(seg => toFrame(seg, route))
     },
-    attach: (child, parent) => {
-      parent.buildNode.children.push(child.buildNode)
-    },
+    attach: (child, parent) =>
+      parent.buildNode.children.push(child.buildNode),
   })
 
   // Pass 2: Validate — walk completed tree, collect all errors
