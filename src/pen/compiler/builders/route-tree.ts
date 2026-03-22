@@ -64,9 +64,9 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
 
   // Pass 1: Build — read filesystem, construct tree (no validation)
   traverse({ absPath, buildNode: root, route: '/' } as Frame, {
-    visit: ({ absPath, buildNode }) => {
-      buildNode.rawRoles = scanRoles(absPath)
-    },
+    visit: ({ absPath, buildNode }) =>
+      (buildNode.rawRoles = scanRoles(absPath)),
+
     expand: ({ absPath, route }) => {
       const dirs = readDirs(absPath)
       const segs = dirs.map(toSegment)                         // EmptyParamNameError may throw here
