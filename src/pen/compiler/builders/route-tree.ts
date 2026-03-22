@@ -96,8 +96,8 @@ export function buildRouteTree(appPath: string, outDir: string): RouteNode {
     expand: (node) => node.children,
   })
 
-  if (errors.length) throw new RouteValidationErrors(errors)
-
+  if (errors.length)
+    throw new RouteValidationErrors(errors)
   return toRouteNode(root, genDir)
 }
 
