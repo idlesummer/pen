@@ -1,0 +1,31 @@
+// Build configuration (tsdown)
+// - Controls what gets built, bundled, and emitted
+// - Uses tsconfig.json for TypeScript resolution and declaration rules
+// - Owns entry points, output format, sourcemaps, declarations, and externals
+
+import { defineConfig } from 'tsdown'
+import pkg from './package.json' with { type: 'json' }
+
+export default defineConfig({
+  // Entry points
+  entry: {
+    index: 'src/index.ts',  // library api
+    bin: 'src/bin.ts',  // cli executable entry
+  },
+
+  // Output options
+  dts: true,            // emit .d.ts type declarations
+  clean: true,          // clean dist/ before build
+  minify: true,         // for smaller builds
+  sourcemap: true,      // source maps for debugging
+
+  // Build-time constant injection
+  define: {
+    __PACKAGE_NAME__: JSON.stringify(pkg.name),
+    __DESCRIPTION__:  JSON.stringify(pkg.description),
+    __VERSION__:      JSON.stringify(pkg.version),
+  },
+
+  // External dependencies
+  external: ['ink', 'react'],
+})
