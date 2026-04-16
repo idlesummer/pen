@@ -1,0 +1,33 @@
+{
+  // TypeScript configuration
+  // - Defines the TypeScript program: module resolution, paths, JSX, and type checking
+  // - Does NOT control what files are built or how they are bundled
+
+  "compilerOptions": {
+    // Language & Module
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "jsx": "react-jsx",
+
+    // Module Resolution
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+
+    // Path Mapping
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    // Emit
+    "noEmit": true, // tsdown handles building, not tsc
+
+    // Type Checking
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "allowJs": true
+  },
+  "include": ["src", "*.config.*"],
+  "exclude": ["node_modules", "dist"]
+}
