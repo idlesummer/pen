@@ -27,9 +27,8 @@ export class Navigation {
   }
 
   get snapshot() {
-    return {
-      history: this.history as readonly NavigationHistory[],
-      position: this.position,
-    }
+    const history = this.history as Readonly<typeof this.history>
+    const position = this.position
+    return { history, position }
   }
 }
