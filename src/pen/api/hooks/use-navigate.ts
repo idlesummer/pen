@@ -3,7 +3,7 @@ import { navigationStore } from '../store'
 
 export function useNavigate() {
   return useSyncExternalStore(
-    cb => navigationStore.subscribe(cb),
-    () => navigationStore.getSnapshot(),
+    navigationStore.subscribe,
+    navigationStore.getSnapshot,
   )
 }
