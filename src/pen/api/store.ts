@@ -19,24 +19,26 @@ function createStore() {
     getSnapshot:
       () => snapshot,
 
-    push: (url: string, searchParams?: unknown) => {
-      navigation.push(url, searchParams)
-      emit()
-    },
+    actions: {
+      push: (url: string, searchParams?: unknown) => {
+        navigation.push(url, searchParams)
+        emit()
+      },
 
-    replace: (url: string, searchParams?: unknown) => {
-      navigation.replace(url, searchParams)
-      emit()
-    },
+      replace: (url: string, searchParams?: unknown) => {
+        navigation.replace(url, searchParams)
+        emit()
+      },
 
-    back: () => {
-      navigation.back()
-      emit()
-    },
+      back: () => {
+        navigation.back()
+        emit()
+      },
 
-    forward: () => {
-      navigation.forward()
-      emit()
+      forward: () => {
+        navigation.forward()
+        emit()
+      },
     },
   }
 }
