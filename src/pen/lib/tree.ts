@@ -1,6 +1,6 @@
 export type TraverseCallbacks<TNode> = {
   /** Called when visiting each node (pre-order). Return true to stop traversal. */
-  visit?: (node: TNode) => unknown
+  visit?: (node: TNode) => boolean | void
   /** Returns children for a node (or creates them) */
   expand?: (node: TNode) => TNode[]
   /** Attaches a child to its parent */
