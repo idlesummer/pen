@@ -1,47 +1,33 @@
-// TypeScript configuration
-// - Defines the TypeScript program: module resolution, paths, JSX, and type checking
-// - Declaration shape and metadata (declaration, maps, sourcemaps)
-// - Does NOT control what files are built or how they are bundled
-
 {
+  // TypeScript configuration
+  // - Defines the TypeScript program: module resolution, paths, JSX, and type checking
+  // - Does NOT control what files are built or how they are bundled
+
   "compilerOptions": {
     // Language & Module
     "target": "esnext",
     "module": "esnext",
-    "lib": ["esnext", "dom"], // DOM needed for testing with happy-dom
+    "lib": ["esnext"],
     "jsx": "react-jsx",
 
     // Module Resolution
     "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "resolveJsonModule": true,            // Optional: if importing JSON
-    "allowSyntheticDefaultImports": true, // Optional: better imports
 
     // Path Mapping
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     // Emit
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "noEmit": true,
-    "declaration": true,    // Optional: generate .d.ts files
-    "declarationMap": true, // Optional: source maps for .d.ts
-    "sourceMap": true,      // Optional: generate source maps
+    "noEmit": true, // tsdown handles building, not tsc
 
     // Type Checking
     "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,     // Optional: warn on unused variables
-    "noUnusedParameters": true, // Optional: warn on unused params
-    "noImplicitReturns": true,  // Optional: functions must return
-    "noFallthroughCasesInSwitch": true, // Optional: switch safety
-    "forceConsistentCasingInFileNames": true,
-
-    // Advanced
-    "skipLibCheck": true  // Optional: faster compilation
+    "skipLibCheck": true,
+    "types": ["node"],
+    "allowJs": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.config.ts"]
+  "include": ["src", "*.config.*"],
+  "exclude": ["node_modules", "dist"]
 }
