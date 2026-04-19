@@ -1,10 +1,12 @@
 // Types
 export type { RouteNode, SegmentLayer, SegmentRole } from './builders/route-tree'
-export type { RolesMapping, RoutesBuckets } from './pipeline'
+export type { RolesMapping, RoutesBuckets, TransformResult } from './pipeline'
 
-// Functions and constants
+// Pipeline functions (steps 1–4 + transform)
+export { collectAppFiles, createRolesMapping, normalizeAppPath, validateAppPaths, createRoutesBuckets, transform } from './pipeline'
+
+// Tree builder (step 5)
 export { buildRouteTree, SEGMENT_ROLES } from './builders/route-tree'
-export { collectAppFiles, createRolesMapping, normalizeAppPath, createRoutesBuckets } from './pipeline'
 
 // Errors
 export {

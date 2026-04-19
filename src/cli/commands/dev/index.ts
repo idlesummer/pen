@@ -1,14 +1,14 @@
 import type { CLICommand } from '../../types'
 import pc from 'picocolors'
-import { pipe } from '@idlesummer/tasker'
 import { loadConfig } from '@/pen/config'
 import { CLI_NAME, VERSION } from '@/pen/constants'
 
-import { buildRouteTree } from '../build/tasks/build-route-tree'
+import { watchApplication } from './tasks/watch-application'
+import { transform } from '@/pen/compiler'
+
 import { writeRouteTree } from '../build/tasks/write-route-tree'
 import { writePathComponentMap } from '../build/tasks/write-path-component-map'
 import { writeEntry } from '../build/tasks/write-entry'
-import { watchApplication } from './tasks/watch-application'
 
 export const dev: CLICommand = {
   name: 'dev',
@@ -22,14 +22,14 @@ export const dev: CLICommand = {
       console.log(pc.dim(`  output: ${outDir}`))
       console.log()
 
-      const pipeline = pipe([
-        buildRouteTree,
-        writeRouteTree,
-        writePathComponentMap,
-        writeEntry,
+      // Initial codegen — same pipeline as build, minus compileApplication
+      const { mapping, routeTree } = transform(appDir, outDir)
+      await Promise.all([
+        writeRouteTree.run({ appDir, outDir, routeTree }),
+        writePathComponentMap.run({ appDir, outDir, mapping }),
+        writeEntry.run({ appDir, outDir }),
       ])
 
-      await pipeline.run({ appDir, outDir })
       await watchApplication({ appDir, outDir })
     }
 

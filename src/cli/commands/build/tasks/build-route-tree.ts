@@ -7,6 +7,6 @@ export const buildRouteTree: Task<BuildContext> = {
   name: 'Building route tree',
   onSuccess: (_, dur) => `Built route tree (${duration(dur)})`,
   run: async (ctx) => ({
-    routeTree: build(ctx.appDir, ctx.outDir),
+    routeTree: build(ctx.buckets!, ctx.mapping!, ctx.outDir),
   }),
 }

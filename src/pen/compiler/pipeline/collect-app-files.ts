@@ -1,9 +1,11 @@
-import { readdirSync } from 'fs'
-import { join, relative } from 'path'
+import { readdirSync, statSync } from 'fs'
+import { join, relative, resolve } from 'path'
+import { DirectoryNotFoundError, NotADirectoryError } from '../errors'
 
 /**
- * Step 1: Recursively reads the app directory and returns a flat array
- * of relative .tsx file paths — groups, dynamic segments, everything kept raw.
+ * Step 1: Validates the app directory, then recursively reads it and returns
+ * a flat array of relative .tsx file paths — groups, dynamic segments,
+ * everything kept raw.
  *
  * Equivalent to Next.js's collectAppFiles → recursiveReadDir.
  *
@@ -16,8 +18,13 @@ import { join, relative } from 'path'
  * → ['screen.tsx', 'about/screen.tsx', '(marketing)/blog/screen.tsx', 'user/[id]/screen.tsx']
  */
 export function collectAppFiles(appDir: string): string[] {
+  const absDir = resolve(appDir)
+  const stat = statSync(absDir, { throwIfNoEntry: false })
+  if (!stat)               throw new DirectoryNotFoundError(absDir)
+  if (!stat.isDirectory()) throw new NotADirectoryError(absDir)
+
   const files: string[] = []
-  scan(appDir, appDir, files)
+  scan(absDir, absDir, files)
   return files
 }
 

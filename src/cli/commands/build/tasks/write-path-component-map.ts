@@ -1,11 +1,11 @@
 import type { Task } from '@idlesummer/tasker'
 import type { BuildContext } from '../types'
-import type { RouteNode } from '@/pen/compiler'
+import type { RolesMapping } from '@/pen/compiler'
 import { mkdir, writeFile } from 'fs/promises'
-import { join } from 'path'
+import { join, relative } from 'path'
 import { duration } from '@idlesummer/tasker'
-import { SEGMENT_ROLES } from '@/pen/compiler'
 import { PACKAGE_NAME } from '@/pen/constants'
+import { removeExtension } from '@/lib/path-utils'
 
 export const writePathComponentMap: Task<BuildContext> = {
   name: 'Writing path-component-map.ts',
@@ -14,11 +14,9 @@ export const writePathComponentMap: Task<BuildContext> = {
     const genDir = join(ctx.outDir, 'generated')
     const outPath = join(genDir, 'path-component-map.ts')
 
-    // Collect all unique paths from routeTree
-    const paths = collectComponentPaths(ctx.routeTree!)
-    const entries = Array.from(paths)
+    // Derive relative import paths directly from the mapping (not from the tree)
+    const entries = relativizeMappingPaths(ctx.mapping!, genDir)
 
-    // Codegen for imports
     const imports = entries.map(toImportStatement).join('\n')
     const map = entries.map(toMapEntry).join('\n')
 
@@ -39,18 +37,15 @@ export const writePathComponentMap: Task<BuildContext> = {
   },
 }
 
-function collectComponentPaths(routeTree: RouteNode) {
-  const paths = new Set<string>()
-
-  function traverse(node: RouteNode) {
-    for (const role of SEGMENT_ROLES) {
-      if (node.roles?.[role]) paths.add(node.roles[role]!)
-    }
-    for (const child of node.children ?? []) traverse(child)
-  }
-
-  traverse(routeTree)
-  return paths
+/**
+ * Converts mapping absolute paths to the same relative paths that buildRouteTree
+ * embeds in node.roles — so componentMap keys match the route tree exactly.
+ */
+function relativizeMappingPaths(mapping: RolesMapping, genDir: string): string[] {
+  return Object.values(mapping).map(absPath => {
+    const relPath = relative(genDir, removeExtension(absPath)).replace(/\\/g, '/')
+    return `${relPath}.js`
+  })
 }
 
 const toImportStatement = (p: string, i: number) => `import Component${i} from "${p}"`

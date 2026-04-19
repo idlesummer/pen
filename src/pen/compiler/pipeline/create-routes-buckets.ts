@@ -4,15 +4,19 @@ import type { RolesMapping } from './create-roles-mapping'
 import { normalizeAppPath } from './normalize-app-path'
 
 /**
- * Normalized URL → per-role raw route key.
+ * Normalized URL → per-role array of raw route keys.
  *
- * '/blog' → { screen: '/(marketing)/blog/screen' }
+ * Arrays mirror how Next.js's appPathsPerRoute stores multiple keys per route
+ * (parallel slots, group variants). For Pen, multiple keys at the same role+URL
+ * means conflicting routes — caught by validateSiblings during tree building.
+ *
+ * '/[...slug]' → { screen: ['/(a)/[...slug]/screen', '/(b)/[...slug]/screen'] }
  */
-export type RoutesBuckets = Record<string, Partial<Record<SegmentRole, string>>>
+export type RoutesBuckets = Record<string, Partial<Record<SegmentRole, string[]>>>
 
 /**
  * Step 4: Groups raw route keys from the mapping by their normalized URL.
- * Each bucket holds the role keys for one URL — Pen's equivalent of
+ * Each bucket holds arrays of route keys per role — Pen's equivalent of
  * Next.js's appPathsPerRoute / createEntrypoints bucketing.
  *
  * {
@@ -21,8 +25,8 @@ export type RoutesBuckets = Record<string, Partial<Record<SegmentRole, string>>>
  * }
  * →
  * {
- *   '/':     { screen: '/screen' },
- *   '/blog': { screen: '/(marketing)/blog/screen' },
+ *   '/':     { screen: ['/screen'] },
+ *   '/blog': { screen: ['/(marketing)/blog/screen'] },
  * }
  */
 export function createRoutesBuckets(mapping: RolesMapping): RoutesBuckets {
@@ -30,7 +34,8 @@ export function createRoutesBuckets(mapping: RolesMapping): RoutesBuckets {
   for (const routeKey of Object.keys(mapping)) {
     const url = normalizeAppPath(routeKey)
     const role = parse(routeKey).base as SegmentRole
-    ;(buckets[url] ??= {})[role] = routeKey
+    const bucket = (buckets[url] ??= {})
+    ;(bucket[role] ??= []).push(routeKey)
   }
   return buckets
 }

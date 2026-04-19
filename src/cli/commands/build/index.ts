@@ -4,6 +4,10 @@ import { pipe, duration, fileList } from '@idlesummer/tasker'
 import { loadConfig } from '@/pen/config'
 import { CLI_NAME, VERSION } from '@/pen/constants'
 
+import { collectFiles } from './tasks/collect-files'
+import { createMapping } from './tasks/create-mapping'
+import { validatePaths } from './tasks/validate-paths'
+import { createBuckets } from './tasks/create-buckets'
 import { buildRouteTree } from './tasks/build-route-tree'
 import { writeRouteTree } from './tasks/write-route-tree'
 import { writePathComponentMap } from './tasks/write-path-component-map'
@@ -18,17 +22,21 @@ export const build: CLICommand = {
       const { appDir, outDir } = await loadConfig()
       console.log(pc.cyan('  Starting production build...\n'))
       console.log(pc.bold(`  ✎  ${CLI_NAME} v${VERSION}\n`))
-      console.log(pc.dim( `  entry:  ${appDir}`))
+      console.log(pc.dim(`  entry:  ${appDir}`))
       console.log(pc.dim( '  target: node24'))
-      console.log(pc.dim( `  output: ${outDir}`))
+      console.log(pc.dim(`  output: ${outDir}`))
       console.log()
 
       const pipeline = pipe([
-        buildRouteTree,
-        writeRouteTree,
-        writePathComponentMap,
-        writeEntry,
-        compileApplication,
+        collectFiles,        // step 1: flat file list
+        createMapping,       // step 2: route key → abs path
+        validatePaths,       // step 3: flat URL validation
+        createBuckets,       // step 4: group by normalized URL (appPathsPerRoute)
+        buildRouteTree,      // step 5: build RouteNode tree from buckets
+        writeRouteTree,      // step 6: emit route-tree.ts
+        writePathComponentMap, // step 7: emit path-component-map.ts (from mapping)
+        writeEntry,          // step 8: emit entry.ts
+        compileApplication,  // step 9: rolldown bundle
       ])
 
       const { duration: dur } = await pipeline.run({ appDir, outDir })

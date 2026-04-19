@@ -4,9 +4,8 @@ import { watch as rolldownWatch } from 'rolldown'
 import { watch as chokidarWatch } from 'chokidar'
 import nodeExternals from 'rollup-plugin-node-externals'
 import pc from 'picocolors'
-import { pipe } from '@idlesummer/tasker'
 
-import { buildRouteTree } from '../../build/tasks/build-route-tree'
+import { transform } from '@/pen/compiler'
 import { writeRouteTree } from '../../build/tasks/write-route-tree'
 import { writePathComponentMap } from '../../build/tasks/write-path-component-map'
 import { writeEntry } from '../../build/tasks/write-entry'
@@ -29,7 +28,6 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
       unmount = null
     }
     try {
-      // Cache-bust so Node re-evaluates the updated module
       const entryUrl = pathToFileURL(entryJs).href + `?v=${Date.now()}`
       const { mount } = await import(entryUrl)
       const instance = mount('/')
@@ -45,8 +43,13 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
     if (codegenRunning) return
     codegenRunning = true
     try {
-      const pipeline = pipe([buildRouteTree, writeRouteTree, writePathComponentMap, writeEntry])
-      await pipeline.run({ appDir, outDir })
+      // Dev equivalent of Next.js's transform() — all pipeline steps inline
+      const { mapping, routeTree } = transform(appDir, outDir)
+      await Promise.all([
+        writeRouteTree.run({ appDir, outDir, routeTree }),
+        writePathComponentMap.run({ appDir, outDir, mapping }),
+        writeEntry.run({ appDir, outDir }),
+      ])
     }
     catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -94,15 +97,12 @@ export async function watchApplication({ appDir, outDir }: WatchContext): Promis
   })
 
   return new Promise<void>(() => {
-    // 'exit' fires when process.exit() is called regardless of how we got here
-    // (Ink's exitOnCtrlC calls process.exit via the \x03 keypress in raw mode)
     process.once('exit', () => {
       bundleWatcher.close()
       fsWatcher.close()
       if (unmount) unmount()
     })
 
-    // Fallback for non-raw-mode environments where Ctrl+C delivers SIGINT as a signal
     process.once('SIGINT', () => process.exit(0))
   })
 }

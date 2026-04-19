@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { buildRouteTree } from '../route-tree'
+import { transform } from '../../pipeline'
 import {
   FileRouterError,
   RouteValidationErrors,
@@ -55,7 +55,7 @@ function file(...parts: string[]) {
 }
 
 function build() {
-  return buildRouteTree(appDir, outDir)
+  return transform(appDir, outDir).routeTree
 }
 
 
