@@ -136,17 +136,17 @@ describe('buildRouteTree — catchall routes', () => {
   })
 
   it('sorts children: static < dynamic < required-catchall', () => {
-    dir('[...slug]')
-    dir('[id]')
-    dir('about')
+    file('[...slug]', 'screen.tsx')
+    file('[id]', 'screen.tsx')
+    file('about', 'screen.tsx')
 
     const tree = build()
     expect(tree.children!.map(c => c.type)).toEqual(['static', 'dynamic', 'required-catchall'])
   })
 
   it('sorts children: dynamic < optional-catchall', () => {
-    dir('[[...opt]]')
-    dir('[id]')
+    file('[[...opt]]', 'screen.tsx')
+    file('[id]', 'screen.tsx')
 
     const tree = build()
     expect(tree.children!.map(c => c.type)).toEqual(['dynamic', 'optional-catchall'])
@@ -156,43 +156,43 @@ describe('buildRouteTree — catchall routes', () => {
 
 describe('buildRouteTree — group validation', () => {
   it('throws ConflictingDynamicSegmentsError when two groups expose the same dynamic param', () => {
-    dir('(a)', '[id]')
-    dir('(b)', '[slug]')
+    file('(a)', '[id]', 'screen.tsx')
+    file('(b)', '[slug]', 'screen.tsx')
 
     expectValidationError(build, ConflictingDynamicSegmentsError)
   })
 
   it('throws DuplicateCatchallError when two groups both expose a required-catchall', () => {
-    dir('(a)', '[...slug]')
-    dir('(b)', '[...slug]')
+    file('(a)', '[...slug]', 'screen.tsx')
+    file('(b)', '[...slug]', 'screen.tsx')
 
     expectValidationError(build, DuplicateCatchallError)
   })
 
   it('throws ConflictingCatchallError when groups expose both required- and optional-catchall', () => {
-    dir('(a)', '[...slug]')
-    dir('(b)', '[[...slug]]')
+    file('(a)', '[...slug]', 'screen.tsx')
+    file('(b)', '[[...slug]]', 'screen.tsx')
 
     expectValidationError(build, ConflictingCatchallError)
   })
 
   it('throws DuplicateOptionalCatchallError when two groups both expose an optional-catchall', () => {
-    dir('(a)', '[[...slug]]')
-    dir('(b)', '[[...slug]]')
+    file('(a)', '[[...slug]]', 'screen.tsx')
+    file('(b)', '[[...slug]]', 'screen.tsx')
 
     expectValidationError(build, DuplicateOptionalCatchallError)
   })
 
   it('throws SplatIndexConflictError when a group exposes an optional-catchall alongside a static sibling', () => {
-    dir('(a)', '[[...slug]]')
-    dir('about')
+    file('(a)', '[[...slug]]', 'screen.tsx')
+    file('about', 'screen.tsx')
 
     expectValidationError(build, SplatIndexConflictError)
   })
 
   it('detects conflicts through nested groups', () => {
-    dir('(a)', '(b)', '[id]')
-    dir('(c)', '[slug]')
+    file('(a)', '(b)', '[id]', 'screen.tsx')
+    file('(c)', '[slug]', 'screen.tsx')
 
     expectValidationError(build, ConflictingDynamicSegmentsError)
   })
