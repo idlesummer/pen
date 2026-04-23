@@ -47,7 +47,7 @@ export default class Route {
     this.modules = {}
 
     for (const dirent of readdirSync(this.absPath, { withFileTypes: true })) {
-      if (dirent.isFile())
+      if (!dirent.isFile())
         continue
       const absPath = join(this.absPath, dirent.name)
       switch (dirent.name) {
@@ -96,5 +96,16 @@ export default class Route {
     const statics = children.filter(route => route.segment.type === 'static')
     if (optionalCatchalls.length && statics.length)
       throw new SplatIndexConflictError(this.absPath)
+  }
+
+  toJSON() {
+    return {
+      absPath: this.absPath,
+      urlPath: this.urlPath,
+      segment: this.segment,
+      modules: this.modules,
+      errors: this.errors.map(err => err.message),
+      children: this.children,
+    }
   }
 }
