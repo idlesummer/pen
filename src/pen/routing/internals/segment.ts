@@ -34,12 +34,6 @@ export function from(raw: string): ParseResult {
     return { segment: { raw, type: 'optional-catchall', param }, errors }
   }
 
-  if (raw.startsWith('[[') && raw.endsWith(']]')) {
-    const param = raw.slice(2, -2)
-    errors.push(new Error(`Optional route parameters are not yet supported ("[[${param}]]").`))
-    return { segment: { raw, type: 'static' }, errors }
-  }
-
   if (raw.startsWith('[...') && raw.endsWith(']')) {
     const param = raw.slice(4, -1)
     validateParam(param, raw, errors)
