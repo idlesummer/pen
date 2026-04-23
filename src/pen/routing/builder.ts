@@ -9,7 +9,8 @@ export function buildRouteTree(appPath: string): Route {
   const absPath = resolve(appPath)
   validateDirectory(absPath)
 
-  const root = new Route(absPath, Segment.from(''))
+  const { segment } = Segment.from('')
+  const root = new Route(absPath, segment)
   traverse(root, {
     visit: (route) => route.loadModules(),
     expand: (route) => route.getChildren(),

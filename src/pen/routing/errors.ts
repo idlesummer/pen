@@ -88,22 +88,11 @@ export class SplatIndexConflictError extends FileRouterError {
   }
 }
 
-export class EmptyParamNameError extends FileRouterError {
-  constructor(public name: string) {
-    super(
-      `Dynamic segment "${name}" has no param name.\n\n` +
-      'Rename the directory to include a param name, e.g. [id], [...slug], or [[...slug]].',
-    )
-    this.name = 'EmptyParamNameError'
-  }
-}
-
-
 // - Route Tree Errors ---------------------------------------------------------------------------------------------------
 
 
 export class RouteValidationErrors extends FileRouterError {
-  constructor(public errors: FileRouterError[]) {
+  constructor(public errors: Error[]) {
     super(
       `Found ${errors.length} route validation error${errors.length > 1 ? 's' : ''}:\n\n` +
       errors.map((e, i) => `${i + 1}. ${e.message}`).join('\n\n'),

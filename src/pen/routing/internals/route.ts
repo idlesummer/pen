@@ -14,6 +14,7 @@ export type RouteModules = Partial<Record<RouteModule, string>>
 
 export default class Route {
   readonly children: Route[] = []
+  readonly errors: Error[] = []
 
   constructor(
     readonly absPath: string,
@@ -31,10 +32,12 @@ export default class Route {
   getChildren(): Route[] {
     const children = readdirSync(this.absPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
-      .map(dirent => new Route(
-        join(this.absPath, dirent.name),
-        Segment.from(dirent.name),
-      ))
+      .map(dirent => {
+        const { segment, errors } = Segment.from(dirent.name)
+        const route = new Route(join(this.absPath, dirent.name), segment)
+        route.errors.push(...errors)
+        return route
+      })
 
     this.validateChildren(children)
     return children
