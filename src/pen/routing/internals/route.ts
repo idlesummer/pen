@@ -1,6 +1,13 @@
 import { readdirSync } from 'fs'
 import { join } from 'path'
 import * as Segment from './segment'
+import {
+  ConflictingCatchallError,
+  ConflictingDynamicSegmentsError,
+  DuplicateCatchallError,
+  DuplicateOptionalCatchallError,
+  SplatIndexConflictError,
+} from '../errors'
 
 export type RouteModule = 'layout' | 'page' | 'error' | 'not-found'
 export type RouteModules = Partial<Record<RouteModule, string>>
@@ -22,12 +29,15 @@ export default class Route {
   }
 
   getChildren(): Route[] {
-    return readdirSync(this.absPath, { withFileTypes: true })
+    const children = readdirSync(this.absPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
       .map(dirent => new Route(
         join(this.absPath, dirent.name),
         Segment.from(dirent.name),
       ))
+
+    this.validateChildren(children)
+    return children
   }
 
   loadModules(): void {
@@ -49,5 +59,27 @@ export default class Route {
   addChild(child: Route): void {
     child.parent = this
     this.children.push(child)
+  }
+
+  private validateChildren(children: Route[]): void {
+    const requiredCatchalls = children.filter(route => route.segment.type === 'catchall')
+    if (requiredCatchalls.length > 1)
+      throw new DuplicateCatchallError(this.absPath)
+
+    const optionalCatchalls = children.filter(route => route.segment.type === 'optional-catchall')
+    if (optionalCatchalls.length > 1)
+      throw new DuplicateOptionalCatchallError(this.absPath)
+
+    const dynamics = children.filter(route => route.segment.type === 'dynamic')
+    if (requiredCatchalls.length && optionalCatchalls.length)
+      throw new ConflictingCatchallError(this.absPath)
+
+    const params = [...new Set(dynamics.map(route => route.segment.param))]
+    if (params.length > 1)
+      throw new ConflictingDynamicSegmentsError(this.absPath, params as string[])
+
+    const statics = children.filter(route => route.segment.type === 'static')
+    if (optionalCatchalls.length && statics.length)
+      throw new SplatIndexConflictError(this.absPath)
   }
 }
