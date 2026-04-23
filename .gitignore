@@ -142,3 +142,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Generated mock app used for testing routing/builder.ts
+scripts/mock-app/
