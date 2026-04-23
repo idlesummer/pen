@@ -59,6 +59,18 @@ export default class Route {
     }
   }
 
+  validateModules(): void {
+    if (!this.modules.page) return
+
+    let root: Route = this
+    while (root.parent) root = root.parent
+
+    if (!root.modules.layout)
+      this.errors.push(new Error(
+        `${this.modules.page} doesn't have a root layout. To fix this error, make sure every page has a root layout.`,
+      ))
+  }
+
   addChild(child: Route): void {
     child.parent = this
     this.children.push(child)

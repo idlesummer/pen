@@ -12,7 +12,10 @@ export function buildRouteTree(appPath: string): Route {
   const { segment } = Segment.from('')
   const root = new Route(absPath, segment)
   traverse(root, {
-    visit: (route) => route.loadModules(),
+    visit: (route) => {
+      route.loadModules()
+      route.validateModules()
+    },
     expand: (route) => route.getChildren(),
     attach: (child, parent) => parent.addChild(child),
   })

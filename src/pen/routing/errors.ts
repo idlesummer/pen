@@ -1,36 +1,17 @@
-/** Base error for all route-builder build errors */
-export class FileRouterError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'FileRouterError'
-  }
-}
-
-
 // - File Tree Errors ----------------------------------------------------------------------------------------------------
 
 
-export class DirectoryNotFoundError extends FileRouterError {
+export class DirectoryNotFoundError extends Error {
   constructor(public path: string) {
     super(`Directory not found: "${path}"`)
     this.name = 'DirectoryNotFoundError'
   }
 }
 
-export class NotADirectoryError extends FileRouterError {
+export class NotADirectoryError extends Error {
   constructor(public path: string) {
     super(`Path is not a directory: "${path}"`)
     this.name = 'NotADirectoryError'
-  }
-}
-
-export class RootIsFileError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `Root path is a file, not a directory: "${path}"\n\n` +
-      'The app directory must be a directory, not a file.',
-    )
-    this.name = 'RootIsFileError'
   }
 }
 
@@ -38,7 +19,7 @@ export class RootIsFileError extends FileRouterError {
 // - Segment Tree Errors -------------------------------------------------------------------------------------------------
 
 
-export class DuplicateCatchallError extends FileRouterError {
+export class DuplicateCatchallError extends Error {
   constructor(public path: string) {
     super(
       `Multiple [...slug] routes found in "${path}".\n\n` +
@@ -48,7 +29,7 @@ export class DuplicateCatchallError extends FileRouterError {
   }
 }
 
-export class DuplicateOptionalCatchallError extends FileRouterError {
+export class DuplicateOptionalCatchallError extends Error {
   constructor(public path: string) {
     super(
       `Multiple [[...slug]] routes found in "${path}".\n\n` +
@@ -58,7 +39,7 @@ export class DuplicateOptionalCatchallError extends FileRouterError {
   }
 }
 
-export class ConflictingCatchallError extends FileRouterError {
+export class ConflictingCatchallError extends Error {
   constructor(public path: string) {
     super(
       `Conflicting [...slug] and [[...slug]] routes in "${path}".\n\n` +
@@ -68,7 +49,7 @@ export class ConflictingCatchallError extends FileRouterError {
   }
 }
 
-export class ConflictingDynamicSegmentsError extends FileRouterError {
+export class ConflictingDynamicSegmentsError extends Error {
   constructor(public path: string, public params: string[]) {
     super(
       `Conflicting dynamic segments in "${path}": ${params.map(p => `[${p}]`).join(', ')}.\n\n` +
@@ -78,7 +59,7 @@ export class ConflictingDynamicSegmentsError extends FileRouterError {
   }
 }
 
-export class SplatIndexConflictError extends FileRouterError {
+export class SplatIndexConflictError extends Error {
   constructor(public path: string) {
     super(
       `[[...slug]] conflicts with static "index" segment in "${path}".\n\n` +
@@ -91,7 +72,7 @@ export class SplatIndexConflictError extends FileRouterError {
 // - Route Tree Errors ---------------------------------------------------------------------------------------------------
 
 
-export class RouteValidationErrors extends FileRouterError {
+export class RouteValidationErrors extends Error {
   constructor(public errors: Error[]) {
     super(
       `Found ${errors.length} route validation error${errors.length > 1 ? 's' : ''}:\n\n` +
@@ -101,7 +82,7 @@ export class RouteValidationErrors extends FileRouterError {
   }
 }
 
-export class DuplicateScreenError extends FileRouterError {
+export class DuplicateScreenError extends Error {
   constructor(
     public url: string,
     public files: [string, string],
