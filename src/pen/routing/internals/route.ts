@@ -71,10 +71,12 @@ export default class Route {
   }
 
   private validateModules(): void {
-    if (!this.modules.page) return
+    if (!this.modules.page)
+      return
 
     let root: Route = this
-    while (root.parent) root = root.parent
+    while (root.parent)
+      root = root.parent
 
     if (!root.modules.layout)
       this.errors.push(new Error(
@@ -106,13 +108,8 @@ export default class Route {
   }
 
   toJSON() {
-    return {
-      absPath: this.absPath,
-      urlPath: this.urlPath,
-      segment: this.segment,
-      modules: this.modules,
-      errors: this.errors.map(err => err.message),
-      children: this.children,
-    }
+    const { absPath, urlPath, segment, modules, children } = this
+    const errors = this.errors.map(err => err.message)
+    return { absPath, urlPath, segment, modules, errors, children }
   }
 }
