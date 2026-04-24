@@ -3,11 +3,13 @@ import { resolve } from 'path'
 import { traverse } from '@/pen/lib/tree'
 import * as Segment from './internals/segment'
 import Route from './internals/route'
-import { DirectoryNotFoundError, NotADirectoryError } from './errors'
 
 export function buildRouteTree(appPath: string): Route {
   const absPath = resolve(appPath)
-  validateDirectory(absPath)
+
+  // Check if app directory exists
+  if (!statSync(absPath, { throwIfNoEntry: false })?.isDirectory())
+    throw new Error("Couldn't find any `app` directory. Please create one under the project root")
 
   const root = new Route(absPath, Segment.from(''))
 
@@ -25,10 +27,4 @@ export function buildRouteTree(appPath: string): Route {
   })
 
   return root
-}
-
-function validateDirectory(path: string): void {
-  const stat = statSync(path, { throwIfNoEntry: false })
-  if (!stat) throw new DirectoryNotFoundError(path)
-  if (!stat.isDirectory()) throw new NotADirectoryError(path)
 }

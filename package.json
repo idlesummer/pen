@@ -36,7 +36,8 @@
   "scripts": {
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "npx tsx scripts/test-builder.ts"
   },
   "dependencies": {
     "commander": "^14.0.3",
@@ -52,6 +53,7 @@
     "ink": "^7.0.0",
     "react": "^19.2.5",
     "tsdown": "^0.21.9",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.2"
   },
