@@ -74,6 +74,7 @@ export default class Route {
     if (!this.modules.page)
       return
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let root: Route = this
     while (root.parent)
       root = root.parent
