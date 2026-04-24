@@ -30,17 +30,12 @@ export default class Route {
   }
 
   getChildren(): Route[] {
-    const children = readdirSync(this.absPath, { withFileTypes: true })
+    return readdirSync(this.absPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
-      .map(dirent => {
-        const { segment, errors } = Segment.from(dirent.name)
-        const route = new Route(join(this.absPath, dirent.name), segment)
-        route.errors.push(...errors)
-        return route
-      })
-
-    this.validateChildren(children)
-    return children
+      .map(dirent => new Route(
+        join(this.absPath, dirent.name),
+        Segment.from(dirent.name),
+      ))
   }
 
   loadModules(): void {
@@ -59,7 +54,23 @@ export default class Route {
     }
   }
 
-  validateModules(): void {
+  addChild(child: Route): void {
+    child.parent = this
+    this.children.push(child)
+  }
+
+  validate(): void {
+    this.errors.length = 0
+    this.validateSegment()
+    this.validateModules()
+    this.validateChildren()
+  }
+
+  private validateSegment(): void {
+    this.errors.push(...Segment.validate(this.segment))
+  }
+
+  private validateModules(): void {
     if (!this.modules.page) return
 
     let root: Route = this
@@ -71,31 +82,27 @@ export default class Route {
       ))
   }
 
-  addChild(child: Route): void {
-    child.parent = this
-    this.children.push(child)
-  }
-
-  private validateChildren(children: Route[]): void {
+  private validateChildren(): void {
+    const { children } = this
     const requiredCatchalls = children.filter(route => route.segment.type === 'catchall')
     if (requiredCatchalls.length > 1)
-      throw new DuplicateCatchallError(this.absPath)
+      this.errors.push(new DuplicateCatchallError(this.absPath))
 
     const optionalCatchalls = children.filter(route => route.segment.type === 'optional-catchall')
     if (optionalCatchalls.length > 1)
-      throw new DuplicateOptionalCatchallError(this.absPath)
+      this.errors.push(new DuplicateOptionalCatchallError(this.absPath))
 
     const dynamics = children.filter(route => route.segment.type === 'dynamic')
     if (requiredCatchalls.length && optionalCatchalls.length)
-      throw new ConflictingCatchallError(this.absPath)
+      this.errors.push(new ConflictingCatchallError(this.absPath))
 
     const params = [...new Set(dynamics.map(route => route.segment.param))]
     if (params.length > 1)
-      throw new ConflictingDynamicSegmentsError(this.absPath, params as string[])
+      this.errors.push(new ConflictingDynamicSegmentsError(this.absPath, params as string[]))
 
     const statics = children.filter(route => route.segment.type === 'static')
     if (optionalCatchalls.length && statics.length)
-      throw new SplatIndexConflictError(this.absPath)
+      this.errors.push(new SplatIndexConflictError(this.absPath))
   }
 
   toJSON() {

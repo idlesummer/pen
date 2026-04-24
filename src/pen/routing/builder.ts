@@ -9,15 +9,19 @@ export function buildRouteTree(appPath: string): Route {
   const absPath = resolve(appPath)
   validateDirectory(absPath)
 
-  const { segment } = Segment.from('')
-  const root = new Route(absPath, segment)
+  const root = new Route(absPath, Segment.from(''))
+
+  // Pass 1 — structural build (no validation)
   traverse(root, {
-    visit: (route) => {
-      route.loadModules()
-      route.validateModules()
-    },
+    visit: (route) => route.loadModules(),
     expand: (route) => route.getChildren(),
     attach: (child, parent) => parent.addChild(child),
+  })
+
+  // Pass 2 — validation (pure, per-node)
+  traverse(root, {
+    visit: (route) => route.validate(),
+    expand: (route) => route.children,
   })
 
   return root
