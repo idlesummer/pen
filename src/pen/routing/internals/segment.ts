@@ -14,41 +14,46 @@ export type Segment = {
 export function from(raw: string): Segment {
   if (raw.startsWith('(') && raw.endsWith(')'))
     return { raw, type: 'group' }
-
   if (raw.startsWith('[[...') && raw.endsWith(']]'))
     return { raw, type: 'optional-catchall', param: raw.slice(5, -2) }
-
   if (raw.startsWith('[...') && raw.endsWith(']'))
     return { raw, type: 'catchall', param: raw.slice(4, -1) }
-
   if (raw.startsWith('[') && raw.endsWith(']'))
     return { raw, type: 'dynamic', param: raw.slice(1, -1) }
-
   return { raw, type: 'static' }
 }
 
-export function validate(segment: Segment): Error[] {
+export function validate({ raw, type, param }: Segment): Error[] {
   const errors: Error[] = []
-  const { raw, type, param } = segment
 
+  // Shape validation
   if (raw.includes('…'))
     errors.push(new Error(`Detected a three-dot character ('…') at ('${raw}'). Did you mean ('...')?`))
 
-  if (type === 'group')
-    return errors
-
-  if (type === 'static') {
-    if (raw.includes('[') || raw.includes(']'))
-      errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
+  // Group validation
+  if (type === 'group') {
+    if (!raw.slice(1, -1))
+      errors.push(new Error(`Segment names may not be empty ('${raw}').`))
     return errors
   }
 
-  if (!param)
-    errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
-  else if (param.includes('[') || param.includes(']'))
-    errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
-  else if (param.startsWith('.'))
-    errors.push(new Error(`Segment names may not start with erroneous periods ('${raw}').`))
+  // Static/malformed name validation
+  else if (type === 'static') {
+    if (raw.includes('[') || raw.includes(']'))
+      errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
+    if (raw.includes('(') || raw.includes(')'))
+      errors.push(new Error(`Segment names may not start or end with extra parenthesis ('${raw}').`))
+    return errors
+  }
 
-  return errors
+  // Dynamic validation
+  else {
+    if (!param)
+      errors.push(new Error(`Segment names may not be empty ('${raw}').`))
+    else if (param.includes('[') || param.includes(']'))
+      errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
+    else if (param.startsWith('.'))
+      errors.push(new Error(`Segment names may not start with erroneous periods ('${raw}').`))
+    return errors
+  }
 }
