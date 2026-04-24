@@ -41,8 +41,6 @@ export function validate({ raw, type, param }: Segment): Error[] {
   else if (type === 'static') {
     if (raw.includes('[') || raw.includes(']'))
       errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
-    if (raw.includes('(') || raw.includes(')'))
-      errors.push(new Error(`Segment names may not start or end with extra parenthesis ('${raw}').`))
     return errors
   }
 
