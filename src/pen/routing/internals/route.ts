@@ -64,6 +64,7 @@ export default class Route {
     this.validateSegment()
     this.validateModules()
     this.validateChildren()
+    this.validateAncestors()
   }
 
   private validateSegment(): void {
@@ -106,6 +107,27 @@ export default class Route {
     const statics = children.filter(route => route.segment.type === 'static')
     if (optionalCatchalls.length && statics.length)
       this.errors.push(new SplatIndexConflictError(this.absPath))
+  }
+
+  private validateAncestors(): void {
+    if (!this.parent) return
+
+    const seenParams = new Set<string>()
+    let hasCatchallAncestor = false
+
+    for (let cursor: Route | undefined = this.parent; cursor; cursor = cursor.parent) {
+      if (cursor.segment.type === 'catchall' || cursor.segment.type === 'optional-catchall')
+        hasCatchallAncestor = true
+      if (cursor.segment.param)
+        seenParams.add(cursor.segment.param)
+    }
+
+    if (hasCatchallAncestor)
+      this.errors.push(new Error('Catch-all must be the last part of the URL.'))
+
+    const { param } = this.segment
+    if (param && seenParams.has(param))
+      this.errors.push(new Error(`You cannot have the same slug name "${param}" repeat within a single dynamic path`))
   }
 
   toJSON() {
