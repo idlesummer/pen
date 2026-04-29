@@ -62,28 +62,12 @@ export default class Route {
   validate(): void {
     this.errors.length = 0
     this.validateSegment()
-    this.validateModules()
     this.validateChildren()
     this.validateAncestors()
   }
 
   private validateSegment(): void {
     this.errors.push(...Segment.validate(this.segment))
-  }
-
-  private validateModules(): void {
-    if (!this.modules.page)
-      return
-
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: Route = this
-    while (root.parent)
-      root = root.parent
-
-    if (!root.modules.layout)
-      this.errors.push(new Error(
-        `${this.modules.page} doesn't have a root layout. To fix this error, make sure every page has a root layout.`,
-      ))
   }
 
   private validateChildren(): void {
