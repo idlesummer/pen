@@ -1,13 +1,6 @@
 import { readdirSync } from 'fs'
 import { join } from 'path'
 import * as Segment from './segment'
-import {
-  ConflictingCatchallError,
-  ConflictingDynamicSegmentsError,
-  DuplicateCatchallError,
-  DuplicateOptionalCatchallError,
-  SplatIndexConflictError,
-} from '../errors'
 
 export type RouteModule = 'layout' | 'page' | 'error' | 'not-found'
 export type RouteModules = Partial<Record<RouteModule, string>>
@@ -32,10 +25,7 @@ export default class Route {
   getChildren(): Route[] {
     return readdirSync(this.absPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('_'))
-      .map(dirent => new Route(
-        join(this.absPath, dirent.name),
-        Segment.from(dirent.name),
-      ))
+      .map(dirent => new Route(join(this.absPath, dirent.name), Segment.from(dirent.name)))
   }
 
   loadModules(): void {
@@ -71,47 +61,61 @@ export default class Route {
   }
 
   private validateChildren(): void {
-    const { children } = this
-    const requiredCatchalls = children.filter(route => route.segment.type === 'catchall')
-    if (requiredCatchalls.length > 1)
-      this.errors.push(new DuplicateCatchallError(this.absPath))
+    const catchalls = this.children.filter(route => route.segment.type === 'catchall')
+    const optionalCatchalls = this.children.filter(route => route.segment.type === 'optional-catchall')
+    const dynamics = this.children.filter(route => route.segment.type === 'dynamic')
 
-    const optionalCatchalls = children.filter(route => route.segment.type === 'optional-catchall')
+    if (catchalls.length > 1)
+      this.errors.push(new Error(
+        'You cannot use different slug names for the same dynamic path' +
+        `('${catchalls[0].segment.raw}' !== '${catchalls[1].segment.raw}').`,
+      ))
+
     if (optionalCatchalls.length > 1)
-      this.errors.push(new DuplicateOptionalCatchallError(this.absPath))
+      this.errors.push(new Error(
+        'You cannot use different slug names for the same dynamic path' +
+        `('${optionalCatchalls[0].segment.raw}' !== '${optionalCatchalls[1].segment.raw}').`,
+      ))
 
-    const dynamics = children.filter(route => route.segment.type === 'dynamic')
-    if (requiredCatchalls.length && optionalCatchalls.length)
-      this.errors.push(new ConflictingCatchallError(this.absPath))
+    if (dynamics.length > 1)
+      this.errors.push(new Error(
+        'You cannot use different slug names for the same dynamic path' +
+        `('${dynamics[0].segment.raw}' !== '${dynamics[1].segment.raw}').`,
+      ))
 
-    const params = [...new Set(dynamics.map(route => route.segment.param))]
-    if (params.length > 1)
-      this.errors.push(new ConflictingDynamicSegmentsError(this.absPath, params as string[]))
+    if (catchalls.length && optionalCatchalls.length)
+      this.errors.push(new Error(
+         'You cannot use both an required and optional catch-all route at the same level ' +
+         `("${optionalCatchalls[0].segment.raw}" and "${dynamics[0].segment.raw}")`,
+      ))
 
-    const statics = children.filter(route => route.segment.type === 'static')
-    if (optionalCatchalls.length && statics.length)
-      this.errors.push(new SplatIndexConflictError(this.absPath))
+    // TODO: Check how nextjs behaves around different types of dynamic segments present under a route
   }
 
   private validateAncestors(): void {
     if (!this.parent) return
 
-    const seenParams = new Set<string>()
-    let hasCatchallAncestor = false
+    const dynamicParams = new Set<string>()
+    let catchallAncestor: Route | undefined
 
-    for (let cursor: Route | undefined = this.parent; cursor; cursor = cursor.parent) {
-      if (cursor.segment.type === 'catchall' || cursor.segment.type === 'optional-catchall')
-        hasCatchallAncestor = true
-      if (cursor.segment.param)
-        seenParams.add(cursor.segment.param)
+    for (let ancestor: Route | undefined = this.parent; ancestor; ancestor = ancestor.parent) {
+      if (ancestor.segment.type === 'catchall' || ancestor.segment.type === 'optional-catchall')
+        catchallAncestor ??= ancestor
+      if (ancestor.segment.param)
+        dynamicParams.add(ancestor.segment.param)
     }
 
-    if (hasCatchallAncestor)
-      this.errors.push(new Error('Catch-all must be the last part of the URL.'))
+    if (catchallAncestor)
+      this.errors.push(new Error(
+        'Catch-all must be the last part of the URL. ' +
+        `Found '${this.segment.raw}' after catch-all '${catchallAncestor.segment.raw}'.`
+      ))
 
-    const { param } = this.segment
-    if (param && seenParams.has(param))
-      this.errors.push(new Error(`You cannot have the same slug name "${param}" repeat within a single dynamic path`))
+    if (this.segment.param && dynamicParams.has(this.segment.param))
+      this.errors.push(new Error(
+        `You cannot have the same slug name "${this.segment.param}" ` +
+        'repeat within a single dynamic path',
+      ))
   }
 
   toJSON() {
