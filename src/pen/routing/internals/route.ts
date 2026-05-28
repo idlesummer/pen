@@ -61,40 +61,46 @@ export default class Route {
   }
 
   private validateChildren(): void {
-    const catchalls = this.children.filter(route => route.segment.type === 'catchall')
-    const optionalCatchalls = this.children.filter(route => route.segment.type === 'optional-catchall')
-    const dynamics = this.children.filter(route => route.segment.type === 'dynamic')
+    const optional = this.children.find(r => r.segment.optional)
+    const catchalls = this.children.filter(r => r.segment.type === 'catchall')
+    const dynamics = this.children.filter(r => r.segment.type === 'dynamic')
 
+    // Optional must be the only routing sibling (groups exempt)
+    if (optional) {
+      const siblings = this.children.filter(c => c !== optional && c.segment.type !== 'group')
+      if (siblings.length)
+        this.errors.push(new Error(
+          `An optional route ("${optional.urlPath}") cannot have siblings. ` +
+          `Found: ${siblings.map(c => `"${c.urlPath}"`).join(', ')}.`,
+        ))
+    }
+
+    // Multiple required catchalls
     if (catchalls.length > 1)
       this.errors.push(new Error(
-        'You cannot use different slug names for the same dynamic path' +
+        'You cannot use different slug names for the same dynamic path ' +
         `('${catchalls[0].segment.raw}' !== '${catchalls[1].segment.raw}').`,
       ))
 
-    if (optionalCatchalls.length > 1)
-      this.errors.push(new Error(
-        'You cannot use different slug names for the same dynamic path' +
-        `('${optionalCatchalls[0].segment.raw}' !== '${optionalCatchalls[1].segment.raw}').`,
-      ))
-
+    // Conflicting dynamic params
     if (dynamics.length > 1)
       this.errors.push(new Error(
-        'You cannot use different slug names for the same dynamic path' +
+        'You cannot use different slug names for the same dynamic path ' +
         `('${dynamics[0].segment.raw}' !== '${dynamics[1].segment.raw}').`,
       ))
-
-    if (catchalls.length && optionalCatchalls.length)
-      this.errors.push(new Error(
-         'You cannot use both an required and optional catch-all route at the same level ' +
-         `("${optionalCatchalls[0].segment.raw}" and "${dynamics[0].segment.raw}")`,
-      ))
-
-    // TODO: Check how nextjs behaves around different types of dynamic segments present under a route
   }
 
   private validateAncestors(): void {
     if (!this.parent) return
 
+    // Immediate-parent check
+    if (this.segment.type === 'optional-catchall' && this.parent.modules.page)
+    this.errors.push(new Error(
+      'You cannot define a route with the same specificity as a optional catch-all route ' +
+      `("${this.parent.urlPath}" and "${this.urlPath}").`,
+    ))
+
+    // Existing chain walk
     const dynamicParams = new Set<string>()
     let catchallAncestor: Route | undefined
 

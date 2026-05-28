@@ -9,13 +9,14 @@ export type Segment = {
   raw: string
   type: SegmentType
   param?: string
+  optional?: true
 }
 
 export function from(raw: string): Segment {
   if (raw.startsWith('(') && raw.endsWith(')'))
     return { raw, type: 'group' }
   if (raw.startsWith('[[...') && raw.endsWith(']]'))
-    return { raw, type: 'optional-catchall', param: raw.slice(5, -2) }
+    return { raw, type: 'optional-catchall', param: raw.slice(5, -2), optional: true }
   if (raw.startsWith('[...') && raw.endsWith(']'))
     return { raw, type: 'catchall', param: raw.slice(4, -1) }
   if (raw.startsWith('[') && raw.endsWith(']'))
