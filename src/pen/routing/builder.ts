@@ -1,6 +1,6 @@
 import { statSync } from 'fs'
 import { resolve } from 'path'
-import { traverse } from '@/pen/lib/tree'
+import { traverse } from '@/pen/lib/traverse'
 import * as Segment from './internals/segment'
 import Route from './internals/route'
 

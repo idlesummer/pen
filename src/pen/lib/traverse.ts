@@ -36,29 +36,3 @@ export function traverse<TNode>(root: TNode, callbacks: TraverseCallbacks<TNode>
     }
   }
 }
-
-export type AncestorCallbacks<TNode> = {
-  /** Called when visiting each ancestor node (from leaf to root) */
-  visit: (node: TNode) => void
-  /** Returns the parent node for a given node */
-  parent: (node: TNode) => TNode | undefined
-}
-
-/**
- * Traverses the ancestor chain from a given node up to the root.
- *
- * @example
- * ancestors(node, {
- *   visit: (node) => console.log(node.name),
- *   parent: (node) => node.parent
- * })
- */
-export function ancestors<TNode>(node: TNode, callbacks: AncestorCallbacks<TNode>) {
-  const { visit, parent } = callbacks
-  let currentNode: TNode | undefined = node
-
-  while (currentNode) {
-    visit(currentNode)
-    currentNode = parent(currentNode)
-  }
-}
