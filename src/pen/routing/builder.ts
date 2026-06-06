@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import { traverse } from '@/pen/lib/traverse'
 import * as Segment from './internals/segment'
 import Route from './internals/route'
-import { validateIntrinsic, validateRelational } from './internals/validate'
+import { validateRouteTree, validateUrlTree } from './internals/validate'
 import {
   type FileRouterError,
   DirectoryNotFoundError,
@@ -29,21 +29,15 @@ export function buildRouteTree(appPath: string): Route {
     attach: (child, parent) => parent.addChild(child),
   })
 
-  // Pass 2 — intrinsic validation (pointer-local, O(nodes)). Prune malformed
-  // subtrees downward: a node under a broken parent produces only noise. Pruning
-  // is downward only — every other branch is still fully validated.
-  const intrinsic: FileRouterError[] = []
-  traverse(root, {
-    visit: (route) => { intrinsic.push(...validateIntrinsic(route)) },
-    expand: (route) => route.segment.type === 'malformed' ? [] : route.children,
-  })
-
-  // Pass 3 — relational validation (cross-branch URL collisions). Runs after
-  // intrinsic, which certifies the segments relational projection assumes.
-  const relational = validateRelational(root)
-
-  const all = [...intrinsic, ...relational]
-  if (all.length) throw new RouteValidationErrors(all)
+  // Pass 2 — validation. Route-tree checks cover the pointer-local rules
+  // (malformed names, repeated slugs); the URL-tree pass projects the tree with
+  // groups flattened and catches everything that only surfaces there
+  // (collisions, slug agreement, splat overlaps, terminality).
+  const errors: FileRouterError[] = [
+    ...validateRouteTree(root),
+    ...validateUrlTree(root),
+  ]
+  if (errors.length) throw new RouteValidationErrors(errors)
 
   return root
 }

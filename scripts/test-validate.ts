@@ -35,9 +35,19 @@ const cases: Case[] = [
     expect: ['CatchallNotTerminalError'],
   },
   {
-    name: 'cross-group slug conflict -> relational, no exact-URL collision',
+    name: 'cross-group slug conflict -> unified dynamic-segments error',
     dir: 'scripts/fixtures/cross-group-slug-conflict',
-    expect: ['CrossGroupSlugConflictError'],
+    expect: ['ConflictingDynamicSegmentsError'],
+  },
+  {
+    name: 'cross-group optional-catch-all vs index page -> closed gap',
+    dir: 'scripts/fixtures/cross-group-optional-page',
+    expect: ['OptionalCatchallPageConflictError'],
+  },
+  {
+    name: 'cross-group catch-all + optional-catch-all -> closed gap',
+    dir: 'scripts/fixtures/cross-group-catchall-optional',
+    expect: ['ConflictingCatchallError'],
   },
   {
     name: 'clean app -> no errors, returns tree',

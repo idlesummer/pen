@@ -5,7 +5,7 @@
 export class FileRouterError extends Error {}
 
 
-// - File Tree Errors ----------------------------------------------------------------------------------------------------
+// - Filesystem Preconditions --------------------------------------------------------------------------------------------
 
 
 export class DirectoryNotFoundError extends FileRouterError {
@@ -23,7 +23,7 @@ export class NotADirectoryError extends FileRouterError {
 }
 
 
-// - Segment Parse Errors ------------------------------------------------------------------------------------------------
+// - Route-tree Findings (pointer-local) ---------------------------------------------------------------------------------
 
 
 export class MalformedSegmentError extends FileRouterError {
@@ -33,74 +33,6 @@ export class MalformedSegmentError extends FileRouterError {
       'Rename the directory to a valid route segment.',
     )
     this.name = 'MalformedSegmentError'
-  }
-}
-
-
-// - Sibling Conflict Errors (same parent — intrinsic) -------------------------------------------------------------------
-
-
-export class DuplicateCatchallError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `Multiple [...slug] routes found in "${path}".\n\n` +
-      'Only one [...slug] is allowed per directory.',
-    )
-    this.name = 'DuplicateCatchallError'
-  }
-}
-
-export class DuplicateOptionalCatchallError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `Multiple [[...slug]] routes found in "${path}".\n\n` +
-      'Only one [[...slug]] is allowed per directory.',
-    )
-    this.name = 'DuplicateOptionalCatchallError'
-  }
-}
-
-export class ConflictingCatchallError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `Conflicting [...slug] and [[...slug]] routes in "${path}".\n\n` +
-      'A [...slug] and [[...slug]] cannot coexist in the same directory.',
-    )
-    this.name = 'ConflictingCatchallError'
-  }
-}
-
-export class ConflictingDynamicSegmentsError extends FileRouterError {
-  constructor(public path: string, public params: string[]) {
-    super(
-      `Conflicting dynamic segments in "${path}": ${params.map(p => `[${p}]`).join(', ')}.\n\n` +
-      'Only one [param] name is allowed per directory level.',
-    )
-    this.name = 'ConflictingDynamicSegmentsError'
-  }
-}
-
-export class SplatIndexConflictError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `[[...slug]] conflicts with a static sibling in "${path}".\n\n` +
-      'Both match the base route — remove one or rename the segment.',
-    )
-    this.name = 'SplatIndexConflictError'
-  }
-}
-
-
-// - Ancestry & Terminal Errors (intrinsic) ----------------------------------------------------------------------------
-
-
-export class CatchallNotTerminalError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `Catch-all route "${path}" must be the last segment in the URL.\n\n` +
-      'Routes nested below a [...slug] or [[...slug]] are unreachable.',
-    )
-    this.name = 'CatchallNotTerminalError'
   }
 }
 
@@ -114,18 +46,12 @@ export class RepeatedSlugError extends FileRouterError {
   }
 }
 
-export class OptionalCatchallPageConflictError extends FileRouterError {
-  constructor(public path: string) {
-    super(
-      `Optional catch-all "${path}" has the same specificity as its parent's page.\n\n` +
-      'A [[...slug]] already matches the parent route, which also defines a page file.',
-    )
-    this.name = 'OptionalCatchallPageConflictError'
-  }
-}
 
-
-// - Cross-branch Errors (relational) ----------------------------------------------------------------------------------
+// - URL-tree Findings (surface once groups are flattened) --------------------------------------------------------------
+//
+// These are detected on the projected URL tree, so each refers to a URL position
+// rather than a directory — same-directory and cross-group conflicts are one and
+// the same check.
 
 
 export class DuplicateScreenError extends FileRouterError {
@@ -134,28 +60,82 @@ export class DuplicateScreenError extends FileRouterError {
     public files: [string, string],
   ) {
     super(
-      `Conflicting screen routes found at "${url}":\n` +
+      `Conflicting screen routes at "${url}":\n` +
       files.map(f => `  - ${f}`).join('\n') + '\n\n' +
       'Each URL can only have one screen file.\n' +
-      'Move one screen to a different directory or rename the route segment.',
+      'Move one screen to a different URL or rename the route segment.',
     )
     this.name = 'DuplicateScreenError'
   }
 }
 
-export class CrossGroupSlugConflictError extends FileRouterError {
-  constructor(
-    public url: string,
-    public params: [string, string],
-    public dirs: [string, string],
-  ) {
+export class ConflictingDynamicSegmentsError extends FileRouterError {
+  constructor(public url: string, public params: string[]) {
     super(
-      `Conflicting slug names for the dynamic path "${url}": [${params[0]}] vs [${params[1]}].\n` +
-      dirs.map(d => `  - ${d}`).join('\n') + '\n\n' +
-      'A dynamic URL position must use one slug name across all route groups.\n' +
-      'Rename so every branch agrees (e.g. make both [id]).',
+      `Conflicting dynamic slug names at "${url}": ${params.map(p => `[${p}]`).join(', ')}.\n\n` +
+      'A dynamic URL position must use one slug name across all branches.',
     )
-    this.name = 'CrossGroupSlugConflictError'
+    this.name = 'ConflictingDynamicSegmentsError'
+  }
+}
+
+export class DuplicateCatchallError extends FileRouterError {
+  constructor(public url: string) {
+    super(
+      `Multiple [...slug] routes resolve to "${url}".\n\n` +
+      'Only one [...slug] is allowed per URL position.',
+    )
+    this.name = 'DuplicateCatchallError'
+  }
+}
+
+export class DuplicateOptionalCatchallError extends FileRouterError {
+  constructor(public url: string) {
+    super(
+      `Multiple [[...slug]] routes resolve to "${url}".\n\n` +
+      'Only one [[...slug]] is allowed per URL position.',
+    )
+    this.name = 'DuplicateOptionalCatchallError'
+  }
+}
+
+export class ConflictingCatchallError extends FileRouterError {
+  constructor(public url: string) {
+    super(
+      `A [...slug] and a [[...slug]] both resolve to "${url}".\n\n` +
+      'They cannot coexist at the same URL position.',
+    )
+    this.name = 'ConflictingCatchallError'
+  }
+}
+
+export class SplatIndexConflictError extends FileRouterError {
+  constructor(public url: string) {
+    super(
+      `[[...slug]] conflicts with a static route at "${url}".\n\n` +
+      'Both match the base path — remove one or rename the segment.',
+    )
+    this.name = 'SplatIndexConflictError'
+  }
+}
+
+export class OptionalCatchallPageConflictError extends FileRouterError {
+  constructor(public url: string) {
+    super(
+      `Optional catch-all "${url}" has the same specificity as its parent's screen.\n\n` +
+      'A [[...slug]] already matches the parent URL, which also defines a screen.',
+    )
+    this.name = 'OptionalCatchallPageConflictError'
+  }
+}
+
+export class CatchallNotTerminalError extends FileRouterError {
+  constructor(public url: string) {
+    super(
+      `Catch-all route "${url}" must be the last segment in the URL.\n\n` +
+      'Routes nested below a [...slug] or [[...slug]] are unreachable.',
+    )
+    this.name = 'CatchallNotTerminalError'
   }
 }
 
