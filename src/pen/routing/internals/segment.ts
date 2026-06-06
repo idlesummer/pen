@@ -4,55 +4,59 @@ export type SegmentType =
   | 'dynamic'
   | 'catchall'
   | 'optional-catchall'
+  | 'malformed'
 
 export type Segment = {
   raw: string
   type: SegmentType
   param?: string
   optional?: true
+  /** Set only when `type === 'malformed'`; explains why parsing failed. */
+  reason?: string
 }
 
+/**
+ * Total parse: every input returns a `Segment`, nothing throws.
+ *
+ * Unparseable names (empty group/param, unbalanced brackets) classify as
+ * `'malformed'` with a `reason`, so parse-layer problems join the accumulated
+ * validation batch instead of short-circuiting the build.
+ */
 export function from(raw: string): Segment {
+  // Group: (name)
   if (raw.startsWith('(') && raw.endsWith(')'))
-    return { raw, type: 'group' }
-  if (raw.startsWith('[[...') && raw.endsWith(']]'))
-    return { raw, type: 'optional-catchall', param: raw.slice(5, -2), optional: true }
-  if (raw.startsWith('[...') && raw.endsWith(']'))
-    return { raw, type: 'catchall', param: raw.slice(4, -1) }
-  if (raw.startsWith('[') && raw.endsWith(']'))
-    return { raw, type: 'dynamic', param: raw.slice(1, -1) }
+    return raw.slice(1, -1)
+      ? { raw, type: 'group' }
+      : { raw, type: 'malformed', reason: 'empty group name' }
+
+  // Optional catch-all: [[...name]]
+  if (raw.startsWith('[[...') && raw.endsWith(']]')) {
+    const param = raw.slice(5, -2)
+    return param
+      ? { raw, type: 'optional-catchall', param, optional: true }
+      : { raw, type: 'malformed', reason: 'empty param name' }
+  }
+
+  // Catch-all: [...name]
+  if (raw.startsWith('[...') && raw.endsWith(']')) {
+    const param = raw.slice(4, -1)
+    return param
+      ? { raw, type: 'catchall', param }
+      : { raw, type: 'malformed', reason: 'empty param name' }
+  }
+
+  // Dynamic: [name]
+  if (raw.startsWith('[') && raw.endsWith(']')) {
+    const param = raw.slice(1, -1)
+    return param
+      ? { raw, type: 'dynamic', param }
+      : { raw, type: 'malformed', reason: 'empty param name' }
+  }
+
+  // A bracket that matched no pattern above means the name is unbalanced.
+  if (raw.includes('[') || raw.includes(']'))
+    return { raw, type: 'malformed', reason: 'unbalanced brackets' }
+
+  // Static: plain name
   return { raw, type: 'static' }
-}
-
-export function validate({ raw, type, param }: Segment): Error[] {
-  const errors: Error[] = []
-
-  // Shape validation
-  if (raw.includes('…'))
-    errors.push(new Error(`Detected a three-dot character ('…') at ('${raw}'). Did you mean ('...')?`))
-
-  // Group validation
-  if (type === 'group') {
-    if (!raw.slice(1, -1))
-      errors.push(new Error(`Segment names may not be empty ('${raw}').`))
-    return errors
-  }
-
-  // Static/malformed name validation
-  else if (type === 'static') {
-    if (raw.includes('[') || raw.includes(']'))
-      errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
-    return errors
-  }
-
-  // Dynamic validation
-  else {
-    if (!param)
-      errors.push(new Error(`Segment names may not be empty ('${raw}').`))
-    else if (param.includes('[') || param.includes(']'))
-      errors.push(new Error(`Segment names may not start or end with extra brackets ('${raw}').`))
-    else if (param.startsWith('.'))
-      errors.push(new Error(`Segment names may not start with erroneous periods ('${raw}').`))
-    return errors
-  }
 }

@@ -37,7 +37,8 @@
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
     "prepare": "npm run build",
-    "test": "npx tsx scripts/test-builder.ts"
+    "test": "npx tsx scripts/test-validate.ts",
+    "test:inspect": "npx tsx scripts/test-builder.ts"
   },
   "dependencies": {
     "commander": "^14.0.3",

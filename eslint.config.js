@@ -5,7 +5,7 @@ import { defineConfig } from 'eslint/config'
 
 export default defineConfig(
   {
-    ignores: ['dist/**'],
+    ignores: ['dist/**', 'scripts/mock-app/**', 'scripts/fixtures/**'],
     files: ['**/*.{js,ts,jsx,tsx}'],
     extends: [
       eslintJs.configs.recommended,                  // ESLint JS's recommended rules
