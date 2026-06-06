@@ -1,6 +1,6 @@
 import { traverse } from '@/pen/lib/traverse'
-import type { Segment } from './segment'
 import Route from './route'
+import UrlNode from './url-node'
 import {
   type FileRouterError,
   MalformedSegmentError,
@@ -52,40 +52,23 @@ function checkRouteNode(route: Route): FileRouterError[] {
 
 // - URL-tree checks -----------------------------------------------------------------------------------------------------
 //
-// Project the route tree to a URL tree (groups erased, dynamics generalized,
-// malformed pruned). Cousins that share a URL collapse into one node, so every
-// cross-branch rule becomes a local check on a single node — there is no longer
-// a same-parent vs cross-group distinction to track.
+// Project the route tree to a URL tree (see `UrlNode`). Cousins that share a URL
+// collapse into one node, so every cross-branch rule is a local check on a single
+// node — there is no longer a same-parent vs cross-group distinction to track.
 
-
-type UrlNode = {
-  key: string                     // '' | static name | '[*]' | '[...*]' | '[[...*]]'
-  url: string                     // normalized URL, for messages
-  routes: Route[]                 // route nodes that project to this position
-  children: Map<string, UrlNode>
-}
-
-const DYNAMIC = '[*]'
-const CATCHALL = '[...*]'
-const OPTIONAL = '[[...*]]'
 
 export function validateUrlTree(root: Route): FileRouterError[] {
   const errors: FileRouterError[] = []
-  walk(project(root), errors)
+  traverse(UrlNode.project(root), {
+    visit: (node) => { errors.push(...checkUrlNode(node)) },
+    expand: (node) => [...node.children.values()],
+  })
   return errors
-}
-
-function walk(node: UrlNode, errors: FileRouterError[]): void {
-  errors.push(...checkUrlNode(node))
-  for (const child of node.children.values())
-    walk(child, errors)
 }
 
 function checkUrlNode(node: UrlNode): FileRouterError[] {
   const errors: FileRouterError[] = []
-  const catchall = node.children.get(CATCHALL)
-  const optional = node.children.get(OPTIONAL)
-  const statics = [...node.children.values()].filter(c => isStatic(c.key))
+  const screens = node.screens
 
   // Identity conflict: several route dirs collapsed into this one dynamic
   // position. Subsumes same-parent sibling conflicts and cross-group ones alike.
@@ -93,28 +76,26 @@ function checkUrlNode(node: UrlNode): FileRouterError[] {
 
   // Two screens at the same URL — but a reported identity conflict is the root
   // cause of the collapse, so the duplicate is just its symptom; skip it then.
-  if (!identityConflict) {
-    const screens = node.routes.filter(r => r.modules.page)
+  if (!identityConflict)
     for (let i = 0; i < screens.length; i++)
       for (let j = i + 1; j < screens.length; j++)
         errors.push(new DuplicateScreenError(node.url, [screens[i].modules.page!, screens[j].modules.page!]))
-  }
 
   // A catch-all and an optional catch-all overlap at the same position.
-  if (catchall && optional)
+  if (node.catchall && node.optional)
     errors.push(new ConflictingCatchallError(node.url))
 
   // An optional catch-all overlaps a static sibling (both match the base path).
-  if (optional && statics.length)
+  if (node.optional && node.staticChildren.length)
     errors.push(new SplatIndexConflictError(node.url))
 
   // An optional catch-all overlaps its parent's screen (it matches zero segments).
-  if (optional && node.routes.some(r => r.modules.page))
-    errors.push(new OptionalCatchallPageConflictError(optional.url))
+  if (node.optional && screens.length)
+    errors.push(new OptionalCatchallPageConflictError(node.optional.url))
 
   // A catch-all / optional catch-all must be terminal: nothing routable below it.
-  for (const splat of [catchall, optional])
-    if (splat && hasScreenDescendant(splat))
+  for (const splat of [node.catchall, node.optional])
+    if (splat?.hasScreenDescendant())
       errors.push(new CatchallNotTerminalError(splat.url))
 
   return errors
@@ -127,87 +108,22 @@ function checkUrlNode(node: UrlNode): FileRouterError[] {
  * alls and optional catch-alls allow only one route per position.
  */
 function checkIdentity(node: UrlNode, errors: FileRouterError[]): boolean {
-  switch (node.key) {
-    case DYNAMIC: {
-      const names = [...new Set(node.routes.map(r => r.segment.param!))]
-      if (names.length > 1) {
-        errors.push(new ConflictingDynamicSegmentsError(node.url, names))
-        return true
-      }
-      return false
+  if (node.isDynamic) {
+    const names = [...new Set(node.routes.map(route => route.segment.param!))]
+    if (names.length > 1) {
+      errors.push(new ConflictingDynamicSegmentsError(node.url, names))
+      return true
     }
-    case CATCHALL:
-      if (node.routes.length > 1) {
-        errors.push(new DuplicateCatchallError(node.url))
-        return true
-      }
-      return false
-    case OPTIONAL:
-      if (node.routes.length > 1) {
-        errors.push(new DuplicateOptionalCatchallError(node.url))
-        return true
-      }
-      return false
-    default:
-      return false
-  }
-}
-
-function hasScreenDescendant(node: UrlNode): boolean {
-  for (const child of node.children.values()) {
-    if (child.routes.some(r => r.modules.page)) return true
-    if (hasScreenDescendant(child)) return true
+  } else if (node.isCatchall) {
+    if (node.routes.length > 1) {
+      errors.push(new DuplicateCatchallError(node.url))
+      return true
+    }
+  } else if (node.isOptional) {
+    if (node.routes.length > 1) {
+      errors.push(new DuplicateOptionalCatchallError(node.url))
+      return true
+    }
   }
   return false
-}
-
-function isStatic(key: string): boolean {
-  return key !== DYNAMIC && key !== CATCHALL && key !== OPTIONAL
-}
-
-
-// - Projection ----------------------------------------------------------------------------------------------------------
-
-
-function project(root: Route): UrlNode {
-  const urlRoot: UrlNode = { key: '', url: '/', routes: [root], children: new Map() }
-  for (const child of root.children)
-    attach(child, urlRoot)
-  return urlRoot
-}
-
-function attach(route: Route, into: UrlNode): void {
-  if (route.segment.type === 'malformed')
-    return // prune the malformed subtree
-
-  // Groups are erased: the group's own modules belong to the parent URL, and its
-  // children attach as if the group segment were not there.
-  if (route.segment.type === 'group') {
-    into.routes.push(route)
-    for (const child of route.children)
-      attach(child, into)
-    return
-  }
-
-  const key = normalize(route.segment)
-  const target = into.children.get(key) ?? makeChild(into, key)
-  target.routes.push(route)
-  for (const child of route.children)
-    attach(child, target)
-}
-
-function makeChild(parent: UrlNode, key: string): UrlNode {
-  const url = parent.url === '/' ? `/${key}` : `${parent.url}/${key}`
-  const node: UrlNode = { key, url, routes: [], children: new Map() }
-  parent.children.set(key, node)
-  return node
-}
-
-function normalize(segment: Segment): string {
-  switch (segment.type) {
-    case 'dynamic':           return DYNAMIC
-    case 'catchall':          return CATCHALL
-    case 'optional-catchall': return OPTIONAL
-    default:                  return segment.raw // static
-  }
 }
