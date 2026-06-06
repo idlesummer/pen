@@ -69,22 +69,23 @@ function validateSiblings(route: Route): FileRouterError[] {
 
 /** A catch-all / optional-catch-all must be terminal: nothing routable below it. */
 function validateTerminal(route: Route): FileRouterError[] {
-  const { type } = route.segment
+  const type = route.segment.type
   if (type !== 'catchall' && type !== 'optional-catchall')
     return []
 
   let hasRoutableDescendant = false
   traverse(route, {
     visit: (node) => {
-      if (node !== route && node.modules.page) {
-        hasRoutableDescendant = true
-        return true // stop early
-      }
+      if (node !== route && node.modules.page)
+        return (hasRoutableDescendant = true) // stop early
     },
-    expand: (node) => node.segment.type === 'malformed' ? [] : node.children,
+    expand: (node) =>
+      node.segment.type === 'malformed' ? [] : node.children,
   })
 
-  return hasRoutableDescendant ? [new CatchallNotTerminalError(route.urlPath)] : []
+  return hasRoutableDescendant
+    ? [new CatchallNotTerminalError(route.urlPath)]
+    : []
 }
 
 /** Checks against the node's own ancestor chain. */
