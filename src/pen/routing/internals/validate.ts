@@ -1,3 +1,22 @@
+/**
+ * Route validation — two passes over the built tree, split by reachability
+ * (what a check needs in order to fire). See `docs/routing-validation.md`.
+ *
+ *   1. Route-tree pass (`validateRouteTree`) — pointer-local rules whose inputs
+ *      are all on the node itself or its ancestor chain. These can't move to the
+ *      URL tree: a malformed name doesn't project, and slug repetition is a
+ *      property of one concrete path.
+ *
+ *   2. URL-tree pass (`validateUrlTree`) — everything that only surfaces once
+ *      groups are flattened. The route tree is projected to a `UrlNode` tree, so
+ *      cousins that resolve to the same URL collapse into one node and every
+ *      cross-branch rule becomes a local check on a single node.
+ *
+ * The projection is what makes pass 2 simple: it dissolves the older "intrinsic
+ * vs relational" (same-parent vs cross-group) distinction — after projection
+ * there is no difference, both are just routes that collapsed into one node.
+ */
+
 import { traverse } from '@/pen/lib/traverse'
 import Route from './route'
 import UrlNode from './url-node'
