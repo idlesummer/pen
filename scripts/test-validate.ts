@@ -35,6 +35,11 @@ const cases: Case[] = [
     expect: ['CatchallNotTerminalError'],
   },
   {
+    name: 'cross-group slug conflict -> relational, no exact-URL collision',
+    dir: 'scripts/fixtures/cross-group-slug-conflict',
+    expect: ['CrossGroupSlugConflictError'],
+  },
+  {
     name: 'clean app -> no errors, returns tree',
     dir: 'scripts/fixtures/clean',
     expect: [],

@@ -143,6 +143,22 @@ export class DuplicateScreenError extends FileRouterError {
   }
 }
 
+export class CrossGroupSlugConflictError extends FileRouterError {
+  constructor(
+    public url: string,
+    public params: [string, string],
+    public dirs: [string, string],
+  ) {
+    super(
+      `Conflicting slug names for the dynamic path "${url}": [${params[0]}] vs [${params[1]}].\n` +
+      dirs.map(d => `  - ${d}`).join('\n') + '\n\n' +
+      'A dynamic URL position must use one slug name across all route groups.\n' +
+      'Rename so every branch agrees (e.g. make both [id]).',
+    )
+    this.name = 'CrossGroupSlugConflictError'
+  }
+}
+
 
 // - Aggregate -----------------------------------------------------------------------------------------------------------
 

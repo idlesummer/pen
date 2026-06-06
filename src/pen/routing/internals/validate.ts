@@ -12,6 +12,7 @@ import {
   RepeatedSlugError,
   OptionalCatchallPageConflictError,
   DuplicateScreenError,
+  CrossGroupSlugConflictError,
 } from '../errors'
 
 // - Intrinsic -----------------------------------------------------------------------------------------------------------
@@ -117,37 +118,62 @@ function validateAncestry(route: Route): FileRouterError[] {
 
 
 /**
- * Bucket every renderable route (those with a `page`) by its projected URL and
- * report cross-branch collisions. Malformed subtrees are skipped: their URL is
- * meaningless and their parse error is already owned by the intrinsic pass.
+ * Project routes to normalized URL keys and report cross-branch conflicts that
+ * only surface once groups are flattened:
+ *
+ * - `DuplicateScreenError` — two renderable routes land on the same URL.
+ * - `CrossGroupSlugConflictError` — a dynamic URL position uses disagreeing slug
+ *   names across groups (e.g. `(a)/[id]` and `(b)/[slug]`). This is the cross-
+ *   group half of the slug-name rule; the same-parent half is owned by intrinsic.
+ *
+ * Same-parent pairs are skipped throughout (intrinsic already reports them), and
+ * malformed subtrees are skipped entirely — their URL is meaningless.
  */
 export function validateRelational(root: Route): FileRouterError[] {
-  const buckets = new Map<string, Route[]>()
+  const screens = new Map<string, Route[]>() // renderable routes, by full URL
+  const slots = new Map<string, Route[]>()   // dynamic segments, by URL position
 
   traverse(root, {
     visit: (route) => {
       if (route.segment.type === 'malformed') return
-      if (!route.modules.page) return
-      const key = bucketKey(route)
-      const bucket = buckets.get(key) ?? []
-      bucket.push(route)
-      buckets.set(key, bucket)
+      if (route.modules.page) bucket(screens, bucketKey(route), route)
+      if (route.segment.type === 'dynamic') bucket(slots, bucketKey(route), route)
     },
     expand: (route) => route.segment.type === 'malformed' ? [] : route.children,
   })
 
   const errors: FileRouterError[] = []
-  for (const [url, routes] of buckets) {
-    if (routes.length < 2) continue
 
-    // Report cross-branch pairs only; same-parent collisions belong to intrinsic.
-    for (let i = 0; i < routes.length; i++)
-      for (let j = i + 1; j < routes.length; j++)
-        if (routes[i].parent !== routes[j].parent)
-          errors.push(new DuplicateScreenError(url, [routes[i].modules.page!, routes[j].modules.page!]))
-  }
+  for (const [url, routes] of screens)
+    for (const [a, b] of crossBranchPairs(routes))
+      errors.push(new DuplicateScreenError(url, [a.modules.page!, b.modules.page!]))
+
+  for (const [url, routes] of slots)
+    for (const [a, b] of crossBranchPairs(routes))
+      if (a.segment.param !== b.segment.param)
+        errors.push(new CrossGroupSlugConflictError(url, [a.segment.param!, b.segment.param!], [a.absPath, b.absPath]))
 
   return errors
+}
+
+/** Append a route to the bucket at `key`, creating the bucket on first use. */
+function bucket(map: Map<string, Route[]>, key: string, route: Route): void {
+  const list = map.get(key) ?? []
+  list.push(route)
+  map.set(key, list)
+}
+
+/**
+ * All unordered pairs in a bucket that live in different branches. Same-parent
+ * pairs are skipped — those collisions are owned by the intrinsic pass.
+ */
+function crossBranchPairs(routes: Route[]): [Route, Route][] {
+  const pairs: [Route, Route][] = []
+  for (let i = 0; i < routes.length; i++)
+    for (let j = i + 1; j < routes.length; j++)
+      if (routes[i].parent !== routes[j].parent)
+        pairs.push([routes[i], routes[j]])
+  return pairs
 }
 
 /** Project a route to a normalized URL key: groups erased, dynamics generalized. */
