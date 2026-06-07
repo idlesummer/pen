@@ -93,12 +93,21 @@ function checkUrlNode(node: UrlNode): FileRouterError[] {
   // position. Subsumes same-parent sibling conflicts and cross-group ones alike.
   const identityConflict = checkIdentity(node, errors)
 
-  // Two screens at the same URL — but a reported identity conflict is the root
-  // cause of the collapse, so the duplicate is just its symptom; skip it then.
+  // Two screens at the same URL — checked *per parallel-route slot*: slots share
+  // a URL and render into different layout slots, so only a same-slot collision
+  // conflicts (everything is in the implicit 'children' slot unless under @slot).
+  // A reported identity conflict is the root cause of the collapse, so the
+  // duplicate is just its symptom; skip it then.
   if (!identityConflict)
-    for (let i = 0; i < screens.length; i++)
-      for (let j = i + 1; j < screens.length; j++)
-        errors.push(new DuplicateScreenError(node.url, [screens[i].modules.page!, screens[j].modules.page!]))
+    for (const slotScreens of groupBySlot(screens).values())
+      for (let i = 0; i < slotScreens.length; i++)
+        for (let j = i + 1; j < slotScreens.length; j++)
+          errors.push(new DuplicateScreenError(node.url, [slotScreens[i].modules.page!, slotScreens[j].modules.page!]))
+
+  // NOTE (parallel routes): the structural checks below are not yet slot-scoped.
+  // They treat a position's slots together — correct until two slots place
+  // *different* dynamic kinds/names at the same position. Per-slot scoping of
+  // these is the follow-up.
 
   // A catch-all and an optional catch-all overlap at the same position.
   if (node.catchall && node.optional)
@@ -145,4 +154,15 @@ function checkIdentity(node: UrlNode, errors: FileRouterError[]): boolean {
     }
   }
   return false
+}
+
+/** Partition routes by their parallel-route slot ('children' is the default). */
+function groupBySlot(routes: Route[]): Map<string, Route[]> {
+  const bySlot = new Map<string, Route[]>()
+  for (const route of routes) {
+    const list = bySlot.get(route.slot) ?? []
+    list.push(route)
+    bySlot.set(route.slot, list)
+  }
+  return bySlot
 }

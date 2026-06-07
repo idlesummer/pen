@@ -50,6 +50,16 @@ const cases: Case[] = [
     expect: ['ConflictingCatchallError'],
   },
   {
+    name: 'parallel routes (@team/@analytics) share URLs without conflict',
+    dir: 'scripts/fixtures/parallel-routes',
+    expect: [],
+  },
+  {
+    name: 'duplicate screen within one slot is still caught',
+    dir: 'scripts/fixtures/parallel-duplicate',
+    expect: ['DuplicateScreenError'],
+  },
+  {
     name: 'clean app -> no errors, returns tree',
     dir: 'scripts/fixtures/clean',
     expect: [],

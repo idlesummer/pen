@@ -78,9 +78,11 @@ export default class UrlNode {
     if (route.segment.type === 'malformed')
       return // prune the malformed subtree
 
-    // Groups are erased: the group's own modules belong to the parent URL, and
-    // its children attach as if the group segment were not there.
-    if (route.segment.type === 'group') {
+    // Groups and slots are URL-transparent: their own modules belong to the
+    // parent URL and their children attach as if the segment were not there.
+    // A slot's routes keep their identity via `route.slot`, which the
+    // duplicate-screen check uses so parallel slots don't collide.
+    if (route.segment.type === 'group' || route.segment.type === 'slot') {
       this.routes.push(route)
       for (const child of route.children)
         this.attach(child)

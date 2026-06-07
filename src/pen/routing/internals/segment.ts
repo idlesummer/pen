@@ -1,6 +1,7 @@
 export type SegmentType =
   | 'static'
   | 'group'
+  | 'slot'
   | 'dynamic'
   | 'catchall'
   | 'optional-catchall'
@@ -11,6 +12,8 @@ export type Segment = {
   type: SegmentType
   param?: string
   optional?: true
+  /** Set only when `type === 'slot'`; the parallel-route slot name (e.g. 'team'). */
+  slot?: string
   /** Set only when `type === 'malformed'`; explains why parsing failed. */
   reason?: string
 }
@@ -28,6 +31,12 @@ export function from(raw: string): Segment {
     return raw.slice(1, -1)
       ? { raw, type: 'group' }
       : { raw, type: 'malformed', reason: 'empty group name' }
+
+  // Slot: @name (parallel route — URL-transparent, like a group)
+  if (raw.startsWith('@'))
+    return raw.length > 1
+      ? { raw, type: 'slot', slot: raw.slice(1) }
+      : { raw, type: 'malformed', reason: 'empty slot name' }
 
   // Optional catch-all: [[...name]]
   if (raw.startsWith('[[...') && raw.endsWith(']]')) {

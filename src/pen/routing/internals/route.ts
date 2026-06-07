@@ -2,7 +2,7 @@ import { readdirSync } from 'fs'
 import { join } from 'path'
 import * as Segment from './segment'
 
-export type RouteModule = 'layout' | 'page' | 'error' | 'not-found'
+export type RouteModule = 'layout' | 'page' | 'error' | 'not-found' | 'default'
 export type RouteModules = Partial<Record<RouteModule, string>>
 
 /**
@@ -23,8 +23,17 @@ export default class Route {
 
   get urlPath(): string {
     if (!this.parent) return '/'
-    if (this.segment.type === 'group') return this.parent.urlPath
+    if (this.segment.type === 'group' || this.segment.type === 'slot') return this.parent.urlPath
     return `${this.parent.urlPath}${this.segment.raw}/`
+  }
+
+  /** The parallel-route slot this route belongs to — the nearest `@slot`
+   *  ancestor (or self), or 'children' (the implicit default slot). */
+  get slot(): string {
+    if (this.segment.type === 'slot') return this.segment.slot!
+    for (let route = this.parent; route; route = route.parent)
+      if (route.segment.type === 'slot') return route.segment.slot!
+    return 'children'
   }
 
   getChildren(): Route[] {
@@ -45,6 +54,7 @@ export default class Route {
         case 'page.tsx':      this.modules.page = absPath; break
         case 'error.tsx':     this.modules.error = absPath; break
         case 'not-found.tsx': this.modules['not-found'] = absPath; break
+        case 'default.tsx':   this.modules.default = absPath; break
       }
     }
   }
