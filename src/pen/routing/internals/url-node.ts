@@ -96,7 +96,8 @@ export default class UrlNode {
   private childFor(key: string): UrlNode {
     let node = this.children.get(key)
     if (!node) {
-      node = new UrlNode(key, this.url === '/' ? `/${key}` : `${this.url}/${key}`)
+      const url = this.url === '/' ? `/${key}` : `${this.url}/${key}`
+      node = new UrlNode(key, url)
       this.children.set(key, node)
     }
     return node
