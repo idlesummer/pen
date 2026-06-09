@@ -1,6 +1,5 @@
 import { Route, validate, UrlNode, FileRouterError, RouteValidationErrors } from '../src/pen/routing'
 
-
 try {
   const appPath = 'scripts/mock-app'
   const root = Route.read(appPath)
