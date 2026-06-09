@@ -1,8 +1,11 @@
-import { readdirSync } from 'fs'
-import { join } from 'path'
+import { readdirSync, statSync } from 'fs'
+import { join, resolve } from 'path'
+import { traverse } from '@/pen/lib/traverse'
 import { Segment } from './segment'
 import {
   type FileRouterError,
+  DirectoryNotFoundError,
+  NotADirectoryError,
   MalformedSegmentError,
   RepeatedSlugError,
 } from '../errors'
@@ -26,6 +29,28 @@ export class Route {
     public modules: RouteModules = {},
     public parent?: Route,
   ) {}
+
+  /**
+   * Read an app directory into a route tree — structure only, no validation.
+   * Throws only the directory precondition (a missing/invalid app dir means
+   * nothing else can run); callable directly so tooling can inspect an
+   * unvalidated tree.
+   */
+  static read(appPath: string): Route {
+    const absPath = resolve(appPath)
+
+    const stat = statSync(absPath, { throwIfNoEntry: false })
+    if (!stat) throw new DirectoryNotFoundError(absPath)
+    if (!stat.isDirectory()) throw new NotADirectoryError(absPath)
+
+    const root = new Route(absPath, Segment.from(''))
+    traverse(root, {
+      visit: (route) => route.loadModules(),
+      expand: (route) => route.getChildren(),
+      attach: (child, parent) => parent.addChild(child),
+    })
+    return root
+  }
 
   get urlPath(): string {
     if (!this.parent) return '/'
