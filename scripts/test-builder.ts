@@ -1,9 +1,9 @@
-import { readRouteTree } from '../src/pen/routing/builder.ts'
-import { validateRouteTree, validateUrlTree } from '../src/pen/routing/internals/validate.ts'
-import UrlNode from '../src/pen/routing/internals/url-node.ts'
-import { FileRouterError, RouteValidationErrors } from '../src/pen/routing/errors.ts'
+import { readRouteTree } from '../src/pen/routing/builder'
+import { validateRouteTree, validateUrlTree } from '../src/pen/routing/internals/validate'
+import UrlNode from '../src/pen/routing/internals/url-node'
+import { FileRouterError, RouteValidationErrors } from '../src/pen/routing/errors'
 
-// Usage: tsx scripts/test-builder.ts [appDir] [--url | --tree=url]
+// Usage: tsx scripts/test-builder [appDir] [--url | --tree=url]
 const args = process.argv.slice(2)
 const wantsUrl = args.includes('--url') || args.includes('--tree=url')
 const appPath = args.find(arg => !arg.startsWith('-')) ?? 'scripts/mock-app'

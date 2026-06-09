@@ -1,5 +1,5 @@
-import { buildRouteTree } from '../src/pen/routing/builder.ts'
-import { RouteValidationErrors, type FileRouterError } from '../src/pen/routing/errors.ts'
+import { buildRouteTree } from '../src/pen/routing/builder'
+import { RouteValidationErrors, type FileRouterError } from '../src/pen/routing/errors'
 
 type Case = {
   name: string

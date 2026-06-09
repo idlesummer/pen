@@ -28,6 +28,6 @@
     "types": ["node"],
     "allowJs": true
   },
-  "include": ["src", "*.config.*"],
+  "include": ["src", "scripts", "*.config.*"],
   "exclude": ["node_modules", "dist"]
 }
