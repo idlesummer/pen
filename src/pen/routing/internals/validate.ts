@@ -21,12 +21,12 @@ export function validate(root: Route): FileRouterError[] {
   const errors: FileRouterError[] = []
 
   traverse(root, {
-    visit: (route) => { errors.push(...route.localErrors()) },
+    visit: (route) => errors.push(...route.localErrors()),
     expand: (route) => route.segment.isMalformed ? [] : route.children,
   })
 
   traverse(UrlNode.project(root), {
-    visit: (node) => { errors.push(...node.localErrors()) },
+    visit: (node) => errors.push(...node.localErrors()),
     expand: (node) => [...node.children.values()],
   })
 
