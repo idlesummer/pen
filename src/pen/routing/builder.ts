@@ -1,11 +1,10 @@
 import { statSync } from 'fs'
 import { resolve } from 'path'
 import { traverse } from '@/pen/lib/traverse'
-import * as Segment from './internals/segment'
-import Route from './internals/route'
-import { validateRouteTree, validateUrlTree } from './internals/validate'
+import { Segment } from './internals/segment'
+import { Route } from './internals/route'
+import { validate } from './internals/validate'
 import {
-  type FileRouterError,
   DirectoryNotFoundError,
   NotADirectoryError,
   RouteValidationErrors,
@@ -18,13 +17,7 @@ import {
 export function buildRouteTree(appPath: string): Route {
   const root = readRouteTree(appPath)
 
-  // Route-tree checks cover the pointer-local rules (malformed names, repeated
-  // slugs); the URL-tree pass projects the tree with groups flattened and catches
-  // everything that only surfaces there (collisions, slug agreement, overlaps).
-  const errors: FileRouterError[] = [
-    ...validateRouteTree(root),
-    ...validateUrlTree(root),
-  ]
+  const errors = validate(root)
   if (errors.length) throw new RouteValidationErrors(errors)
 
   return root

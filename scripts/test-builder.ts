@@ -1,7 +1,4 @@
-import { readRouteTree } from '../src/pen/routing/builder'
-import { validateRouteTree, validateUrlTree } from '../src/pen/routing/internals/validate'
-import UrlNode from '../src/pen/routing/internals/url-node'
-import { FileRouterError, RouteValidationErrors } from '../src/pen/routing/errors'
+import { readRouteTree, validate, UrlNode, FileRouterError, RouteValidationErrors } from '../src/pen/routing'
 
 // Usage: tsx scripts/test-builder [appDir] [--url | --tree=url]
 const args = process.argv.slice(2)
@@ -14,7 +11,7 @@ try {
   console.log(JSON.stringify(tree, null, 2))
 
   // Report findings without throwing, so the tree is always inspectable.
-  const errors = [...validateRouteTree(root), ...validateUrlTree(root)]
+  const errors = validate(root)
   if (errors.length) {
     console.error('\n' + new RouteValidationErrors(errors).message)
     process.exitCode = 1

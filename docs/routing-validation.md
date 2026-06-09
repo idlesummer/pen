@@ -16,15 +16,18 @@ partial updates.
 | `Route` | `internals/route.ts` | the filesystem tree — one node per directory, groups and all |
 | `UrlNode` | `internals/url-node.ts` | the **projected URL tree** — groups erased, dynamics generalized, malformed pruned |
 
-Both are data + construction only. Neither holds validation logic; the rules
-live in `internals/validate.ts`, exactly as the brief keeps validation out of
-`Route`.
+Each tree node owns the rules it can judge from itself — `localErrors()` on both
+`Route` and `UrlNode`. `internals/validate.ts` holds no rules of its own; it only
+walks the trees and gathers what each node reports (see *Two passes*). A `Segment`
+likewise owns the question *"what kind of segment is this?"* (`isDynamic`,
+`isTransparent`, …), so type checks aren't smeared across the module.
 
 ## Two passes (split by reachability)
 
-A check belongs to a pass based on what it needs in order to fire.
+A check belongs to a pass based on what it needs in order to fire. `validate(root)`
+runs both, in order, and concatenates the findings.
 
-### 1. Route-tree pass — `validateRouteTree`
+### 1. Route tree — `Route.localErrors()`
 
 Pointer-local rules: everything they need is on the node itself or its ancestor
 chain. These cannot move to the URL tree.
@@ -35,7 +38,7 @@ chain. These cannot move to the URL tree.
 - **`RepeatedSlugError`** — the same slug name twice on one path
   (`/[id]/x/[id]`). A property of one concrete route path.
 
-### 2. URL-tree pass — `validateUrlTree`
+### 2. URL projection — `UrlNode.localErrors()`
 
 Everything that only surfaces once route groups are flattened. The route tree is
 projected to a `UrlNode` tree, and **cousins that resolve to the same URL

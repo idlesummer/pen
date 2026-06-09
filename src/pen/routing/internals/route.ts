@@ -1,38 +1,44 @@
 import { readdirSync } from 'fs'
 import { join } from 'path'
-import * as Segment from './segment'
+import { Segment } from './segment'
+import {
+  type FileRouterError,
+  MalformedSegmentError,
+  RepeatedSlugError,
+} from '../errors'
 
 export type RouteModule = 'layout' | 'page' | 'error' | 'not-found' | 'default'
 export type RouteModules = Partial<Record<RouteModule, string>>
 
 /**
- * A node in the route tree: data + filesystem IO only.
+ * A node in the route tree: one directory on disk.
  *
- * `Route` holds no validation logic and no error state. All checks live in
- * `validate.ts` and run as separate passes over the built tree.
+ * Holds its structure and the filesystem IO that builds it, and knows the rules
+ * it can judge from itself alone — see `localErrors`. Cross-branch rules (two
+ * routes colliding at one URL) belong to `UrlNode`, not here.
  */
-export default class Route {
+export class Route {
   readonly children: Route[] = []
 
   constructor(
     readonly absPath: string,
-    readonly segment: Segment.Segment,
+    readonly segment: Segment,
     public modules: RouteModules = {},
     public parent?: Route,
   ) {}
 
   get urlPath(): string {
     if (!this.parent) return '/'
-    if (this.segment.type === 'group' || this.segment.type === 'slot') return this.parent.urlPath
+    if (this.segment.isTransparent) return this.parent.urlPath
     return `${this.parent.urlPath}${this.segment.raw}/`
   }
 
   /** The parallel-route slot this route belongs to — the nearest `@slot`
    *  ancestor (or self), or 'children' (the implicit default slot). */
   get slot(): string {
-    if (this.segment.type === 'slot') return this.segment.slot!
+    if (this.segment.isSlot) return this.segment.slot!
     for (let route = this.parent; route; route = route.parent)
-      if (route.segment.type === 'slot') return route.segment.slot!
+      if (route.segment.isSlot) return route.segment.slot!
     return 'children'
   }
 
@@ -62,6 +68,29 @@ export default class Route {
   addChild(child: Route): void {
     child.parent = this
     this.children.push(child)
+  }
+
+  /**
+   * Findings this node can judge from itself and its ancestor chain alone —
+   * inputs that never leave the route tree, so they can't move to `UrlNode`.
+   * A malformed name doesn't project to a URL; slug repetition is a property of
+   * one concrete path. (The walk in `validate` prunes a malformed subtree, so a
+   * node under a broken parent never reaches here.)
+   */
+  localErrors(): FileRouterError[] {
+    const { segment } = this
+
+    // Malformed: report the parse error and stop — the subtree is noise.
+    if (segment.isMalformed)
+      return [new MalformedSegmentError(this.urlPath, segment.reason ?? 'malformed segment')]
+
+    // A slug name may not repeat up a single route path.
+    if (segment.param)
+      for (let ancestor = this.parent; ancestor; ancestor = ancestor.parent)
+        if (ancestor.segment.param === segment.param)
+          return [new RepeatedSlugError(this.urlPath, segment.param)]
+
+    return []
   }
 
   toJSON() {
