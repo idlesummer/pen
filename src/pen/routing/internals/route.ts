@@ -38,7 +38,6 @@ export class Route {
    */
   static read(appPath: string): Route {
     const absPath = resolve(appPath)
-
     const stat = statSync(absPath, { throwIfNoEntry: false })
     if (!stat) throw new DirectoryNotFoundError(absPath)
     if (!stat.isDirectory()) throw new NotADirectoryError(absPath)
