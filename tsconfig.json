@@ -21,6 +21,7 @@
 
     // Emit
     "noEmit": true, // tsdown handles building, not tsc
+    "allowImportingTsExtensions": true, // scripts import ../src/*.ts directly
 
     // Type Checking
     "strict": true,
