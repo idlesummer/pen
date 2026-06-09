@@ -16,7 +16,8 @@ try {
     console.error('\n' + new RouteValidationErrors(errors).message)
     process.exitCode = 1
   }
-} catch (err) {
+}
+catch (err) {
   if (err instanceof FileRouterError) {
     console.error(err.message)
     process.exitCode = 1
