@@ -62,7 +62,8 @@ export class Route {
   get slot(): string {
     if (this.segment.isSlot) return this.segment.slot!
     for (let route = this.parent; route; route = route.parent)
-      if (route.segment.isSlot) return route.segment.slot!
+      if (route.segment.isSlot)
+        return route.segment.slot!
     return 'children'
   }
 
