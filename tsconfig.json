@@ -25,6 +25,7 @@
 
     // Type Checking
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "types": ["node"],
     "allowJs": true
