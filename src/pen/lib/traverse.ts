@@ -41,7 +41,7 @@ export function traverse<TNode>(root: TNode, hooks: TraverseHooks<TNode>) {
       if (leave!(node) === true)
         return
     }
-    else {
+    else {      // Original pre-order traversal logic
       if (visit?.(node) === true)
         return  // Stop if the visitor has found its target
 
