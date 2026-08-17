@@ -1,6 +1,3 @@
-// Public surface - re-exports, plus compileRoutes wiring the pipeline
-// together. Only what router/ and the top-level index.ts actually need.
-
 import type { RouteNode } from './compiling/route-tree'
 import type { SearchNode } from './compiling/search-tree'
 import type { RouteIssue } from './compiling/validate'
