@@ -1,8 +1,8 @@
-import type { Segment } from './segment.js'
+import type { Segment } from './segment'
 import { basename } from 'node:path'
-import { treeify } from '@/lib/treeify.js'
-import { traverse } from '@/lib/traverse.js'
-import { createSegment, isPrivateSegment } from './segment.js'
+import { treeify } from '@/lib/treeify'
+import { traverse } from '@/lib/traverse'
+import { createSegment, isPrivateSegment } from './segment'
 
 export type RouteModuleType =
   'page' | 'layout' | 'loading' | 'error' | 'not-found' | 'default'

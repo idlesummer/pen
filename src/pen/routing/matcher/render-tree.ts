@@ -1,10 +1,10 @@
-import type { RouteNode } from './route-tree.js'
-import type { SearchNode } from './search-tree.js'
-import type { MatchPath } from './match-path.js'
-import type { RenderLeaf } from './render-leaf.js'
-import { getRouteNodeParentIfNotSlot } from './route-tree.js'
-import { createMatchPath, getMatchPathParams } from './match-path.js'
-import { createRenderLeaf } from './render-leaf.js'
+import type { RouteNode } from '../compiler/route-tree'
+import type { SearchNode } from '../compiler/search-tree'
+import type { MatchPath } from './match-path'
+import type { RenderLeaf } from './render-leaf'
+import { getRouteNodeParentIfNotSlot } from '../compiler/route-tree'
+import { createMatchPath, getMatchPathParams } from './match-path'
+import { createRenderLeaf } from './render-leaf'
 
 export type SlotRenderNodes = Record<string, RenderNode>  // Actual name is SlotRenderNode
 export type RenderNode = RenderLeaf | { // Should be ShellRenderNode but inlined for brevity
