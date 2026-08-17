@@ -1,8 +1,8 @@
-import type { RouteNode } from '../compiler/route-tree'
-import type { SearchNode } from '../compiler/search-tree'
+import type { RouteNode } from '../compiling/route-tree'
+import type { SearchNode } from '../compiling/search-tree'
 import type { MatchPath } from './match-path'
 import type { RenderLeaf } from './render-leaf'
-import { getRouteNodeParentIfNotSlot } from '../compiler/route-tree'
+import { getRouteNodeParentIfNotSlot } from '../compiling/route-tree'
 import { createMatchPath, getMatchPathParams } from './match-path'
 import { createRenderLeaf } from './render-leaf'
 
