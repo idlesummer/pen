@@ -1,5 +1,5 @@
-import type { RouteNode } from './route-tree.js'
-import { traverse } from '@/lib/traverse.js'
+import type { RouteNode } from './route-tree'
+import { traverse } from '@/lib/traverse'
 
 export type SearchNode = {
   routeNode: RouteNode                // real folder for this position - not-found climbs from here

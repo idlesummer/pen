@@ -1,7 +1,7 @@
-import type { RouteNode } from './route-tree.js'
-import type { SearchNode } from './search-tree.js'
-import { getRoutePath, forEachReachableRouteNode } from './route-tree.js'
-import { forEachSearchNode } from './search-tree.js'
+import type { RouteNode } from './route-tree'
+import type { SearchNode } from './search-tree'
+import { getRoutePath, forEachReachableRouteNode } from './route-tree'
+import { forEachSearchNode } from './search-tree'
 
 export type RouteIssue = {
   rule: string

@@ -1,6 +1,6 @@
-import type { SearchNode } from './search-tree.js'
-import { traverse } from '@/lib/traverse.js'
-import { getDynamicParam } from './search-tree.js'
+import type { SearchNode } from '../compiler/search-tree'
+import { traverse } from '@/lib/traverse'
+import { getDynamicParam } from '../compiler/search-tree'
 
 export type MatchPathParams = Record<string, string | string[]>  // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {

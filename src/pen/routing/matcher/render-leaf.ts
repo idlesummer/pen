@@ -1,7 +1,7 @@
-import type { RouteNode, RouteModuleType } from './route-tree.js'
-import type { MatchPathParams, MatchPath } from './match-path.js'
-import { getRouteNodeParentIfNotSlot } from './route-tree.js'
-import { getMatchPathParams } from './match-path.js'
+import type { RouteNode, RouteModuleType } from '../compiler/route-tree'
+import type { MatchPathParams, MatchPath } from './match-path'
+import { getRouteNodeParentIfNotSlot } from '../compiler/route-tree'
+import { getMatchPathParams } from './match-path'
 
 type PageOrDefaultRenderLeaf = {
   moduleRouteNode: RouteNode
@@ -28,7 +28,7 @@ function findNearestModuleRouteNode(routeNode: RouteNode, moduleType: RouteModul
 }
 
 /** A default.tsx renders at a real segment position, so - like a real
- *  Next.js default.tsx - it gets the params resolved up to the point of the
+ *  Next default.tsx - it gets the params resolved up to the point of the
  *  miss; not-found.tsx can be reached from anywhere with no reliable
  *  segment context, so it gets none. */
 function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainParams: MatchPathParams): RenderLeaf | undefined {
