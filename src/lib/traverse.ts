@@ -6,7 +6,7 @@ export type TraverseHooks<TNode> = {
   /** Called after traversing a node's children. Return true to stop traversal. */
   leave?: (node: TNode) => unknown
   /** Attaches a child node to its parent */
-  attach?: (child: TNode, parent: TNode) => void
+  attach?: (child: TNode, parent: TNode) => unknown
 }
 
 /**
@@ -21,9 +21,9 @@ export type TraverseHooks<TNode> = {
  *
  * ```ts
  * traverse(root, {
- *   visit: (node) => node.name === 'target',
+ *   visit:  (node) => node.name === 'target',
  *   expand: (node) => createChildren(node),
- *   leave: (node) => node.complete = true,
+ *   leave:  (node) => node.complete = true,
  *   attach: (child, parent) => parent.children.push(child),
  * })
  * ```
@@ -41,7 +41,7 @@ export function traverse<TNode>(root: TNode, hooks: TraverseHooks<TNode>) {
       if (leave!(node) === true)
         return
     }
-    else {      // Original pre-order traversal logic
+    else {
       if (visit?.(node) === true)
         return  // Stop if the visitor has found its target
 
