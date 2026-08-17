@@ -1,6 +1,6 @@
-import type { SearchNode } from '../compiler/search-tree'
+import type { SearchNode } from '../compiling/search-tree'
 import { traverse } from '@/lib/traverse'
-import { getDynamicParam } from '../compiler/search-tree'
+import { getDynamicParam } from '../compiling/search-tree'
 
 export type MatchPathParams = Record<string, string | string[]>  // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {

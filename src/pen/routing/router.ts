@@ -1,9 +1,9 @@
-import type { RouteNode } from './compiler/route-tree'
-import type { SearchNode } from './compiler/search-tree'
-import type { RouteIssue } from './compiler/validate'
-import type { RenderNode } from './matcher/render-tree'
-import { compileRoutes } from './compiler/compile'
-import { createMatcher } from './matcher/match'
+import type { RouteNode } from './compiling/route-tree'
+import type { SearchNode } from './compiling/search-tree'
+import type { RouteIssue } from './compiling/validate'
+import type { RenderNode } from './matching/render-tree'
+import { compileRoutes } from './compiler'
+import { createMatcher } from './matcher'
 
 export type Router = [
   match: (url: string) => [hasPage: boolean, tree?: RenderNode],

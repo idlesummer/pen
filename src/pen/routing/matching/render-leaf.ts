@@ -1,6 +1,6 @@
-import type { RouteNode, RouteModuleType } from '../compiler/route-tree'
+import type { RouteNode, RouteModuleType } from '../compiling/route-tree'
 import type { MatchPathParams, MatchPath } from './match-path'
-import { getRouteNodeParentIfNotSlot } from '../compiler/route-tree'
+import { getRouteNodeParentIfNotSlot } from '../compiling/route-tree'
 import { getMatchPathParams } from './match-path'
 
 type PageOrDefaultRenderLeaf = {

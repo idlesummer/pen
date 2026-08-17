@@ -1,6 +1,6 @@
-import type { SearchNode } from '../compiler/search-tree'
-import type { RenderNode } from './render-tree'
-import { createRenderTree } from './render-tree'
+import type { SearchNode } from './compiling/search-tree'
+import type { RenderNode } from './matching/render-tree'
+import { createRenderTree } from './matching/render-tree'
 
 export type Matcher =
   (url: string) => [hasPage: boolean, tree?: RenderNode]
