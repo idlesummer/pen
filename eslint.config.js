@@ -23,7 +23,9 @@ export default defineConfig(
       parser: tseslint.parser,
       parserOptions: {
         // Enable project service for better TypeScript integration
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['eslint.config.js'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
