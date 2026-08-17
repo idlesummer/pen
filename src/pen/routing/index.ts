@@ -1,8 +1,8 @@
-export type { RouteNode } from './compiler'
-export type { SearchNode } from './compiler'
+export type { RouteNode } from './compiler/route-tree'
+export type { SearchNode } from './compiler/search-tree'
+export type { RouteIssue } from './compiler/validate'
 export type { RenderNode } from './matcher'
-export type { RouteIssue } from './compiler'
 
-export { getRoutePath } from './compiler'
-export { getDynamicParam } from './compiler'
+export { getRoutePath } from './compiler/route-tree'
+export { getDynamicParam } from './compiler/search-tree'
 export { createRouter } from './router'
