@@ -1,4 +1,4 @@
-import type { SearchNode } from '../compiler/index'
+import type { SearchNode } from '../compiler/search-tree'
 import type { RenderNode } from './render-tree'
 import { createRenderTree } from './render-tree'
 

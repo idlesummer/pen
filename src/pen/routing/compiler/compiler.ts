@@ -9,13 +9,6 @@ import { createSearchTree } from './search-tree'
 import { validateRouteTree, validateSearchTree } from './validate'
 import { sanitizeRouteTree, sanitizeSearchTree } from './sanitize'
 
-export type { RouteNode, RouteModuleType } from './route-tree'
-export type { SearchNode } from './search-tree'
-export type { RouteIssue } from './validate'
-
-export { getRoutePath, getRouteNodeParentIfNotSlot } from './route-tree'
-export { getDynamicParam } from './search-tree'
-
 /** Compiles file paths into a validated, sanitized SearchNode tree - the
  *  artifact matcher/ matches against. Build-time only. */
 export function compileRoutes(filePaths: string[]): [RouteNode, SearchNode, RouteIssue[]] {
