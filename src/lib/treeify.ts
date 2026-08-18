@@ -1,4 +1,4 @@
-import { join, sep } from 'node:path'
+import { join } from 'node:path'
 
 export type CreateHookContext = {
   /** The current path component being processed. */
@@ -55,12 +55,17 @@ export type TreeifyHooks<TNode> = {
  * })
  * ```
  */
-export function treeify<TNode>(root: TNode, sourcePaths: string[], hooks: TreeifyHooks<TNode>) {
+export function treeify<TNode>(
+  root: TNode,
+  sourcePaths: string[],
+  separator='/',
+  hooks: TreeifyHooks<TNode>,
+) {
   const { create, attach } = hooks
   const nodes = new Map<string, TNode>()
 
   for (const sourcePath of sourcePaths) {
-    const components = sourcePath.split(sep)
+    const components = sourcePath.split(separator)
     let parentPath = ''
     let parentNode = root
 
