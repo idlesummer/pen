@@ -4,7 +4,7 @@
 // Edit filePaths to shape a route tree, edit urls to probe it, re-run.
 import type { RenderNode } from '@/pen/routing'
 import { sep } from 'node:path'
-import { createRouter, getRoutePath } from '@/pen/routing'
+import { createRouter } from '@/pen/routing'
 
 // createRouteTree splits each path on node:path's platform sep ('\' on
 // Windows), so these need converting from the '/'-written literals below -
@@ -86,12 +86,12 @@ function printRenderNode(node: RenderNode, indent: string): void {
   if (node.type === 'leaf') {
     const params = 'params' in node ? node.params : undefined
     const suffix = params && Object.keys(params).length ? ` ${JSON.stringify(params)}` : ''
-    console.log(`${indent}${node.moduleType} <- /${getRoutePath(node.moduleRouteNode)}${suffix}`)
+    console.log(`${indent}${node.moduleType} <- /${node.path}${suffix} (${node.sourcePath})`)
     return
   }
 
   const flags = [node.loading && 'loading', node.error && 'error'].filter(Boolean).join('+')
-  console.log(`${indent}layout <- /${getRoutePath(node.moduleRouteNode)}${flags ? ` (${flags})` : ''}`)
+  console.log(`${indent}layout <- /${node.path}${flags ? ` (${flags})` : ''}`)
   for (const [slotName, slotNode] of Object.entries(node.slots)) {
     console.log(`${indent}  [${slotName}]`)
     printRenderNode(slotNode, `${indent}    `)
