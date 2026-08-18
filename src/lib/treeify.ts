@@ -1,19 +1,15 @@
-import { join } from 'node:path'
-
-export type CreateHookContext = {
-  /** The current path component being processed. */
-  component: string
-  /** All path components of the current input path. */
-  components: readonly string[]
-  /** The full input path currently being processed. */
-  sourcePath: string
+export type CreateContext = {
   /** The zero-based position of the current segment within the input path. */
   index: number
+  /** All path parts of the current input path. */
+  parts: readonly string[]
+  /** The full input path currently being processed. */
+  path: string
 }
 
 export type TreeifyHooks<TNode> = {
   /** Builds a node for a path segment. Return `undefined` to prune the remainder of the current path. */
-  create: (parent: TNode, context: CreateHookContext) => TNode | undefined
+  create: (parent: TNode, context: CreateContext) => TNode | undefined
   /** Attaches a child node to its parent. */
   attach: (child: TNode, parent: TNode) => void
 }
@@ -45,8 +41,8 @@ export type TreeifyHooks<TNode> = {
  * const root: Node = { name: '', children: [] }
  *
  * treeify(root, ['src/index.ts', 'src/lib/utils.ts'], {
- *   create: (parent, { component }) => ({
- *     name: component,
+ *   create: (parent, { part }) => ({
+ *     name: part,
  *     parent,
  *     children: [],
  *   }),
@@ -55,34 +51,30 @@ export type TreeifyHooks<TNode> = {
  * })
  * ```
  */
-export function treeify<TNode>(
-  root: TNode,
-  sourcePaths: string[],
-  separator='/',
-  hooks: TreeifyHooks<TNode>,
-) {
+export function treeify<TNode>(root: TNode, paths: string[], separator='/', hooks: TreeifyHooks<TNode>) {
   const { create, attach } = hooks
-  const nodes = new Map<string, TNode>()
+  const siblingNodeMap = new Map<TNode, Map<string, TNode>>() // map: node  edge (part) → node
+  const createSiblingNodes = () => new Map<string, TNode>()
 
-  for (const sourcePath of sourcePaths) {
-    const components = sourcePath.split(separator)
-    let parentPath = ''
+  for (const path of paths) {
+    const parts = path.split(separator)
     let parentNode = root
 
-    for (const [index, component] of components.entries()) {
-      const path = join(parentPath, component)
-      let node = nodes.get(path)
+    // Iterates each segment in the path ('foo/bar/baz' → ['foo', 'bar', 'baz'])
+    for (const [index, part] of parts.entries()) {
+      const siblingNodes = siblingNodeMap.getOrInsertComputed(parentNode, createSiblingNodes)
+      let node = siblingNodes.get(part)
 
       if (node === undefined) {
-        node = create(parentNode, { component, components, sourcePath, index })
+        const context = { index, parts, path }
+        node = create(parentNode, context)
         if (node === undefined)
           break
 
-        nodes.set(path, node)
+        siblingNodes.set(part, node)
         attach(node, parentNode)
       }
       parentNode = node
-      parentPath = path
     }
   }
 }
