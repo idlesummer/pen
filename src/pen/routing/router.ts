@@ -15,5 +15,5 @@ export type Router = [
 export function createRouter(filePaths: string[]): Router {
   const [routeTree, searchTree, diagnostics] = createCompiledRoutes(filePaths)
   const matcher = createMatcher(searchTree)
-  return [matcher, routeTree, searchTree, diagnostics]
+  return [matcher, diagnostics, routeTree, searchTree]
 }
