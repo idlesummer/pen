@@ -8,7 +8,7 @@ type PageOrDefaultRenderLeaf = {
   type: 'leaf'
   moduleType: 'page' | 'default'
   path: string
-  sourcePath: string
+  modulePath: string
   params: MatchPathParams
 }
 
@@ -16,7 +16,7 @@ type NotFoundRenderLeaf = {
   type: 'leaf'
   moduleType: 'notfound'
   path: string
-  sourcePath: string
+  modulePath: string
 }
 
 type RenderLeaf =
@@ -57,7 +57,7 @@ function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, main
         type: 'leaf',
         moduleType: 'default',
         path: getRoutePath(defaultRouteNode),
-        sourcePath: defaultRouteNode.modulePaths.get('default')!,
+        modulePath: defaultRouteNode.modulePaths.get('default')!,
         params: getMatchPathParams(matchPath, mainParams),
       },
     }
@@ -69,7 +69,7 @@ function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, main
         type: 'leaf',
         moduleType: 'notfound',
         path: getRoutePath(notFoundRouteNode),
-        sourcePath: notFoundRouteNode.modulePaths.get('not-found')!,
+        modulePath: notFoundRouteNode.modulePaths.get('not-found')!,
       },
     }
 }
@@ -86,14 +86,14 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   if (urlExhausted && searchNode.page) {
     const routeNode = searchNode.page
     const params = getMatchPathParams(matchPath, mainParams)  // mainParams carries main-tree params in, since a slot's own chain never links back to it
-    return { routeNode, leaf: { type: 'leaf', moduleType: 'page', path: getRoutePath(routeNode), sourcePath: routeNode.modulePaths.get('page')!, params } }
+    return { routeNode, leaf: { type: 'leaf', moduleType: 'page', path: getRoutePath(routeNode), modulePath: routeNode.modulePaths.get('page')!, params } }
   }
   else if (!urlExhausted && searchNode.catchall) {
     const routeNode = searchNode.catchall
     const param = routeNode.segment.value
     const urlTail = url.slice(searchNode.index)
     const params = { ...getMatchPathParams(matchPath, mainParams), [param]: urlTail }
-    return { routeNode, leaf: { type: 'leaf', moduleType: 'page', path: getRoutePath(routeNode), sourcePath: routeNode.modulePaths.get('page')!, params } }
+    return { routeNode, leaf: { type: 'leaf', moduleType: 'page', path: getRoutePath(routeNode), modulePath: routeNode.modulePaths.get('page')!, params } }
   }
   else
     return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)

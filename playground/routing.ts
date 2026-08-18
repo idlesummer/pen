@@ -86,7 +86,7 @@ function printRenderNode(node: RenderNode, indent: string): void {
   if (node.type === 'leaf') {
     const params = 'params' in node ? node.params : undefined
     const suffix = params && Object.keys(params).length ? ` ${JSON.stringify(params)}` : ''
-    console.log(`${indent}${node.moduleType} <- /${node.path}${suffix} (${node.sourcePath})`)
+    console.log(`${indent}${node.moduleType} <- /${node.path}${suffix} (${node.modulePath})`)
     return
   }
 
