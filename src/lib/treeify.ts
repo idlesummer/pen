@@ -15,7 +15,7 @@ export type TreeifyHooks<TNode> = {
 }
 
 /**
- * Builds a tree in place from filesystem paths.
+ * Builds a tree in place from paths.
  *
  * - Each path is traversed from parent to child.
  * - Shared path prefixes reuse the same nodes.
@@ -24,10 +24,11 @@ export type TreeifyHooks<TNode> = {
  * - Returning `undefined` from `create` prunes the remainder of that path.
  * - `root` is mutated through `attach` and is not replaced.
  *
- * Paths are expected to use the current platform's path separator.
+ * Paths are split using `separator`, which defaults to `/`.
  *
- * @param root - The node paths are attached to. Mutated through `attach`, never replaced.
- * @param sourcePaths - The filesystem paths to build into the tree.
+ * @param root - The root node to which paths are attached. Mutated through `attach`, never replaced.
+ * @param paths - The paths to build into the tree.
+ * @param separator - The separator used to split each path. Defaults to `/`.
  * @param hooks - Callbacks controlling node creation and attachment; see {@link TreeifyHooks}.
  *
  * @example
@@ -40,9 +41,9 @@ export type TreeifyHooks<TNode> = {
  *
  * const root: Node = { name: '', children: [] }
  *
- * treeify(root, ['src/index.ts', 'src/lib/utils.ts'], {
- *   create: (parent, { part }) => ({
- *     name: part,
+ * treeify(root, ['src/index.ts', 'src/lib/utils.ts'], '/', {
+ *   create: (parent, { index, parts }) => ({
+ *     name: parts[index],
  *     parent,
  *     children: [],
  *   }),
