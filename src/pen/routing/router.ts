@@ -7,9 +7,9 @@ import { createMatcher } from './matcher'
 
 export type Router = [
   match: Matcher,
+  diagnostic: CompileDiagnostic[],
   routeTree: RouteNode,
   searchTree: SearchNode,
-  diagnostic: CompileDiagnostic[],
 ]
 
 export function createRouter(filePaths: string[]): Router {

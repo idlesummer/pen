@@ -34,7 +34,7 @@ const urls = [
   '/nope',
 ]
 
-const [match, , , routeIssues] = createRouter(filePaths)
+const [match, routeIssues] = createRouter(filePaths)
 
 if (routeIssues.length) {
   console.log('route issues:')
