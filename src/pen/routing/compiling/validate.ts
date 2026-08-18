@@ -3,7 +3,7 @@ import type { SearchNode } from './search-tree'
 import { getRoutePath, forEachReachableRouteNode } from './route-tree'
 import { forEachSearchNode } from './search-tree'
 
-export type RouteIssue = {
+export type CompileDiagnostic = {
   rule: string
   severity: 'error' | 'warning'
   message: string
@@ -24,30 +24,34 @@ export function findNearestSlotAncestor(routeNode: RouteNode): RouteNode | undef
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
   const params = new Set<string>()
   for (let node: RouteNode | undefined = routeNode; node; node = node.parent) {
-    if (node.segment.type !== 'dynamic' && node.segment.type !== 'catchall')
+    const segmentType = node.segment.type
+    if (segmentType !== 'dynamic' && segmentType !== 'catchall')
       continue
 
-    if (params.has(node.segment.value))
-      return node.segment.value
-    params.add(node.segment.value)
+    const paramName = node.segment.value
+    if (params.has(paramName))
+      return paramName
+    params.add(paramName)
   }
 }
 
 /** Runs intrinsic validation on each node and its ancestry on the raw tree. */
-export function validateRouteTree(root: RouteNode): RouteIssue[] {
-  const issues: RouteIssue[] = []
+export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
+  const diagnostics: CompileDiagnostic[] = []
 
   forEachReachableRouteNode(root, (routeNode) => {
-    if (routeNode.segment.type === 'malformed') {
-      return void issues.push({
+    const segmentType = routeNode.segment.type
+
+    if (segmentType === 'malformed') {
+      return void diagnostics.push({
         rule: 'malformed-segment',
         severity: 'error',
         message: `"${routeNode.name}": ${routeNode.segment.value}`,
         files: [getDiagnosticPath(routeNode)],
       })
     }
-    if (routeNode.segment.type === 'catchall' && routeNode.children.length) {
-      issues.push({
+    if (segmentType === 'catchall' && routeNode.children.length) {
+      diagnostics.push({
         rule: 'non-terminal-catchall',
         severity: 'warning',
         message:
@@ -56,10 +60,10 @@ export function validateRouteTree(root: RouteNode): RouteIssue[] {
         files: [getDiagnosticPath(routeNode)],
       })
     }
-    if (routeNode.segment.type === 'slot') {
+    if (segmentType === 'slot') {
       const ancestorRouteNode = findNearestSlotAncestor(routeNode)
       if (ancestorRouteNode) {
-        issues.push({
+        diagnostics.push({
           rule: 'nested-slot',
           severity: 'error',
           message:
@@ -69,17 +73,17 @@ export function validateRouteTree(root: RouteNode): RouteIssue[] {
         })
       }
     }
-    if (routeNode.segment.type === 'dynamic' || routeNode.segment.type === 'catchall') {
-      const param = findDuplicateParam(routeNode)
-      if (param) issues.push({
+    if (segmentType === 'dynamic' || segmentType === 'catchall') {
+      const paramName = findDuplicateParam(routeNode)
+      if (paramName) diagnostics.push({
         rule: 'repeated-param-name',
         severity: 'error',
-        message: `"${param}" is used more than once as a dynamic segment name in this route's path`,
+        message: `"${paramName}" is used more than once as a dynamic segment name in this route's path`,
         files: [getDiagnosticPath(routeNode)],
       })
     }
   })
-  return issues
+  return diagnostics
 }
 
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
@@ -89,14 +93,14 @@ function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefin
 }
 
 /** Runs relational validation between routes sharing the same URL position. */
-export function validateSearchTree(searchTree: SearchNode): RouteIssue[] {
-  const issues: RouteIssue[] = []
+export function validateSearchTree(searchTree: SearchNode): CompileDiagnostic[] {
+  const diagnostics: CompileDiagnostic[] = []
 
   forEachSearchNode(searchTree, (searchNode) => {
     const validation = searchNode.validation
     const pageConflicts = findConflictingRouteFiles(validation?.pages)
     if (pageConflicts) {
-      issues.push({
+      diagnostics.push({
         rule: 'duplicate-page-route',
         severity: 'error',
         message: 'multiple pages resolve to the same URL pattern',
@@ -105,7 +109,7 @@ export function validateSearchTree(searchTree: SearchNode): RouteIssue[] {
     }
     const catchallConflicts = findConflictingRouteFiles(validation?.catchalls)
     if (catchallConflicts) {
-      issues.push({
+      diagnostics.push({
         rule: 'duplicate-catchall-route',
         severity: 'error',
         message: 'multiple catch-all pages resolve to the same URL pattern',
@@ -115,7 +119,7 @@ export function validateSearchTree(searchTree: SearchNode): RouteIssue[] {
     const dynamicRoutes = validation?.dynamics
     if (dynamicRoutes && dynamicRoutes.size > 1) {
       const params = [...dynamicRoutes.keys()]
-      issues.push({
+      diagnostics.push({
         rule: 'param-name-clash',
         severity: 'error',
         message: `two routes disagree on what to call the same URL parameter: ${params.join(' vs ')}`,
@@ -123,5 +127,5 @@ export function validateSearchTree(searchTree: SearchNode): RouteIssue[] {
       })
     }
   })
-  return issues
+  return diagnostics
 }
