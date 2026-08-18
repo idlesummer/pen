@@ -38,13 +38,14 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   const routeFilePaths = filePaths.filter(isRouteFilePath)  // ignore non-route-module files
 
   treeify(routeNodeRoot, routeFilePaths, sep, {
-    create: (parentRouteNode, { component, components, sourcePath, index }) => {
-      if (index === components.length-1) {  // Create the route module if component is last
-        const routeModuleType = createRouteModuleType(component)
-        parentRouteNode.modulePaths.set(routeModuleType, sourcePath)
+    create: (parentRouteNode, { index, parts, path }) => {
+      const part = parts[index]!      // always defined since `create` only yields existing indices.
+      if (index === parts.length-1) { // Create the route module if component is last
+        const routeModuleType = createRouteModuleType(part)
+        parentRouteNode.modulePaths.set(routeModuleType, path)
       }
-      else if (!isPrivateSegment(component))
-        return createRouteNode(component, createSegment(component))
+      else if (!isPrivateSegment(part))
+        return createRouteNode(part, createSegment(part))
     },
     attach: (child, parent) => {
       child.parent = parent
