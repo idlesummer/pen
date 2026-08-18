@@ -65,11 +65,11 @@ const urls = [
   '/nope',
 ]
 
-const [match, routeIssues] = createRouter(filePaths)
+const [match, diagnostics] = createRouter(filePaths)
 
-if (routeIssues.length) {
+if (diagnostics.length) {
   console.log('route issues:')
-  for (const issue of routeIssues)
+  for (const issue of diagnostics)
     console.log(`  [${issue.severity}] ${issue.rule}: ${issue.message} (${issue.files.join(', ')})`)
   console.log()
 }
