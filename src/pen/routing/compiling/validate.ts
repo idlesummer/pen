@@ -27,9 +27,10 @@ function findDuplicateParam(routeNode: RouteNode): string | undefined {
     if (node.segment.type !== 'dynamic' && node.segment.type !== 'catchall')
       continue
 
-    if (params.has(node.segment.value))
-      return node.segment.value
-    params.add(node.segment.value)
+    const paramName = node.segment.value
+    if (params.has(paramName))
+      return paramName
+    params.add(paramName)
   }
 }
 
