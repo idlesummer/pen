@@ -17,8 +17,9 @@ function shouldKeepRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean):
 export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
-      const isInsideSlot = routeNode.segment.type === 'slot' || !!findNearestSlotAncestor(routeNode)
-      routeNode.children = routeNode.segment.type !== 'catchall'
+      const segmentType = routeNode.segment.type
+      const isInsideSlot = segmentType === 'slot' || !!findNearestSlotAncestor(routeNode)
+      routeNode.children = segmentType !== 'catchall'
         ? routeNode.children.filter(child => shouldKeepRouteChild(child, isInsideSlot))
         : []
     },
