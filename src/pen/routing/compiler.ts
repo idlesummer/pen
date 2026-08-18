@@ -11,12 +11,12 @@ import { sanitizeRouteTree, sanitizeSearchTree } from './compiling/sanitize'
  *  found during validation. */
 export function createCompiledRoutes(filePaths: string[]): [RouteNode, SearchNode, CompileDiagnostic[]] {
   const routeTree = createRouteTree(filePaths)
-  const routeIssues = validateRouteTree(routeTree) // intrinsic issues
+  const diagnostics = validateRouteTree(routeTree) // intrinsic issues
   sanitizeRouteTree(routeTree)
 
   const searchTree = createSearchTree(routeTree)
-  routeIssues.push(...validateSearchTree(searchTree)) // relational issues
+  diagnostics.push(...validateSearchTree(searchTree)) // relational issues
   sanitizeSearchTree(searchTree)
 
-  return [routeTree, searchTree, routeIssues]
+  return [routeTree, searchTree, diagnostics]
 }

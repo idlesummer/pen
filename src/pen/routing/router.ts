@@ -9,11 +9,11 @@ export type Router = [
   match: Matcher,
   routeTree: RouteNode,
   searchTree: SearchNode,
-  routeIssues: CompileDiagnostic[],
+  diagnostic: CompileDiagnostic[],
 ]
 
 export function createRouter(filePaths: string[]): Router {
-  const [routeTree, searchTree, routeIssues] = createCompiledRoutes(filePaths)
+  const [routeTree, searchTree, diagnostics] = createCompiledRoutes(filePaths)
   const matcher = createMatcher(searchTree)
-  return [matcher, routeTree, searchTree, routeIssues]
+  return [matcher, routeTree, searchTree, diagnostics]
 }
