@@ -20,9 +20,10 @@ export type TreeifyHooks<TNode> = {
  * Each path is traversed from parent to child, reusing nodes for shared
  * prefixes. Nodes are created and attached as they are encountered.
  *
- * Returning `undefined` from `create` stops processing the current path.
+ * Returning `undefined` from {@link TreeifyHooks.create create}
+ * stops processing the current path.
  *
- * @param root - The root node of the tree. Mutated through `attach`.
+ * @param root - The root node of the tree. Mutated through {@link TreeifyHooks.attach attach}.
  * @param paths - The paths to build into the tree.
  * @param separator - The separator used to split each path.
  * @param hooks - Callbacks used to create and attach nodes.
