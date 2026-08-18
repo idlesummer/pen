@@ -1,4 +1,4 @@
-export type CreateContext = {
+export type TreeifyCreateContext = {
   /** The zero-based position of the current segment within the input path. */
   index: number
   /** All path parts of the current input path. */
@@ -9,7 +9,7 @@ export type CreateContext = {
 
 export type TreeifyHooks<TNode> = {
   /** Builds a node for a path segment. Return `undefined` to prune the remainder of the current path. */
-  create: (parent: TNode, context: CreateContext) => TNode | undefined
+  create: (parent: TNode, context: TreeifyCreateContext) => TNode | undefined
   /** Attaches a child node to its parent. */
   attach: (child: TNode, parent: TNode) => void
 }
