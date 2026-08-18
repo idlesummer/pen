@@ -3,7 +3,14 @@
 //
 // Edit filePaths to shape a route tree, edit urls to probe it, re-run.
 import type { RenderNode } from '@/pen/routing'
+import { sep } from 'node:path'
 import { createRouter, getRoutePath } from '@/pen/routing'
+
+// createRouteTree splits each path on node:path's platform sep ('\' on
+// Windows), so these need converting from the '/'-written literals below -
+// otherwise every path here comes through as a single unsplit component
+// and the whole tree flattens onto root.
+const toFilePath = (path: string) => path.split('/').join(sep)
 
 /*
  * Route tree:
@@ -51,7 +58,7 @@ const filePaths = [
   'dashboard/@sidebar/page.tsx',
   'dashboard/@sidebar/default.tsx',
   'users/[id]/settings/page.tsx',
-]
+].map(toFilePath)
 
 const urls = [
   '/',
