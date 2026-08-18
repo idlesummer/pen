@@ -6,10 +6,9 @@ import { createSearchTree } from './compiling/search-tree'
 import { validateRouteTree, validateSearchTree } from './compiling/validate'
 import { sanitizeRouteTree, sanitizeSearchTree } from './compiling/sanitize'
 
-/**
- * Compiles file paths into a validated, sanitized SearchNode tree used
- * by the matcher.
- */
+/** Compiles file paths into route and search trees, validating and sanitizing
+ *  both trees along the way. Returns the compiled trees and any route issues
+ *  found during validation. */
 export function createCompiledRoutes(filePaths: string[]): [RouteNode, SearchNode, RouteIssue[]] {
   const routeTree = createRouteTree(filePaths)
   const routeIssues = validateRouteTree(routeTree) // intrinsic issues
