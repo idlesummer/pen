@@ -17,8 +17,9 @@ function shouldKeepRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean):
 export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
-      const isInsideSlot = routeNode.segment.type === 'slot' || !!findNearestSlotAncestor(routeNode)
-      routeNode.children = routeNode.segment.type !== 'catchall'
+      const segmentType = routeNode.segment.type
+      const isInsideSlot = segmentType === 'slot' || !!findNearestSlotAncestor(routeNode)
+      routeNode.children = segmentType !== 'catchall'
         ? routeNode.children.filter(child => shouldKeepRouteChild(child, isInsideSlot))
         : []
     },
@@ -32,10 +33,10 @@ export function sanitizeRouteTree(routeTree: RouteNode) {
  *  validateSearchTree, same as sanitizeRouteTree after validateRouteTree. */
 export function sanitizeSearchTree(searchTree: SearchNode) {
   forEachSearchNode(searchTree, (searchNode) => {
-    const [pageRouteNode] = searchNode.validation?.pages ?? []
-    const [catchallRouteNode] = searchNode.validation?.catchalls ?? []
-    searchNode.page = pageRouteNode
-    searchNode.catchall = catchallRouteNode
+    const pageRouteNode = searchNode.validation?.pages?.[0]
+    const catchallRouteNode = searchNode.validation?.catchalls?.[0]
+    if (pageRouteNode)     searchNode.page = pageRouteNode
+    if (catchallRouteNode) searchNode.catchall = catchallRouteNode
     delete searchNode.validation
   })
 }
