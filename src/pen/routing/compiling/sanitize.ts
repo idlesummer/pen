@@ -35,8 +35,8 @@ export function sanitizeSearchTree(searchTree: SearchNode) {
   forEachSearchNode(searchTree, (searchNode) => {
     const [pageRouteNode] = searchNode.validation?.pages ?? []
     const [catchallRouteNode] = searchNode.validation?.catchalls ?? []
-    searchNode.page = pageRouteNode
-    searchNode.catchall = catchallRouteNode
+    if (pageRouteNode)     searchNode.page = pageRouteNode
+    if (catchallRouteNode) searchNode.catchall = catchallRouteNode
     delete searchNode.validation
   })
 }
