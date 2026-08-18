@@ -8,14 +8,14 @@ export type TreeifyCreateContext = {
 }
 
 export type TreeifyHooks<TNode> = {
-  /** Builds a node for a path segment. Return `undefined` to prune the remainder of the current path. */
+  /** Creates a node for a path segment. Return `undefined` to prune the remainder of the current path. */
   create: (parent: TNode, context: TreeifyCreateContext) => TNode | undefined
   /** Attaches a child node to its parent. */
   attach: (child: TNode, parent: TNode) => void
 }
 
 /**
- * Builds a tree in place from paths.
+ * Creates a tree in place from paths.
  *
  * Each path is traversed from parent to child, reusing nodes for shared
  * prefixes. Nodes are created and attached as they are encountered.
