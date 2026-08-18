@@ -53,6 +53,7 @@ const filePaths = [
   'blog/[slug]/not-found.tsx',
   'docs/[...slug]/page.tsx',
   '(marketing)/pricing/page.tsx',
+  '(marketing)/about/page.tsx', // collides with about/page.tsx -> duplicate-page-route diagnostic
   'dashboard/layout.tsx',
   'dashboard/page.tsx',
   'dashboard/@sidebar/page.tsx',
