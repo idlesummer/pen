@@ -45,6 +45,7 @@
     "ink": "^7.1.1",
     "react": "^19.2.8",
     "tsdown": "^0.22.14",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0"
   },
@@ -57,5 +58,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
