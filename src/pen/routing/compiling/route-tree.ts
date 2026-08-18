@@ -1,5 +1,5 @@
 import type { Segment } from './segment'
-import { basename } from 'node:path'
+import { basename, sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { createSegment, isPrivateSegment } from './segment'
@@ -37,7 +37,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   const routeNodeRoot = createRouteNode('', createSegment(''))
   const routeFilePaths = filePaths.filter(isRouteFilePath)  // ignore non-route-module files
 
-  treeify(routeNodeRoot, routeFilePaths, {
+  treeify(routeNodeRoot, routeFilePaths, sep, {
     create: (parentRouteNode, { component, components, sourcePath, index }) => {
       if (index === components.length-1) {  // Create the route module if component is last
         const routeModuleType = createRouteModuleType(component)
