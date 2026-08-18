@@ -7,6 +7,6 @@ export type Matcher =
 
 /** Given a compiled SearchNode tree, returns a matcher for that tree -
  *  the runtime half, no filesystem/compile-time dependency at all. */
-export function createMatcher(searchTree: SearchNode): (url: string) => [hasPage: boolean, tree?: RenderNode] {
+export function createMatcher(searchTree: SearchNode): Matcher {
   return (url) => createRenderTree(url, searchTree)
 }
