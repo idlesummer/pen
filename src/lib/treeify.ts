@@ -30,6 +30,10 @@ export type TreeifyHooks<TNode> = {
  *
  * Paths are expected to use the current platform's path separator.
  *
+ * @param root - The node paths are attached to. Mutated through `attach`, never replaced.
+ * @param sourcePaths - The filesystem paths to build into the tree.
+ * @param hooks - Callbacks controlling node creation and attachment; see {@link TreeifyHooks}.
+ *
  * @example
  * ```ts
  * type Node = {
