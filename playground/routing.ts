@@ -5,6 +5,37 @@
 import type { RenderNode } from '@/pen/routing'
 import { createRouter, getRoutePath } from '@/pen/routing'
 
+/*
+ * Route tree:
+ *
+ * /
+ * ├── page.tsx
+ * ├── layout.tsx
+ * ├── about/
+ * │   └── page.tsx
+ * ├── blog/
+ * │   ├── page.tsx
+ * │   ├── layout.tsx
+ * │   └── [slug]/
+ * │       ├── page.tsx
+ * │       └── not-found.tsx
+ * ├── docs/
+ * │   └── [...slug]/
+ * │       └── page.tsx
+ * ├── (marketing)/
+ * │   └── pricing/
+ * │       └── page.tsx
+ * ├── dashboard/
+ * │   ├── layout.tsx
+ * │   ├── page.tsx
+ * │   └── @sidebar/
+ * │       ├── page.tsx
+ * │       └── default.tsx
+ * └── users/
+ *     └── [id]/
+ *         └── settings/
+ *             └── page.tsx
+ */
 const filePaths = [
   'page.tsx',
   'layout.tsx',
