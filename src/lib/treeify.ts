@@ -39,7 +39,7 @@ export type TreeifyHooks<TNode> = {
  *
  * treeify(root, ['src/index.ts', 'src/lib/utils.ts'], '/', {
  *   create: (parent, { index, parts }) => ({
- *     name: parts[index]!, // defined because index comes from parts.entries()
+ *     name: parts[index]!, // defined since index comes from parts.entries()
  *     parent,
  *     children: [],
  *   }),
@@ -48,7 +48,12 @@ export type TreeifyHooks<TNode> = {
  * })
  * ```
  */
-export function treeify<TNode>(root: TNode, paths: string[], separator: string, hooks: TreeifyHooks<TNode>) {
+export function treeify<TNode>(
+  root: TNode,
+  paths: readonly string[],
+  separator: string,
+  hooks: TreeifyHooks<TNode>,
+) {
   const { create, attach } = hooks
   const siblingNodeMap = new Map<TNode, Map<string, TNode>>() // map: node  edge (part) → node
   const createSiblingNodes = () => new Map<string, TNode>()
