@@ -48,14 +48,9 @@ export type TreeifyHooks<TNode> = {
  * })
  * ```
  */
-export function treeify<TNode>(
-  root: TNode,
-  paths: readonly string[],
-  separator: string,
-  hooks: TreeifyHooks<TNode>,
-) {
+export function treeify<TNode>(root: TNode, paths: string[], separator: string, hooks: TreeifyHooks<TNode>) {
   const { create, attach } = hooks
-  const siblingNodeMap = new Map<TNode, Map<string, TNode>>() // map: node  edge (part) → node
+  const siblingNodeMap = new Map<TNode, Map<string, TNode>>() // map: parent → edge (part) → child
   const createSiblingNodes = () => new Map<string, TNode>()
 
   for (const path of paths) {
