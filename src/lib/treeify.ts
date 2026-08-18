@@ -1,4 +1,4 @@
-export type CreateContext = {
+export type TreeifyCreateContext = {
   /** The zero-based position of the current segment within the input path. */
   index: number
   /** All path parts of the current input path. */
@@ -8,14 +8,14 @@ export type CreateContext = {
 }
 
 export type TreeifyHooks<TNode> = {
-  /** Builds a node for a path segment. Return `undefined` to prune the remainder of the current path. */
-  create: (parent: TNode, context: CreateContext) => TNode | undefined
+  /** Creates a node for a path segment. Return `undefined` to prune the remainder of the current path. */
+  create: (parent: TNode, context: TreeifyCreateContext) => TNode | undefined
   /** Attaches a child node to its parent. */
   attach: (child: TNode, parent: TNode) => void
 }
 
 /**
- * Builds a tree in place from paths.
+ * Creates a tree in place from paths.
  *
  * Each path is traversed from parent to child, reusing nodes for shared
  * prefixes. Nodes are created and attached as they are encountered.
@@ -39,7 +39,7 @@ export type TreeifyHooks<TNode> = {
  *
  * treeify(root, ['src/index.ts', 'src/lib/utils.ts'], '/', {
  *   create: (parent, { index, parts }) => ({
- *     name: parts[index]!, // defined because index comes from parts.entries()
+ *     name: parts[index]!, // defined since index comes from parts.entries()
  *     parent,
  *     children: [],
  *   }),
@@ -50,7 +50,7 @@ export type TreeifyHooks<TNode> = {
  */
 export function treeify<TNode>(root: TNode, paths: string[], separator: string, hooks: TreeifyHooks<TNode>) {
   const { create, attach } = hooks
-  const siblingNodeMap = new Map<TNode, Map<string, TNode>>() // map: node  edge (part) → node
+  const siblingNodeMap = new Map<TNode, Map<string, TNode>>() // map: parent → edge (part) → child
   const createSiblingNodes = () => new Map<string, TNode>()
 
   for (const path of paths) {
