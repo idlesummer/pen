@@ -6,9 +6,11 @@ import { createSearchTree } from './compiling/search-tree'
 import { validateRouteTree, validateSearchTree } from './compiling/validate'
 import { sanitizeRouteTree, sanitizeSearchTree } from './compiling/sanitize'
 
-/** Compiles file paths into a validated, sanitized SearchNode tree - the
- *  artifact matcher/ matches against. Build-time only. */
-export function compileRoutes(filePaths: string[]): [RouteNode, SearchNode, RouteIssue[]] {
+/**
+ * Compiles file paths into a validated, sanitized SearchNode tree used
+ * by the matcher.
+ */
+export function createCompiledRoutes(filePaths: string[]): [RouteNode, SearchNode, RouteIssue[]] {
   const routeTree = createRouteTree(filePaths)
   const routeIssues = validateRouteTree(routeTree) // intrinsic issues
   sanitizeRouteTree(routeTree)

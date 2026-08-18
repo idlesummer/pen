@@ -2,7 +2,7 @@ import type { RouteNode } from './compiling/route-tree'
 import type { SearchNode } from './compiling/search-tree'
 import type { RouteIssue } from './compiling/validate'
 import type { RenderNode } from './matching/render-tree'
-import { compileRoutes } from './compiler'
+import { createCompiledRoutes } from './compiler'
 import { createMatcher } from './matcher'
 
 export type Router = [
@@ -13,7 +13,7 @@ export type Router = [
 ]
 
 export function createRouter(filePaths: string[]): Router {
-  const [routeTree, searchTree, routeIssues] = compileRoutes(filePaths)
+  const [routeTree, searchTree, routeIssues] = createCompiledRoutes(filePaths)
   const matcher = createMatcher(searchTree)
   return [matcher, routeTree, searchTree, routeIssues]
 }
