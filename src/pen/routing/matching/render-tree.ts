@@ -36,11 +36,6 @@ function findDefaultRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainP
   }
 }
 
-/** Interprets a walked MatchPath: what it resolved to, using the same
- *  priority order createMatchPath's own traversal already used to pick it -
- *  a real page or catch-all if the position IS one, otherwise the nearest
- *  fallback climbing from there. Returns the originating RouteNode alongside
- *  the leaf, since callers need it to climb up to root. */
 function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchPathParams): [RouteNode, RenderLeaf] | undefined {
   const searchNode = matchPath.searchNode
   const urlExhausted = searchNode.index === url.length
