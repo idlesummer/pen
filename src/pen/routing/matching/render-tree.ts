@@ -22,13 +22,16 @@ type RenderLeaf =
   | NotFoundRenderLeaf
 
 export type SlotRenderNodes = Record<string, RenderNode>  // Actual name is SlotRenderNode
-export type RenderNode = RenderLeaf | { // Should be ShellRenderNode but inlined for brevity
+
+type ShellRenderNode = {
   path: string
   layout?: string
   loading?: string
   error?: string
   slots: SlotRenderNodes & { children: RenderNode }
 }
+
+export type RenderNode = RenderLeaf | ShellRenderNode
 
 /** Pairs a RenderLeaf with the RouteNode it came from - the latter is only
  *  needed internally, to seed the wrap-and-climb walk up to root. */
@@ -69,6 +72,10 @@ function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, main
     }
 }
 
+function toPageLeaf(routeNode: RouteNode, params: MatchPathParams): RenderLeafResult {
+  return { routeNode, leaf: { moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
+}
+
 /** Interprets a walked MatchPath: what it resolved to, using the same
  *  priority order createMatchPath's own traversal already used to pick it -
  *  a real page or catch-all if the position IS one, otherwise the nearest
@@ -79,16 +86,15 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   const urlExhausted = searchNode.index === url.length
 
   if (urlExhausted && searchNode.page) {
-    const routeNode = searchNode.page
     const params = getMatchPathParams(matchPath, mainParams)  // mainParams carries main-tree params in, since a slot's own chain never links back to it
-    return { routeNode, leaf: { moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
+    return toPageLeaf(searchNode.page, params)
   }
   else if (!urlExhausted && searchNode.catchall) {
     const routeNode = searchNode.catchall
     const param = routeNode.segment.value
     const urlTail = url.slice(searchNode.index)
     const params = { ...getMatchPathParams(matchPath, mainParams), [param]: urlTail }
-    return { routeNode, leaf: { moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
+    return toPageLeaf(routeNode, params)
   }
   else
     return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)
