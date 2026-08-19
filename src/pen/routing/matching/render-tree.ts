@@ -27,7 +27,7 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
   return [renderLeaf, routeNode]
 }
 
-function resolveRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchPathParams): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchPathParams): [RenderLeaf, RouteNode] | undefined {
   const searchNode = matchPath.searchNode
   const urlExhausted = searchNode.index === url.length
   const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
@@ -82,7 +82,7 @@ function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderN
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
     const slotMatchPath = createMatchPath(slotSearchTree, url)
-    const result = resolveRenderLeaf(slotMatchPath, url, mainParams)
+    const result = createRenderLeaf(slotMatchPath, url, mainParams)
     if (result) slotRenderNodes[slotName] = createRenderNodeChain(...result)
   }
   for (const _ in slotRenderNodes)  // a bit more efficent than Object.keys(...).length
@@ -103,10 +103,10 @@ function createSlottedRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: Rou
  *  the render tree. `success` is false for default fallbacks and when nothing
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
-  const url = urlString.split('/').filter(Boolean)              // Convert url string to a list of segments
-  const mainMatchPath = createMatchPath(searchTree, url)        // Find search node path with params that match the url
-  const mainResult = resolveRenderLeaf(mainMatchPath, url, {})  // Create the initial render node leaf
-  if (!mainResult) return [false]                               // Return nothing if not even a fallback exists
+  const url = urlString.split('/').filter(Boolean)            // Convert url string to a list of segments
+  const mainMatchPath = createMatchPath(searchTree, url)      // Find search node path with params that match the url
+  const mainResult = createRenderLeaf(mainMatchPath, url, {}) // Create the initial render node leaf
+  if (!mainResult) return [false]                             // Return nothing if not even a fallback exists
 
   const [mainRenderLeaf, mainRouteNode] = mainResult
   const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
