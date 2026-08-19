@@ -102,9 +102,7 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
 
 function getSlotMatchPaths(matchPathLeaf: MatchPath): MatchPath[] {
   const slotMatchPaths: MatchPath[] = []
-  let matchPath: MatchPath | undefined = matchPathLeaf
-
-  for (; matchPath; matchPath = matchPath.parent) {
+  for (let matchPath: MatchPath | undefined = matchPathLeaf; matchPath; matchPath = matchPath.parent) {
     if (matchPath.searchNode.slots)
       slotMatchPaths.push(matchPath)
   }
