@@ -21,7 +21,7 @@ type RenderLeaf =
   | PageOrDefaultRenderLeaf
   | NotFoundRenderLeaf
 
-export type SlotRenderNodes = Record<string, RenderNode>  // Actual name is SlotRenderNode
+type SlotRenderNodes = Record<string, RenderNode>  // Actual name is SlotRenderNode
 
 type ShellRenderNode = {
   path: string
