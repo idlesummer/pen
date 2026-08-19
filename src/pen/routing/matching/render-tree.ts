@@ -5,7 +5,6 @@ import { getRoutePath, getRouteNodeParentIfNotSlot } from '../compiling/route-tr
 import { createMatchPath, getMatchPathParams } from './match-path'
 
 type PageOrDefaultRenderLeaf = {
-  type: 'leaf'
   moduleType: 'page' | 'default'
   modulePath: string
   path: string
@@ -13,7 +12,6 @@ type PageOrDefaultRenderLeaf = {
 }
 
 type NotFoundRenderLeaf = {
-  type: 'leaf'
   moduleType: 'notfound'
   modulePath: string
   path: string
@@ -25,7 +23,6 @@ type RenderLeaf =
 
 export type SlotRenderNodes = Record<string, RenderNode>  // Actual name is SlotRenderNode
 export type RenderNode = RenderLeaf | { // Should be ShellRenderNode but inlined for brevity
-  type: 'layout'
   path: string
   layout?: string
   loading?: string
@@ -54,7 +51,6 @@ function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, main
     return {
       routeNode: defaultRouteNode,
       leaf: {
-        type: 'leaf',
         moduleType: 'default',
         modulePath: defaultRouteNode.modulePaths.get('default')!,
         path: getRoutePath(defaultRouteNode),
@@ -66,7 +62,6 @@ function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, main
     return {
       routeNode: notFoundRouteNode,
       leaf: {
-        type: 'leaf',
         moduleType: 'notfound',
         modulePath: notFoundRouteNode.modulePaths.get('not-found')!,
         path: getRoutePath(notFoundRouteNode),
@@ -86,14 +81,14 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   if (urlExhausted && searchNode.page) {
     const routeNode = searchNode.page
     const params = getMatchPathParams(matchPath, mainParams)  // mainParams carries main-tree params in, since a slot's own chain never links back to it
-    return { routeNode, leaf: { type: 'leaf', moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
+    return { routeNode, leaf: { moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
   }
   else if (!urlExhausted && searchNode.catchall) {
     const routeNode = searchNode.catchall
     const param = routeNode.segment.value
     const urlTail = url.slice(searchNode.index)
     const params = { ...getMatchPathParams(matchPath, mainParams), [param]: urlTail }
-    return { routeNode, leaf: { type: 'leaf', moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
+    return { routeNode, leaf: { moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params } }
   }
   else
     return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)
@@ -116,7 +111,6 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, extra
   const error = routeNode.modulePaths.get('error')
 
   return (!layout && !loading && !error && !extraSlots) ? childRenderNode : {
-    type: 'layout',
     path: getRoutePath(routeNode),
     layout, loading, error,
     slots: { ...extraSlots, children: childRenderNode },

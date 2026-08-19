@@ -83,7 +83,7 @@ if (diagnostics.length) {
 }
 
 function printRenderNode(node: RenderNode, indent: string): void {
-  if (node.type === 'leaf') {
+  if (!('slots' in node)) {
     const params = 'params' in node ? node.params : undefined
     const suffix = params && Object.keys(params).length ? ` ${JSON.stringify(params)}` : ''
     console.log(`${indent}${node.moduleType} <- /${node.path}${suffix} (${node.modulePath})`)
