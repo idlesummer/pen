@@ -24,8 +24,7 @@ const toFilePath = (path: string) => path.split('/').join(sep)
  * │   ├── page.tsx
  * │   ├── layout.tsx
  * │   └── [slug]/
- * │       ├── page.tsx
- * │       └── not-found.tsx
+ * │       └── page.tsx
  * ├── docs/
  * │   └── [...slug]/
  * │       └── page.tsx
@@ -50,7 +49,6 @@ const filePaths = [
   'blog/page.tsx',
   'blog/layout.tsx',
   'blog/[slug]/page.tsx',
-  'blog/[slug]/not-found.tsx',
   'docs/[...slug]/page.tsx',
   '(marketing)/pricing/page.tsx',
   '(marketing)/about/page.tsx', // collides with about/page.tsx -> duplicate-page-route diagnostic
@@ -86,12 +84,12 @@ function printRenderNode(node: RenderNode, indent: string): void {
   if (!('slots' in node)) {
     const params = 'params' in node ? node.params : undefined
     const suffix = params && Object.keys(params).length ? ` ${JSON.stringify(params)}` : ''
-    console.log(`${indent}${node.moduleType} <- /${node.path}${suffix} (${node.modulePath})`)
+    console.log(`${indent}${node.moduleType} <- /${node.routePath}${suffix} (${node.modulePath})`)
     return
   }
 
   const flags = [node.loading && 'loading', node.error && 'error'].filter(Boolean).join('+')
-  console.log(`${indent}layout <- /${node.path}${flags ? ` (${flags})` : ''}`)
+  console.log(`${indent}layout <- /${node.routePath}${flags ? ` (${flags})` : ''}`)
   for (const [slotName, slotNode] of Object.entries(node.slots)) {
     console.log(`${indent}  [${slotName}]`)
     printRenderNode(slotNode, `${indent}    `)

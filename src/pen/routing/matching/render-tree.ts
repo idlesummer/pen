@@ -8,19 +8,19 @@ type RenderLeaf = {
   moduleType: RouteModuleType // page or default
   modulePath: string
   routePath: string
-  params?: MatchPathParams
+  params: MatchPathParams
 }
 
 type SlotRenderNodes = Record<string, RenderNode>  // contains SlotRenderNode
 export type RenderNode = RenderLeaf | {
-  path: string
+  routePath: string
   layout?: string
   loading?: string
   error?: string
   slots: SlotRenderNodes
 }
 
-function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params?: MatchPathParams): [RenderLeaf, RouteNode] {
+function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params: MatchPathParams): [RenderLeaf, RouteNode] {
   const modulePath = routeNode.modulePaths.get(moduleType)!
   const routePath = getRoutePath(routeNode)
   const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
@@ -31,14 +31,12 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   const searchNode = matchPath.searchNode
   const urlExhausted = searchNode.index === url.length
   const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
+  const params = getMatchPathParams(matchPath, mainParams)
 
   if (!moduleRouteNode) {
     const defaultRouteNode = findDefaultRouteNodeParent(searchNode.routeNode)
-    const params = getMatchPathParams(matchPath, mainParams)
-    if (defaultRouteNode) return createModuleRenderLeaf('default', defaultRouteNode, params)
-    else return
+    return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, params)
   }
-  const params = getMatchPathParams(matchPath, mainParams)
   if (!urlExhausted) {
     const paramName = moduleRouteNode.segment.value
     params[paramName] = url.slice(searchNode.index)
@@ -62,10 +60,10 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   if (!layout && !loading && !error && !slotRenderNodes)
     return childRenderNode
 
-  const path = getRoutePath(routeNode)
+  const routePath = getRoutePath(routeNode)
   const slots = slotRenderNodes ?? Object.create(null)
   slots.children = childRenderNode
-  return { path, layout, loading, error, slots }
+  return { routePath, layout, loading, error, slots }
 }
 
 function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): RenderNode {
