@@ -24,13 +24,6 @@ export type RenderNode =
   | RenderLeaf
   | ShellRenderNode
 
-function findNearestModuleRouteNode(routeNode: RouteNode, moduleType: RouteModuleType): RouteNode | undefined {
-  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
-    if (node.modulePaths.has(moduleType))
-      return node
-  }
-}
-
 function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params?: MatchPathParams): [RouteNode, RenderLeaf] {
   const modulePath = routeNode.modulePaths.get(moduleType)!
   const routePath = getRoutePath(routeNode)
@@ -38,16 +31,16 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
   return [routeNode, renderLeaf]
 }
 
-/** A default.tsx renders at a real segment position, so - like a real
- *  Next default.tsx - it gets the params resolved up to the point of the
- *  miss; not-found.tsx can be reached from anywhere with no reliable
- *  segment context, so it gets none. */
 function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainParams: MatchPathParams): [RouteNode, RenderLeaf] | undefined {
-  const defaultRouteNode = findNearestModuleRouteNode(routeNode, 'default')
-  if (defaultRouteNode) return createModuleRenderLeaf('default', defaultRouteNode, getMatchPathParams(matchPath, mainParams))
-
-  const notfoundRouteNode = findNearestModuleRouteNode(routeNode, 'not-found')
-  if (notfoundRouteNode) return createModuleRenderLeaf('not-found', notfoundRouteNode)
+  let notfoundRouteNode: RouteNode | undefined
+  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
+    if (node.modulePaths.has('default'))
+      return createModuleRenderLeaf('default', node, getMatchPathParams(matchPath, mainParams))
+    if (node.modulePaths.has('not-found'))
+      notfoundRouteNode ??= node
+  }
+  if (notfoundRouteNode)
+    return createModuleRenderLeaf('not-found', notfoundRouteNode)
 }
 
 /** Interprets a walked MatchPath: what it resolved to, using the same
