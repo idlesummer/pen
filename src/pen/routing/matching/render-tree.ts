@@ -148,9 +148,9 @@ function createSlotRenderNodes(matchPathStep: MatchPath, url: string[]): SlotRen
 
 function createRenderNodeChainWithSlots(routeNode: RouteNode, mainRenderLeaf: RenderNode, url: string[], slotMatchPaths: MatchPath[]): RenderNode {
   let renderNode = mainRenderLeaf
-  let node: RouteNode | undefined = routeNode
 
-  for (; node; node = node.parent) { // For each route node in the match path leaf
+  // For each route node in the match path leaf
+  for (let node: RouteNode | undefined = routeNode; node; node = node.parent) {
     const slotMatchPath = slotMatchPaths.find(matchPath => matchPath.searchNode.routeNode === node)
     const slotRenderNodes = slotMatchPath && createSlotRenderNodes(slotMatchPath, url)
     renderNode = wrapRenderNode(node, renderNode, slotRenderNodes)
