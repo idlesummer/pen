@@ -4,25 +4,14 @@ import type { MatchPathParams, MatchPath } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot } from '../compiling/route-tree'
 import { createMatchPath, getMatchPathParams } from './match-path'
 
-type PageOrDefaultRenderLeaf = {
-  moduleType: 'page' | 'default'
+type RenderLeaf = {
+  moduleType: RouteModuleType // page, default, or not-found
   modulePath: string
-  path: string
-  params: MatchPathParams
+  routePath: string
+  params?: MatchPathParams
 }
-
-type NotFoundRenderLeaf = {
-  moduleType: 'notfound'
-  modulePath: string
-  path: string
-}
-
-type RenderLeaf =
-  | PageOrDefaultRenderLeaf
-  | NotFoundRenderLeaf
 
 type SlotRenderNodes = Record<string, RenderNode>  // Actual name is SlotRenderNode
-
 type ShellRenderNode = {
   path: string
   layout?: string
@@ -31,7 +20,9 @@ type ShellRenderNode = {
   slots: SlotRenderNodes & { children: RenderNode }
 }
 
-export type RenderNode = RenderLeaf | ShellRenderNode
+export type RenderNode =
+  | RenderLeaf
+  | ShellRenderNode
 
 function findNearestModuleRouteNode(routeNode: RouteNode, moduleType: RouteModuleType): RouteNode | undefined {
   for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
@@ -40,33 +31,23 @@ function findNearestModuleRouteNode(routeNode: RouteNode, moduleType: RouteModul
   }
 }
 
+function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params?: MatchPathParams): [RouteNode, RenderLeaf] {
+  const modulePath = routeNode.modulePaths.get(moduleType)!
+  const routePath = getRoutePath(routeNode)
+  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
+  return [routeNode, renderLeaf]
+}
+
 /** A default.tsx renders at a real segment position, so - like a real
  *  Next default.tsx - it gets the params resolved up to the point of the
  *  miss; not-found.tsx can be reached from anywhere with no reliable
  *  segment context, so it gets none. */
-function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainParams: MatchPathParams): [routeNode: RouteNode, leaf: RenderLeaf] | undefined {
+function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainParams: MatchPathParams): [RouteNode, RenderLeaf] | undefined {
   const defaultRouteNode = findNearestModuleRouteNode(routeNode, 'default')
-  if (defaultRouteNode)
-    return [defaultRouteNode, {
-      moduleType: 'default',
-      modulePath: defaultRouteNode.modulePaths.get('default')!,
-      path: getRoutePath(defaultRouteNode),
-      params: getMatchPathParams(matchPath, mainParams),
-    }]
-  const notFoundRouteNode = findNearestModuleRouteNode(routeNode, 'not-found')
-  if (notFoundRouteNode)
-    return [notFoundRouteNode, {
-      moduleType: 'notfound',
-      modulePath: notFoundRouteNode.modulePaths.get('not-found')!,
-      path: getRoutePath(notFoundRouteNode),
-    }]
-}
+  if (defaultRouteNode) return createModuleRenderLeaf('default', defaultRouteNode, getMatchPathParams(matchPath, mainParams))
 
-function createPageRenderLeaf(routeNode: RouteNode, params: MatchPathParams): [routeNode: RouteNode, leaf: RenderLeaf] {
-  const moduleType = 'page'
-  const modulePath = routeNode.modulePaths.get('page')!
-  const path = getRoutePath(routeNode)
-  return [routeNode, { moduleType, modulePath, path, params }]
+  const notfoundRouteNode = findNearestModuleRouteNode(routeNode, 'not-found')
+  if (notfoundRouteNode) return createModuleRenderLeaf('not-found', notfoundRouteNode)
 }
 
 /** Interprets a walked MatchPath: what it resolved to, using the same
@@ -74,23 +55,22 @@ function createPageRenderLeaf(routeNode: RouteNode, params: MatchPathParams): [r
  *  a real page or catch-all if the position IS one, otherwise the nearest
  *  fallback climbing from there. Returns the originating RouteNode alongside
  *  the leaf, since callers need it to climb up to root. */
-function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchPathParams): [routeNode: RouteNode, leaf: RenderLeaf] | undefined {
+function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchPathParams): [RouteNode, RenderLeaf] | undefined {
   const searchNode = matchPath.searchNode
   const urlExhausted = searchNode.index === url.length
+  const routeNode = urlExhausted ? searchNode.page : searchNode.catchall
 
-  if (urlExhausted && searchNode.page) {
-    const params = getMatchPathParams(matchPath, mainParams)  // mainParams carries main-tree params in, since a slot's own chain never links back to it
-    return createPageRenderLeaf(searchNode.page, params)
-  }
-  else if (!urlExhausted && searchNode.catchall) {
-    const routeNode = searchNode.catchall
-    const param = routeNode.segment.value
-    const urlTail = url.slice(searchNode.index)
-    const params = { ...getMatchPathParams(matchPath, mainParams), [param]: urlTail }
-    return createPageRenderLeaf(routeNode, params)
-  }
-  else
+  // Return fallback if matching searchNode page or catchall doesn't exist
+  if (!routeNode)
     return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)
+
+  // Else then create a render leaf and attach params
+  const params = getMatchPathParams(matchPath, mainParams)
+  if (!urlExhausted) {
+    const paramName = routeNode.segment.value
+    params[paramName] = url.slice(searchNode.index) // gather the remaining url since its a catchall
+  }
+  return createModuleRenderLeaf('page', routeNode, params)
 }
 
 function getSlotMatchPathsByRouteNode(matchPathLeaf: MatchPath): Map<RouteNode, MatchPath> {
@@ -116,9 +96,7 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, extra
 
 function createRenderNodeChain(routeNode: RouteNode, renderLeaf: RenderNode): RenderNode {
   let renderNode = renderLeaf
-  let node: RouteNode | undefined = routeNode
-
-  for (; node; node = getRouteNodeParentIfNotSlot(node))
+  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node))
     renderNode = wrapRenderNode(node, renderNode)
   return renderNode
 }
