@@ -100,11 +100,11 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
     return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)
 }
 
-function getSlotMatchPaths(matchPathLeaf: MatchPath): MatchPath[] {
-  const slotMatchPaths: MatchPath[] = []
+function getSlotMatchPathsByRouteNode(matchPathLeaf: MatchPath): Map<RouteNode, MatchPath> {
+  const slotMatchPaths = new Map<RouteNode, MatchPath>()
   for (let matchPath: MatchPath | undefined = matchPathLeaf; matchPath; matchPath = matchPath.parent) {
     if (matchPath.searchNode.slots)
-      slotMatchPaths.push(matchPath)
+      slotMatchPaths.set(matchPath.searchNode.routeNode, matchPath)
   }
   return slotMatchPaths
 }
@@ -144,12 +144,12 @@ function createSlotRenderNodes(matchPathStep: MatchPath, url: string[]): SlotRen
     return slotRenderNodes
 }
 
-function createRenderNodeChainWithSlots(routeNode: RouteNode, mainRenderLeaf: RenderNode, url: string[], slotMatchPaths: MatchPath[]): RenderNode {
+function createRenderNodeChainWithSlots(routeNode: RouteNode, mainRenderLeaf: RenderNode, url: string[], slotMatchPaths: Map<RouteNode, MatchPath>): RenderNode {
   let renderNode = mainRenderLeaf
 
   // For each route node in the match path leaf
   for (let node: RouteNode | undefined = routeNode; node; node = node.parent) {
-    const slotMatchPath = slotMatchPaths.find(matchPath => matchPath.searchNode.routeNode === node)
+    const slotMatchPath = slotMatchPaths.get(node)
     const slotRenderNodes = slotMatchPath && createSlotRenderNodes(slotMatchPath, url)
     renderNode = wrapRenderNode(node, renderNode, slotRenderNodes)
   }
@@ -166,7 +166,7 @@ export function createRenderTree(urlString: string, searchTree: SearchNode): [su
   if (!mainResult) return [false]                        // Return nothing if not even a fallback exists
 
   const { routeNode: mainRouteNode, leaf: mainRenderLeaf } = mainResult
-  const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Find all match path links containing slots
+  const slotMatchPaths = getSlotMatchPathsByRouteNode(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
   const renderTree = createRenderNodeChainWithSlots(mainRouteNode, mainRenderLeaf, url, slotMatchPaths) // Create main render chain
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
