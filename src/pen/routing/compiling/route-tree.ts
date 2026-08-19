@@ -4,7 +4,7 @@ import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { createSegment, isPrivateSegment } from './segment'
 
-export type RouteModuleType = 'page' | 'default' | 'not-found' | 'layout' | 'loading' | 'error'
+export type RouteModuleType = 'page' | 'default' | 'layout' | 'loading' | 'error'
 export type RouteNode = {
   name: string
   segment: Segment
@@ -14,7 +14,7 @@ export type RouteNode = {
 }
 
 const ROUTE_MODULE_TYPES = new Set<RouteModuleType>([
-  'page', 'layout', 'loading', 'error', 'not-found', 'default',
+  'page', 'layout', 'loading', 'error', 'default',
 ])
 
 function createRouteModuleType(fileName: string): RouteModuleType {

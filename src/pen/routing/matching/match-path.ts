@@ -40,8 +40,8 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
     return 'candidate'
 }
 
-function isBetterCatchPath(candidate: MatchPath, bestCatchPath?: MatchPath): boolean {
-  return !bestCatchPath || candidate.searchNode.specificity > bestCatchPath.searchNode.specificity
+function isBetterDefaultPath(candidate: MatchPath, bestDefaultPath?: MatchPath): boolean {
+  return !bestDefaultPath || candidate.searchNode.specificity > bestDefaultPath.searchNode.specificity
 }
 
 /** Finds the winning MatchPath for one tree: a real match if traversal
@@ -50,7 +50,7 @@ function isBetterCatchPath(candidate: MatchPath, bestCatchPath?: MatchPath): boo
 export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPath {
   const rootMatchPath: MatchPath = { searchNode: searchTree }
   let bestMatchPath: MatchPath | undefined
-  let bestCatchPath: MatchPath | undefined  // most static-preferring failed branch seen so far
+  let bestDefaultPath: MatchPath | undefined  // most static-preferring failed branch seen so far
 
   traverse(rootMatchPath, {   // Performs a regular MatchPath traversal restricted to static and dynamic
     expand: (matchPath) =>
@@ -60,11 +60,11 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
       const classification = classifyMatchPath(matchPath, url)
       if (classification === 'winner')
         return (bestMatchPath = matchPath, true)
-      if (classification === 'candidate' && isBetterCatchPath(matchPath, bestCatchPath))
-        bestCatchPath = matchPath
+      if (classification === 'candidate' && isBetterDefaultPath(matchPath, bestDefaultPath))
+        bestDefaultPath = matchPath
     },
   })
-  return bestMatchPath ?? bestCatchPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
+  return bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
 }
 
 /** Assembles the full params accumulated along a walked path, seeded with

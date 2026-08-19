@@ -20,9 +20,7 @@ type ShellRenderNode = {
   slots: SlotRenderNodes & { children: RenderNode }
 }
 
-export type RenderNode =
-  | RenderLeaf
-  | ShellRenderNode
+export type RenderNode = RenderLeaf | ShellRenderNode
 
 function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params?: MatchPathParams): [RouteNode, RenderLeaf] {
   const modulePath = routeNode.modulePaths.get(moduleType)!
@@ -31,16 +29,11 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
   return [routeNode, renderLeaf]
 }
 
-function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainParams: MatchPathParams): [RouteNode, RenderLeaf] | undefined {
-  let notfoundRouteNode: RouteNode | undefined
+function findDefaultRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, mainParams: MatchPathParams): [RouteNode, RenderLeaf] | undefined {
   for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
     if (node.modulePaths.has('default'))
       return createModuleRenderLeaf('default', node, getMatchPathParams(matchPath, mainParams))
-    if (node.modulePaths.has('not-found'))
-      notfoundRouteNode ??= node
   }
-  if (notfoundRouteNode)
-    return createModuleRenderLeaf('not-found', notfoundRouteNode)
 }
 
 /** Interprets a walked MatchPath: what it resolved to, using the same
@@ -53,9 +46,8 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   const urlExhausted = searchNode.index === url.length
   const routeNode = urlExhausted ? searchNode.page : searchNode.catchall
 
-  // Return fallback if matching searchNode page or catchall doesn't exist
-  if (!routeNode)
-    return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)
+  if (!routeNode) // Return fallback if matching searchNode page or catchall doesn't exist
+    return findDefaultRenderLeaf(searchNode.routeNode, matchPath, mainParams)
 
   // Else then create a render leaf and attach params
   const params = getMatchPathParams(matchPath, mainParams)
@@ -66,7 +58,7 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   return createModuleRenderLeaf('page', routeNode, params)
 }
 
-function getSlotMatchPathsByRouteNode(matchPathLeaf: MatchPath): Map<RouteNode, MatchPath> {
+function getSlotMatchPaths(matchPathLeaf: MatchPath): Map<RouteNode, MatchPath> {
   const slotMatchPaths = new Map<RouteNode, MatchPath>()
   for (let matchPath: MatchPath | undefined = matchPathLeaf; matchPath; matchPath = matchPath.parent) {
     if (matchPath.searchNode.slots)
@@ -75,15 +67,15 @@ function getSlotMatchPathsByRouteNode(matchPathLeaf: MatchPath): Map<RouteNode, 
   return slotMatchPaths
 }
 
-function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, extraSlots?: SlotRenderNodes): RenderNode {
+function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
   const layout = routeNode.modulePaths.get('layout')
   const loading = routeNode.modulePaths.get('loading')
   const error = routeNode.modulePaths.get('error')
 
-  return (!layout && !loading && !error && !extraSlots) ? childRenderNode : {
+  return (!layout && !loading && !error && !slotRenderNodes) ? childRenderNode : {
     path: getRoutePath(routeNode),
     layout, loading, error,
-    slots: { ...extraSlots, children: childRenderNode },
+    slots: { ...slotRenderNodes, children: childRenderNode },
   }
 }
 
@@ -111,7 +103,7 @@ function createSlotRenderNodes(matchPathStep: MatchPath, url: string[]): SlotRen
 function createRenderNodeChainWithSlots(routeNode: RouteNode, mainRenderLeaf: RenderNode, url: string[], slotMatchPaths: Map<RouteNode, MatchPath>): RenderNode {
   let renderNode = mainRenderLeaf
 
-  // For each route node in the match path leaf
+  // For each route node parent in the match path leaf
   for (let node: RouteNode | undefined = routeNode; node; node = node.parent) {
     const slotMatchPath = slotMatchPaths.get(node)
     const slotRenderNodes = slotMatchPath && createSlotRenderNodes(slotMatchPath, url)
@@ -130,7 +122,7 @@ export function createRenderTree(urlString: string, searchTree: SearchNode): [su
   if (!mainResult) return [false]                        // Return nothing if not even a fallback exists
 
   const [mainRouteNode, mainRenderLeaf] = mainResult
-  const slotMatchPaths = getSlotMatchPathsByRouteNode(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
+  const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
   const renderTree = createRenderNodeChainWithSlots(mainRouteNode, mainRenderLeaf, url, slotMatchPaths) // Create main render chain
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
