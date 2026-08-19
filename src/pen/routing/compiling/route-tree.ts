@@ -76,3 +76,11 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
       routeNode.segment.type !== 'catchall' ? routeNode.children : [],
   })
 }
+
+/** Finds the nearest ancestor route node with a default module, skipping slot boundaries. */
+export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode | undefined {
+  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
+    if (node.modulePaths.has('default'))
+      return node
+  }
+}
