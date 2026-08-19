@@ -62,8 +62,11 @@ function findFallbackRenderLeaf(routeNode: RouteNode, matchPath: MatchPath, main
     }]
 }
 
-function toPageLeaf(routeNode: RouteNode, params: MatchPathParams): [routeNode: RouteNode, leaf: RenderLeaf] {
-  return [routeNode, { moduleType: 'page', modulePath: routeNode.modulePaths.get('page')!, path: getRoutePath(routeNode), params }]
+function createPageRenderLeaf(routeNode: RouteNode, params: MatchPathParams): [routeNode: RouteNode, leaf: RenderLeaf] {
+  const moduleType = 'page'
+  const modulePath = routeNode.modulePaths.get('page')!
+  const path = getRoutePath(routeNode)
+  return [routeNode, { moduleType, modulePath, path, params }]
 }
 
 /** Interprets a walked MatchPath: what it resolved to, using the same
@@ -77,14 +80,14 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
 
   if (urlExhausted && searchNode.page) {
     const params = getMatchPathParams(matchPath, mainParams)  // mainParams carries main-tree params in, since a slot's own chain never links back to it
-    return toPageLeaf(searchNode.page, params)
+    return createPageRenderLeaf(searchNode.page, params)
   }
   else if (!urlExhausted && searchNode.catchall) {
     const routeNode = searchNode.catchall
     const param = routeNode.segment.value
     const urlTail = url.slice(searchNode.index)
     const params = { ...getMatchPathParams(matchPath, mainParams), [param]: urlTail }
-    return toPageLeaf(routeNode, params)
+    return createPageRenderLeaf(routeNode, params)
   }
   else
     return findFallbackRenderLeaf(searchNode.routeNode, matchPath, mainParams)
