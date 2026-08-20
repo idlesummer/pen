@@ -9,9 +9,9 @@ export type SearchNode = {
   page?: RouteNode                    // checked by classifyMatchPath to decide if this position is a match
   catchall?: RouteNode                // consuming folder's catch-all page
   // Route types
+  slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
   statics?: Map<string, SearchNode>   // consuming folder's static children
   dynamic?: SearchNode                // consuming folder's dynamic child - param name is getDynamicParamName(dynamic)
-  slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
   // Validation metadata
   validation?: {                      // candidates validation checks against (later removed in sanitizeSearchTree)
     pages?: RouteNode[]               // every page claimed here, for duplicate-route
