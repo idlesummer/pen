@@ -20,23 +20,23 @@ export type RenderNode = RenderLeaf | {
   slots: SlotRenderNodes
 }
 
-function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params: MatchPathParams): [RenderLeaf, RouteNode] {
+function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params: MatchParams): [RenderLeaf, RouteNode] {
   const modulePath = routeNode.modulePaths.get(moduleType)!
   const routePath = getRoutePath(routeNode)
   const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
   return [renderLeaf, routeNode]
 }
 
-function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchPathParams): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
   const searchNode = matchPath.searchNode
   const urlExhausted = searchNode.index === url.length
   const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
 
   if (!moduleRouteNode) {
     const defaultRouteNode = findDefaultRouteNodeParent(searchNode.routeNode)
-    return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchPathParams(matchPath, mainParams))
+    return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchParams(matchPath, mainParams))
   }
-  const params = getMatchPathParams(matchPath, mainParams)
+  const params = getMatchParams(matchPath, mainParams)
   if (!urlExhausted) {
     const paramName = moduleRouteNode.segment.value
     params[paramName] = url.slice(searchNode.index)
@@ -75,7 +75,7 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): Re
 
 function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderNodes | undefined {
   const searchNode = matchPath.searchNode
-  const mainParams = getMatchPathParams(matchPath, {})
+  const mainParams = getMatchParams(matchPath, {})
   const slotRenderNodes: SlotRenderNodes = Object.create(null)  // equivalent to {} but without prototype inheritance
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
