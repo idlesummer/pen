@@ -10,7 +10,7 @@ export type SearchNode = {
   catchall?: RouteNode                // consuming folder's catch-all page
   // Route types
   statics?: Map<string, SearchNode>   // consuming folder's static children
-  dynamic?: SearchNode                // consuming folder's dynamic child - param name is getParam(dynamic)
+  dynamic?: SearchNode                // consuming folder's dynamic child - param name is getDynamicParamName(dynamic)
   slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
   // Validation metadata
   validation?: {                      // candidates validation checks against (later removed in sanitizeSearchTree)
@@ -83,7 +83,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   return searchTree
 }
 
-export function getDynamicParam(dynamicSearchNode: SearchNode): string {
+export function getDynamicParamName(dynamicSearchNode: SearchNode): string {
   return dynamicSearchNode.routeNode.segment.value
 }
 
