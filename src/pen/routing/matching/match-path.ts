@@ -48,11 +48,11 @@ function isBetterDefaultPath(candidate: MatchPath, bestDefaultPath?: MatchPath):
  *  found one, or - failing that - whichever failed branch was most
  *  static-preferring. Callers interpret what it resolved to themselves. */
 export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPath {
-  const rootMatchPath: MatchPath = { searchNode: searchTree }
+  const matchPathHead: MatchPath = { searchNode: searchTree }
   let bestMatchPath: MatchPath | undefined
   let bestDefaultPath: MatchPath | undefined  // most static-preferring failed branch seen so far
 
-  traverse(rootMatchPath, {   // Performs a regular MatchPath traversal restricted to static and dynamic
+  traverse(matchPathHead, {   // Performs a regular MatchPath traversal restricted to static and dynamic
     expand: (matchPath) =>
       createChildMatchPaths(matchPath, url),
 
