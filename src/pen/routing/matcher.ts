@@ -1,6 +1,7 @@
 import type { SearchNode } from './compiling/search-tree'
 import type { RenderNode } from './matching/render-tree'
 import { createRenderTree } from './matching/render-tree'
+import { sanitizeUrl } from './matching/url'
 
 export type Matcher =
   (url: string) => [hasPage: boolean, tree?: RenderNode]
@@ -8,5 +9,5 @@ export type Matcher =
 /** Given a compiled SearchNode tree, returns a matcher for that tree -
  *  the runtime half, no filesystem/compile-time dependency at all. */
 export function createMatcher(searchTree: SearchNode): Matcher {
-  return (url) => createRenderTree(url, searchTree)
+  return (url) => createRenderTree(sanitizeUrl(url), searchTree)
 }
