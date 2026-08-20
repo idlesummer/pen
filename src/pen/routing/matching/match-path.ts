@@ -57,10 +57,10 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
       createChildMatchPaths(matchPath, url),
 
     leave: (matchPath) => { // Once subtrees are visited,
-      const classification = classifyMatchPath(matchPath, url)
-      if (classification === 'winner')
+      const matchClass = classifyMatchPath(matchPath, url)
+      if (matchClass === 'winner')
         return (bestMatchPath = matchPath, true)
-      if (classification === 'candidate' && isBetterDefaultPath(matchPath, bestDefaultPath))
+      if (matchClass === 'candidate' && isBetterDefaultPath(matchPath, bestDefaultPath))
         bestDefaultPath = matchPath
     },
   })
