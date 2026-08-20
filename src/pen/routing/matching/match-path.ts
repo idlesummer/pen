@@ -11,7 +11,7 @@ export type MatchPath = {
 
 function createChildMatchPaths(matchPath: MatchPath, url: string[]): MatchPath[] {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.index]
+  const urlPart = url[searchNode.depth]
   if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
@@ -27,7 +27,7 @@ function createChildMatchPaths(matchPath: MatchPath, url: string[]): MatchPath[]
 /* Returns a 'winner' or 'candidate' if url or tree exhausts. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.index]
+  const urlPart = url[searchNode.depth]
 
   if (urlPart === undefined)  // means url is exhausted
     return searchNode.page ? 'winner' : 'candidate'

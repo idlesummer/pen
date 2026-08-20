@@ -29,7 +29,7 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
 
 function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
   const searchNode = matchPath.searchNode
-  const urlExhausted = searchNode.index === url.length
+  const urlExhausted = searchNode.depth === url.length
   const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
 
   if (!moduleRouteNode) {
@@ -39,7 +39,7 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   const params = getMatchParams(matchPath, mainParams)
   if (!urlExhausted) {
     const paramName = moduleRouteNode.segment.value
-    params[paramName] = url.slice(searchNode.index)
+    params[paramName] = url.slice(searchNode.depth)
   }
   return createModuleRenderLeaf('page', moduleRouteNode, params)
 }
