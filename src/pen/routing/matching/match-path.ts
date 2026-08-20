@@ -11,7 +11,7 @@ export type MatchPath = {
 
 function createChildMatchPaths(matchPath: MatchPath, url: string[]): MatchPath[] {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.depth]
+  const urlPart = url[searchNode.depth + 1]
   if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
@@ -19,15 +19,15 @@ function createChildMatchPaths(matchPath: MatchPath, url: string[]): MatchPath[]
   const staticChild = searchNode.statics?.get(urlPart)
   const dynamicChild = searchNode.dynamic
 
-  if (staticChild)  childMatchPaths.push({ searchNode: staticChild, parent: matchPath })
-  if (dynamicChild) childMatchPaths.push({ searchNode: dynamicChild, parent: matchPath, param: urlPart })
+  if (staticChild)                    childMatchPaths.push({ searchNode: staticChild, parent: matchPath })
+  if (dynamicChild && urlPart.length) childMatchPaths.push({ searchNode: dynamicChild, parent: matchPath, param: urlPart })
   return childMatchPaths
 }
 
 /* Returns a 'winner' or 'candidate' if url or tree exhausts. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.depth]
+  const urlPart = url[searchNode.depth + 1]
 
   if (urlPart === undefined)  // means url is exhausted
     return searchNode.page ? 'winner' : 'candidate'
@@ -35,7 +35,7 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
     return 'winner'
 
   const staticSearchNode = searchNode.statics?.get(urlPart!)
-  const dynamicSearchNode = searchNode.dynamic
+  const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
   if (!staticSearchNode && !dynamicSearchNode)  // no static/dynamic nodes means tree is exhausted
     return 'candidate'
 }

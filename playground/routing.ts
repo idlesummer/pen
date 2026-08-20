@@ -60,7 +60,7 @@ const filePaths = [
 ].map(toFilePath)
 
 const urls = [
-  '/',
+  '',
   '/about',
   '/blog',
   '/blog/hello-world',
