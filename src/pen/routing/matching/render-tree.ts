@@ -87,7 +87,7 @@ function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderN
     return slotRenderNodes
 }
 
-function createRenderNodeChainWithSlots(mainRenderLeaf: RenderNode, routeNode: RouteNode, url: string[], slotMatchPaths: Map<RouteNode, MatchPath>): RenderNode {
+function createMainRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: RouteNode, url: string[], slotMatchPaths: Map<RouteNode, MatchPath>): RenderNode {
   let renderNode = mainRenderLeaf
   for (let node: RouteNode | undefined = routeNode; node; node = node.parent) { // Walk each RouteNode from the RenderLeaf toward the root
     const slotMatchPath = slotMatchPaths.get(node)
@@ -108,6 +108,6 @@ export function createRenderTree(urlString: string, searchTree: SearchNode): [su
 
   const [mainRenderLeaf, mainRouteNode] = mainResult
   const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
-  const renderTree = createRenderNodeChainWithSlots(mainRenderLeaf, mainRouteNode, url, slotMatchPaths) // Create main render chain
+  const renderTree = createMainRenderNodeChain(mainRenderLeaf, mainRouteNode, url, slotMatchPaths) // Create main render chain
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
