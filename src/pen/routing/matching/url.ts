@@ -1,1 +1,3 @@
-// file for url sanitizing
+export function sanitizeUrl(urlString: string) {
+  return urlString
+}
