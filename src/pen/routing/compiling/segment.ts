@@ -25,7 +25,7 @@ export function createSegment(name: string): Segment {
   let match: RegExpMatchArray | null
 
   // '' - the app root's synthetic label (no folder name of its own to parse)
-  if (name) // if name is empty string
+  if (!name) // if name is empty string
     return { type: 'group', value: '' }
 
   if ((match = name.match(CATCHALL_PATTERN)))
