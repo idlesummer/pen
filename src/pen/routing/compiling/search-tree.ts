@@ -39,7 +39,8 @@ function createSearchNode(anchor: RouteNode, depth: number, specificity: number)
 
 function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
   const validation = searchNode.validation!
-  const routeNodes = routeNode.segment.type === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
+  const segmentType = routeNode.segment.type
+  const routeNodes = segmentType === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
   routeNodes.push(routeNode)
 }
 
