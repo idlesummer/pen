@@ -33,7 +33,7 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
 
   if (!moduleRouteNode) {
-    const defaultRouteNode = findDefaultRouteNodeParent(searchNode.routeNode)
+    const defaultRouteNode = findDefaultRouteNodeParent(searchNode.anchor)
     return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchParams(matchPath, mainParams))
   }
   const params = getMatchParams(matchPath, mainParams)
@@ -48,7 +48,7 @@ function getSlotMatchPaths(matchPathTail: MatchPath): Map<RouteNode, MatchPath> 
   const slotMatchPaths = new Map<RouteNode, MatchPath>()
   for (let matchPath: MatchPath | undefined = matchPathTail; matchPath; matchPath = matchPath.parent) {
     if (matchPath.searchNode.slots)
-      slotMatchPaths.set(matchPath.searchNode.routeNode, matchPath)
+      slotMatchPaths.set(matchPath.searchNode.anchor, matchPath)
   }
   return slotMatchPaths
 }

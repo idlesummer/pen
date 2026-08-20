@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import { traverse } from '@/lib/traverse'
 
 export type SearchNode = {
-  routeNode: RouteNode                // real folder for this position - not-found climbs from here
+  anchor: RouteNode                   // means nearest ancestor/self whose segment is static/dynamic/slot
   depth: number                       // segments consumed to reach this position - 0 at root
   specificity: number                 // how static-preferring the path to this node is; higher is better
   // Accepting route nodes
@@ -20,8 +20,8 @@ export type SearchNode = {
   }
 }
 
-function createSearchNode(routeNode: RouteNode, depth: number, specificity: number): SearchNode {
-  return { routeNode, depth, specificity, validation: {} }  // Validation is guaranteed to exist here, it's only removed later at sanitization
+function createSearchNode(anchor: RouteNode, depth: number, specificity: number): SearchNode {
+  return { anchor, depth, specificity, validation: {} }  // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
 function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
@@ -84,7 +84,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 }
 
 export function getDynamicParamName(dynamicSearchNode: SearchNode): string {
-  return dynamicSearchNode.routeNode.segment.value
+  return dynamicSearchNode.anchor.segment.value
 }
 
 export function forEachSearchNode(searchTree: SearchNode, visit: (searchNode: SearchNode) => void) {
