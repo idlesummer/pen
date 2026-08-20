@@ -1,8 +1,8 @@
 import type { RouteNode } from './route-tree'
 import { traverse } from '@/lib/traverse'
 
-/* anchor: static/dynamic/slot folders each get their own SearchNode; group/
- * catchall/malformed folders are transparent and share their parent's.
+/* anchor: static/dynamic/slot folders each get their own SearchNode
+ * group/catchall/malformed folders are transparent and share their parent's
  *
  *   blog/                     <- anchor (static)
  *   └── (reviews)/            <- NOT anchor (group)
@@ -13,7 +13,8 @@ import { traverse } from '@/lib/traverse'
  *               └── page.tsx
  *
  * Both featured and archive anchor to themselves; (reviews) and (critics)
- * anchor to blog, the nearest real folder before the group chain began. */
+ * anchor to blog, the nearest real folder before the group chain began
+ */
 export type SearchNode = {
   anchor: RouteNode                   // means nearest ancestor/self whose segment is static/dynamic/slot
   depth: number                       // segments consumed to reach this position - 0 at root
