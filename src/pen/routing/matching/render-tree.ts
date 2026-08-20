@@ -31,12 +31,12 @@ function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: Match
   const searchNode = matchPath.searchNode
   const urlExhausted = searchNode.index === url.length
   const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
-  const params = getMatchPathParams(matchPath, mainParams)
 
   if (!moduleRouteNode) {
     const defaultRouteNode = findDefaultRouteNodeParent(searchNode.routeNode)
-    return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, params)
+    return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchPathParams(matchPath, mainParams))
   }
+  const params = getMatchPathParams(matchPath, mainParams)
   if (!urlExhausted) {
     const paramName = moduleRouteNode.segment.value
     params[paramName] = url.slice(searchNode.index)
