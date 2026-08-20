@@ -70,9 +70,9 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
 /** Assembles the full params accumulated along a walked path, seeded with
  *  whatever the search itself started with (non-empty for a slot's own
  *  search, seeded from its owner's position in the main search). */
-export function getMatchPathParams(matchPathStep: MatchPath, inheritedParams: MatchPathParams): MatchPathParams {
+export function getMatchPathParams(matchPath: MatchPath, inheritedParams: MatchPathParams): MatchPathParams {
   const params: MatchPathParams = { ...inheritedParams }
-  for (let step: MatchPath | undefined = matchPathStep; step; step = step.parent) {
+  for (let step: MatchPath | undefined = matchPath; step; step = step.parent) {
     if (step.param !== undefined)
       params[getDynamicParam(step.searchNode)] = step.param
   }
