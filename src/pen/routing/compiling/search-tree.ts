@@ -38,10 +38,10 @@ function createSearchNode(anchor: RouteNode, depth: number, staticness: number):
 }
 
 function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
-  if (routeNode.segment.type === 'catchall')
-    (searchNode.validation!.catchalls ??= []).push(routeNode)
-  else
-    (searchNode.validation!.pages ??= []).push(routeNode)
+  const validation = searchNode.validation!
+  const segmentType = routeNode.segment.type
+  const routeNodes = segmentType === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
+  routeNodes.push(routeNode)
 }
 
 function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
@@ -54,8 +54,8 @@ function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: Ro
 function getOrCreateDynamicChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
   const dynamicSearchNode = parentSearchNode.dynamic ??= createSearchNode(childRouteNode, parentSearchNode.depth+1, parentSearchNode.staticness-1)
   const dynamicChildName = childRouteNode.segment.value
-  parentSearchNode.validation!.dynamics ??= new Map()                                 // for validation
-  parentSearchNode.validation!.dynamics.getOrInsert(dynamicChildName, childRouteNode) // for validation
+  const validation = parentSearchNode.validation!;
+  (validation.dynamics ??= new Map()).getOrInsert(dynamicChildName, childRouteNode) // for validation
   return dynamicSearchNode
 }
 
