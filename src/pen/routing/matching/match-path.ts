@@ -43,7 +43,7 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
   if (searchNode.catchall)
     return 'winner'
 
-  const staticSearchNode = searchNode.statics?.get(urlPart!)
+  const staticSearchNode = searchNode.statics?.get(urlPart)
   const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
   if (!staticSearchNode && !dynamicSearchNode)  // no static/dynamic nodes means tree is exhausted
     return 'candidate'
