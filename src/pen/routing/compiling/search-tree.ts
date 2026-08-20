@@ -54,9 +54,8 @@ function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: Ro
 function getOrCreateDynamicChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
   const dynamicSearchNode = parentSearchNode.dynamic ??= createSearchNode(childRouteNode, parentSearchNode.depth+1, parentSearchNode.specificity-1)
   const dynamicChildName = childRouteNode.segment.value
-  const validation = parentSearchNode.validation!
-  validation.dynamics ??= new Map()                                 // for validation
-  validation.dynamics.getOrInsert(dynamicChildName, childRouteNode) // for validation
+  const validation = parentSearchNode.validation!;
+  (validation.dynamics ??= new Map()).getOrInsert(dynamicChildName, childRouteNode) // for validation
   return dynamicSearchNode
 }
 
