@@ -50,7 +50,7 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
 }
 
 function isBetterDefaultPath(candidate: MatchPath, bestDefaultPath?: MatchPath): boolean {
-  return !bestDefaultPath || candidate.searchNode.specificity > bestDefaultPath.searchNode.specificity
+  return !bestDefaultPath || candidate.searchNode.staticness > bestDefaultPath.searchNode.staticness
 }
 
 /** Finds the winning MatchPath for one tree: a real match if traversal
