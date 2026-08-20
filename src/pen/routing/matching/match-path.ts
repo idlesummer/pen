@@ -36,7 +36,7 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
 /* Returns a 'winner' or 'candidate' if url or tree exhausts. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.depth + 1]
+  const urlPart = url[searchNode.depth+1]
 
   if (urlPart === undefined)  // means url is exhausted
     return searchNode.page ? 'winner' : 'candidate'
