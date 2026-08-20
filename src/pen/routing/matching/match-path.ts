@@ -9,18 +9,27 @@ export type MatchPath = {
   parent?: MatchPath  // the step before this one; undefined at the root
 }
 
-function createChildMatchPaths(matchPath: MatchPath, url: string[]): MatchPath[] {
-  const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.depth + 1]
+function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): MatchPath[] {
+  const parentSearchNode = parentMatchPath.searchNode
+  const urlPart = url[parentSearchNode.depth+1]
   if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
   const childMatchPaths: MatchPath[] = []
-  const staticChild = searchNode.statics?.get(urlPart)
-  const dynamicChild = searchNode.dynamic
+  const staticChild = parentSearchNode.statics?.get(urlPart)
+  const dynamicChild = parentSearchNode.dynamic
 
-  if (staticChild)                    childMatchPaths.push({ searchNode: staticChild, parent: matchPath })
-  if (dynamicChild && urlPart.length) childMatchPaths.push({ searchNode: dynamicChild, parent: matchPath, paramValue: urlPart })
+  if (staticChild) {
+    const searchNode = staticChild
+    const parent = parentMatchPath
+    childMatchPaths.push({ searchNode, parent })
+  }
+  if (dynamicChild && urlPart) {
+    const searchNode = dynamicChild
+    const parent = parentMatchPath
+    const paramValue = urlPart
+    childMatchPaths.push({ searchNode, parent, paramValue })
+  }
   return childMatchPaths
 }
 
