@@ -1,11 +1,11 @@
 import type { SearchNode } from '../compiling/search-tree'
 import { traverse } from '@/lib/traverse'
-import { getDynamicParam } from '../compiling/search-tree'
+import { getDynamicParamName } from '../compiling/search-tree'
 
 export type MatchParams = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {
   searchNode: SearchNode
-  param?: string      // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParam
+  paramValue?: string // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
   parent?: MatchPath  // the step before this one; undefined at the root
 }
 
@@ -27,8 +27,8 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
   if (dynamicChild && urlPart) {
     const searchNode = dynamicChild
     const parent = parentMatchPath
-    const param = urlPart
-    childMatchPaths.push({ searchNode, parent, param })
+    const paramValue = urlPart
+    childMatchPaths.push({ searchNode, parent, paramValue })
   }
   return childMatchPaths
 }
@@ -82,8 +82,8 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
 export function getMatchParams(matchPath: MatchPath, inheritedParams: MatchParams): MatchParams {
   const params: MatchParams = { ...inheritedParams }
   for (let step: MatchPath | undefined = matchPath; step; step = step.parent) {
-    if (step.param !== undefined)
-      params[getDynamicParam(step.searchNode)] = step.param
+    if (step.paramValue !== undefined)
+      params[getDynamicParamName(step.searchNode)] = step.paramValue
   }
   return params
 }
