@@ -36,14 +36,14 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
 /* Returns a 'winner' or 'candidate' if url or tree exhausts. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.depth + 1]
+  const urlPart = url[searchNode.depth+1]
 
   if (urlPart === undefined)  // means url is exhausted
     return searchNode.page ? 'winner' : 'candidate'
   if (searchNode.catchall)
     return 'winner'
 
-  const staticSearchNode = searchNode.statics?.get(urlPart!)
+  const staticSearchNode = searchNode.statics?.get(urlPart)
   const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
   if (!staticSearchNode && !dynamicSearchNode)  // no static/dynamic nodes means tree is exhausted
     return 'candidate'
