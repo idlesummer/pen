@@ -38,10 +38,9 @@ function createSearchNode(anchor: RouteNode, depth: number, specificity: number)
 }
 
 function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
-  if (routeNode.segment.type === 'catchall')
-    (searchNode.validation!.catchalls ??= []).push(routeNode)
-  else
-    (searchNode.validation!.pages ??= []).push(routeNode)
+  const validation = searchNode.validation!
+  const routeNodes = routeNode.segment.type === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
+  routeNodes.push(routeNode)
 }
 
 function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
