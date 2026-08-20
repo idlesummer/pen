@@ -1,14 +1,14 @@
 import type { RouteNode, RouteModuleType } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchPathParams, MatchPath } from './match-path'
+import type { MatchParams, MatchPath } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchPath, getMatchPathParams } from './match-path'
+import { createMatchPath, getMatchParams } from './match-path'
 
 type RenderLeaf = {
   moduleType: RouteModuleType // page or default
   modulePath: string
   routePath: string
-  params: MatchPathParams
+  params: MatchParams
 }
 
 type SlotRenderNodes = Record<string, RenderNode>  // contains SlotRenderNode
