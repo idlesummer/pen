@@ -65,7 +65,7 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): Re
 function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderNodes | undefined {
   const searchNode = matchPath.searchNode
   const mainParamTable = getParamTable(matchPath)
-  const slotRenderNodes: SlotRenderNodes = {}  // equivalent to {} but without prototype inheritance
+  const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modity prototype chain
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
     const slotMatchPath = createMatchPath(slotSearchTree, url)
