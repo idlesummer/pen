@@ -64,9 +64,7 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
   let bestDefaultPath: MatchNode | undefined  // most static-preferring failed branch seen so far
 
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
-    expand: (matchNode) =>
-      createMatchNodeChildren(matchNode, url),
-
+    expand: (matchNode) => createMatchNodeChildren(matchNode, url),
     leave: (matchNode) => { // Once subtrees are visited,
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
