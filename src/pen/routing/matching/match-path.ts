@@ -72,7 +72,6 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
 
       if (matchStatus === 'failed' && isBetterDefaultNode(matchNode, bestDefaultPath))
         bestDefaultPath = matchNode
-
       else if (matchStatus === 'winner') {
         matchNode.acceptingNode = acceptingNode
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
