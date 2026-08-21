@@ -31,9 +31,10 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
-    return defaultNode && createModuleRenderLeaf('default', defaultNode, { ...mainParamTable, ...getParamTable(matchPath) })
+    const paramTable = Object.assign({ ...mainParamTable }, getParamTable(matchPath))
+    return defaultNode && createModuleRenderLeaf('default', defaultNode, paramTable)
   }
-  const paramTable = { ...mainParamTable, ...getParamTable(matchPath) }
+  const paramTable = Object.assign({ ...mainParamTable }, getParamTable(matchPath))
   if (matchPath.catchallParamValues) {
     const catchallName = moduleNode.segment.value
     paramTable[catchallName] = matchPath.catchallParamValues
