@@ -92,9 +92,9 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
  *  search, seeded from its owner's position in the main search). */
 export function getMatchParams(matchPath: MatchPath, inheritedParams: ParamTable): ParamTable {
   const params: ParamTable = { ...inheritedParams }
-  for (let step: MatchPath | undefined = matchPath; step; step = step.parent) {
-    if (step.paramValue !== undefined)
-      params[getDynamicParamName(step.searchNode)] = step.paramValue
+  for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
+    if (path.paramValue !== undefined)
+      params[getDynamicParamName(path.searchNode)] = path.paramValue
   }
   return params
 }
