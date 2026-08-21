@@ -3,7 +3,7 @@ import { traverse } from '@/lib/traverse'
 
 export type SearchNode = {
   anchor: RouteNode                   // means nearest ancestor/self whose segment is static/dynamic/slot
-  urlDepth: number                      // segments consumed to reach this position - 0 at root
+  urlDepth: number                    // segments consumed to reach this position - 0 at root
   staticness: number                  // how static-preferring the path to this node is; higher is better
   // Accepting route nodes
   page?: RouteNode                    // checked by classifyMatchNode to decide if this position is a match
