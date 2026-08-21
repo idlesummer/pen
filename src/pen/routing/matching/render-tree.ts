@@ -61,7 +61,7 @@ function createSlotRenderNodes(matchNode: MatchNode, url: string[]): SlotRenderN
   const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modity prototype chain
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
-    const slotMatchNode = createMatchNode(slotSearchTree, url)
+    const slotMatchNode = createMatchPath(slotSearchTree, url)
     const result = createRenderLeaf(slotMatchNode, mainParamTable)
     if (result) slotRenderNodes[slotName] = createRenderNodeChain(...result)
   }
@@ -84,7 +84,7 @@ function createMainRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: RouteN
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const url = urlString.split('/')                       // Convert url string to a list of segments; url[0] is always '' (root's own position)
-  const mainMatchNode = createMatchNode(searchTree, url) // Find search node path with params that match the url
+  const mainMatchNode = createMatchPath(searchTree, url) // Find search node path with params that match the url
   const mainResult = createRenderLeaf(mainMatchNode, {}) // Create the initial render node leaf
   if (!mainResult) return [false]                        // Return nothing if not even a fallback exists
 
