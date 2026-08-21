@@ -6,8 +6,8 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {
   searchNode: SearchNode
-  paramValue?: string         // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
   moduleNode?: RouteNode      // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
+  paramValue?: string         // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
   catchallParams?: string[]   // the captured tail segments, only set when moduleNode came from a catchall
   parent?: MatchPath          // the step before this one; undefined at the root
 }
@@ -53,7 +53,6 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
     matchPath.catchallParams = url.slice(searchNode.depth+1)
     return 'winner'
   }
-
   const staticSearchNode = searchNode.statics?.get(urlPart)
   const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
   if (!staticSearchNode && !dynamicSearchNode)  // no static/dynamic nodes means tree is exhausted
