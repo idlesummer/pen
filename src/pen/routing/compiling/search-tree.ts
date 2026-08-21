@@ -11,7 +11,7 @@ export type SearchNode = {
   // Route types
   slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
   statics?: Map<string, SearchNode>   // consuming folder's static children
-  dynamic?: SearchNode                // consuming folder's dynamic child - param name is getDynamicParamName(dynamic)
+  dynamic?: SearchNode                // consuming folder's dynamic child - param name is dynamic.anchor.segment.value
   // Validation metadata
   validation?: {                      // candidates validation checks against (later removed in sanitizeSearchTree)
     pages?: RouteNode[]               // every page claimed here, for duplicate-route
