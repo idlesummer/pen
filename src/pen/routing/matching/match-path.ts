@@ -6,9 +6,9 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {
   searchNode: SearchNode
-  moduleNode?: RouteNode      // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
-  paramValue?: string         // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
-  catchallParams?: string[]   // the captured tail segments, only set when moduleNode came from a catchall
+  moduleNode?: RouteNode           // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
+  dynamicParamValue?: string       // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
+  catchallParamValues?: string[]   // the captured tail segments, only set when moduleNode came from a catchall
   parent?: MatchPath          // the step before this one; undefined at the root
 }
 
@@ -30,15 +30,15 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
   if (dynamicChild && urlPart) {
     const searchNode = dynamicChild
     const parent = parentMatchPath
-    const paramValue = urlPart
-    childMatchPaths.push({ searchNode, parent, paramValue })
+    const dynamicParamValue = urlPart
+    childMatchPaths.push({ searchNode, parent, dynamicParamValue })
   }
   return childMatchPaths
 }
 
 /** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
- *  winning matchPath's moduleNode (and catchallParams, for catchalls) here,
- *  once, so callers never re-derive them from url/depth again. */
+ *  winning matchPath's moduleNode (and catchallParamValues, for catchalls)
+ *  here, once, so callers never re-derive them from url/depth again. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
   const urlPart = url[searchNode.depth+1]
@@ -50,7 +50,7 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
   }
   if (searchNode.catchall) {
     matchPath.moduleNode = searchNode.catchall
-    matchPath.catchallParams = url.slice(searchNode.depth+1)
+    matchPath.catchallParamValues = url.slice(searchNode.depth+1)
     return 'winner'
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)
@@ -92,8 +92,8 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
 export function getParamTable(matchPath: MatchPath, inheritedParams: ParamTable): ParamTable {
   const paramTable: ParamTable = { ...inheritedParams }
   for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
-    if (path.paramValue !== undefined)
-      paramTable[getDynamicParamName(path.searchNode)] = path.paramValue
+    if (path.dynamicParamValue !== undefined)
+      paramTable[getDynamicParamName(path.searchNode)] = path.dynamicParamValue
   }
   return paramTable
 }

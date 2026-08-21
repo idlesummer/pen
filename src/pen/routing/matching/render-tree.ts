@@ -8,7 +8,7 @@ type RenderLeaf = {
   moduleType: RouteModuleType // page or default
   modulePath: string
   routePath: string
-  params: ParamTable
+  paramTable: ParamTable
 }
 
 type SlotRenderNodes = Record<string, RenderNode>  // contains SlotRenderNode
@@ -20,10 +20,10 @@ export type RenderNode = RenderLeaf | {
   slots: SlotRenderNodes
 }
 
-function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params: ParamTable): [RenderLeaf, RouteNode] {
+function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, paramTable: ParamTable): [RenderLeaf, RouteNode] {
   const modulePath = routeNode.modulePaths.get(moduleType)!
   const routePath = getRoutePath(routeNode)
-  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
+  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, paramTable }
   return [renderLeaf, routeNode]
 }
 
@@ -33,12 +33,12 @@ function createRenderLeaf(matchPath: MatchPath, mainParams: ParamTable): [Render
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
     return defaultNode && createModuleRenderLeaf('default', defaultNode, getParamTable(matchPath, mainParams))
   }
-  const params = getParamTable(matchPath, mainParams)
-  if (matchPath.catchallParams) {
+  const paramTable = getParamTable(matchPath, mainParams)
+  if (matchPath.catchallParamValues) {
     const paramName = moduleNode.segment.value
-    params[paramName] = matchPath.catchallParams
+    paramTable[paramName] = matchPath.catchallParamValues
   }
-  return createModuleRenderLeaf('page', moduleNode, params)
+  return createModuleRenderLeaf('page', moduleNode, paramTable)
 }
 
 function getSlotMatchPaths(matchPathTail: MatchPath): Map<RouteNode, MatchPath> {
