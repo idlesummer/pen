@@ -36,22 +36,17 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   return matchNodeChildren
 }
 
-function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): 'winner' | 'candidate' | undefined {
+function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['candidate'] | undefined {
   const searchNode = matchNode.searchNode
-  if (nextUrlPart === undefined) {
-    if (!searchNode.page) return 'candidate'  // if url is exhausted (and no page)
-    matchNode.acceptingNode = searchNode.page // if url exhausted + has a page
-    return 'winner'
-  }
-  if (searchNode.catchall) {  // Can this SearchNode accept what's left?
-    matchNode.acceptingNode = searchNode.catchall
-    return 'winner'     // if catchall (only once segments remain - it needs one or more)
-  }
+  if (nextUrlPart === undefined)  // if url exhausted + has a page
+    return searchNode.page ? ['winner', searchNode.page] : ['candidate']
+
+  if (searchNode.catchall)
+    return ['winner', searchNode.catchall]
+
   const staticSearchNode = searchNode.statics?.get(nextUrlPart) // check for static children
   if (!staticSearchNode && !searchNode.dynamic)
-    return 'candidate'  // if tree is exhausted (no static/dynamic nodes)
-
-  // return undefined if url is not exhausted and tree still has more children
+    return ['candidate']  // if tree is exhausted (no static/dynamic nodes)
 }
 
 function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode): boolean {
@@ -74,11 +69,14 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
       const searchNode = matchNode.searchNode
       const nextUrlDepth = searchNode.urlDepth+1
       const nextUrlPart = url[nextUrlDepth] // if urlPart is undefined it means it's exhausted
-      const matchClass = classifyMatchNode(matchNode, nextUrlPart)
+      const [matchClass, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
 
       if (matchClass === 'winner') {
-        if (matchNode.acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
+        matchNode.acceptingNode = acceptingNode
+
+        if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
           matchNode.catchallCapture = url.slice(nextUrlDepth) // capture the remaining params
+
         bestMatchPath = matchNode
         return true
       }
