@@ -90,10 +90,10 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
  *  whatever the search itself started with (non-empty for a slot's own
  *  search, seeded from its owner's position in the main search). */
 export function getMatchParams(matchPath: MatchPath, inheritedParams: ParamTable): ParamTable {
-  const params: ParamTable = { ...inheritedParams }
+  const paramTable: ParamTable = { ...inheritedParams }
   for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
     if (path.paramValue !== undefined)
-      params[getDynamicParamName(path.searchNode)] = path.paramValue
+      paramTable[getDynamicParamName(path.searchNode)] = path.paramValue
   }
-  return params
+  return paramTable
 }
