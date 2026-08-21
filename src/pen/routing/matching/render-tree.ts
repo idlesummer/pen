@@ -30,8 +30,8 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
 function createRenderLeaf(matchPath: MatchPath, mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
-    const defaultRouteNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
-    return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchParams(matchPath, mainParams))
+    const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
+    return defaultNode && createModuleRenderLeaf('default', defaultNode, getMatchParams(matchPath, mainParams))
   }
   const params = getMatchParams(matchPath, mainParams)
   if (matchPath.catchallParams) {
