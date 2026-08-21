@@ -44,9 +44,9 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
   const urlPart = url[searchNode.urlPos+1]
 
   if (urlPart === undefined) {  // means url is exhausted
-    if (!searchNode.page) return 'candidate'
-    matchNode.acceptingNode = searchNode.page
-    return 'winner'
+    return searchNode.page
+      ? (matchNode.acceptingNode = searchNode.page, 'winner')
+      : 'candidate'
   }
   if (searchNode.catchall) {
     matchNode.acceptingNode = searchNode.catchall
