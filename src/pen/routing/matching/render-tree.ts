@@ -2,7 +2,7 @@ import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { ParamTable, MatchNode } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchNode, getParamTable, getSlotMatchNodes } from './match-path'
+import { createMatchPath, getParamTable, getSlotMatchNodes } from './match-path'
 
 type RenderLeaf = {
   routePath: string

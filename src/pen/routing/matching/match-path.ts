@@ -62,10 +62,10 @@ function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode):
 /** Finds the winning MatchNode for one tree: a real match if traversal
  *  found one, or - failing that - whichever failed branch was most
  *  static-preferring. Callers interpret what it resolved to themselves. */
-export function createMatchNode(searchTree: SearchNode, url: string[]): MatchNode {
+export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchTree: MatchNode = { searchNode: searchTree }
-  let bestMatchNode: MatchNode | undefined
-  let bestDefaultNode: MatchNode | undefined  // most static-preferring failed branch seen so far
+  let bestMatchPath: MatchNode | undefined
+  let bestDefaultPath: MatchNode | undefined  // most static-preferring failed branch seen so far
 
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
     expand: (matchNode) =>
@@ -74,12 +74,12 @@ export function createMatchNode(searchTree: SearchNode, url: string[]): MatchNod
     leave: (matchNode) => { // Once subtrees are visited,
       const matchClass = classifyMatchNode(matchNode, url)
       if (matchClass === 'winner')
-        return (bestMatchNode = matchNode, true)
-      if (matchClass === 'candidate' && isBetterDefaultNode(matchNode, bestDefaultNode))
-        bestDefaultNode = matchNode
+        return (bestMatchPath = matchNode, true)
+      if (matchClass === 'candidate' && isBetterDefaultNode(matchNode, bestDefaultPath))
+        bestDefaultPath = matchNode
     },
   })
-  return bestMatchNode ?? bestDefaultNode!  // guaranteed since url or tree eventually exhausts (safe to assert)
+  return bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
 }
 
 /** Assembles the params accumulated by walking matchNode's own chain -
