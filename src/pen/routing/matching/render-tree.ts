@@ -5,9 +5,9 @@ import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent }
 import { createMatchPath, getParamTable, getSlotMatchPaths } from './match-path'
 
 type RenderLeaf = {
+  routePath: string
   moduleType: RouteModuleType // page or default
   modulePath: string
-  routePath: string
   paramTable: ParamTable
 }
 
