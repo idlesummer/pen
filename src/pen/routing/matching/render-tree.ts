@@ -42,6 +42,23 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
   return createModuleRenderLeaf('page', acceptingNode, paramTable)
 }
 
+// function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
+//   const acceptingNode = matchPath.acceptingNode
+//   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchPath.searchNode.anchor)
+//   if (!routeNode) return
+
+//   const paramTable = { ...mainParamTable, ...getParamTable(matchPath) }
+//   if (matchPath.catchallParamValues) {
+//     const catchallName = acceptingNode!.segment.value
+//     paramTable[catchallName] = matchPath.catchallParamValues
+//   }
+//   const moduleType = acceptingNode ? 'page' : 'default'
+//   const modulePath = routeNode.modulePaths.get(moduleType)!
+//   const routePath = getRoutePath(routeNode)
+//   const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, paramTable }
+//   return [renderLeaf, routeNode]
+// }
+
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
   const layout = routeNode.modulePaths.get('layout')
   const loading = routeNode.modulePaths.get('loading')
