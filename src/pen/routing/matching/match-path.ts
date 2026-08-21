@@ -58,8 +58,7 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
     return 'winner'     // if catchall (only once segments remain - it needs one or more)
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)
-  const dynamicSearchNode = searchNode.dynamic
-  if (!staticSearchNode && !dynamicSearchNode)
+  if (!staticSearchNode && !searchNode.dynamic)
     return 'candidate'  // if tree is exhausted (no static/dynamic nodes)
 }
 
