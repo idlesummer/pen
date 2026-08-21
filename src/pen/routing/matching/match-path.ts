@@ -47,7 +47,7 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
     return ['winner', searchNode.catchall]
 
   const staticSearchNode = searchNode.statics?.get(nextUrlPart)
-  if (!staticSearchNode && !searchNode.dynamic) // check if this search node has children
+  if (!staticSearchNode && !searchNode.dynamic) // no child can consume nextUrlPart
     return ['failed']  // means tree is exhausted (no static/dynamic childen)
 }
 
