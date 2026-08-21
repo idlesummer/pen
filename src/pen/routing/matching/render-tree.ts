@@ -2,7 +2,7 @@ import type { RouteNode, RouteModuleType } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { ParamTable, MatchPath } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchPath, getMatchParams } from './match-path'
+import { createMatchPath, getParamTable } from './match-path'
 
 type RenderLeaf = {
   moduleType: RouteModuleType // page or default
@@ -31,9 +31,9 @@ function createRenderLeaf(matchPath: MatchPath, mainParams: ParamTable): [Render
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
-    return defaultNode && createModuleRenderLeaf('default', defaultNode, getMatchParams(matchPath, mainParams))
+    return defaultNode && createModuleRenderLeaf('default', defaultNode, getParamTable(matchPath, mainParams))
   }
-  const params = getMatchParams(matchPath, mainParams)
+  const params = getParamTable(matchPath, mainParams)
   if (matchPath.catchallParams) {
     const paramName = moduleNode.segment.value
     params[paramName] = matchPath.catchallParams
@@ -72,7 +72,7 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): Re
 
 function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderNodes | undefined {
   const searchNode = matchPath.searchNode
-  const mainParams = getMatchParams(matchPath, {})
+  const mainParams = getParamTable(matchPath, {})
   const slotRenderNodes: SlotRenderNodes = Object.create(null)  // equivalent to {} but without prototype inheritance
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
