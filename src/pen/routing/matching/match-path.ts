@@ -47,16 +47,17 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
     matchNode.acceptingNode = searchNode.page
     return 'winner'     // if url exhausted + has a page
   }
-  if (urlPart === undefined && searchNode.catchall) {
+  if (urlPart === undefined) {
+    return 'candidate'  // if url is exhausted (and no page)
+  }
+  if (searchNode.catchall) {
     matchNode.acceptingNode = searchNode.catchall
     matchNode.catchallParamValues = url.slice(searchNode.urlPos+1)
-    return 'winner'     // if catchall
-  }
-  if (urlPart === undefined) {
-    return 'candidate'  // if url is exhausted
+    return 'winner'     // if catchall (only once segments remain - it needs one or more)
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)
-  if (!staticSearchNode && !searchNode.dynamic)
+  const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
+  if (!staticSearchNode && !dynamicSearchNode)
     return 'candidate'  // if tree is exhausted (no static/dynamic nodes)
 }
 
