@@ -96,3 +96,13 @@ export function getParamTable(matchPath: MatchPath): ParamTable {
   }
   return paramTable
 }
+
+/** Creates a reverse look up for slot-bearing RouteNodes to its corresponding MatchPath. */
+export function getSlotMatchPaths(matchPath: MatchPath): Map<RouteNode, MatchPath> {
+  const slotMatchPaths = new Map<RouteNode, MatchPath>()
+  for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
+    if (path.searchNode.slots)
+      slotMatchPaths.set(path.searchNode.anchor, path)
+  }
+  return slotMatchPaths
+}

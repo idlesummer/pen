@@ -2,7 +2,7 @@ import type { RouteNode, RouteModuleType } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { ParamTable, MatchPath } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchPath, getParamTable } from './match-path'
+import { createMatchPath, getParamTable, getSlotMatchPaths } from './match-path'
 
 type RenderLeaf = {
   moduleType: RouteModuleType // page or default
@@ -40,15 +40,6 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
     paramTable[catchallName] = matchPath.catchallParamValues
   }
   return createModuleRenderLeaf('page', moduleNode, paramTable)
-}
-
-function getSlotMatchPaths(matchPath: MatchPath): Map<RouteNode, MatchPath> {
-  const slotMatchPaths = new Map<RouteNode, MatchPath>()
-  for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
-    if (path.searchNode.slots)
-      slotMatchPaths.set(path.searchNode.anchor, path)
-  }
-  return slotMatchPaths
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
