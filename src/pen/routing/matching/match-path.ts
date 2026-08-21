@@ -30,7 +30,7 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   if (dynamicChild) {
     const searchNode = dynamicChild
     const parent = parentMatchNode
-    const dynamicCapture = urlPart
+    const dynamicCapture = urlPart // Record how did I get to this search node
     matchNodeChildren.push({ searchNode, parent, dynamicCapture })
   }
   return matchNodeChildren
@@ -45,7 +45,7 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
     matchNode.acceptingNode = searchNode.page // if url exhausted + has a page
     return 'winner'
   }
-  if (searchNode.catchall) {
+  if (searchNode.catchall) {  // Can this SearchNode accept what's left?
     matchNode.acceptingNode = searchNode.catchall
     matchNode.catchallCapture = url.slice(searchNode.urlDepth+1)
     return 'winner'     // if catchall (only once segments remain - it needs one or more)
