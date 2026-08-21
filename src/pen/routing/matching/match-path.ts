@@ -7,9 +7,9 @@ export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
   acceptingNode?: RouteNode   // the page/catchall this step resolved to, set by classifyMatchNode once it settles a winner
-  dynamicCapture?: string     // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
+  dynamicCapture?: string     // captured url value for dynamic node
   catchallCapture?: string[]  // the captured tail segments, only set when acceptingNode came from a catchall
-  parent?: MatchNode          // the step before this one; undefined at the root
+  parent?: MatchNode
 }
 
 function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): MatchNode[] {
