@@ -1,3 +1,4 @@
+import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import { traverse } from '@/lib/traverse'
 import { getDynamicParamName } from '../compiling/search-tree'
@@ -5,8 +6,10 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type MatchParams = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {
   searchNode: SearchNode
-  paramValue?: string // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
-  parent?: MatchPath  // the step before this one; undefined at the root
+  paramValue?: string         // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
+  moduleRouteNode?: RouteNode // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
+  catchallCapture?: string[]  // the captured tail segments, only set when moduleRouteNode came from a catchall
+  parent?: MatchPath          // the step before this one; undefined at the root
 }
 
 function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): MatchPath[] {
@@ -33,15 +36,23 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
   return childMatchPaths
 }
 
-/* Returns a 'winner' or 'candidate' if url or tree exhausts. */
+/* Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
+ * winning matchPath's moduleRouteNode (and catchallCapture, for catchalls)
+ * here, once, so callers never re-derive them from url/depth again. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
   const urlPart = url[searchNode.depth+1]
 
-  if (urlPart === undefined)  // means url is exhausted
-    return searchNode.page ? 'winner' : 'candidate'
-  if (searchNode.catchall)
+  if (urlPart === undefined) {  // means url is exhausted
+    if (!searchNode.page) return 'candidate'
+    matchPath.moduleRouteNode = searchNode.page
     return 'winner'
+  }
+  if (searchNode.catchall) {
+    matchPath.moduleRouteNode = searchNode.catchall
+    matchPath.catchallCapture = url.slice(searchNode.depth+1)
+    return 'winner'
+  }
 
   const staticSearchNode = searchNode.statics?.get(urlPart)
   const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures

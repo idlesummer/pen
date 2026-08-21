@@ -27,19 +27,16 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
   return [renderLeaf, routeNode]
 }
 
-function createRenderLeaf(matchPath: MatchPath, url: string[], mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
-  const searchNode = matchPath.searchNode
-  const urlExhausted = searchNode.depth === url.length-1
-  const moduleRouteNode = urlExhausted ? searchNode.page : searchNode.catchall
-
+function createRenderLeaf(matchPath: MatchPath, mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
+  const moduleRouteNode = matchPath.moduleRouteNode
   if (!moduleRouteNode) {
-    const defaultRouteNode = findDefaultRouteNodeParent(searchNode.anchor)
+    const defaultRouteNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
     return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchParams(matchPath, mainParams))
   }
   const params = getMatchParams(matchPath, mainParams)
-  if (!urlExhausted) {
+  if (matchPath.catchallCapture) {
     const paramName = moduleRouteNode.segment.value
-    params[paramName] = url.slice(searchNode.depth+1)
+    params[paramName] = matchPath.catchallCapture
   }
   return createModuleRenderLeaf('page', moduleRouteNode, params)
 }
@@ -80,7 +77,7 @@ function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderN
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
     const slotMatchPath = createMatchPath(slotSearchTree, url)
-    const result = createRenderLeaf(slotMatchPath, url, mainParams)
+    const result = createRenderLeaf(slotMatchPath, mainParams)
     if (result) slotRenderNodes[slotName] = createRenderNodeChain(...result)
   }
   for (const _ in slotRenderNodes)  // a bit more efficent than Object.keys(...).length
@@ -101,10 +98,10 @@ function createMainRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: RouteN
  *  the render tree. `success` is false for default fallbacks and when nothing
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
-  const url = urlString.split('/')                            // Convert url string to a list of segments; url[0] is always '' (root's own position)
-  const mainMatchPath = createMatchPath(searchTree, url)      // Find search node path with params that match the url
-  const mainResult = createRenderLeaf(mainMatchPath, url, {}) // Create the initial render node leaf
-  if (!mainResult) return [false]                             // Return nothing if not even a fallback exists
+  const url = urlString.split('/')                       // Convert url string to a list of segments; url[0] is always '' (root's own position)
+  const mainMatchPath = createMatchPath(searchTree, url) // Find search node path with params that match the url
+  const mainResult = createRenderLeaf(mainMatchPath, {}) // Create the initial render node leaf
+  if (!mainResult) return [false]                        // Return nothing if not even a fallback exists
 
   const [mainRenderLeaf, mainRouteNode] = mainResult
   const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
