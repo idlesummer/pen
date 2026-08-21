@@ -1,6 +1,6 @@
 import type { RouteNode, RouteModuleType } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchParams, MatchPath } from './match-path'
+import type { ParamTable, MatchPath } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { createMatchPath, getMatchParams } from './match-path'
 
@@ -8,7 +8,7 @@ type RenderLeaf = {
   moduleType: RouteModuleType // page or default
   modulePath: string
   routePath: string
-  params: MatchParams
+  params: ParamTable
 }
 
 type SlotRenderNodes = Record<string, RenderNode>  // contains SlotRenderNode
@@ -20,14 +20,14 @@ export type RenderNode = RenderLeaf | {
   slots: SlotRenderNodes
 }
 
-function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params: MatchParams): [RenderLeaf, RouteNode] {
+function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNode, params: ParamTable): [RenderLeaf, RouteNode] {
   const modulePath = routeNode.modulePaths.get(moduleType)!
   const routePath = getRoutePath(routeNode)
   const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
   return [renderLeaf, routeNode]
 }
 
-function createRenderLeaf(matchPath: MatchPath, mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchPath: MatchPath, mainParams: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
