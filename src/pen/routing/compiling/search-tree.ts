@@ -83,10 +83,6 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   return searchTree
 }
 
-export function getDynamicParamName(dynamicSearchNode: SearchNode): string {
-  return dynamicSearchNode.anchor.segment.value
-}
-
 export function forEachSearchNode(searchTree: SearchNode, visit: (searchNode: SearchNode) => void) {
   traverse(searchTree, {
     visit,

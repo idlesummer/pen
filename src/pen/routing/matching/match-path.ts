@@ -1,7 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import { traverse } from '@/lib/traverse'
-import { getDynamicParamName } from '../compiling/search-tree'
 
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchNode = {
@@ -88,8 +87,10 @@ export function createMatchNode(searchTree: SearchNode, url: string[]): MatchNod
 export function getParamTable(matchNode: MatchNode): ParamTable {
   const paramTable: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (node.dynamicCapture !== undefined)
-      paramTable[getDynamicParamName(node.searchNode)] = node.dynamicCapture
+    if (node.dynamicCapture === undefined) continue
+    const dynamicNode = node.searchNode.anchor
+    const paramName = dynamicNode.segment.value
+    paramTable[paramName] = node.dynamicCapture
   }
   return paramTable
 }
