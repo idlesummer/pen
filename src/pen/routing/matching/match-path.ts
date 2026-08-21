@@ -19,22 +19,22 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
-  const childMatchNodes: MatchNode[] = []
+  const matchNodeChildren: MatchNode[] = []
   const staticChild = parentSearchNode.statics?.get(urlPart)
   const dynamicChild = parentSearchNode.dynamic
 
   if (staticChild) {
     const searchNode = staticChild
     const parent = parentMatchNode
-    childMatchNodes.push({ searchNode, parent })
+    matchNodeChildren.push({ searchNode, parent })
   }
   if (dynamicChild) {
     const searchNode = dynamicChild
     const parent = parentMatchNode
     const dynamicCapture = urlPart
-    childMatchNodes.push({ searchNode, parent, dynamicCapture })
+    matchNodeChildren.push({ searchNode, parent, dynamicCapture })
   }
-  return childMatchNodes
+  return matchNodeChildren
 }
 
 function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'candidate' | undefined {
