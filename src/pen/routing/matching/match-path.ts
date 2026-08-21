@@ -6,9 +6,9 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {
   searchNode: SearchNode
-  moduleNode?: RouteNode          // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
+  acceptingNode?: RouteNode       // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
   dynamicParamValue?: string      // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
-  catchallParamValues?: string[]  // the captured tail segments, only set when moduleNode came from a catchall
+  catchallParamValues?: string[]  // the captured tail segments, only set when acceptingNode came from a catchall
   parent?: MatchPath              // the step before this one; undefined at the root
 }
 
@@ -37,7 +37,7 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
 }
 
 /** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
- *  winning matchPath's moduleNode (and catchallParamValues, for catchalls)
+ *  winning matchPath's acceptingNode (and catchallParamValues, for catchalls)
  *  here, once, so callers never re-derive them from url/urlPos again. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
@@ -45,11 +45,11 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
 
   if (urlPart === undefined) {  // means url is exhausted
     if (!searchNode.page) return 'candidate'
-    matchPath.moduleNode = searchNode.page
+    matchPath.acceptingNode = searchNode.page
     return 'winner'
   }
   if (searchNode.catchall) {
-    matchPath.moduleNode = searchNode.catchall
+    matchPath.acceptingNode = searchNode.catchall
     matchPath.catchallParamValues = url.slice(searchNode.urlPos+1)
     return 'winner'
   }
