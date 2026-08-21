@@ -7,8 +7,8 @@ export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
   acceptingNode?: RouteNode   // page/catchall of the searchNode, set here so that later pipeline doesn't have to
-  dynamicCapture?: string     // captured url value for dynamic node (mutually exclusive to catchallCapture)
-  catchallCapture?: string[]  // captured url tail, only set when acceptingNode came from a catchall
+  dynamicCapture?: string     // captured url value for dynamic node
+  catchallCapture?: string[]  // captured url tail of this node's catchall child route
   parent?: MatchNode
 }
 
@@ -36,23 +36,22 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   return matchNodeChildren
 }
 
-function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'candidate' | undefined {
+function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): 'winner' | 'candidate' | undefined {
   const searchNode = matchNode.searchNode
-  const urlPart = url[searchNode.urlDepth+1]  // if urlPart is undefined it means it's exhausted
-
-  if (urlPart === undefined) {
+  if (nextUrlPart === undefined) {
     if (!searchNode.page) return 'candidate'  // if url is exhausted (and no page)
     matchNode.acceptingNode = searchNode.page // if url exhausted + has a page
     return 'winner'
   }
   if (searchNode.catchall) {  // Can this SearchNode accept what's left?
     matchNode.acceptingNode = searchNode.catchall
-    matchNode.catchallCapture = url.slice(searchNode.urlDepth+1)
     return 'winner'     // if catchall (only once segments remain - it needs one or more)
   }
-  const staticSearchNode = searchNode.statics?.get(urlPart)
+  const staticSearchNode = searchNode.statics?.get(nextUrlPart) // check for static children
   if (!staticSearchNode && !searchNode.dynamic)
     return 'candidate'  // if tree is exhausted (no static/dynamic nodes)
+
+  // return undefined if url is not exhausted and tree still has more children
 }
 
 function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode): boolean {
@@ -72,9 +71,17 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
       createMatchNodeChildren(matchNode, url),
 
     leave: (matchNode) => { // Once subtrees are visited,
-      const matchClass = classifyMatchNode(matchNode, url)
-      if (matchClass === 'winner')
-        return (bestMatchPath = matchNode, true)
+      const searchNode = matchNode.searchNode
+      const nextUrlDepth = searchNode.urlDepth+1
+      const nextUrlPart = url[nextUrlDepth] // if urlPart is undefined it means it's exhausted
+      const matchClass = classifyMatchNode(matchNode, nextUrlPart)
+
+      if (matchClass === 'winner') {
+        if (matchNode.acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
+          matchNode.catchallCapture = url.slice(nextUrlDepth) // capture the remaining params
+        bestMatchPath = matchNode
+        return true
+      }
       if (matchClass === 'candidate' && isBetterDefaultNode(matchNode, bestDefaultPath))
         bestDefaultPath = matchNode
     },
