@@ -41,22 +41,23 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
  *  here, once, so callers never re-derive them from url/urlPos again. */
 function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchNode.searchNode
-  const urlPart = url[searchNode.urlPos+1]
+  const urlPart = url[searchNode.urlPos+1]  // if urlPart is undefined it means it's exhausted
 
-  if (urlPart === undefined) {  // means url is exhausted
-    if (!searchNode.page) return 'candidate'
+  if (urlPart === undefined && searchNode.page) {
     matchNode.acceptingNode = searchNode.page
-    return 'winner'
+    return 'winner'     // if url exhausted + has a page
   }
-  if (searchNode.catchall) {
+  if (urlPart === undefined && searchNode.catchall) {
     matchNode.acceptingNode = searchNode.catchall
     matchNode.catchallParamValues = url.slice(searchNode.urlPos+1)
-    return 'winner'
+    return 'winner'     // if catchall
+  }
+  if (urlPart === undefined) {
+    return 'candidate'  // if url is exhausted
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)
-  const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
-  if (!staticSearchNode && !dynamicSearchNode)  // no static/dynamic nodes means tree is exhausted
-    return 'candidate'
+  if (!staticSearchNode && !searchNode.dynamic)
+    return 'candidate'  // if tree is exhausted (no static/dynamic nodes)
 }
 
 function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode): boolean {
