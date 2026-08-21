@@ -36,16 +36,16 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   return matchNodeChildren
 }
 
-function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['candidate'] | undefined {
+function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['fallback'] | undefined {
   const searchNode = matchNode.searchNode
   if (nextUrlPart === undefined)  // if url exhausted + has a page
-    return searchNode.page ? ['winner', searchNode.page] : ['candidate']
+    return searchNode.page ? ['winner', searchNode.page] : ['fallback']
   if (searchNode.catchall)
     return ['winner', searchNode.catchall]
 
   const staticSearchNode = searchNode.statics?.get(nextUrlPart) // check for static children
   if (!staticSearchNode && !searchNode.dynamic)
-    return ['candidate']  // if tree is exhausted (no static/dynamic nodes)
+    return ['fallback']  // if tree is exhausted (no static/dynamic nodes)
 
   // Return undefined if URL remains and this node can continue matching
 }
@@ -79,7 +79,7 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
         bestMatchPath = matchNode
         return true
       }
-      if (matchClass === 'candidate' && isBetterDefaultNode(matchNode, bestDefaultPath))
+      if (matchClass === 'fallback' && isBetterDefaultNode(matchNode, bestDefaultPath))
         bestDefaultPath = matchNode
     },
   })
