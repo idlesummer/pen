@@ -36,9 +36,9 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
   return childMatchPaths
 }
 
-/* Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
- * winning matchPath's moduleNode (and catchallParams, for catchalls) here,
- * once, so callers never re-derive them from url/depth again. */
+/** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
+ *  winning matchPath's moduleNode (and catchallParams, for catchalls) here,
+ *  once, so callers never re-derive them from url/depth again. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
   const urlPart = url[searchNode.depth+1]
