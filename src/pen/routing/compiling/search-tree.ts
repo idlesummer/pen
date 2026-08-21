@@ -6,7 +6,7 @@ export type SearchNode = {
   urlPos: number                      // segments consumed to reach this position - 0 at root
   staticness: number                  // how static-preferring the path to this node is; higher is better
   // Accepting route nodes
-  page?: RouteNode                    // checked by classifyMatchPath to decide if this position is a match
+  page?: RouteNode                    // checked by classifyMatchNode to decide if this position is a match
   catchall?: RouteNode                // consuming folder's catch-all page
   // Route types
   slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
