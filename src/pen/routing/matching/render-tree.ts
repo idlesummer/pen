@@ -63,7 +63,8 @@ function createSlotRenderNodes(matchNode: MatchNode, url: string[]): SlotRenderN
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
     const slotMatchNode = createMatchPath(slotSearchTree, url)
     const context = createRenderLeaf(slotMatchNode, mainParamTable)
-    if (context) slotRenderNodes[slotName] = createRenderNodeChain(...context)
+    if (context !== undefined)
+      slotRenderNodes[slotName] = createRenderNodeChain(...context)
   }
   for (const _ in slotRenderNodes)  // a bit more efficent than Object.keys(...).length
     return slotRenderNodes
