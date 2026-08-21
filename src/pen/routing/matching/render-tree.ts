@@ -27,13 +27,13 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
   return [renderLeaf, routeNode]
 }
 
-function createRenderLeaf(matchPath: MatchPath, mainParams: ParamTable): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
-    return defaultNode && createModuleRenderLeaf('default', defaultNode, getParamTable(matchPath, mainParams))
+    return defaultNode && createModuleRenderLeaf('default', defaultNode, getParamTable(matchPath, mainParamTable))
   }
-  const paramTable = getParamTable(matchPath, mainParams)
+  const paramTable = getParamTable(matchPath, mainParamTable)
   if (matchPath.catchallParamValues) {
     const paramName = moduleNode.segment.value
     paramTable[paramName] = matchPath.catchallParamValues
@@ -72,12 +72,12 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): Re
 
 function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderNodes | undefined {
   const searchNode = matchPath.searchNode
-  const mainParams = getParamTable(matchPath, {})
+  const mainParamTable = getParamTable(matchPath, {})
   const slotRenderNodes: SlotRenderNodes = Object.create(null)  // equivalent to {} but without prototype inheritance
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
     const slotMatchPath = createMatchPath(slotSearchTree, url)
-    const result = createRenderLeaf(slotMatchPath, mainParams)
+    const result = createRenderLeaf(slotMatchPath, mainParamTable)
     if (result) slotRenderNodes[slotName] = createRenderNodeChain(...result)
   }
   for (const _ in slotRenderNodes)  // a bit more efficent than Object.keys(...).length
