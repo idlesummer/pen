@@ -67,11 +67,11 @@ function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode):
  *  found one, or - failing that - whichever failed branch was most
  *  static-preferring. Callers interpret what it resolved to themselves. */
 export function createMatchNode(searchTree: SearchNode, url: string[]): MatchNode {
-  const matchNodeHead: MatchNode = { searchNode: searchTree }
+  const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatchNode: MatchNode | undefined
   let bestDefaultNode: MatchNode | undefined  // most static-preferring failed branch seen so far
 
-  traverse(matchNodeHead, {   // Performs a regular MatchNode traversal restricted to static and dynamic
+  traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
     expand: (matchNode) =>
       createChildMatchNodes(matchNode, url),
 
