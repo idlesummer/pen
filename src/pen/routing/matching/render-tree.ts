@@ -35,8 +35,8 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
   }
   const paramTable = { ...mainParamTable, ...getParamTable(matchPath) }
   if (matchPath.catchallParamValues) {
-    const paramName = moduleNode.segment.value
-    paramTable[paramName] = matchPath.catchallParamValues
+    const catchallName = moduleNode.segment.value
+    paramTable[catchallName] = matchPath.catchallParamValues
   }
   return createModuleRenderLeaf('page', moduleNode, paramTable)
 }
