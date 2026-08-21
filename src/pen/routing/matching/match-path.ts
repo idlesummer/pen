@@ -6,6 +6,7 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchNode = {
   searchNode: SearchNode
+  // Match metadata
   acceptingNode?: RouteNode   // the page/catchall this step resolved to, set by classifyMatchNode once it settles a winner
   dynamicCapture?: string     // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
   catchallCapture?: string[]  // the captured tail segments, only set when acceptingNode came from a catchall
