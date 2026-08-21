@@ -6,9 +6,9 @@ export type ParamTable = Record<string, string | string[]> // dynamic route para
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
-  acceptingNode?: RouteNode   // the page/catchall this step resolved to, set by classifyMatchNode once it settles a winner
-  dynamicCapture?: string     // captured url value for dynamic node
-  catchallCapture?: string[]  // the captured tail segments, only set when acceptingNode came from a catchall
+  acceptingNode?: RouteNode   // page/catchall of the searchNode, set here so that later pipeline doesn't have to
+  dynamicCapture?: string     // captured url value for dynamic node (mutually exclusive to catchallCapture)
+  catchallCapture?: string[]  // captured url tail, only set when acceptingNode came from a catchall
   parent?: MatchNode
 }
 
