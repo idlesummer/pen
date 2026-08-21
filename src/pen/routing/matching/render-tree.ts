@@ -31,16 +31,16 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
     paramTable[catchallName] = matchPath.catchallParamValues
   }
   const moduleType = acceptingNode ? 'page' : 'default'
-  const modulePath = routeNode.modulePaths.get(moduleType)!
+  const modulePath = routeNode.modulePaths[moduleType]!
   const routePath = getRoutePath(routeNode)
   const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, paramTable }
   return [renderLeaf, routeNode]
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
-  const layout = routeNode.modulePaths.get('layout')
-  const loading = routeNode.modulePaths.get('loading')
-  const error = routeNode.modulePaths.get('error')
+  const layout = routeNode.modulePaths.layout
+  const loading = routeNode.modulePaths.loading
+  const error = routeNode.modulePaths.error
   if (!layout && !loading && !error && !slotRenderNodes)
     return childRenderNode
 

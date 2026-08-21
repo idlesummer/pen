@@ -11,7 +11,7 @@ export type CompileDiagnostic = {
 }
 
 function getDiagnosticPath(routeNode: RouteNode): string {
-  return routeNode.modulePaths.values().next().value ?? getRoutePath(routeNode)
+  return Object.values(routeNode.modulePaths)[0] ?? getRoutePath(routeNode)
 }
 
 export function findNearestSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
@@ -89,7 +89,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
   if (!routeNodes) return
   if (routeNodes.length < 2) return
-  return routeNodes.map(routeNode => routeNode.modulePaths.get('page')!)
+  return routeNodes.map(routeNode => routeNode.modulePaths.page!)
 }
 
 /** Runs relational validation between routes sharing the same URL position. */

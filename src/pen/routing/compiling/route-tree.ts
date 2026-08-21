@@ -8,7 +8,7 @@ export type RouteModuleType = 'page' | 'default' | 'layout' | 'loading' | 'error
 export type RouteNode = {
   name: string
   segment: Segment
-  modulePaths: Map<RouteModuleType, string>
+  modulePaths: Partial<Record<RouteModuleType, string>>
   parent?: RouteNode
   children: RouteNode[]
 }
@@ -28,7 +28,7 @@ function isRouteFilePath(path: string): boolean {
 }
 
 function createRouteNode(name: string, segment: Segment): RouteNode {
-  return { name, segment, modulePaths: new Map(), children: [] }
+  return { name, segment, modulePaths: {}, children: [] }
 }
 
 export function createRouteTree(filePaths: string[]): RouteNode {
@@ -40,7 +40,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       const part = parts[index]!      // always defined since `create` only yields existing indices.
       if (index === parts.length-1) { // Create the route module if component is last
         const routeModuleType = createRouteModuleType(part)
-        parentRouteNode.modulePaths.set(routeModuleType, path)
+        parentRouteNode.modulePaths[routeModuleType] = path
       }
       else if (!isPrivateSegment(part))
         return createRouteNode(part, createSegment(part))
@@ -80,7 +80,7 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
 /** Finds the nearest ancestor route node with a default module, skipping slot boundaries. */
 export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode | undefined {
   for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
-    if (node.modulePaths.has('default'))
+    if (node.modulePaths.default)
       return node
   }
 }
