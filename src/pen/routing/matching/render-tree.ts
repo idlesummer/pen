@@ -84,12 +84,12 @@ function createMainRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: RouteN
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const url = urlString.split('/')                       // Convert url string to a list of segments; url[0] is always '' (root's own position)
-  const mainMatchNode = createMatchPath(searchTree, url) // Find search node path with params that match the url
-  const mainResult = createRenderLeaf(mainMatchNode, {}) // Create the initial render node leaf
+  const mainMatchPath = createMatchPath(searchTree, url) // Find search node path with params that match the url
+  const mainResult = createRenderLeaf(mainMatchPath, {}) // Create the initial render node leaf
   if (!mainResult) return [false]                        // Return nothing if not even a fallback exists
 
   const [mainRenderLeaf, mainRouteNode] = mainResult
-  const slotMatchNodes = getSlotMatchNodes(mainMatchNode) // Create a map of route node to match node
+  const slotMatchNodes = getSlotMatchNodes(mainMatchPath) // Create a map of route node to match node
   const renderTree = createMainRenderNodeChain(mainRenderLeaf, mainRouteNode, url, slotMatchNodes) // Create main render chain
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
