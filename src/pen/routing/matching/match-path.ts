@@ -42,11 +42,8 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
   const urlPart = url[searchNode.urlDepth+1]  // if urlPart is undefined it means it's exhausted
 
   if (urlPart === undefined) {
-    // if url is exhausted (and no page)
-    if (!searchNode.page) return 'candidate'
-
-    // if url exhausted + has a page
-    matchNode.acceptingNode = searchNode.page
+    if (!searchNode.page) return 'candidate'  // if url is exhausted (and no page)
+    matchNode.acceptingNode = searchNode.page // if url exhausted + has a page
     return 'winner'
   }
   if (searchNode.catchall) {
