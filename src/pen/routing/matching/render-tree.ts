@@ -31,10 +31,10 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
-    const paramTable = Object.assign({ ...mainParamTable }, getParamTable(matchPath))
+    const paramTable = { ...mainParamTable, ...getParamTable(matchPath) }
     return defaultNode && createModuleRenderLeaf('default', defaultNode, paramTable)
   }
-  const paramTable = Object.assign({ ...mainParamTable }, getParamTable(matchPath))
+  const paramTable = { ...mainParamTable, ...getParamTable(matchPath) }
   if (matchPath.catchallParamValues) {
     const catchallName = moduleNode.segment.value
     paramTable[catchallName] = matchPath.catchallParamValues
