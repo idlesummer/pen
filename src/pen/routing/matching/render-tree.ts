@@ -38,9 +38,7 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
-  const layout = routeNode.modulePaths.layout
-  const loading = routeNode.modulePaths.loading
-  const error = routeNode.modulePaths.error
+  const { layout, loading, error } = routeNode.modulePaths
   if (!layout && !loading && !error && !slotRenderNodes)
     return childRenderNode
 
