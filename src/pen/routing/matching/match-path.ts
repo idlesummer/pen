@@ -6,10 +6,10 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchPath = {
   searchNode: SearchNode
-  moduleNode?: RouteNode           // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
-  dynamicParamValue?: string       // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
-  catchallParamValues?: string[]   // the captured tail segments, only set when moduleNode came from a catchall
-  parent?: MatchPath          // the step before this one; undefined at the root
+  moduleNode?: RouteNode          // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
+  dynamicParamValue?: string      // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
+  catchallParamValues?: string[]  // the captured tail segments, only set when moduleNode came from a catchall
+  parent?: MatchPath              // the step before this one; undefined at the root
 }
 
 function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): MatchPath[] {
