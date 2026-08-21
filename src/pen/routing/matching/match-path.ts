@@ -6,10 +6,10 @@ import { getDynamicParamName } from '../compiling/search-tree'
 export type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 export type MatchNode = {
   searchNode: SearchNode
-  acceptingNode?: RouteNode       // the page/catchall this step resolved to, set by classifyMatchNode once it settles a winner
-  dynamicParamValue?: string      // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
-  catchallParamValues?: string[]  // the captured tail segments, only set when acceptingNode came from a catchall
-  parent?: MatchNode              // the step before this one; undefined at the root
+  acceptingNode?: RouteNode   // the page/catchall this step resolved to, set by classifyMatchNode once it settles a winner
+  dynamicCapture?: string     // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
+  catchallCapture?: string[]  // the captured tail segments, only set when acceptingNode came from a catchall
+  parent?: MatchNode          // the step before this one; undefined at the root
 }
 
 function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): MatchNode[] {
@@ -27,17 +27,17 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
     const parent = parentMatchNode
     childMatchNodes.push({ searchNode, parent })
   }
-  if (dynamicChild && urlPart) {
+  if (dynamicChild) {
     const searchNode = dynamicChild
     const parent = parentMatchNode
-    const dynamicParamValue = urlPart
-    childMatchNodes.push({ searchNode, parent, dynamicParamValue })
+    const dynamicCapture = urlPart
+    childMatchNodes.push({ searchNode, parent, dynamicCapture })
   }
   return childMatchNodes
 }
 
 /** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
- *  winning matchNode's acceptingNode (and catchallParamValues, for catchalls)
+ *  winning matchNode's acceptingNode (and catchallCapture, for catchalls)
  *  here, once, so callers never re-derive them from url/urlPos again. */
 function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchNode.searchNode
@@ -52,11 +52,11 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
   }
   if (searchNode.catchall) {
     matchNode.acceptingNode = searchNode.catchall
-    matchNode.catchallParamValues = url.slice(searchNode.urlPos+1)
+    matchNode.catchallCapture = url.slice(searchNode.urlPos+1)
     return 'winner'     // if catchall (only once segments remain - it needs one or more)
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)
-  const dynamicSearchNode = urlPart.length ? searchNode.dynamic : undefined  // dynamic rejects empty-string captures
+  const dynamicSearchNode = searchNode.dynamic
   if (!staticSearchNode && !dynamicSearchNode)
     return 'candidate'  // if tree is exhausted (no static/dynamic nodes)
 }
@@ -93,8 +93,8 @@ export function createMatchNode(searchTree: SearchNode, url: string[]): MatchNod
 export function getParamTable(matchNode: MatchNode): ParamTable {
   const paramTable: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (node.dynamicParamValue !== undefined)
-      paramTable[getDynamicParamName(node.searchNode)] = node.dynamicParamValue
+    if (node.dynamicCapture !== undefined)
+      paramTable[getDynamicParamName(node.searchNode)] = node.dynamicCapture
   }
   return paramTable
 }
