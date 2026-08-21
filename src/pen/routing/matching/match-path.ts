@@ -38,17 +38,17 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
 
 /* `winner` means a match was found
  * `failed` means can't match further (either url or tree was exhausted)
- * `undefined` means all children have been visited but no winner (so try another branch in the parent) */
+ * `undefined` means all children were visited but no winner (so try another branch in the parent) */
 function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['failed'] | undefined {
   const searchNode = matchNode.searchNode
   if (nextUrlPart === undefined)  // if url exhausted + has a page
     return searchNode.page ? ['winner', searchNode.page] : ['failed']
-  if (searchNode.catchall)
+  if (searchNode.catchall)        // if url not exhausted and catchall
     return ['winner', searchNode.catchall]
 
-  const staticSearchNode = searchNode.statics?.get(nextUrlPart) // check for static children
-  if (!staticSearchNode && !searchNode.dynamic)
-    return ['failed']  // if tree is exhausted (no static/dynamic nodes)
+  const staticSearchNode = searchNode.statics?.get(nextUrlPart)
+  if (!staticSearchNode && !searchNode.dynamic) // check if this search node has children
+    return ['failed']  // means tree is exhausted (no static/dynamic childen)
 }
 
 function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode): boolean {
