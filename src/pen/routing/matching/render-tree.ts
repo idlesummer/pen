@@ -59,7 +59,7 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
     return childRenderNode
 
   const routePath = getRoutePath(routeNode)
-  const slots = slotRenderNodes ?? Object.create(null)
+  const slots = slotRenderNodes ?? {} // warn users to not modify prototype chain
   slots.children = childRenderNode
   return { routePath, layout, loading, error, slots }
 }
@@ -74,7 +74,7 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): Re
 function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderNodes | undefined {
   const searchNode = matchPath.searchNode
   const mainParamTable = getParamTable(matchPath)
-  const slotRenderNodes: SlotRenderNodes = Object.create(null)  // equivalent to {} but without prototype inheritance
+  const slotRenderNodes: SlotRenderNodes = {}  // equivalent to {} but without prototype inheritance
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
     const slotMatchPath = createMatchPath(slotSearchTree, url)
