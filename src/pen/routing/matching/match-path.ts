@@ -68,11 +68,12 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const [status, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
+      const [matchStatus, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
 
-      if (status === 'failed' && isBetterDefaultNode(matchNode, bestDefaultPath))
+      if (matchStatus === 'failed' && isBetterDefaultNode(matchNode, bestDefaultPath))
         bestDefaultPath = matchNode
-      else if (status === 'winner') {
+
+      else if (matchStatus === 'winner') {
         matchNode.acceptingNode = acceptingNode
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
           matchNode.catchallCapture = url.slice(searchNode.urlDepth+1) // capture the remaining params
