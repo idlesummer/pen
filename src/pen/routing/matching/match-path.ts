@@ -72,7 +72,6 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
 
       if (matchClass === 'winner') {
         matchNode.acceptingNode = acceptingNode
-
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
           matchNode.catchallCapture = url.slice(searchNode.urlDepth+1) // capture the remaining params
 
