@@ -46,7 +46,7 @@ function getSlotMatchPaths(matchPath: MatchPath): Map<RouteNode, MatchPath> {
   const slotMatchPaths = new Map<RouteNode, MatchPath>()
   for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
     if (path.searchNode.slots)
-      slotMatchPaths.set(path.searchNode.anchor, matchPath)
+      slotMatchPaths.set(path.searchNode.anchor, path)
   }
   return slotMatchPaths
 }
