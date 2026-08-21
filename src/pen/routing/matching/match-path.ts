@@ -67,15 +67,14 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
 
     leave: (matchNode) => { // Once subtrees are visited,
       const searchNode = matchNode.searchNode
-      const nextUrlDepth = searchNode.urlDepth+1
-      const nextUrlPart = url[nextUrlDepth] // if urlPart is undefined it means it's exhausted
+      const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
       const [matchClass, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
 
       if (matchClass === 'winner') {
         matchNode.acceptingNode = acceptingNode
 
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
-          matchNode.catchallCapture = url.slice(nextUrlDepth) // capture the remaining params
+          matchNode.catchallCapture = url.slice(searchNode.urlDepth+1) // capture the remaining params
 
         bestMatchPath = matchNode
         return true
