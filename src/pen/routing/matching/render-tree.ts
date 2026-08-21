@@ -26,9 +26,9 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   if (!routeNode) return
 
   const paramTable = { ...mainParamTable, ...getParamTable(matchNode) }
-  if (matchNode.catchallParamValues) {
+  if (matchNode.catchallCapture) {
     const catchallName = acceptingNode!.segment.value
-    paramTable[catchallName] = matchNode.catchallParamValues
+    paramTable[catchallName] = matchNode.catchallCapture
   }
   const moduleType = acceptingNode ? 'page' : 'default'
   const modulePath = routeNode.modulePaths[moduleType]!
