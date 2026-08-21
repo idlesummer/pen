@@ -31,9 +31,9 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
   const moduleNode = matchPath.moduleNode
   if (!moduleNode) {
     const defaultNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
-    return defaultNode && createModuleRenderLeaf('default', defaultNode, getParamTable(matchPath, mainParamTable))
+    return defaultNode && createModuleRenderLeaf('default', defaultNode, { ...mainParamTable, ...getParamTable(matchPath) })
   }
-  const paramTable = getParamTable(matchPath, mainParamTable)
+  const paramTable = { ...mainParamTable, ...getParamTable(matchPath) }
   if (matchPath.catchallParamValues) {
     const paramName = moduleNode.segment.value
     paramTable[paramName] = matchPath.catchallParamValues
@@ -72,7 +72,7 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode): Re
 
 function createSlotRenderNodes(matchPath: MatchPath, url: string[]): SlotRenderNodes | undefined {
   const searchNode = matchPath.searchNode
-  const mainParamTable = getParamTable(matchPath, {})
+  const mainParamTable = getParamTable(matchPath)
   const slotRenderNodes: SlotRenderNodes = Object.create(null)  // equivalent to {} but without prototype inheritance
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {

@@ -86,11 +86,10 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchPat
   return bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
 }
 
-/** Assembles the full params accumulated along a walked path, seeded with
- *  whatever the search itself started with (non-empty for a slot's own
- *  search, seeded from its owner's position in the main search). */
-export function getParamTable(matchPath: MatchPath, inheritedParams: ParamTable): ParamTable {
-  const paramTable: ParamTable = { ...inheritedParams }
+/** Assembles the params accumulated by walking matchPath's own chain -
+ *  callers combine this with any inherited table themselves. */
+export function getParamTable(matchPath: MatchPath): ParamTable {
+  const paramTable: ParamTable = {}
   for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
     if (path.dynamicParamValue !== undefined)
       paramTable[getDynamicParamName(path.searchNode)] = path.dynamicParamValue
