@@ -14,7 +14,7 @@ export type MatchPath = {
 
 function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): MatchPath[] {
   const parentSearchNode = parentMatchPath.searchNode
-  const urlPart = url[parentSearchNode.depth+1]
+  const urlPart = url[parentSearchNode.urlPos+1]
   if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
@@ -38,10 +38,10 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
 
 /** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
  *  winning matchPath's moduleNode (and catchallParamValues, for catchalls)
- *  here, once, so callers never re-derive them from url/depth again. */
+ *  here, once, so callers never re-derive them from url/urlPos again. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
-  const urlPart = url[searchNode.depth+1]
+  const urlPart = url[searchNode.urlPos+1]
 
   if (urlPart === undefined) {  // means url is exhausted
     if (!searchNode.page) return 'candidate'
@@ -50,7 +50,7 @@ function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'can
   }
   if (searchNode.catchall) {
     matchPath.moduleNode = searchNode.catchall
-    matchPath.catchallParamValues = url.slice(searchNode.depth+1)
+    matchPath.catchallParamValues = url.slice(searchNode.urlPos+1)
     return 'winner'
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)

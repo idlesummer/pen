@@ -3,7 +3,7 @@ import { traverse } from '@/lib/traverse'
 
 export type SearchNode = {
   anchor: RouteNode                   // means nearest ancestor/self whose segment is static/dynamic/slot
-  depth: number                       // segments consumed to reach this position - 0 at root
+  urlPos: number                      // segments consumed to reach this position - 0 at root
   staticness: number                  // how static-preferring the path to this node is; higher is better
   // Accepting route nodes
   page?: RouteNode                    // checked by classifyMatchPath to decide if this position is a match
@@ -20,8 +20,8 @@ export type SearchNode = {
   }
 }
 
-function createSearchNode(anchor: RouteNode, depth: number, staticness: number): SearchNode {
-  return { anchor, depth, staticness, validation: {} }  // Validation is guaranteed to exist here, it's only removed later at sanitization
+function createSearchNode(anchor: RouteNode, urlPos: number, staticness: number): SearchNode {
+  return { anchor, urlPos, staticness, validation: {} }  // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
 function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
@@ -34,12 +34,12 @@ function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode
 function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
   const staticSearchNodes = parentSearchNode.statics ??= new Map()
   const staticChildName = childRouteNode.segment.value
-  const createStaticChild = () => createSearchNode(childRouteNode, parentSearchNode.depth+1, parentSearchNode.staticness)
+  const createStaticChild = () => createSearchNode(childRouteNode, parentSearchNode.urlPos+1, parentSearchNode.staticness)
   return staticSearchNodes.getOrInsertComputed(staticChildName, createStaticChild)  // return the static child
 }
 
 function getOrCreateDynamicChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
-  const dynamicSearchNode = parentSearchNode.dynamic ??= createSearchNode(childRouteNode, parentSearchNode.depth+1, parentSearchNode.staticness-1)
+  const dynamicSearchNode = parentSearchNode.dynamic ??= createSearchNode(childRouteNode, parentSearchNode.urlPos+1, parentSearchNode.staticness-1)
   const dynamicChildName = childRouteNode.segment.value
   const validationDynamics = parentSearchNode.validation!.dynamics ??= new Map()
   validationDynamics.getOrInsert(dynamicChildName, childRouteNode) // for validation
@@ -47,9 +47,9 @@ function getOrCreateDynamicChild(parentSearchNode: SearchNode, childRouteNode: R
 }
 
 function getOrCreateSlotChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
-  const slotSearchNodes = parentSearchNode.slots ??= new Map() // slot can't consume url, so it inherits owner's depth and staticness
+  const slotSearchNodes = parentSearchNode.slots ??= new Map() // slot can't consume url, so it inherits owner's urlPos and staticness
   const slotChildName = childRouteNode.segment.value
-  const createSlotChild = () => createSearchNode(childRouteNode, parentSearchNode.depth, parentSearchNode.staticness)
+  const createSlotChild = () => createSearchNode(childRouteNode, parentSearchNode.urlPos, parentSearchNode.staticness)
   return slotSearchNodes.getOrInsertComputed(slotChildName, createSlotChild) // return the slot child
 }
 
