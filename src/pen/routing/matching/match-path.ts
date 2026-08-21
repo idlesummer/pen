@@ -37,9 +37,6 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   return childMatchNodes
 }
 
-/** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
- *  winning matchNode's acceptingNode (and catchallCapture, for catchalls)
- *  here, once, so callers never re-derive them from url/urlDepth again. */
 function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchNode.searchNode
   const urlPart = url[searchNode.urlDepth+1]  // if urlPart is undefined it means it's exhausted
