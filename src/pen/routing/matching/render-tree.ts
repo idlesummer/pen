@@ -42,11 +42,11 @@ function createRenderLeaf(matchPath: MatchPath, mainParamTable: ParamTable): [Re
   return createModuleRenderLeaf('page', moduleNode, paramTable)
 }
 
-function getSlotMatchPaths(matchPathTail: MatchPath): Map<RouteNode, MatchPath> {
+function getSlotMatchPaths(matchPath: MatchPath): Map<RouteNode, MatchPath> {
   const slotMatchPaths = new Map<RouteNode, MatchPath>()
-  for (let matchPath: MatchPath | undefined = matchPathTail; matchPath; matchPath = matchPath.parent) {
-    if (matchPath.searchNode.slots)
-      slotMatchPaths.set(matchPath.searchNode.anchor, matchPath)
+  for (let path: MatchPath | undefined = matchPath; path; path = path.parent) {
+    if (path.searchNode.slots)
+      slotMatchPaths.set(path.searchNode.anchor, matchPath)
   }
   return slotMatchPaths
 }
