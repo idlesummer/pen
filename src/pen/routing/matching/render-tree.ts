@@ -105,7 +105,7 @@ export function createRenderTree(urlString: string, searchTree: SearchNode): [su
   if (!mainResult) return [false]                        // Return nothing if not even a fallback exists
 
   const [mainRenderLeaf, mainRouteNode] = mainResult
-  const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Map each ancestor route node to its own slot match path, if it has one
+  const slotMatchPaths = getSlotMatchPaths(mainMatchPath) // Create a map of route node ot match path
   const renderTree = createMainRenderNodeChain(mainRenderLeaf, mainRouteNode, url, slotMatchPaths) // Create main render chain
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
