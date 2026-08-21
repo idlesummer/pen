@@ -1,4 +1,4 @@
-import type { RouteNode, RouteModuleType } from '../compiling/route-tree'
+import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { ParamTable, MatchPath } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
@@ -6,7 +6,7 @@ import { createMatchPath, getParamTable, getSlotMatchPaths } from './match-path'
 
 type RenderLeaf = {
   routePath: string
-  moduleType: RouteModuleType // page or default
+  moduleType: 'page' | 'default' // page or default
   modulePath: string
   paramTable: ParamTable
 }
