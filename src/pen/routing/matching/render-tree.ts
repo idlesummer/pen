@@ -28,17 +28,17 @@ function createModuleRenderLeaf(moduleType: RouteModuleType, routeNode: RouteNod
 }
 
 function createRenderLeaf(matchPath: MatchPath, mainParams: MatchParams): [RenderLeaf, RouteNode] | undefined {
-  const moduleRouteNode = matchPath.moduleRouteNode
-  if (!moduleRouteNode) {
+  const moduleNode = matchPath.moduleNode
+  if (!moduleNode) {
     const defaultRouteNode = findDefaultRouteNodeParent(matchPath.searchNode.anchor)
     return defaultRouteNode && createModuleRenderLeaf('default', defaultRouteNode, getMatchParams(matchPath, mainParams))
   }
   const params = getMatchParams(matchPath, mainParams)
-  if (matchPath.catchallCapture) {
-    const paramName = moduleRouteNode.segment.value
-    params[paramName] = matchPath.catchallCapture
+  if (matchPath.catchallParams) {
+    const paramName = moduleNode.segment.value
+    params[paramName] = matchPath.catchallParams
   }
-  return createModuleRenderLeaf('page', moduleRouteNode, params)
+  return createModuleRenderLeaf('page', moduleNode, params)
 }
 
 function getSlotMatchPaths(matchPathTail: MatchPath): Map<RouteNode, MatchPath> {

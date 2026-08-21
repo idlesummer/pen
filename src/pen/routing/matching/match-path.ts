@@ -7,8 +7,8 @@ export type MatchParams = Record<string, string | string[]> // dynamic route par
 export type MatchPath = {
   searchNode: SearchNode
   paramValue?: string         // the dynamic param value this step itself captured, if any - the name is searchNode's own, via getDynamicParamName
-  moduleRouteNode?: RouteNode // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
-  catchallCapture?: string[]  // the captured tail segments, only set when moduleRouteNode came from a catchall
+  moduleNode?: RouteNode      // the page/catchall this step resolved to, set by classifyMatchPath once it settles a winner
+  catchallParams?: string[]   // the captured tail segments, only set when moduleNode came from a catchall
   parent?: MatchPath          // the step before this one; undefined at the root
 }
 
@@ -37,20 +37,20 @@ function createChildMatchPaths(parentMatchPath: MatchPath, url: string[]): Match
 }
 
 /* Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
- * winning matchPath's moduleRouteNode (and catchallCapture, for catchalls)
- * here, once, so callers never re-derive them from url/depth again. */
+ * winning matchPath's moduleNode (and catchallParams, for catchalls) here,
+ * once, so callers never re-derive them from url/depth again. */
 function classifyMatchPath(matchPath: MatchPath, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchPath.searchNode
   const urlPart = url[searchNode.depth+1]
 
   if (urlPart === undefined) {  // means url is exhausted
     if (!searchNode.page) return 'candidate'
-    matchPath.moduleRouteNode = searchNode.page
+    matchPath.moduleNode = searchNode.page
     return 'winner'
   }
   if (searchNode.catchall) {
-    matchPath.moduleRouteNode = searchNode.catchall
-    matchPath.catchallCapture = url.slice(searchNode.depth+1)
+    matchPath.moduleNode = searchNode.catchall
+    matchPath.catchallParams = url.slice(searchNode.depth+1)
     return 'winner'
   }
 
