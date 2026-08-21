@@ -14,7 +14,7 @@ export type MatchNode = {
 
 function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): MatchNode[] {
   const parentSearchNode = parentMatchNode.searchNode
-  const urlPart = url[parentSearchNode.urlPos+1]
+  const urlPart = url[parentSearchNode.urlDepth+1]
   if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
@@ -38,10 +38,10 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
 
 /** Returns a 'winner' or 'candidate' if url or tree exhausts. Settles the
  *  winning matchNode's acceptingNode (and catchallCapture, for catchalls)
- *  here, once, so callers never re-derive them from url/urlPos again. */
+ *  here, once, so callers never re-derive them from url/urlDepth again. */
 function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'candidate' | undefined {
   const searchNode = matchNode.searchNode
-  const urlPart = url[searchNode.urlPos+1]  // if urlPart is undefined it means it's exhausted
+  const urlPart = url[searchNode.urlDepth+1]  // if urlPart is undefined it means it's exhausted
 
   if (urlPart === undefined && searchNode.page) {
     matchNode.acceptingNode = searchNode.page
@@ -52,7 +52,7 @@ function classifyMatchNode(matchNode: MatchNode, url: string[]): 'winner' | 'can
   }
   if (searchNode.catchall) {
     matchNode.acceptingNode = searchNode.catchall
-    matchNode.catchallCapture = url.slice(searchNode.urlPos+1)
+    matchNode.catchallCapture = url.slice(searchNode.urlDepth+1)
     return 'winner'     // if catchall (only once segments remain - it needs one or more)
   }
   const staticSearchNode = searchNode.statics?.get(urlPart)
