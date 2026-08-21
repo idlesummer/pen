@@ -61,8 +61,8 @@ function createSlotRenderNodes(matchNode: MatchNode, url: string[]): SlotRenderN
   const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modity prototype chain
 
   for (const [slotName, slotSearchTree] of searchNode.slots ?? []) {
-    const slotMatchNode = createMatchPath(slotSearchTree, url)
-    const context = createRenderLeaf(slotMatchNode, mainParamTable)
+    const slotMatchPath = createMatchPath(slotSearchTree, url)
+    const context = createRenderLeaf(slotMatchPath, mainParamTable)
     if (context !== undefined)
       slotRenderNodes[slotName] = createRenderNodeChain(...context)
   }
