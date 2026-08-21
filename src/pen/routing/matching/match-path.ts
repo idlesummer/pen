@@ -40,13 +40,14 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
   const searchNode = matchNode.searchNode
   if (nextUrlPart === undefined)  // if url exhausted + has a page
     return searchNode.page ? ['winner', searchNode.page] : ['candidate']
-
   if (searchNode.catchall)
     return ['winner', searchNode.catchall]
 
   const staticSearchNode = searchNode.statics?.get(nextUrlPart) // check for static children
   if (!staticSearchNode && !searchNode.dynamic)
     return ['candidate']  // if tree is exhausted (no static/dynamic nodes)
+
+  // Return undefined if URL remains and this node can continue matching
 }
 
 function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode): boolean {
