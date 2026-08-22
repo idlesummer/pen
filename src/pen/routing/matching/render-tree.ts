@@ -84,8 +84,8 @@ function createMainRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: RouteN
  *  the render tree. `success` is false for default fallbacks and when nothing
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
-  const url = urlString.split('/')                       // Convert url string to a list of segments; url[0] is always '' (root's own position)
-  const mainMatchPath = createMatchPath(searchTree, url) // Find search node path with params that match the url
+  const url = urlString.split('/')                        // Convert url string to a list of segments; url[0] is always '' (root's own position)
+  const mainMatchPath = createMatchPath(searchTree, url)  // Find search node path with params that match the url
   const mainContext = createRenderLeaf(mainMatchPath, {}) // Create the initial render node leaf
   if (!mainContext) return [false]                        // Return nothing if not even a fallback exists
 
