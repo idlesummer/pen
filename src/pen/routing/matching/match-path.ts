@@ -12,14 +12,13 @@ export type MatchNode = {
   parent?: MatchNode
 }
 
-function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): MatchNode[] {
-  const parentSearchNode = parentMatchNode.searchNode
-  const urlPart = url[parentSearchNode.urlDepth+1]
-  if (urlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
+function createMatchNodeChildren(parentMatchNode: MatchNode, nextUrlPart: string): MatchNode[] {
+  if (nextUrlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
+  const parentSearchNode = parentMatchNode.searchNode
   const matchNodeChildren: MatchNode[] = []
-  const staticChild = parentSearchNode.statics?.get(urlPart)
+  const staticChild = parentSearchNode.statics?.get(nextUrlPart)
   const dynamicChild = parentSearchNode.dynamic
 
   if (staticChild) {
@@ -30,7 +29,7 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, url: string[]): Mat
   if (dynamicChild) {
     const searchNode = dynamicChild
     const parent = parentMatchNode
-    const dynamicCapture = urlPart // Record how did I get to this search node
+    const dynamicCapture = nextUrlPart  // Record how did I get to this search node
     matchNodeChildren.push({ searchNode, parent, dynamicCapture })
   }
   return matchNodeChildren
@@ -64,7 +63,11 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
   let bestDefaultPath: MatchNode | undefined  // most static-preferring failed branch seen so far
 
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
-    expand: (matchNode) => createMatchNodeChildren(matchNode, url),
+    expand: (matchNode) => {
+      const searchNode = matchNode.searchNode
+      const nextUrlPart = url[searchNode.urlDepth+1]!
+      return createMatchNodeChildren(matchNode, nextUrlPart)
+    },
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
