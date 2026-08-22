@@ -12,7 +12,7 @@ export type MatchNode = {
   parent?: MatchNode
 }
 
-function createMatchNodeChildren(parentMatchNode: MatchNode, nextUrlPart: string): MatchNode[] {
+function createMatchNodeChildren(parentMatchNode: MatchNode, nextUrlPart?: string): MatchNode[] {
   if (nextUrlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
@@ -65,7 +65,7 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
     expand: (matchNode) => {
       const searchNode = matchNode.searchNode
-      const nextUrlPart = url[searchNode.urlDepth+1]!
+      const nextUrlPart = url[searchNode.urlDepth+1]
       return createMatchNodeChildren(matchNode, nextUrlPart)
     },
     leave: (matchNode) => {
