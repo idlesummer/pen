@@ -18,7 +18,7 @@ function createMatchNodeChildren(parentMatchNode: MatchNode, nextUrlPart?: strin
 
   const parentSearchNode = parentMatchNode.searchNode
   const matchNodeChildren: MatchNode[] = []
-  const staticChild = parentSearchNode.statics?.get(nextUrlPart)
+  const staticChild = parentSearchNode.statics?.get(nextUrlPart)  // query url part in next node children
   const dynamicChild = parentSearchNode.dynamic
 
   if (staticChild) {
