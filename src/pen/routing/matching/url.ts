@@ -5,7 +5,7 @@
  *  '', the root's own position) - safe for callers to use `!segment` in
  *  place of `segment === undefined`. */
 export function normalizeUrl(urlString: string): string[] {
-  const prefixed = urlString ? '/' + urlString : urlString
+  const prefixed = urlString ? `/${urlString}` : urlString
   const collapsed = prefixed.replace(/\/+/g, '/')
   return collapsed.split('/')
 }
