@@ -13,8 +13,7 @@ export type MatchNode = {
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
-  if (!nextUrlPart) // check if URL is exhausted by checking whether the next segment exists
-    return []
+  if (!nextUrlPart) return [] // check if URL is exhausted by checking whether the next segment exists
 
   const parentSearchNode = parent.searchNode
   const matchNodeChildren: MatchNode[] = []
