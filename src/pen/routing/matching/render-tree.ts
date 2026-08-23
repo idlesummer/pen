@@ -48,33 +48,31 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   return { routePath, layout, loading, error, slots }
 }
 
-/** Builds the RenderNode for every slot this matchNode owns, each by
- *  re-entering createRenderNode at that slot's own leaf and climbing to
- *  its own boundary - independent of, and never touching, the main climb.
- *  Slot matches are already resolved by createMatchTree, so this never
- *  needs url or createMatchPath. */
-function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
-  const mainParamTable = getParamTable(matchNode)
-  const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
-
-  for (const [slotName, slotMatchNode] of matchNode.slots ?? []) {
-    const context = createRenderLeaf(slotMatchNode, mainParamTable)
-    if (context) slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
-  }
-  for (const _ in slotRenderNodes)  // a bit more efficient than Object.keys(...).length
-    return slotRenderNodes
-}
-
 /** Climbs from a leaf's RouteNode up to the root, wrapping each ancestor's
  *  layout/loading/error along the way. matchNode rides along only as
  *  auxiliary context: it stays put while routeNode passes through groups
  *  (which have no SearchNode to align to) and only steps to its own
  *  parent once routeNode catches back up to where matchNode is anchored -
  *  so there is one relationship here, not a separate matchNode walk
- *  bridged back in through a routeNode -> matchNode map. */
+ *  bridged back in through a routeNode -> matchNode map. Slots (already
+ *  resolved by createMatchTree) are built by re-entering this same
+ *  function at each slot's own leaf and climbing to its own boundary -
+ *  independent of, and never touching, the main climb. */
 function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined, childRenderNode: RenderNode): RenderNode {
   const aligned = matchNode?.searchNode.anchor === routeNode
-  const slots = aligned ? createSlotRenderNodes(matchNode!) : undefined
+
+  let slots: SlotRenderNodes | undefined
+  if (aligned) {
+    const mainParamTable = getParamTable(matchNode!)
+    const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
+    for (const [slotName, slotMatchNode] of matchNode!.slots ?? []) {
+      const context = createRenderLeaf(slotMatchNode, mainParamTable)
+      if (context) slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
+    }
+    for (const _ in slotRenderNodes)  // a bit more efficient than Object.keys(...).length
+      slots = slotRenderNodes
+  }
+
   const renderNode = wrapRenderNode(routeNode, childRenderNode, slots)
 
   const parentRouteNode = getRouteNodeParentIfNotSlot(routeNode)
