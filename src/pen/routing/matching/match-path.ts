@@ -22,15 +22,8 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   const staticChild = parentSearchNode.statics?.get(nextUrlPart)  // query url part in next node children
   const dynamicChild = parentSearchNode.dynamic
 
-  if (staticChild) {
-    const searchNode = staticChild
-    matchNodeChildren.push({ searchNode, parent })
-  }
-  if (dynamicChild) {
-    const searchNode = dynamicChild
-    const dynamicCapture = nextUrlPart  // Record how did I get to this search node
-    matchNodeChildren.push({ searchNode, parent, dynamicCapture })
-  }
+  if (staticChild)  matchNodeChildren.push({ searchNode: staticChild, parent })
+  if (dynamicChild) matchNodeChildren.push({ searchNode: dynamicChild, dynamicCapture: nextUrlPart, parent })
   return matchNodeChildren
 }
 
@@ -49,8 +42,8 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
     return ['failed']  // means tree is exhausted (no static/dynamic childen)
 }
 
-function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode): boolean {
-  return !bestDefaultNode || candidate.searchNode.staticness > bestDefaultNode.searchNode.staticness
+function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode: MatchNode): boolean {
+  return candidate.searchNode.staticness > bestDefaultNode.searchNode.staticness
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
@@ -69,8 +62,10 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
       const [matchStatus, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
 
-      if (matchStatus === 'failed' && isBetterDefaultNode(matchNode, bestDefaultPath))
-        bestDefaultPath = matchNode
+      if (matchStatus === 'failed') {
+        if (!bestDefaultPath || isBetterDefaultNode(matchNode, bestDefaultPath))
+          bestDefaultPath = matchNode
+      }
       else if (matchStatus === 'winner') {
         matchNode.acceptingNode = acceptingNode
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
@@ -108,7 +103,9 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNod
 export function getParamTable(matchNode: MatchNode): ParamTable {
   const paramTable: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (node.dynamicCapture === undefined) continue
+    if (node.dynamicCapture === undefined)
+      continue
+
     const dynamicNode = node.searchNode.anchor
     const paramName = dynamicNode.segment.value
     paramTable[paramName] = node.dynamicCapture
