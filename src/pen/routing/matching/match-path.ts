@@ -90,17 +90,17 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 
 /** Wraps createMatchPath, eagerly resolving every slot along the winning
  *  chain so later pipeline stages never need createMatchPath or url again.
- *  Recurses into itself (not createMatchPath) per slot for symmetry with
- *  the main call - harmless since a slot's own chain can never itself
- *  contain slots (sanitizeRouteTree prunes nested slots at compile time),
- *  so the loop below just finds nothing further to resolve there. */
+ *  Resolves each slot via createMatchPath directly, not by recursing into
+ *  createMatchTree itself - a slot's own chain can never itself contain
+ *  further slots (sanitizeRouteTree prunes nested slots at compile time),
+ *  so there's nothing further a slot's own resolution would need to check for. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
   const matchNode = createMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
     const slots = new Map<string, MatchNode>()
     for (const [slotName, slotSearchTree] of node.searchNode.slots)
-      slots.set(slotName, createMatchTree(slotSearchTree, url))
+      slots.set(slotName, createMatchPath(slotSearchTree, url))
     node.slots = slots
   }
   return matchNode
