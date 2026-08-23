@@ -84,10 +84,10 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNod
   const mainMatchNode = createMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
-    const subtrees = new Map<string, MatchNode>()
-    for (const [slotName, slotSearchTree] of node.searchNode.slots)
-      subtrees.set(slotName, createMatchPath(slotSearchTree, url))
-    node.subtrees = subtrees
+
+    node.subtrees = new Map()
+    for (const [slotName, searchSubtree] of node.searchNode.slots)
+      node.subtrees.set(slotName, createMatchPath(searchSubtree, url))
   }
   return mainMatchNode
 }
