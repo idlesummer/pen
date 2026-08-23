@@ -10,6 +10,7 @@ export type MatchNode = {
   dynamicCapture?: string     // captured url value for dynamic node
   catchallCapture?: string[]  // captured url tail of this node's catchall child route; implies acceptingNode exists
   parent?: MatchNode
+  slots?: Map<string, MatchNode>  // each slot's own winning match, resolved eagerly by createMatchTree
 }
 
 function createMatchNodeChildren(parentMatchNode: MatchNode, nextUrlPart?: string): MatchNode[] {
@@ -85,6 +86,24 @@ export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNod
     },
   })
   return bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
+}
+
+/** Wraps createMatchPath, eagerly resolving every slot along the winning
+ *  chain so later pipeline stages never need createMatchPath or url again.
+ *  Recurses into itself (not createMatchPath) per slot for symmetry with
+ *  the main call - harmless since a slot's own chain can never itself
+ *  contain slots (sanitizeRouteTree prunes nested slots at compile time),
+ *  so the loop below just finds nothing further to resolve there. */
+export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
+  const matchNode = createMatchPath(searchTree, url)
+  for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
+    if (!node.searchNode.slots) continue
+    const slots = new Map<string, MatchNode>()
+    for (const [slotName, slotSearchTree] of node.searchNode.slots)
+      slots.set(slotName, createMatchTree(slotSearchTree, url))
+    node.slots = slots
+  }
+  return matchNode
 }
 
 /** Assembles the params accumulated by walking matchNode's own chain -
