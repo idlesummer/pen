@@ -11,13 +11,13 @@ type RenderLeaf = {
   paramTable: ParamTable
 }
 
-type SlotRenderNodes = Record<string, RenderNode> // contains SlotRenderNode
+type RenderSubtrees = Record<string, RenderNode> // contains SlotRenderNode
 export type RenderNode = RenderLeaf | {
   routePath: string
   layout?: string
   loading?: string
   error?: string
-  slots: SlotRenderNodes
+  slots: RenderSubtrees
 }
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
@@ -37,7 +37,7 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   return [renderLeaf, routeNode]
 }
 
-function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
+function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: RenderSubtrees): RenderNode {
   const { layout, loading, error } = routeNode.modulePaths
   if (!layout && !loading && !error && !slotRenderNodes)
     return childRenderNode
@@ -48,7 +48,7 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   return { routePath, layout, loading, error, slots }
 }
 
-function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode, slotRenderNodeMap?: Map<RouteNode, SlotRenderNodes>): RenderNode {
+function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode, slotRenderNodeMap?: Map<RouteNode, RenderSubtrees>): RenderNode {
   let renderNode = renderLeaf
   for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
     const slotRenderNodes = slotRenderNodeMap?.get(node)
@@ -57,12 +57,12 @@ function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode, slo
   return renderNode
 }
 
-function createSlotRenderNodeMap(mainMatchPath: MatchNode, url: string[]): Map<RouteNode, SlotRenderNodes> {
-  const slotRenderNodesNap = new Map<RouteNode, SlotRenderNodes>()
+function createSlotRenderNodeMap(mainMatchPath: MatchNode, url: string[]): Map<RouteNode, RenderSubtrees> {
+  const slotRenderNodesNap = new Map<RouteNode, RenderSubtrees>()
 
   for (const [routeNode, matchNode] of getSlotMatchNodes(mainMatchPath)) {
     const mainParamTable = getParamTable(matchNode)
-    const slotRenderNodes: SlotRenderNodes = {}
+    const slotRenderNodes: RenderSubtrees = {}
 
     for (const [slotName, slotSearchTree] of matchNode.searchNode.slots ?? []) {
       const slotMatchPath = createMatchPath(slotSearchTree, url)
