@@ -8,7 +8,7 @@ export type MatchNode = {
   // Match metadata
   acceptingNode?: RouteNode   // page/catchall of the searchNode, set here so that later pipeline doesn't have to
   dynamicCapture?: string     // captured url value for dynamic node
-  catchallCapture?: string[]  // captured url tail of this node's catchall child route
+  catchallCapture?: string[]  // captured url tail of this node's catchall child route; implies acceptingNode exists
   parent?: MatchNode
 }
 
