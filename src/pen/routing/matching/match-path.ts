@@ -58,7 +58,7 @@ function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode):
 /** Finds the winning MatchNode for one tree: a real match if traversal
  *  found one, or - failing that - whichever failed branch was most
  *  static-preferring. Callers interpret what it resolved to themselves. */
-export function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
+function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatchPath: MatchNode | undefined
   let bestDefaultPath: MatchNode | undefined  // most static-preferring failed branch seen so far
