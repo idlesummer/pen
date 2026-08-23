@@ -65,7 +65,7 @@ function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined
   if (aligned) {
     const mainParamTable = getParamTable(matchNode!)
     const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
-    for (const [slotName, slotMatchNode] of matchNode!.slots ?? []) {
+    for (const [slotName, slotMatchNode] of matchNode!.subtrees ?? []) {
       const context = createRenderLeaf(slotMatchNode, mainParamTable)
       if (context)
         slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
