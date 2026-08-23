@@ -14,7 +14,9 @@ export type MatchNode = {
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
-  if (!nextUrlPart) return []  // check if URL is exhausted by checking whether the next segment exists
+  if (!nextUrlPart) // check if URL is exhausted by checking whether the next segment exists
+    return []
+
   const parentSearchNode = parent.searchNode
   const matchNodeChildren: MatchNode[] = []
   const staticChild = parentSearchNode.statics?.get(nextUrlPart)  // query url part in next node children
@@ -32,8 +34,9 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
   const searchNode = matchNode.searchNode
   if (!nextUrlPart)  // if url exhausted + has a page
     return searchNode.page ? ['winner', searchNode.page] : ['failed']
-  if (searchNode.catchall)        // if url not exhausted and catchall
-    return ['winner', searchNode.catchall]
+
+  if (searchNode.catchall)
+    return ['winner', searchNode.catchall]  // if url not exhausted and catchall
 
   const staticSearchNode = searchNode.statics?.get(nextUrlPart)
   if (!staticSearchNode && !searchNode.dynamic) // no child can consume nextUrlPart
