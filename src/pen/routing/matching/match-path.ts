@@ -10,26 +10,24 @@ export type MatchNode = {
   dynamicCapture?: string     // captured url value for dynamic node
   catchallCapture?: string[]  // captured url tail of this node's catchall child route; implies acceptingNode exists
   parent?: MatchNode
-  slots?: Map<string, MatchNode>  // each slot's own winning match, resolved eagerly by createMatchTree
+  subtrees?: Map<string, MatchNode>  // each slot's own winning match, resolved eagerly by createMatchTree
 }
 
-function createMatchNodeChildren(parentMatchNode: MatchNode, nextUrlPart?: string): MatchNode[] {
+function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
   if (nextUrlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
     return []
 
-  const parentSearchNode = parentMatchNode.searchNode
+  const parentSearchNode = parent.searchNode
   const matchNodeChildren: MatchNode[] = []
   const staticChild = parentSearchNode.statics?.get(nextUrlPart)  // query url part in next node children
   const dynamicChild = parentSearchNode.dynamic
 
   if (staticChild) {
     const searchNode = staticChild
-    const parent = parentMatchNode
     matchNodeChildren.push({ searchNode, parent })
   }
   if (dynamicChild) {
     const searchNode = dynamicChild
-    const parent = parentMatchNode
     const dynamicCapture = nextUrlPart  // Record how did I get to this search node
     matchNodeChildren.push({ searchNode, parent, dynamicCapture })
   }
@@ -97,10 +95,10 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNod
     if (!node.searchNode.slots)
       continue
 
-    const slots = new Map<string, MatchNode>()
+    const subtrees = new Map<string, MatchNode>()
     for (const [slotName, slotSearchTree] of node.searchNode.slots)
-      slots.set(slotName, createMatchPath(slotSearchTree, url))
-    node.slots = slots
+      subtrees.set(slotName, createMatchPath(slotSearchTree, url))
+    node.subtrees = subtrees
   }
   return mainMatchNode
 }
