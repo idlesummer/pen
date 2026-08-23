@@ -78,7 +78,6 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
   const mainMatchNode = createMatchPath(searchTree, url)
-
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
