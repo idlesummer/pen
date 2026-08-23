@@ -87,9 +87,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
   const mainMatchNode = createMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
-    if (!node.searchNode.slots)
-      continue
-
+    if (!node.searchNode.slots) continue
     const subtrees = new Map<string, MatchNode>()
     for (const [slotName, slotSearchTree] of node.searchNode.slots)
       subtrees.set(slotName, createMatchPath(slotSearchTree, url))
@@ -103,9 +101,7 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNod
 export function getParamTable(matchNode: MatchNode): ParamTable {
   const paramTable: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (node.dynamicCapture === undefined)
-      continue
-
+    if (!node.dynamicCapture) continue
     const dynamicNode = node.searchNode.anchor
     const paramName = dynamicNode.segment.value
     paramTable[paramName] = node.dynamicCapture
