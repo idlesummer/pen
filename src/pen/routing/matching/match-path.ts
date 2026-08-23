@@ -26,9 +26,9 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   return matchNodeChildren
 }
 
-/* `winner` means a match was found
- * `failed` means can't match further (either url or tree was exhausted)
- * `undefined` means all children were visited but no winner (so try another branch in the parent) */
+/* `winner`    - means a match was found
+ * `failed`    - means can't match further (either url or tree was exhausted)
+ * `undefined` - means all children were visited but no winner (so try another branch in the parent) */
 function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['failed'] | undefined {
   const searchNode = matchNode.searchNode
   if (!nextUrlPart)                                                 // if url exhausted + has a page
