@@ -2,7 +2,7 @@ import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { ParamTable, MatchNode } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchPath, getParamTable, getSlotMatchNodes } from './match-path'
+import { createMatchPath, getParamTable } from './match-path'
 
 type RenderLeaf = {
   routePath: string
@@ -68,6 +68,16 @@ function createSlotRenderNodes(matchNode: MatchNode, url: string[]): SlotRenderN
   }
   for (const _ in slotRenderNodes)  // a bit more efficent than Object.keys(...).length
     return slotRenderNodes
+}
+
+/** Creates a reverse look up for slot-bearing RouteNodes to its corresponding MatchNode. */
+function getSlotMatchNodes(matchNode: MatchNode): Map<RouteNode, MatchNode> {
+  const slotMatchNodes = new Map<RouteNode, MatchNode>()
+  for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
+    if (node.searchNode.slots)
+      slotMatchNodes.set(node.searchNode.anchor, node)
+  }
+  return slotMatchNodes
 }
 
 function createMainRenderNodeChain(mainRenderLeaf: RenderNode, routeNode: RouteNode, url: string[], slotMatchNodes: Map<RouteNode, MatchNode>): RenderNode {
