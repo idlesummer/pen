@@ -1,8 +1,9 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { ParamTable, MatchNode } from './match-path'
+import { traverse } from '@/lib/traverse'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchPath, getParamTable, getSlotMatchNodes } from './match-path'
+import { createMatchPath, getParamTable } from './match-path'
 
 type RenderLeaf = {
   routePath: string
@@ -37,58 +38,93 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   return [renderLeaf, routeNode]
 }
 
-function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: RenderSubtrees): RenderNode {
+function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, renderSubtrees?: RenderSubtrees): RenderNode {
   const { layout, loading, error } = routeNode.modulePaths
-  if (!layout && !loading && !error && !slotRenderNodes)
+  if (!layout && !loading && !error && !renderSubtrees)
     return childRenderNode
 
   const routePath = getRoutePath(routeNode)
-  const slots = slotRenderNodes ?? {} // warn users to not modify prototype chain
+  const slots = renderSubtrees ?? {} // warn users to not modify prototype chain
   slots.children = childRenderNode
   return { routePath, layout, loading, error, slots }
 }
 
-function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode, slotRenderNodeMap?: Map<RouteNode, RenderSubtrees>): RenderNode {
-  let renderNode = renderLeaf
-  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node)) {
-    const slotRenderNodes = slotRenderNodeMap?.get(node)
-    renderNode = wrapRenderNode(node, renderNode, slotRenderNodes)
-  }
-  return renderNode
+type RenderNodeFrame = {
+  routeNode: RouteNode
+  matchNode?: MatchNode
+  renderNode: RenderNode
+  parent?: RenderNodeFrame
+  slotName?: string
+  renderSubtrees?: RenderSubtrees
 }
 
-function createSlotRenderNodeMap(mainMatchPath: MatchNode, url: string[]): Map<RouteNode, RenderSubtrees> {
-  const slotRenderNodesNap = new Map<RouteNode, RenderSubtrees>()
+/** Builds a RenderNode chain using the shared `traverse` utility so slot
+ *  subtrees do not require recursive calls between createRenderNodeChain
+ *  and createRenderSubtrees. */
+function createRenderNodeChain(renderLeaf: RenderNode, routeNode: RouteNode, matchNode: MatchNode, url: string[]): RenderNode {
+  const rootFrame: RenderNodeFrame = { routeNode, matchNode, renderNode: renderLeaf }
 
-  for (const [routeNode, matchNode] of getSlotMatchNodes(mainMatchPath)) {
-    const mainParamTable = getParamTable(matchNode)
-    const slotRenderNodes: RenderSubtrees = {}
+  traverse(rootFrame, {
+    expand: (frame) => {
+      const matched = frame.matchNode?.searchNode.anchor === frame.routeNode
+      const renderSubtrees = matched ? {} : undefined
+      const slotEntries = matched ? [...frame.matchNode!.searchNode.slots ?? []] : []
 
-    for (const [slotName, slotSearchTree] of matchNode.searchNode.slots ?? []) {
-      const slotMatchPath = createMatchPath(slotSearchTree, url)
-      const context = createRenderLeaf(slotMatchPath, mainParamTable)
-      if (context !== undefined)
-        slotRenderNodes[slotName] = createRenderNodeChain(...context)
-    }
-    if (Object.keys(slotRenderNodes).length) {
-      slotRenderNodesNap.set(routeNode, slotRenderNodes)
-      break
-    }
-  }
-  return slotRenderNodesNap
+      const childFrames: RenderNodeFrame[] = []
+      const mainParamTable = matched ? getParamTable(frame.matchNode!) : undefined
+
+      for (const [slotName, slotSearchTree] of slotEntries) {
+        const slotMatchPath = createMatchPath(slotSearchTree, url)
+        const context = createRenderLeaf(slotMatchPath, mainParamTable!)
+        if (context === undefined)
+          continue
+
+        const [slotRenderLeaf, slotRouteNode] = context
+        childFrames.push({ routeNode: slotRouteNode, matchNode: slotMatchPath, renderNode: slotRenderLeaf, parent: frame, slotName })
+      }
+
+      frame.renderSubtrees = renderSubtrees
+
+      frame.renderNode = wrapRenderNode(
+        frame.routeNode,
+        frame.renderNode,
+        Object.keys(renderSubtrees ?? {}).length ? renderSubtrees : undefined,
+      )
+
+      const parentRouteNode = getRouteNodeParentIfNotSlot(frame.routeNode)
+
+      if (parentRouteNode) {
+        frame.routeNode = parentRouteNode
+        if (matched)
+          frame.matchNode = frame.matchNode!.parent
+      }
+
+      if (childFrames.length)
+        return childFrames
+
+      if (parentRouteNode)
+        return [{ ...frame }] // continue stepping up through routeNode levels as a synthetic child
+
+      if (frame.parent)
+        frame.parent.renderSubtrees![frame.slotName!] = frame.renderNode
+
+      return null
+    },
+  })
+
+  return rootFrame.renderNode
 }
 
 /** Returns whether the main children route matched a real page, together with
  *  the render tree. `success` is false for default fallbacks and when nothing
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
-  const url = urlString.split('/')                        // Convert to url string array, url[0] is always '' (root's own position)
-  const mainMatchPath = createMatchPath(searchTree, url)  // Find search node path with params that match the url
+  const url = urlString.split('/') // Convert to url string array, url[0] is always '' (root's own position)
+  const mainMatchPath = createMatchPath(searchTree, url) // Find search node path with params that match the url
   const mainContext = createRenderLeaf(mainMatchPath, {}) // Create the initial render node leaf
-  if (!mainContext) return [false]                        // Return nothing if not even a fallback exists
+  if (!mainContext) return [false] // Return nothing if not even a fallback exists
 
   const [mainRenderLeaf, mainRouteNode] = mainContext
-  const slotRenderNodeMap = createSlotRenderNodeMap(mainMatchPath, url)
-  const renderTree = createRenderNodeChain(mainRenderLeaf, mainRouteNode, slotRenderNodeMap)
+  const renderTree = createRenderNodeChain(mainRenderLeaf, mainRouteNode, mainMatchPath, url)
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
