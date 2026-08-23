@@ -62,27 +62,46 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   return { routePath, layout, loading, error, slots }
 }
 
-function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined, childRenderNode: RenderNode): RenderNode {
-  const aligned = matchNode?.searchNode.anchor === routeNode
-  let slots: SlotRenderNodes | undefined
-
-  if (aligned) {
-    const mainParamTable = getParamTable(matchNode!)
-    const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
-    for (const [slotName, slotMatchNode] of matchNode!.subtrees ?? []) {
-      const context = createRenderLeaf(slotMatchNode, mainParamTable)
-      if (context)
-        slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
-    }
-    if (Object.keys(slotRenderNodes).length)
-      slots = slotRenderNodes
+/** Used only for a slot's own climb: no need to check for further slots
+ *  here, since a slot's chain can never itself contain slots
+ *  (sanitizeRouteTree prunes nested slots at compile time). */
+function climbToSlotBoundary(routeNode: RouteNode, childRenderNode: RenderNode): RenderNode {
+  let renderNode = childRenderNode
+  let currentRouteNode: RouteNode | undefined = routeNode
+  while (currentRouteNode) {
+    renderNode = wrapRenderNode(currentRouteNode, renderNode)
+    currentRouteNode = getRouteNodeParentIfNotSlot(currentRouteNode)
   }
-  const renderNode = wrapRenderNode(routeNode, childRenderNode, slots)
-  const parentRouteNode = getRouteNodeParentIfNotSlot(routeNode)
-  if (!parentRouteNode) return renderNode
+  return renderNode
+}
 
-  const parentMatchNode = aligned ? matchNode!.parent : matchNode
-  return createRenderNode(parentRouteNode, parentMatchNode, renderNode)
+function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined, childRenderNode: RenderNode): RenderNode {
+  let renderNode = childRenderNode
+  let currentRouteNode: RouteNode | undefined = routeNode
+  let currentMatchNode = matchNode
+
+  while (currentRouteNode) {
+    const aligned = currentMatchNode?.searchNode.anchor === currentRouteNode
+    let slots: SlotRenderNodes | undefined
+
+    if (aligned) {
+      const mainParamTable = getParamTable(currentMatchNode!)
+      const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
+      for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
+        const context = createRenderLeaf(slotMatchNode, mainParamTable)
+        if (context)
+          slotRenderNodes[slotName] = climbToSlotBoundary(context[1], context[0])
+      }
+      if (Object.keys(slotRenderNodes).length)
+        slots = slotRenderNodes
+    }
+
+    renderNode = wrapRenderNode(currentRouteNode, renderNode, slots)
+    const parentRouteNode = getRouteNodeParentIfNotSlot(currentRouteNode)
+    currentMatchNode = aligned ? currentMatchNode?.parent : currentMatchNode
+    currentRouteNode = parentRouteNode
+  }
+  return renderNode
 }
 
 /** Returns whether the main children route matched a real page, together with
