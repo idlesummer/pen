@@ -14,9 +14,7 @@ export type MatchNode = {
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
-  if (nextUrlPart === undefined)  // check if URL is exhausted by checking whether the next segment exists
-    return []
-
+  if (!nextUrlPart) return []  // check if URL is exhausted by checking whether the next segment exists
   const parentSearchNode = parent.searchNode
   const matchNodeChildren: MatchNode[] = []
   const staticChild = parentSearchNode.statics?.get(nextUrlPart)  // query url part in next node children
@@ -32,7 +30,7 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
  * `undefined` means all children were visited but no winner (so try another branch in the parent) */
 function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['failed'] | undefined {
   const searchNode = matchNode.searchNode
-  if (nextUrlPart === undefined)  // if url exhausted + has a page
+  if (!nextUrlPart)  // if url exhausted + has a page
     return searchNode.page ? ['winner', searchNode.page] : ['failed']
   if (searchNode.catchall)        // if url not exhausted and catchall
     return ['winner', searchNode.catchall]
