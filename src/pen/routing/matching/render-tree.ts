@@ -69,7 +69,7 @@ function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined
       const context = createRenderLeaf(slotMatchNode, mainParamTable)
       if (context) slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
     }
-    for (const _ in slotRenderNodes)  // a bit more efficient than Object.keys(...).length
+    if (Object.keys(slotRenderNodes).length)
       slots = slotRenderNodes
   }
 
