@@ -74,14 +74,11 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   return bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
 }
 
-/** Wraps createMatchPath, eagerly resolving every slot along the winning
- *  chain so later pipeline stages never need createMatchPath or url again.
- *  Resolves each slot via createMatchPath directly, not by recursing into
- *  createMatchTree itself - a slot's own chain can never itself contain
- *  further slots (sanitizeRouteTree prunes nested slots at compile time),
- *  so there's nothing further a slot's own resolution would need to check for. */
+/** Walks up the winning path, finds slots on each node, creates their
+ *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
   const mainMatchNode = createMatchPath(searchTree, url)
+
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
