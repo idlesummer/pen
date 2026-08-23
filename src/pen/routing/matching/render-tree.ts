@@ -77,7 +77,6 @@ function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined
     if (Object.keys(slotRenderNodes).length)
       slots = slotRenderNodes
   }
-
   const renderNode = wrapRenderNode(routeNode, childRenderNode, slots)
   const parentRouteNode = getRouteNodeParentIfNotSlot(routeNode)
   if (!parentRouteNode) return renderNode
