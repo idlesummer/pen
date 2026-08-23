@@ -55,9 +55,6 @@ function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode?: MatchNode):
   return !bestDefaultNode || candidate.searchNode.staticness > bestDefaultNode.searchNode.staticness
 }
 
-/** Finds the winning MatchNode for one tree: a real match if traversal
- *  found one, or - failing that - whichever failed branch was most
- *  static-preferring. Callers interpret what it resolved to themselves. */
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatchPath: MatchNode | undefined
@@ -95,15 +92,17 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
  *  further slots (sanitizeRouteTree prunes nested slots at compile time),
  *  so there's nothing further a slot's own resolution would need to check for. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
-  const matchNode = createMatchPath(searchTree, url)
-  for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (!node.searchNode.slots) continue
+  const mainMatchNode = createMatchPath(searchTree, url)
+  for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
+    if (!node.searchNode.slots)
+      continue
+
     const slots = new Map<string, MatchNode>()
     for (const [slotName, slotSearchTree] of node.searchNode.slots)
       slots.set(slotName, createMatchPath(slotSearchTree, url))
     node.slots = slots
   }
-  return matchNode
+  return mainMatchNode
 }
 
 /** Assembles the params accumulated by walking matchNode's own chain -
