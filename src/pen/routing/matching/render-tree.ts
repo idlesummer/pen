@@ -27,6 +27,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   const paramTable: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
     if (!node.dynamicCapture) continue
+
     const dynamicNode = node.searchNode.anchor
     const paramName = dynamicNode.segment.value
     paramTable[paramName] = node.dynamicCapture
@@ -91,11 +92,11 @@ function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined
  *  can be rendered. */
 export function createRenderTree(urlString: string, searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const url = urlString.split('/') // Convert to url string array, url[0] is always '' (root's own position)
-  const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
-  const mainContext = createRenderLeaf(mainMatchNode, {}) // Create the initial render node leaf
+  const mainMatchTree = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
+  const mainContext = createRenderLeaf(mainMatchTree , {}) // Create the initial render node leaf
   if (!mainContext) return [false] // Return nothing if not even a fallback exists
 
   const [mainRenderLeaf, mainRouteNode] = mainContext
-  const renderTree = createRenderNode(mainRouteNode, mainMatchNode, mainRenderLeaf)
+  const renderTree = createRenderNode(mainRouteNode, mainMatchTree, mainRenderLeaf)
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
