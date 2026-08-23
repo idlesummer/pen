@@ -9,7 +9,7 @@ export type MatchNode = {
   dynamicCapture?: string           // captured url value for dynamic node
   catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies acceptingNode exists
   parent?: MatchNode
-  subtrees?: Map<string, MatchNode> // each slot's own winning match, resolved eagerly by createMatchTree
+  subtrees?: Map<string, MatchNode> // each slot's own winning match
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
