@@ -60,21 +60,21 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
  *  independent of, and never touching, the main climb. */
 function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined, childRenderNode: RenderNode): RenderNode {
   const aligned = matchNode?.searchNode.anchor === routeNode
-
   let slots: SlotRenderNodes | undefined
+
   if (aligned) {
     const mainParamTable = getParamTable(matchNode!)
     const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
     for (const [slotName, slotMatchNode] of matchNode!.slots ?? []) {
       const context = createRenderLeaf(slotMatchNode, mainParamTable)
-      if (context) slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
+      if (context)
+        slotRenderNodes[slotName] = createRenderNode(context[1], slotMatchNode, context[0])
     }
     if (Object.keys(slotRenderNodes).length)
       slots = slotRenderNodes
   }
 
   const renderNode = wrapRenderNode(routeNode, childRenderNode, slots)
-
   const parentRouteNode = getRouteNodeParentIfNotSlot(routeNode)
   if (!parentRouteNode) return renderNode
 
