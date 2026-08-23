@@ -1,9 +1,10 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { ParamTable, MatchNode } from './match-path'
+import type { MatchNode } from './match-path'
 import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { createMatchTree, getParamTable } from './match-path'
+import { createMatchTree } from './match-path'
 
+type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 type RenderLeaf = {
   routePath: string
   moduleType: 'page' | 'default' // page or default
@@ -37,6 +38,19 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   return [renderLeaf, routeNode]
 }
 
+/** Assembles the params accumulated by walking matchNode's own chain -
+ *  callers combine this with any inherited table themselves. */
+function getParamTable(matchNode: MatchNode): ParamTable {
+  const paramTable: ParamTable = {}
+  for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
+    if (!node.dynamicCapture) continue
+    const dynamicNode = node.searchNode.anchor
+    const paramName = dynamicNode.segment.value
+    paramTable[paramName] = node.dynamicCapture
+  }
+  return paramTable
+}
+
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
   const { layout, loading, error } = routeNode.modulePaths
   if (!layout && !loading && !error && !slotRenderNodes)
@@ -48,16 +62,6 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   return { routePath, layout, loading, error, slots }
 }
 
-/** Climbs from a leaf's RouteNode up to the root, wrapping each ancestor's
- *  layout/loading/error along the way. matchNode rides along only as
- *  auxiliary context: it stays put while routeNode passes through groups
- *  (which have no SearchNode to align to) and only steps to its own
- *  parent once routeNode catches back up to where matchNode is anchored -
- *  so there is one relationship here, not a separate matchNode walk
- *  bridged back in through a routeNode -> matchNode map. Slots (already
- *  resolved by createMatchTree) are built by re-entering this same
- *  function at each slot's own leaf and climbing to its own boundary -
- *  independent of, and never touching, the main climb. */
 function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined, childRenderNode: RenderNode): RenderNode {
   const aligned = matchNode?.searchNode.anchor === routeNode
   let slots: SlotRenderNodes | undefined
