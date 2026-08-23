@@ -5,11 +5,11 @@ import { traverse } from '@/lib/traverse'
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
-  acceptingNode?: RouteNode   // page/catchall of the searchNode, set here so that later pipeline doesn't have to
-  dynamicCapture?: string     // captured url value for dynamic node
-  catchallCapture?: string[]  // captured url tail of this node's catchall child route; implies acceptingNode exists
+  acceptingNode?: RouteNode         // page/catchall of the searchNode, set here so that later pipeline doesn't have to
+  dynamicCapture?: string           // captured url value for dynamic node
+  catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies acceptingNode exists
   parent?: MatchNode
-  subtrees?: Map<string, MatchNode>  // each slot's own winning match, resolved eagerly by createMatchTree
+  subtrees?: Map<string, MatchNode> // each slot's own winning match, resolved eagerly by createMatchTree
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
@@ -33,12 +33,10 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
   const searchNode = matchNode.searchNode
   if (!nextUrlPart)                                                 // if url exhausted + has a page
     return searchNode.page ? ['winner', searchNode.page] : ['failed']
-
-  if (searchNode.catchall)
-    return ['winner', searchNode.catchall]                          // if url not exhausted and catchall
-
-  if (!searchNode.statics?.get(nextUrlPart) && !searchNode.dynamic) // if no child can consume nextUrlPart
-    return ['failed']  // means tree is exhausted (no static/dynamic childen)
+  if (searchNode.catchall)                                          // if url not exhausted and catchall
+    return ['winner', searchNode.catchall]
+  if (!searchNode.statics?.get(nextUrlPart) && !searchNode.dynamic) // if no child can consume nextUrlPart (or tree exhausted)
+    return ['failed']
 }
 
 function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode: MatchNode): boolean {
