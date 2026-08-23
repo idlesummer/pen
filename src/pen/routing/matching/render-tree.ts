@@ -21,6 +21,19 @@ export type RenderNode = RenderLeaf | {
   slots: SlotRenderNodes
 }
 
+/** Assembles the params accumulated by walking matchNode's own chain -
+ *  callers combine this with any inherited table themselves. */
+function getParamTable(matchNode: MatchNode): ParamTable {
+  const paramTable: ParamTable = {}
+  for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
+    if (!node.dynamicCapture) continue
+    const dynamicNode = node.searchNode.anchor
+    const paramName = dynamicNode.segment.value
+    paramTable[paramName] = node.dynamicCapture
+  }
+  return paramTable
+}
+
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const acceptingNode = matchNode.acceptingNode
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
@@ -36,19 +49,6 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   const routePath = getRoutePath(routeNode)
   const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, paramTable }
   return [renderLeaf, routeNode]
-}
-
-/** Assembles the params accumulated by walking matchNode's own chain -
- *  callers combine this with any inherited table themselves. */
-function getParamTable(matchNode: MatchNode): ParamTable {
-  const paramTable: ParamTable = {}
-  for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (!node.dynamicCapture) continue
-    const dynamicNode = node.searchNode.anchor
-    const paramName = dynamicNode.segment.value
-    paramTable[paramName] = node.dynamicCapture
-  }
-  return paramTable
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
