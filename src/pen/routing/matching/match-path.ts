@@ -6,8 +6,10 @@ import { traverse } from '@/lib/traverse'
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
-  contentType?: 'page' | 'default'  // which kind of module contentNode provides
-  contentNode?: RouteNode           // page/catchall accepted by the searchNode, or the nearest default.tsx ancestor if none was found
+  content?: [
+    type: 'page' | 'default',       // which kind of module contentNode provides
+    node: RouteNode,                // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+  ]
   dynamicCapture?: string           // captured url value for dynamic node
   catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies contentType is 'page'
   parent?: MatchNode
@@ -47,7 +49,7 @@ function isBetterStaticNode(candidate: MatchNode, bestDefaultNode: MatchNode): b
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatchPath: MatchNode | undefined
-  let bestStaticPath: MatchNode | undefined  // most static-preferring failed branch seen so far
+  let bestStaticPath: MatchNode | undefined // most static-preferring failed branch seen so far
 
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
     expand: (matchNode) => {
@@ -65,8 +67,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
           bestStaticPath = matchNode
       }
       else if (matchStatus === 'winner') {
-        matchNode.contentType = 'page'
-        matchNode.contentNode = acceptingNode
+        matchNode.content = ['page', acceptingNode]
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
           matchNode.catchallCapture = url.slice(searchNode.urlDepth+1) // capture the remaining params
         bestMatchPath = matchNode
@@ -75,12 +76,10 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     },
   })
   const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
-  if (!matchNode.contentNode) {                       // populate default node if no true match was found
+  if (!matchNode.content) {                       // populate default node if no true match was found
     const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-    if (contentNode) {
-      matchNode.contentType = 'default'
-      matchNode.contentNode = contentNode
-    }
+    if (contentNode)
+      matchNode.content = ['default', contentNode]
   }
   return matchNode
 }
