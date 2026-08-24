@@ -33,9 +33,6 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-/** Returns the leaf's own render content together with the RouteNode it
- *  anchors to - the RouteNode is only for the caller to climb from, and
- *  never touches the RenderLeaf/RenderNode types themselves. */
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const acceptingNode = matchNode.acceptingNode
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
@@ -63,10 +60,6 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   return { routePath, layout, loading, error, slots }
 }
 
-/** Builds a slot's own render node: its leaf content, then climbs to its
- *  slot boundary. No recursive call for further slots - a slot's own chain
- *  can never itself contain slots (sanitizeRouteTree prunes nested slots
- *  at compile time), so there's nothing further to check for here. */
 function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
   const content = createRenderLeaf(matchNode, inheritedParams)
   if (!content) return
@@ -78,11 +71,6 @@ function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable)
   return renderNode
 }
 
-/** Builds matchNode's own render node: its leaf content, then climbs from
- *  the accepting RouteNode toward root, re-checking for slots at every step -
- *  matchNode advances in lockstep with routeNode, only when aligned - since
- *  createMatchTree resolves .subtrees on every node along the winning chain,
- *  not just the leaf. */
 function createRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
   const content = createRenderLeaf(matchNode, inheritedParams)
   if (!content) return
@@ -114,15 +102,8 @@ function createRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): Re
   return renderNode
 }
 
-/** Returns whether the main children route matched a real page, together with
- *  the render tree. `success` is false for default fallbacks and when nothing
- *  can be rendered. Takes an already-normalized url segment array (see
- *  normalizeUrl) - url[0] is always '' (root's own position). */
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
   const renderTree = createRenderNode(mainMatchNode, {})
-
-  return renderTree
-    ? [!!mainMatchNode.acceptingNode, renderTree]
-    : [false] // Return nothing if not even a fallback exists
+  return renderTree ? [!!mainMatchNode.acceptingNode, renderTree] : [false] // Return nothing if not even a fallback exists
 }
