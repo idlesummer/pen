@@ -36,7 +36,7 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
   const searchNode = matchNode.searchNode
   if (!nextUrlPart)                                                 // if url exhausted + has a page
     return searchNode.page ? ['winner', searchNode.page] : ['failed']
-  if (searchNode.catchall)                                          // if url not exhausted and catchall
+  if (searchNode.catchall)                                          // if url not exhausted but has catchall
     return ['winner', searchNode.catchall]
   if (!searchNode.statics?.get(nextUrlPart) && !searchNode.dynamic) // if no child can consume nextUrlPart (or tree exhausted)
     return ['failed']
