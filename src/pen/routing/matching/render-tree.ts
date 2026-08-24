@@ -82,7 +82,8 @@ function createMainRenderNode(mainMatchNode: MatchNode, inheritedParams: ParamTa
   let currentMatchNode: MatchNode | undefined = mainMatchNode
 
   while (currentRouteNode) {
-    const aligned: boolean = currentMatchNode?.searchNode.anchor === currentRouteNode
+    const searchNode: SearchNode | undefined = currentMatchNode?.searchNode
+    const aligned: boolean = searchNode?.anchor === currentRouteNode
     let slots: SlotRenderNodes | undefined
 
     if (aligned) {
