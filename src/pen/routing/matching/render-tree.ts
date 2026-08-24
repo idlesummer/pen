@@ -121,7 +121,8 @@ function createRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): Re
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
   const renderTree = createRenderNode(mainMatchNode, {})
-  if (!renderTree) return [false] // Return nothing if not even a fallback exists
 
-  return [!!mainMatchNode.acceptingNode, renderTree]
+  return renderTree
+    ? [!!mainMatchNode.acceptingNode, renderTree]
+    : [false] // Return nothing if not even a fallback exists
 }
