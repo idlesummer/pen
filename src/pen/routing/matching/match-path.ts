@@ -6,10 +6,10 @@ import { traverse } from '@/lib/traverse'
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
-  acceptingNode?: RouteNode         // page/catchall of the searchNode, set here so that later pipeline doesn't have to
-  defaultNode?: RouteNode           // nearest default.tsx ancestor, resolved when acceptingNode isn't found
+  contentType?: 'page' | 'default'  // which kind of module contentNode provides
+  contentNode?: RouteNode           // page/catchall accepted by the searchNode, or the nearest default.tsx ancestor if none was found
   dynamicCapture?: string           // captured url value for dynamic node
-  catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies acceptingNode exists
+  catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies contentType is 'page'
   parent?: MatchNode
   subtrees?: Map<string, MatchNode> // each slot's own winning match
 }
@@ -65,7 +65,8 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
           bestDefaultPath = matchNode
       }
       else if (matchStatus === 'winner') {
-        matchNode.acceptingNode = acceptingNode
+        matchNode.contentType = 'page'
+        matchNode.contentNode = acceptingNode
         if (acceptingNode === searchNode.catchall)  // if the accepting node was a catchall
           matchNode.catchallCapture = url.slice(searchNode.urlDepth+1) // capture the remaining params
         bestMatchPath = matchNode
@@ -74,8 +75,10 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     },
   })
   const matchNode = bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
-  if (!matchNode.acceptingNode) // populate default node if no true match was found
-    matchNode.defaultNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+  if (!matchNode.contentNode) { // populate default node if no true match was found
+    matchNode.contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+    if (matchNode.contentNode) matchNode.contentType = 'default'
+  }
   return matchNode
 }
 

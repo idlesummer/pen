@@ -34,20 +34,18 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 }
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
-  const acceptingNode = matchNode.acceptingNode
-  const routeNode = acceptingNode ?? matchNode.defaultNode
-  if (!routeNode) return  // return early if no page or default exists
+  const { contentType, contentNode } = matchNode
+  if (!contentNode || !contentType) return  // return early if no page or default exists
 
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
-  if (matchNode.catchallCapture) {                    // implies acceptingNode exists
-    const catchallName = acceptingNode!.segment.value // safe because catchallCapture implies acceptingNode exists
+  if (matchNode.catchallCapture) {                  // implies contentType is 'page'
+    const catchallName = contentNode.segment.value
     params[catchallName] = matchNode.catchallCapture
   }
-  const moduleType = acceptingNode ? 'page' : 'default'
-  const modulePath = routeNode.modulePaths[moduleType]!
-  const routePath = getRoutePath(routeNode)
-  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
-  return [renderLeaf, routeNode]
+  const modulePath = contentNode.modulePaths[contentType]!
+  const routePath = getRoutePath(contentNode)
+  const renderLeaf: RenderLeaf = { moduleType: contentType, modulePath, routePath, params }
+  return [renderLeaf, contentNode]
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
@@ -107,5 +105,5 @@ function createMainRenderNode(mainMatchNode: MatchNode, inheritedParams: ParamTa
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
   const renderTree = createMainRenderNode(mainMatchNode, {})
-  return renderTree ? [!!mainMatchNode.acceptingNode, renderTree] : [false] // Return nothing if not even a fallback exists
+  return renderTree ? [mainMatchNode.contentType === 'page', renderTree] : [false] // Return nothing if not even a fallback exists
 }
