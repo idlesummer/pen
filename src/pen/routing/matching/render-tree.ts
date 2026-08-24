@@ -10,7 +10,7 @@ type RenderLeaf = {
   moduleType: 'page' | 'default' // page or default
   modulePath: string
   params: ParamTable
-  routeNode: RouteNode // seeds the climb in createRenderNode/climbToSlotBoundary
+  routeNode?: RouteNode // seeds the climb in createRenderNode/climbToSlotBoundary; set back to undefined once read, so the returned tree stays JSON.stringify-safe (RouteNode is circular via .parent/.children)
 }
 
 type SlotRenderNodes = Record<string, RenderNode> // contains SlotRenderNode
@@ -85,8 +85,10 @@ function createRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, mat
       const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
       for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
         const leaf = createRenderLeaf(slotMatchNode, mainParamTable)
-        if (leaf)
-          slotRenderNodes[slotName] = climbToSlotBoundary(leaf.routeNode, leaf)
+        if (leaf) {
+          slotRenderNodes[slotName] = climbToSlotBoundary(leaf.routeNode!, leaf)
+          leaf.routeNode = undefined
+        }
       }
       if (Object.keys(slotRenderNodes).length)
         slots = slotRenderNodes
@@ -108,6 +110,7 @@ export function createRenderTree(url: string[], searchTree: SearchNode): [succes
   const mainRenderLeaf = createRenderLeaf(mainMatchTree, {}) // Create the initial render node leaf
   if (!mainRenderLeaf) return [false] // Return nothing if not even a fallback exists
 
-  const renderTree = createRenderNode(mainRenderLeaf.routeNode, mainRenderLeaf, mainMatchTree)
+  const renderTree = createRenderNode(mainRenderLeaf.routeNode!, mainRenderLeaf, mainMatchTree)
+  mainRenderLeaf.routeNode = undefined
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
