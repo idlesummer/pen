@@ -91,7 +91,6 @@ function createRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, mat
       if (Object.keys(slotRenderNodes).length)
         slots = slotRenderNodes
     }
-
     renderNode = wrapRenderNode(currentRouteNode, renderNode, slots)
     const parentRouteNode = getNonSlotParent(currentRouteNode)
     currentMatchNode = aligned ? currentMatchNode?.parent : currentMatchNode
