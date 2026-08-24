@@ -63,9 +63,17 @@ export function getRoutePath(routeNode: RouteNode): string {
 /** The next ancestor to continue climbing to - or undefined if `routeNode`
  *  is itself a slot's own folder, since slots are validated to never nest
  *  and climbing must stop there rather than escape into the owner's tree. */
-export function getTraversableParent(routeNode: RouteNode): RouteNode | undefined {
+export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
   if (routeNode.segment.type !== 'slot')
     return routeNode.parent
+}
+
+/** Finds the nearest ancestor route node with a default module, skipping slot boundaries. */
+export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode | undefined {
+  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node)) {
+    if (node.modulePaths.default)
+      return node
+  }
 }
 
 /** Visits every reachable route node, pruning descendants beneath catch-all routes. */
@@ -75,12 +83,4 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
     expand: (routeNode) =>
       routeNode.segment.type !== 'catchall' ? routeNode.children : [],
   })
-}
-
-/** Finds the nearest ancestor route node with a default module, skipping slot boundaries. */
-export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode | undefined {
-  for (let node: RouteNode | undefined = routeNode; node; node = getTraversableParent(node)) {
-    if (node.modulePaths.default)
-      return node
-  }
 }
