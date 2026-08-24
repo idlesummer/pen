@@ -36,7 +36,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 /** Returns the leaf's own render content together with the RouteNode it
  *  anchors to - the RouteNode is only for the caller to climb from, and
  *  never touches the RenderLeaf/RenderNode types themselves. */
-function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
+function createRenderContent(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const acceptingNode = matchNode.acceptingNode
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   if (!routeNode) return
@@ -68,11 +68,11 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
  *  can never itself contain slots (sanitizeRouteTree prunes nested slots
  *  at compile time), so there's nothing further to check for here. */
 function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
-  const context = createRenderLeaf(matchNode, inheritedParams)
-  if (!context) return
+  const content = createRenderContent(matchNode, inheritedParams)
+  if (!content) return
 
-  const [leaf, leafRouteNode] = context
-  let renderNode: RenderNode = leaf
+  const [renderLeaf, leafRouteNode] = content
+  let renderNode: RenderNode = renderLeaf
   for (let node: RouteNode | undefined = leafRouteNode; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(node, renderNode)
   return renderNode
@@ -84,10 +84,10 @@ function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable)
  *  createMatchTree resolves .subtrees on every node along the winning chain,
  *  not just the leaf. */
 function createRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
-  const context = createRenderLeaf(matchNode, inheritedParams)
-  if (!context) return
+  const content = createRenderContent(matchNode, inheritedParams)
+  if (!content) return
 
-  const [leaf, leafRouteNode] = context
+  const [leaf, leafRouteNode] = content
   let renderNode: RenderNode = leaf
   let currentRouteNode: RouteNode | undefined = leafRouteNode
   let currentMatchNode: MatchNode | undefined = matchNode
