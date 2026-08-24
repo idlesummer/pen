@@ -36,7 +36,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const acceptingNode = matchNode.acceptingNode
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  if (!routeNode) return
+  if (!routeNode) return  // return early if no page or default exists
 
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
   if (matchNode.catchallCapture) {                    // implies acceptingNode exists
