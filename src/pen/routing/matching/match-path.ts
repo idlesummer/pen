@@ -1,11 +1,13 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
+import { findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
   acceptingNode?: RouteNode         // page/catchall of the searchNode, set here so that later pipeline doesn't have to
+  defaultNode?: RouteNode           // nearest default.tsx ancestor, resolved when acceptingNode isn't found
   dynamicCapture?: string           // captured url value for dynamic node
   catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies acceptingNode exists
   parent?: MatchNode
@@ -71,7 +73,10 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       }
     },
   })
-  return bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
+  const matchNode = bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
+  if (!matchNode.acceptingNode)
+    matchNode.defaultNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+  return matchNode
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
