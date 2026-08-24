@@ -39,7 +39,7 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   if (!routeNode) return
 
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
-  if (matchNode.catchallCapture) {  // implies acceptingNode exists
+  if (matchNode.catchallCapture) {                    // implies acceptingNode exists
     const catchallName = acceptingNode!.segment.value // safe because catchallCapture implies acceptingNode exists
     params[catchallName] = matchNode.catchallCapture
   }
