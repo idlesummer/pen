@@ -67,11 +67,8 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
  *  (sanitizeRouteTree prunes nested slots at compile time). */
 function climbToSlotBoundary(routeNode: RouteNode, childRenderNode: RenderNode): RenderNode {
   let renderNode = childRenderNode
-  let currentRouteNode: RouteNode | undefined = routeNode
-  while (currentRouteNode) {
-    renderNode = wrapRenderNode(currentRouteNode, renderNode)
-    currentRouteNode = getRouteNodeParentIfNotSlot(currentRouteNode)
-  }
+  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node))
+    renderNode = wrapRenderNode(node, renderNode)
   return renderNode
 }
 
