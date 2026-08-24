@@ -29,17 +29,18 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   return matchNodeChildren
 }
 
-/* `winner`    - a match was found
- * `failed`    - can't match further (either url or tree was exhausted)
- * `undefined` - all children were visited but no winner (so try another branch in the parent) */
-function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner', RouteNode] | ['failed'] | undefined {
+function getMatchNodeContent(matchNode: MatchNode, nextUrlPart?: string): RouteNode | undefined {
   const searchNode = matchNode.searchNode
-  if (!nextUrlPart)                                                 // if url exhausted + has a page
-    return searchNode.page ? ['winner', searchNode.page] : ['failed']
-  if (searchNode.catchall)                                          // if url not exhausted but has catchall
-    return ['winner', searchNode.catchall]
-  if (!searchNode.statics?.get(nextUrlPart) && !searchNode.dynamic) // if no child can consume nextUrlPart (or tree exhausted)
-    return ['failed']
+  if (!nextUrlPart) return searchNode.page // if url exhausted, this node's own page (if any)
+  return searchNode.catchall               // if url not exhausted, this node's catchall child (if any)
+}
+
+/** Whether a static or dynamic child could still consume nextUrlPart - i.e.
+ *  whether this node should defer to a child instead of being judged itself. */
+function canMatchChild(matchNode: MatchNode, nextUrlPart?: string): boolean {
+  if (!nextUrlPart) return false
+  const searchNode = matchNode.searchNode
+  return !!searchNode.statics?.get(nextUrlPart) || !!searchNode.dynamic
 }
 
 function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
@@ -65,17 +66,17 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const [matchStatus, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
+      const contentNode = getMatchNodeContent(matchNode, nextUrlPart)
 
-      if (matchStatus === 'failed') {
-        if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
-          bestStaticPath = matchNode
-      }
-      else if (matchStatus === 'winner') {
+      if (contentNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leafContent = ['page', acceptingNode, catchallParams]
+        matchNode.leafContent = ['page', contentNode, catchallParams]
         bestMatchPath = matchNode
         return true
+      }
+      else if (!canMatchChild(matchNode, nextUrlPart)) {
+        if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
+          bestStaticPath = matchNode
       }
     },
   })
