@@ -42,8 +42,8 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
     return ['failed']
 }
 
-function isMoreStatic(candidate: MatchNode, bestStaticNode: MatchNode): boolean {
-  return candidate.searchNode.staticness > bestStaticNode.searchNode.staticness
+function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
+  return candidate.searchNode.staticness > current.searchNode.staticness
 }
 
 function resolveDefaultContent(matchNode: MatchNode): ['default', RouteNode] | undefined {
