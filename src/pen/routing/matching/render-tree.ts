@@ -10,6 +10,7 @@ type RenderLeaf = {
   moduleType: 'page' | 'default' // page or default
   modulePath: string
   params: ParamTable
+  routeNode: RouteNode // seeds the climb in createRenderNode/climbToSlotBoundary
 }
 
 type SlotRenderNodes = Record<string, RenderNode> // contains SlotRenderNode
@@ -33,7 +34,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): RenderLeaf | undefined {
   const acceptingNode = matchNode.acceptingNode
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   if (!routeNode) return
@@ -46,8 +47,7 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   const moduleType = acceptingNode ? 'page' : 'default'
   const modulePath = routeNode.modulePaths[moduleType]!
   const routePath = getRoutePath(routeNode)
-  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
-  return [renderLeaf, routeNode]
+  return { moduleType, modulePath, routePath, params, routeNode }
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
@@ -84,9 +84,9 @@ function createRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, mat
       const mainParamTable = getParamTable(currentMatchNode!)
       const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
       for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
-        const context = createRenderLeaf(slotMatchNode, mainParamTable)
-        if (context)
-          slotRenderNodes[slotName] = climbToSlotBoundary(context[1], context[0])
+        const leaf = createRenderLeaf(slotMatchNode, mainParamTable)
+        if (leaf)
+          slotRenderNodes[slotName] = climbToSlotBoundary(leaf.routeNode, leaf)
       }
       if (Object.keys(slotRenderNodes).length)
         slots = slotRenderNodes
@@ -105,10 +105,9 @@ function createRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, mat
  *  normalizeUrl) - url[0] is always '' (root's own position). */
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchTree = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
-  const mainContext = createRenderLeaf(mainMatchTree , {}) // Create the initial render node leaf
-  if (!mainContext) return [false] // Return nothing if not even a fallback exists
+  const mainRenderLeaf = createRenderLeaf(mainMatchTree, {}) // Create the initial render node leaf
+  if (!mainRenderLeaf) return [false] // Return nothing if not even a fallback exists
 
-  const [mainRenderLeaf, mainRouteNode] = mainContext
-  const renderTree = createRenderNode(mainRouteNode, mainRenderLeaf, mainMatchTree)
+  const renderTree = createRenderNode(mainRenderLeaf.routeNode, mainRenderLeaf, mainMatchTree)
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
