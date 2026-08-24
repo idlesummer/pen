@@ -9,7 +9,7 @@ type RenderLeaf = {
   routePath: string
   moduleType: 'page' | 'default' // page or default
   modulePath: string
-  paramTable: ParamTable
+  params: ParamTable
 }
 
 type SlotRenderNodes = Record<string, RenderNode> // contains SlotRenderNode
@@ -23,15 +23,15 @@ export type RenderNode = RenderLeaf | {
 
 /** Assembles the params by walking matchNode's own chain. */
 function getParamTable(matchNode: MatchNode): ParamTable {
-  const paramTable: ParamTable = {}
+  const params: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
     if (!node.dynamicCapture) continue
 
     const dynamicNode = node.searchNode.anchor
     const paramName = dynamicNode.segment.value
-    paramTable[paramName] = node.dynamicCapture
+    params[paramName] = node.dynamicCapture
   }
-  return paramTable
+  return params
 }
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
@@ -39,15 +39,15 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   if (!routeNode) return
 
-  const paramTable = { ...mainParamTable, ...getParamTable(matchNode) }
+  const params = { ...mainParamTable, ...getParamTable(matchNode) }
   if (matchNode.catchallCapture) {  // implies acceptingNode exists
     const catchallName = acceptingNode!.segment.value // safe because catchallCapture implies acceptingNode exists
-    paramTable[catchallName] = matchNode.catchallCapture
+    params[catchallName] = matchNode.catchallCapture
   }
   const moduleType = acceptingNode ? 'page' : 'default'
   const modulePath = routeNode.modulePaths[moduleType]!
   const routePath = getRoutePath(routeNode)
-  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, paramTable }
+  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
   return [renderLeaf, routeNode]
 }
 
