@@ -71,9 +71,9 @@ function climbToSlotBoundary(routeNode: RouteNode, childRenderNode: RenderNode):
   return renderNode
 }
 
-function createRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, matchNode?: MatchNode): RenderNode {
-  let renderNode = childRenderNode
-  let currentRouteNode: RouteNode | undefined = routeNode
+function createRenderNode(childRenderLeaf: RenderLeaf, matchNode?: MatchNode): RenderNode {
+  let renderNode: RenderNode = childRenderLeaf
+  let currentRouteNode: RouteNode | undefined = childRenderLeaf.routeNode
   let currentMatchNode = matchNode
 
   while (currentRouteNode) {
@@ -110,7 +110,7 @@ export function createRenderTree(url: string[], searchTree: SearchNode): [succes
   const mainRenderLeaf = createRenderLeaf(mainMatchTree, {}) // Create the initial render node leaf
   if (!mainRenderLeaf) return [false] // Return nothing if not even a fallback exists
 
-  const renderTree = createRenderNode(mainRenderLeaf.routeNode!, mainRenderLeaf, mainMatchTree)
+  const renderTree = createRenderNode(mainRenderLeaf, mainMatchTree)
   mainRenderLeaf.routeNode = undefined
   return [mainRenderLeaf.moduleType === 'page', renderTree]
 }
