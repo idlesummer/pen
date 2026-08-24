@@ -46,7 +46,8 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   const moduleType = acceptingNode ? 'page' : 'default'
   const modulePath = routeNode.modulePaths[moduleType]!
   const routePath = getRoutePath(routeNode)
-  return [{ moduleType, modulePath, routePath, params }, routeNode]
+  const renderLeaf: RenderLeaf = { moduleType, modulePath, routePath, params }
+  return [renderLeaf, routeNode]
 }
 
 function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
