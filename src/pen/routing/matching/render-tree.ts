@@ -1,7 +1,7 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode } from './match-path'
-import { getRoutePath, getRouteNodeParentIfNotSlot, findDefaultRouteNodeParent } from '../compiling/route-tree'
+import { getRoutePath, getTraversableParent, findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { createMatchTree } from './match-path'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
@@ -66,7 +66,7 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
  *  (sanitizeRouteTree prunes nested slots at compile time). */
 function climbToSlotBoundary(routeNode: RouteNode, childRenderNode: RenderNode): RenderNode {
   let renderNode = childRenderNode
-  for (let node: RouteNode | undefined = routeNode; node; node = getRouteNodeParentIfNotSlot(node))
+  for (let node: RouteNode | undefined = routeNode; node; node = getTraversableParent(node))
     renderNode = wrapRenderNode(node, renderNode)
   return renderNode
 }
@@ -93,7 +93,7 @@ function createRenderNode(routeNode: RouteNode, matchNode: MatchNode | undefined
     }
 
     renderNode = wrapRenderNode(currentRouteNode, renderNode, slots)
-    const parentRouteNode = getRouteNodeParentIfNotSlot(currentRouteNode)
+    const parentRouteNode = getTraversableParent(currentRouteNode)
     currentMatchNode = aligned ? currentMatchNode?.parent : currentMatchNode
     currentRouteNode = parentRouteNode
   }
