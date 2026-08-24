@@ -42,7 +42,7 @@ function classifyMatchNode(matchNode: MatchNode, nextUrlPart?: string): ['winner
     return ['failed']
 }
 
-function isBetterStaticNode(candidate: MatchNode, bestStaticNode: MatchNode): boolean {
+function isMoreStatic(candidate: MatchNode, bestStaticNode: MatchNode): boolean {
   return candidate.searchNode.staticness > bestStaticNode.searchNode.staticness
 }
 
@@ -68,7 +68,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const [matchStatus, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
 
       if (matchStatus === 'failed') {
-        if (!bestStaticPath || isBetterStaticNode(matchNode, bestStaticPath))
+        if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
           bestStaticPath = matchNode
       }
       else if (matchStatus === 'winner') {
