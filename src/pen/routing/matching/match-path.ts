@@ -3,13 +3,15 @@ import type { SearchNode } from '../compiling/search-tree'
 import { findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { traverse } from '@/lib/traverse'
 
+type MatchContent = [
+  type: 'page' | 'default',       // which kind of module contentNode provides
+  node: RouteNode,                // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+]
+
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
-  content?: [
-    type: 'page' | 'default',       // which kind of module contentNode provides
-    node: RouteNode,                // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
-  ]
+  content?: MatchContent
   dynamicCapture?: string           // captured url value for dynamic node
   catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies contentType is 'page'
   parent?: MatchNode
@@ -46,7 +48,7 @@ function isBetterStaticNode(candidate: MatchNode, bestStaticNode: MatchNode): bo
   return candidate.searchNode.staticness > bestStaticNode.searchNode.staticness
 }
 
-function resolveDefaultContent(matchNode: MatchNode): MatchNode['content'] {
+function resolveDefaultContent(matchNode: MatchNode): MatchContent | undefined {
   const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   return contentNode && ['default', contentNode]
 }
