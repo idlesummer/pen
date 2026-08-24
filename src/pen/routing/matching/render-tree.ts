@@ -21,7 +21,6 @@ export type RenderNode = RenderLeaf | {
   slots: SlotRenderNodes
 }
 
-/** Assembles the params by walking matchNode's own chain. */
 function getParamTable(matchNode: MatchNode): ParamTable {
   const params: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
