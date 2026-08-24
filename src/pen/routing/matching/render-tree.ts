@@ -36,7 +36,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 /** Returns the leaf's own render content together with the RouteNode it
  *  anchors to - the RouteNode is only for the caller to climb from, and
  *  never touches the RenderLeaf/RenderNode types themselves. */
-function createRenderContent(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   const acceptingNode = matchNode.acceptingNode
   const routeNode = acceptingNode ?? findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   if (!routeNode) return
@@ -68,7 +68,7 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
  *  can never itself contain slots (sanitizeRouteTree prunes nested slots
  *  at compile time), so there's nothing further to check for here. */
 function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
-  const content = createRenderContent(matchNode, inheritedParams)
+  const content = createRenderLeaf(matchNode, inheritedParams)
   if (!content) return
 
   const [renderLeaf, leafRouteNode] = content
@@ -84,7 +84,7 @@ function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable)
  *  createMatchTree resolves .subtrees on every node along the winning chain,
  *  not just the leaf. */
 function createRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
-  const content = createRenderContent(matchNode, inheritedParams)
+  const content = createRenderLeaf(matchNode, inheritedParams)
   if (!content) return
 
   const [leaf, leafRouteNode] = content
