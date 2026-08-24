@@ -6,12 +6,12 @@ import { traverse } from '@/lib/traverse'
 export type MatchNode = {
   searchNode: SearchNode
   // Match metadata
-  content?: [
-    type: 'page' | 'default',       // which kind of module contentNode provides
+  leafContent?: [
+    type: 'page' | 'default',       // which kind of module the node provides
     node: RouteNode,                // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
-  ]
+    catchallCapture?: string[],     // captured url tail of this node's catchall child route; only set when type is 'page'
+  ]                                 // never set on an ancestor - exactly one node per createMatchPath call gets this
   dynamicCapture?: string           // captured url value for dynamic node
-  catchallCapture?: string[]        // captured url tail of this node's catchall child route; implies contentType is 'page'
   parent?: MatchNode
   subtrees?: Map<string, MatchNode> // each slot's own winning match
 }
@@ -72,15 +72,15 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
           bestStaticPath = matchNode
       }
       else if (matchStatus === 'winner') {
-        matchNode.content = ['page', acceptingNode]
-        matchNode.catchallCapture = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
+        const catchallCapture = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
+        matchNode.leafContent = ['page', acceptingNode, catchallCapture]
         bestMatchPath = matchNode
         return true
       }
     },
   })
   const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
-  matchNode.content ??= resolveDefaultContent(matchNode) // populate default node if no true match was found
+  matchNode.leafContent ??= resolveDefaultContent(matchNode) // populate default node if no true match was found
   return matchNode
 }
 

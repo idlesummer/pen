@@ -34,13 +34,13 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 }
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
-  if (!matchNode.content) return  // return early if no page or default exists
-  const [contentType, contentNode] = matchNode.content
+  if (!matchNode.leafContent) return  // return early if no page or default exists
+  const [contentType, contentNode, catchallCapture] = matchNode.leafContent
 
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
-  if (matchNode.catchallCapture) {                  // implies contentType is 'page'
+  if (catchallCapture) {
     const catchallName = contentNode.segment.value
-    params[catchallName] = matchNode.catchallCapture
+    params[catchallName] = catchallCapture
   }
   const modulePath = contentNode.modulePaths[contentType]!
   const routePath = getRoutePath(contentNode)
@@ -105,5 +105,5 @@ function createMainRenderNode(mainMatchNode: MatchNode, inheritedParams: ParamTa
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
   const renderTree = createMainRenderNode(mainMatchNode, {})
-  return renderTree ? [mainMatchNode.content?.[0] === 'page', renderTree] : [false] // Return nothing if not even a fallback exists
+  return renderTree ? [mainMatchNode.leafContent?.[0] === 'page', renderTree] : [false] // Return nothing if not even a fallback exists
 }
