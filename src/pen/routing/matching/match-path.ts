@@ -47,7 +47,7 @@ function isBetterDefaultNode(candidate: MatchNode, bestDefaultNode: MatchNode): 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatchPath: MatchNode | undefined
-  let bestDefaultPath: MatchNode | undefined  // most static-preferring failed branch seen so far
+  let bestStaticPath: MatchNode | undefined  // most static-preferring failed branch seen so far
 
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
     expand: (matchNode) => {
@@ -61,8 +61,8 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const [matchStatus, acceptingNode] = classifyMatchNode(matchNode, nextUrlPart) ?? []
 
       if (matchStatus === 'failed') {
-        if (!bestDefaultPath || isBetterDefaultNode(matchNode, bestDefaultPath))
-          bestDefaultPath = matchNode
+        if (!bestStaticPath || isBetterDefaultNode(matchNode, bestStaticPath))
+          bestStaticPath = matchNode
       }
       else if (matchStatus === 'winner') {
         matchNode.contentType = 'page'
@@ -74,7 +74,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       }
     },
   })
-  const matchNode = bestMatchPath ?? bestDefaultPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
+  const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
   if (!matchNode.contentNode) { // populate default node if no true match was found
     matchNode.contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
     if (matchNode.contentNode) matchNode.contentType = 'default'
