@@ -77,7 +77,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
   if (!matchNode.contentNode) {                       // populate default node if no true match was found
     const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-    if (matchNode.contentNode) {
+    if (contentNode) {
       matchNode.contentType = 'default'
       matchNode.contentNode = contentNode
     }
