@@ -24,23 +24,23 @@ export type RenderNode = RenderLeaf | {
 function getParamTable(matchNode: MatchNode): ParamTable {
   const params: ParamTable = {}
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (!node.dynamicCapture) continue
+    if (!node.dynamicParam) continue
 
     const dynamicNode = node.searchNode.anchor
     const paramName = dynamicNode.segment.value
-    params[paramName] = node.dynamicCapture
+    params[paramName] = node.dynamicParam
   }
   return params
 }
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   if (!matchNode.leafContent) return  // return early if no page or default exists
-  const [contentType, contentNode, catchallCapture] = matchNode.leafContent
+  const [contentType, contentNode, catchallParams] = matchNode.leafContent
 
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
-  if (catchallCapture) {
+  if (catchallParams) {
     const catchallName = contentNode.segment.value
-    params[catchallName] = catchallCapture
+    params[catchallName] = catchallParams
   }
   const modulePath = contentNode.modulePaths[contentType]!
   const routePath = getRoutePath(contentNode)

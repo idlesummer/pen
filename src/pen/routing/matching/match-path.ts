@@ -9,9 +9,9 @@ export type MatchNode = {
   leafContent?: [
     type: 'page' | 'default',       // which kind of module the node provides
     node: RouteNode,                // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
-    catchallCapture?: string[],     // captured url tail of this node's catchall child route; only set when type is 'page'
+    catchallParams?: string[],      // captured url tail of this node's catchall child route; only set when type is 'page'
   ]                                 // never set on an ancestor - exactly one node per createMatchPath call gets this
-  dynamicCapture?: string           // captured url value for dynamic node
+  dynamicParam?: string             // captured url value for dynamic node
   parent?: MatchNode
   subtrees?: Map<string, MatchNode> // each slot's own winning match
 }
@@ -25,7 +25,7 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   const dynamicChild = parentSearchNode.dynamic
 
   if (staticChild)  matchNodeChildren.push({ searchNode: staticChild, parent })
-  if (dynamicChild) matchNodeChildren.push({ searchNode: dynamicChild, dynamicCapture: nextUrlPart, parent })
+  if (dynamicChild) matchNodeChildren.push({ searchNode: dynamicChild, dynamicParam: nextUrlPart, parent })
   return matchNodeChildren
 }
 
@@ -72,8 +72,8 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
           bestStaticPath = matchNode
       }
       else if (matchStatus === 'winner') {
-        const catchallCapture = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leafContent = ['page', acceptingNode, catchallCapture]
+        const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
+        matchNode.leafContent = ['page', acceptingNode, catchallParams]
         bestMatchPath = matchNode
         return true
       }
