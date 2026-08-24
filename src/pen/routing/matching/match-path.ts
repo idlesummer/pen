@@ -73,8 +73,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       }
       else if (matchStatus === 'winner') {
         matchNode.content = ['page', acceptingNode]
-        if (nextUrlPart)  // winner + urlPart left can only mean catchall (see classifyMatchNode)
-          matchNode.catchallCapture = url.slice(searchNode.urlDepth+1) // capture the remaining params
+        matchNode.catchallCapture = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
         bestMatchPath = matchNode
         return true
       }
