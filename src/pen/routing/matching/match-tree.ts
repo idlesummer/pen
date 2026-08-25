@@ -1,7 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import { findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { hasConsumingChild } from '../compiling/search-tree'
 import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
@@ -28,6 +27,10 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   if (staticChild)  matchNodeChildren.push({ searchNode: staticChild, parent })
   if (dynamicChild) matchNodeChildren.push({ searchNode: dynamicChild, dynamicParam: nextUrlPart, parent })
   return matchNodeChildren
+}
+
+function hasConsumingChild(searchNode: SearchNode, urlPart: string): boolean {
+  return !!(searchNode.dynamic || searchNode.statics?.has(urlPart))
 }
 
 function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
