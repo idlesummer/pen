@@ -80,7 +80,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
-export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
+export function createMatchTree(searchTree: SearchNode, url: string[]): Readonly<MatchNode> {
   const mainMatchNode = createMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
