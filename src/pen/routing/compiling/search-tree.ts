@@ -36,14 +36,16 @@ function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode
 }
 
 function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
+  const { urlDepth, staticness } = parentSearchNode
   const staticSearchNodes = parentSearchNode.statics ??= new Map()
   const staticChildName = childRouteNode.segment.value
-  const createStaticChild = () => createSearchNode(childRouteNode, parentSearchNode.urlDepth+1, parentSearchNode.staticness)
+  const createStaticChild = () => createSearchNode(childRouteNode, urlDepth+1, staticness)
   return staticSearchNodes.getOrInsertComputed(staticChildName, createStaticChild)  // return the static child
 }
 
 function getOrCreateDynamicChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
-  const dynamicSearchNode = parentSearchNode.dynamic ??= createSearchNode(childRouteNode, parentSearchNode.urlDepth+1, parentSearchNode.staticness-1)
+  const { urlDepth, staticness } = parentSearchNode
+  const dynamicSearchNode = parentSearchNode.dynamic ??= createSearchNode(childRouteNode, urlDepth+1, staticness-1)
   const dynamicChildName = childRouteNode.segment.value
   const validationDynamics = parentSearchNode.validation!.dynamics ??= new Map()
   validationDynamics.getOrInsert(dynamicChildName, childRouteNode) // for validation
@@ -51,9 +53,10 @@ function getOrCreateDynamicChild(parentSearchNode: SearchNode, childRouteNode: R
 }
 
 function getOrCreateSlotChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
+  const { urlDepth, staticness } = parentSearchNode
   const slotSearchNodes = parentSearchNode.slots ??= new Map() // slot can't consume url, so it inherits owner's urlDepth and staticness
   const slotChildName = childRouteNode.segment.value
-  const createSlotChild = () => createSearchNode(childRouteNode, parentSearchNode.urlDepth, parentSearchNode.staticness)
+  const createSlotChild = () => createSearchNode(childRouteNode, urlDepth, staticness)
   return slotSearchNodes.getOrInsertComputed(slotChildName, createSlotChild) // return the slot child
 }
 
