@@ -28,3 +28,8 @@ Where anchor looks outward (nearest ancestor-or-self of a real type), page/catch
 ```
 
 Both docs.page and docs.catchall belong to the same SearchNode (docs's), since [...slug] never gets its own anchor - it's transparent, so its page.tsx still lands in docs's territory. Which one gets used at match time depends on whether the URL is exhausted exactly at docs (/docs -> docs.page) or has more segments left (/docs/a/b -> docs.catchall).
+
+- SearchTree: what routes are possible?
+- MatchTree: which possible routes won for this URL?
+- RouteTree: what is actually defined at those routes?
+- RenderTree: combines the winning match with the defined content
