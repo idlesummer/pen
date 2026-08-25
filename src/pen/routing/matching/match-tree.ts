@@ -10,8 +10,8 @@ export type MatchNode = {
   // Match metadata
   dynamicParam?: string             // captured url value for dynamic node
   leaf?: {
-    type: 'page' | 'default'        // which kind of module the node provides
-    node: RouteNode                 // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+    leafType: 'page' | 'default'        // which kind of module the node provides
+    leafNode: RouteNode                 // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
     catchallParams?: string[]       // captured url tail of this node's catchall child route; only set when type is 'page'
   }
 }
@@ -38,8 +38,8 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
 }
 
 function createDefaultLeaf(matchNode: MatchNode): MatchNode['leaf'] {
-  const node = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return node && { type: 'default', node }
+  const leafNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+  return leafNode && { leafType: 'default', leafNode }
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
@@ -56,12 +56,12 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const acceptingNode = nextUrlPart ? searchNode.catchall : searchNode.page
+      const leafNode = nextUrlPart ? searchNode.catchall : searchNode.page  // acceptingNode
 
       // handle winning match if a contentNode exists
-      if (acceptingNode) {
+      if (leafNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leaf = { type: 'page', node: acceptingNode, catchallParams }
+        matchNode.leaf = { leafType: 'page', leafNode, catchallParams }
         bestMatchPath = matchNode
         return true
       }
