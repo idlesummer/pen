@@ -86,7 +86,7 @@ function createMainRenderNode(mainMatchNode: MatchNode, mainParamTable: ParamTab
 
     if (aligned) {
       const mainParamTable = getParamTable(currentMatchNode!)
-      const slotRenderNodes: SlotRenderNodes = {}  // NOTE: never modify prototype chain
+      const slotRenderNodes: SlotRenderNodes = {}
       for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
         const slotRenderNode = createSlotRenderNode(slotMatchNode, mainParamTable)
         if (slotRenderNode) slotRenderNodes[slotName] = slotRenderNode
