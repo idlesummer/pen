@@ -98,6 +98,7 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   return renderNode
 }
 
+/** Creates the render tree for a URL and reports whether it matched a page. */
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
