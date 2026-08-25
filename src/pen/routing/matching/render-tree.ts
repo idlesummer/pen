@@ -90,13 +90,14 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
-  for (let node: RouteNode | undefined = contentNode  ; node; node = getNonSlotParent(node)) {
-    const isMatchNodeAnchor = matchNode?.searchNode.anchor === node
-    const slots = isMatchNodeAnchor ? createSlotRenderNodes(matchNode!) : undefined
-    renderNode = wrapRenderNode(renderNode, node, slots)
-
-    if (isMatchNodeAnchor)
-      matchNode = matchNode?.parent
+  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
+    if (matchNode?.searchNode.anchor !== node)
+      renderNode = wrapRenderNode(renderNode, node)
+    else {
+      const slots = createSlotRenderNodes(matchNode)
+      renderNode = wrapRenderNode(renderNode, node, slots)
+      matchNode = matchNode.parent
+    }
   }
   return renderNode
 }
