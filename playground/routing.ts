@@ -81,7 +81,7 @@ if (diagnostics.length) {
 }
 
 function printRenderNode(node: RenderNode, indent: string): void {
-  if (!('slots' in node)) {
+  if (!('subtrees' in node)) {
     const paramTable = 'paramTable' in node ? node.paramTable : undefined
     const suffix = paramTable && Object.keys(paramTable).length ? ` ${JSON.stringify(paramTable)}` : ''
     console.log(`${indent}${node.moduleType} <- /${node.routePath}${suffix} (${node.modulePath})`)
@@ -90,7 +90,7 @@ function printRenderNode(node: RenderNode, indent: string): void {
 
   const flags = [node.loading && 'loading', node.error && 'error'].filter(Boolean).join('+')
   console.log(`${indent}layout <- /${node.routePath}${flags ? ` (${flags})` : ''}`)
-  for (const [slotName, slotNode] of Object.entries(node.slots)) {
+  for (const [slotName, slotNode] of Object.entries(node.subtrees)) {
     console.log(`${indent}  [${slotName}]`)
     printRenderNode(slotNode, `${indent}    `)
   }

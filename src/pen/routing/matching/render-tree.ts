@@ -12,13 +12,13 @@ type RenderLeaf = {
   params: ParamTable
 }
 
-type SlotRenderNodes = Record<string, RenderNode> // contains SlotRenderNode
+type RenderSubtrees = Record<string, RenderNode>
 export type RenderNode = RenderLeaf | {
   routePath: string
   layout?: string
   loading?: string
   error?: string
-  slots: SlotRenderNodes
+  subtrees: RenderSubtrees
 }
 
 function getParamTable(matchNode: MatchNode): ParamTable {
@@ -48,18 +48,18 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   return [renderLeaf, contentNode]
 }
 
-function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
+function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, subtreeRenderNodes?: RenderSubtrees): RenderNode {
   const { layout, loading, error } = routeNode.modulePaths
-  if (!layout && !loading && !error && !slotRenderNodes)
+  if (!layout && !loading && !error && !subtreeRenderNodes)
     return childRenderNode
 
   const routePath = routeNode.path
-  const slots = slotRenderNodes ?? {} // warn users to not modify prototype chain
-  slots.children = childRenderNode
-  return { routePath, layout, loading, error, slots }
+  const subtrees = subtreeRenderNodes ?? {} // warn users to not modify prototype chain
+  subtrees.children = childRenderNode
+  return { routePath, layout, loading, error, subtrees }
 }
 
-function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable): RenderNode | undefined {
+function createRenderSubtree(matchNode: MatchNode, mainParamTable: ParamTable): RenderNode | undefined {
   const content = createRenderLeaf(matchNode, mainParamTable)
   if (!content) return
 
@@ -82,20 +82,20 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   while (currentRouteNode) {
     const searchNode: SearchNode | undefined = currentMatchNode?.searchNode
     const aligned: boolean = searchNode?.anchor === currentRouteNode
-    let slots: SlotRenderNodes | undefined
+    let subtrees: RenderSubtrees | undefined
 
     if (aligned) {
       const mainParamTable = getParamTable(currentMatchNode!)
-      const slotRenderNodes: SlotRenderNodes = {}
+      const subtreeRenderNodes: RenderSubtrees = {}
       for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
-        const slotRenderNode = createSlotRenderNode(slotMatchNode, mainParamTable)
-        if (slotRenderNode)
-          slotRenderNodes[slotName] = slotRenderNode
+        const subtreeRenderNode = createRenderSubtree(slotMatchNode, mainParamTable)
+        if (subtreeRenderNode)
+          subtreeRenderNodes[slotName] = subtreeRenderNode
       }
-      if (Object.keys(slotRenderNodes).length)
-        slots = slotRenderNodes
+      if (Object.keys(subtreeRenderNodes).length)
+        subtrees = subtreeRenderNodes
     }
-    renderNode = wrapRenderNode(currentRouteNode, renderNode, slots)
+    renderNode = wrapRenderNode(currentRouteNode, renderNode, subtrees)
     const parentRouteNode = getNonSlotParent(currentRouteNode)
     currentMatchNode = aligned ? currentMatchNode?.parent : currentMatchNode
     currentRouteNode = parentRouteNode
