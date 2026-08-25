@@ -35,16 +35,16 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): RenderLeaf | undefined {
   if (!matchNode.leaf) return  // return early if no page or default exists
-  const { leafType, leafNode , catchallParams } = matchNode.leaf
+  const { contentType, contentNode  , catchallParams } = matchNode.leaf
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
 
   if (catchallParams) {
-    const catchallName = leafNode.segment.value
+    const catchallName = contentNode .segment.value
     params[catchallName] = catchallParams
   }
-  const modulePath = leafNode.modulePaths[leafType]!
-  const routePath = leafNode.path
-  return { moduleType: leafType, modulePath, routePath, params }
+  const modulePath = contentNode .modulePaths[contentType]!
+  const routePath = contentNode .path
+  return { moduleType: contentType, modulePath, routePath, params }
 }
 
 function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
@@ -61,9 +61,9 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
   const renderLeaf = createRenderLeaf(matchNode, mainParams)
   if (!renderLeaf) return
 
-  const leafNode = matchNode.leaf!.leafNode
+  const contentNode  = matchNode.leaf!.contentNode
   let renderNode: RenderNode = renderLeaf
-  for (let node: RouteNode | undefined = leafNode ; node; node = getNonSlotParent(node))
+  for (let node: RouteNode | undefined = contentNode  ; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(renderNode, node)
   return renderNode
 }
@@ -85,11 +85,11 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   const renderLeaf = createRenderLeaf(mainMatchNode, {})
   if (!renderLeaf) return
 
-  const leafNode = mainMatchNode.leaf!.leafNode
+  const contentNode  = mainMatchNode.leaf!.contentNode
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
-  for (let node: RouteNode | undefined = leafNode ; node; node = getNonSlotParent(node)) {
+  for (let node: RouteNode | undefined = contentNode  ; node; node = getNonSlotParent(node)) {
     const isMatchNodeAnchor = matchNode?.searchNode.anchor === node
     const slots = isMatchNodeAnchor ? createSlotRenderNodes(matchNode!) : undefined
     renderNode = wrapRenderNode(renderNode, node, slots)
@@ -103,5 +103,5 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
-  return [mainMatchNode.leaf?.leafType === 'page', renderTree]
+  return [mainMatchNode.leaf?.contentType === 'page', renderTree]
 }
