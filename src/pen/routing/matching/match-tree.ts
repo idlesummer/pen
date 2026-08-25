@@ -60,9 +60,8 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 
       // handle winning match if a contentNode exists
       if (contentNode) {
-        const contentType = 'page'
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leaf = { contentType, contentNode, catchallParams }
+        matchNode.leaf = { contentType: 'page', contentNode, catchallParams }
         bestMatchPath = matchNode
         return true
       }
