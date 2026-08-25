@@ -5,15 +5,15 @@ import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
   searchNode: SearchNode
-  // Match metadata
-  leafContent?: [
-    type: 'page' | 'default',       // which kind of module the node provides
-    node: RouteNode,                // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
-    catchallParams?: string[],      // captured url tail of this node's catchall child route; only set when type is 'page'
-  ]                                 // never set on an ancestor - exactly one node per createMatchPath call gets this
-  dynamicParam?: string             // captured url value for dynamic node
   parent?: MatchNode
   subtrees?: Map<string, MatchNode> // each slot's own winning match
+  // Match metadata
+  dynamicParam?: string             // captured url value for dynamic node
+  leaf?: {
+    type: 'page' | 'default'        // which kind of module the node provides
+    node: RouteNode                 // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+    catchallParams?: string[]       // captured url tail of this node's catchall child route; only set when type is 'page'
+  }
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
@@ -37,9 +37,9 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
   return candidate.searchNode.staticness > current.searchNode.staticness
 }
 
-function createDefaultContent(matchNode: MatchNode): ['default', RouteNode] | undefined {
-  const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return contentNode && ['default', contentNode]
+function createDefaultLeaf(matchNode: MatchNode): MatchNode['leaf'] {
+  const node = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+  return node && { type: 'default', node }
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
@@ -56,12 +56,12 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const contentNode = nextUrlPart ? searchNode.catchall : searchNode.page
+      const acceptingNode = nextUrlPart ? searchNode.catchall : searchNode.page
 
       // handle winning match if a contentNode exists
-      if (contentNode) {
+      if (acceptingNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leafContent = ['page', contentNode, catchallParams]
+        matchNode.leaf = { type: 'page', node: acceptingNode, catchallParams }
         bestMatchPath = matchNode
         return true
       }
@@ -74,7 +74,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     },
   })
   const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
-  matchNode.leafContent ??= createDefaultContent(matchNode) // populate default node if no true match was found
+  matchNode.leaf ??= createDefaultLeaf(matchNode)     // populate default node if no true match was found
   return matchNode
 }
 
