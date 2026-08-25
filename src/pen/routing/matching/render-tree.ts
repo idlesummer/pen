@@ -87,8 +87,8 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   const content = createRenderLeaf(mainMatchNode, {})
   if (!content) return
 
-  const [leaf, contentNode] = content
-  let renderNode: RenderNode = leaf
+  const [renderLeaf, contentNode] = content
+  let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
