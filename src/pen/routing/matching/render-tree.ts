@@ -58,15 +58,22 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
   return { routePath, layout, loading, error, slots }
 }
 
+/** Walks routeNode's ancestors, wrapping as it goes. getSlotsAt (when given) is asked,
+ *  at each node, whether slots should attach there - the one piece that differs
+ *  between the main path (has slots) and a slot's own path (never does, by construction). */
+function wrapAlongRoute(leaf: RenderNode, fromRouteNode: RouteNode, getSlotsAt?: (routeNode: RouteNode) => SlotRenderNodes | undefined): RenderNode {
+  let renderNode = leaf
+  for (let node: RouteNode | undefined = fromRouteNode; node; node = getNonSlotParent(node))
+    renderNode = wrapRenderNode(renderNode, node, getSlotsAt?.(node))
+  return renderNode
+}
+
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
   const content = createRenderLeaf(matchNode, mainParams)
   if (!content) return
 
   const [renderLeaf, contentNode] = content
-  let renderNode: RenderNode = renderLeaf
-  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
-    renderNode = wrapRenderNode(renderNode, node)
-  return renderNode
+  return wrapAlongRoute(renderLeaf, contentNode) // slot subtrees are terminal - no nested slots to look up
 }
 
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
@@ -87,17 +94,15 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   if (!content) return
 
   const [renderLeaf, contentNode] = content
-  let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
-  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
+  return wrapAlongRoute(renderLeaf, contentNode, (node) => {
     const isMatchNodeAnchor = matchNode?.searchNode.anchor === node
     const slots = isMatchNodeAnchor ? createSlotRenderNodes(matchNode!) : undefined
-    renderNode = wrapRenderNode(renderNode, node, slots)
     if (isMatchNodeAnchor)
       matchNode = matchNode?.parent
-  }
-  return renderNode
+    return slots
+  })
 }
 
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
