@@ -38,9 +38,8 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
 }
 
 function createDefaultLeaf(matchNode: MatchNode): MatchNode['leaf'] {
-  const contentType = 'default'
   const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return contentNode && { contentType, contentNode }
+  return contentNode && { contentType: 'default', contentNode }
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
