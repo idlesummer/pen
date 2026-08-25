@@ -1,8 +1,8 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchNode } from './match-path'
+import type { MatchNode } from './match-tree'
 import { getRoutePath, getNonSlotParent } from '../compiling/route-tree'
-import { createMatchTree } from './match-path'
+import { createMatchTree } from './match-tree'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 type RenderLeaf = {
