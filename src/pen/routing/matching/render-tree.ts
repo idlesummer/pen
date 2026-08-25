@@ -63,9 +63,9 @@ function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable):
   const content = createRenderLeaf(matchNode, mainParamTable)
   if (!content) return
 
-  const [renderLeaf, leafRouteNode] = content
+  const [renderLeaf, contentNode] = content
   let renderNode: RenderNode = renderLeaf
-  for (let node: RouteNode | undefined = leafRouteNode; node; node = getNonSlotParent(node))
+  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(node, renderNode)
   return renderNode
 }
@@ -80,7 +80,8 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
     if (slotRenderNode)
       slotRenderNodes[slotName] = slotRenderNode
   }
-  return Object.keys(slotRenderNodes).length ? slotRenderNodes : undefined
+  if (Object.keys(slotRenderNodes).length)
+    return slotRenderNodes
 }
 
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
