@@ -10,8 +10,8 @@ export type MatchNode = {
   // Match metadata
   dynamicParam?: string             // captured url value for dynamic node
   leaf?: {
-    contentType: 'page' | 'default'        // which kind of module the node provides
-    contentNode: RouteNode                 // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+    contentType: 'page' | 'default' // which kind of module the node provides
+    contentNode: RouteNode          // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
     catchallParams?: string[]       // captured url tail of this node's catchall child route; only set when type is 'page'
   }
 }
