@@ -3,17 +3,19 @@ import type { SearchNode } from '../compiling/search-tree'
 import { findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { traverse } from '@/lib/traverse'
 
+export type MatchLeaf = {
+  contentType: 'page' | 'default' // content means page/catchall (acceptingNode) or default
+  contentNode: RouteNode          // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+  catchallParams?: string[]       // captured url tail of this node's catchall child route; only set when type is 'page'
+}
+
 export type MatchNode = {
   searchNode: SearchNode
   parent?: MatchNode
   subtrees?: Map<string, MatchNode> // each slot's own winning match
   // Match metadata
   dynamicParam?: string             // captured url value for dynamic node
-  leaf?: {
-    contentType: 'page' | 'default' // content means page/catchall (acceptingNode) or default
-    contentNode: RouteNode          // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
-    catchallParams?: string[]       // captured url tail of this node's catchall child route; only set when type is 'page'
-  }
+  leaf?: MatchLeaf
 }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
@@ -37,7 +39,7 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
   return candidate.searchNode.staticness > current.searchNode.staticness
 }
 
-function createDefaultLeaf(matchNode: MatchNode): MatchNode['leaf'] {
+function createDefaultLeaf(matchNode: MatchNode): MatchLeaf | undefined {
   const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   return contentNode && { contentType: 'default', contentNode }
 }
