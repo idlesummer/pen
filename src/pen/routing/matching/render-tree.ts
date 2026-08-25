@@ -1,7 +1,7 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode } from './match-tree'
-import { getRoutePath, getNonSlotParent } from '../compiling/route-tree'
+import { getNonSlotParent } from '../compiling/route-tree'
 import { createMatchTree } from './match-tree'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
@@ -43,7 +43,7 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
     params[catchallName] = catchallParams
   }
   const modulePath = contentNode.modulePaths[contentType]!
-  const routePath = getRoutePath(contentNode)
+  const routePath = contentNode.path
   const renderLeaf: RenderLeaf = { moduleType: contentType, modulePath, routePath, params }
   return [renderLeaf, contentNode]
 }
@@ -53,7 +53,7 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   if (!layout && !loading && !error && !slotRenderNodes)
     return childRenderNode
 
-  const routePath = getRoutePath(routeNode)
+  const routePath = routeNode.path
   const slots = slotRenderNodes ?? {} // warn users to not modify prototype chain
   slots.children = childRenderNode
   return { routePath, layout, loading, error, slots }

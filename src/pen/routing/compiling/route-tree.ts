@@ -8,6 +8,7 @@ export type RouteModuleType = 'page' | 'default' | 'layout' | 'loading' | 'error
 export type RouteNode = {
   name: string
   segment: Segment
+  path: string                        // this node's route path, e.g. 'blog/[slug]' - '' for root
   modulePaths: Partial<Record<RouteModuleType, string>>
   parent?: RouteNode
   children: RouteNode[]
@@ -27,23 +28,25 @@ function isRouteFilePath(path: string): boolean {
   return fileName.endsWith('.tsx') && ROUTE_MODULE_TYPES.has(routeModuleType)
 }
 
-function createRouteNode(name: string, segment: Segment): RouteNode {
-  return { name, segment, modulePaths: {}, children: [] }
+function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
+  return { name, segment, path, modulePaths: {}, children: [] }
 }
 
 export function createRouteTree(filePaths: string[]): RouteNode {
-  const routeNodeRoot = createRouteNode('', createSegment(''))
+  const routeNodeRoot = createRouteNode('', createSegment(''), '')
   const routeFilePaths = filePaths.filter(isRouteFilePath)  // ignore non-route-module files
 
   treeify(routeNodeRoot, routeFilePaths, sep, {
-    create: (parentRouteNode, { index, parts, path }) => {
+    create: (parentRouteNode, { index, parts, path: filePath }) => {
       const part = parts[index]!      // always defined since `create` only yields existing indices.
       if (index === parts.length-1) { // Create the route module if component is last
         const routeModuleType = createRouteModuleType(part)
-        parentRouteNode.modulePaths[routeModuleType] = path
+        parentRouteNode.modulePaths[routeModuleType] = filePath
       }
-      else if (!isPrivateSegment(part))
-        return createRouteNode(part, createSegment(part))
+      else if (!isPrivateSegment(part)) {
+        const path = parentRouteNode.path ? `${parentRouteNode.path}/${part}` : part
+        return createRouteNode(part, createSegment(part), path)
+      }
     },
     attach: (child, parent) => {
       child.parent = parent
@@ -51,13 +54,6 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     },
   })
   return routeNodeRoot
-}
-
-export function getRoutePath(routeNode: RouteNode): string {
-  const names: string[] = []
-  for (let node: RouteNode | undefined = routeNode; node?.parent; node = node.parent)
-    names.push(node.name)
-  return names.reverse().join('/')
 }
 
 /** The next ancestor to continue climbing to - or undefined if `routeNode`

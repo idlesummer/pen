@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { SearchNode } from './search-tree'
-import { getRoutePath, forEachReachableRouteNode } from './route-tree'
+import { forEachReachableRouteNode } from './route-tree'
 import { forEachSearchNode } from './search-tree'
 
 export type CompileDiagnostic = {
@@ -11,7 +11,7 @@ export type CompileDiagnostic = {
 }
 
 function getDiagnosticPath(routeNode: RouteNode): string {
-  return Object.values(routeNode.modulePaths)[0] ?? getRoutePath(routeNode)
+  return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
 }
 
 export function findNearestSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
@@ -55,7 +55,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         rule: 'non-terminal-catchall',
         severity: 'warning',
         message:
-          `"${getRoutePath(routeNode)}" is a catch-all route and must be terminal, ` +
+          `"${routeNode.path}" is a catch-all route and must be terminal, ` +
           'but has routes nested beneath it that can never be reached',
         files: [getDiagnosticPath(routeNode)],
       })
@@ -67,7 +67,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
           rule: 'nested-slot',
           severity: 'error',
           message:
-            `"${getRoutePath(routeNode)}" is a slot nested inside slot "${getRoutePath(ancestorRouteNode)}" ` +
+            `"${routeNode.path}" is a slot nested inside slot "${ancestorRouteNode.path}" ` +
             '- slot subtrees are terminal and can\'t declare further slots',
           files: [getDiagnosticPath(routeNode)],
         })
