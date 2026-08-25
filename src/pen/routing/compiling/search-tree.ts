@@ -6,7 +6,7 @@ export type SearchNode = {
   urlDepth: number                    // segments consumed to reach this position - 0 at root
   staticness: number                  // how static-preferring the path to this node is; higher is better
   // Accepting route nodes
-  page?: RouteNode                    // checked by classifyMatchNode to decide if this position is a match
+  page?: RouteNode                    // checked during matching to decide if this position is a match
   catchall?: RouteNode                // consuming folder's catch-all page
   // Route types
   slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
@@ -29,6 +29,10 @@ function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode
   const segmentType = routeNode.segment.type
   const routeNodes = segmentType === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
   routeNodes.push(routeNode)
+
+  // first claimant wins - same node validateSearchTree will flag as a duplicate if routeNodes.length > 1
+  if (segmentType === 'catchall') searchNode.catchall ??= routeNode
+  else searchNode.page ??= routeNode
 }
 
 function getOrCreateStaticChild(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {

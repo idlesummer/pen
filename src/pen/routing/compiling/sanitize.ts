@@ -28,15 +28,12 @@ export function sanitizeRouteTree(routeTree: RouteNode) {
   })
 }
 
-/** Collapses each node's validated candidates down to the single value
- *  matching reads, then drops `validation` entirely. Must run after
- *  validateSearchTree, same as sanitizeRouteTree after validateRouteTree. */
+/** Drops each node's `validation` candidates now that validateSearchTree has
+ *  had its look - page/catchall are already live, set as each was collected.
+ *  Must run after validateSearchTree, same as sanitizeRouteTree after
+ *  validateRouteTree. */
 export function sanitizeSearchTree(searchTree: SearchNode) {
   forEachSearchNode(searchTree, (searchNode) => {
-    const pageRouteNode = searchNode.validation?.pages?.[0]
-    const catchallRouteNode = searchNode.validation?.catchalls?.[0]
-    if (pageRouteNode)     searchNode.page = pageRouteNode
-    if (catchallRouteNode) searchNode.catchall = catchallRouteNode
-    delete searchNode.validation
+    searchNode.validation = undefined // cheaper than delete - avoids a hidden-class transition
   })
 }
