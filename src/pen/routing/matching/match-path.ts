@@ -29,14 +29,6 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   return matchNodeChildren
 }
 
-/** Whether a static or dynamic child could still consume nextUrlPart - i.e.
- *  whether this node should defer to a child instead of being judged itself. */
-function canMatchChild(matchNode: MatchNode, nextUrlPart?: string): boolean {
-  if (!nextUrlPart) return false
-  const searchNode = matchNode.searchNode
-  return !!searchNode.statics?.get(nextUrlPart) || !!searchNode.dynamic
-}
-
 function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
   return candidate.searchNode.staticness > current.searchNode.staticness
 }
@@ -62,13 +54,15 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
       const contentNode = nextUrlPart ? searchNode.catchall : searchNode.page
 
+      // handle winning match if a contentNode exists
       if (contentNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
         matchNode.leafContent = ['page', contentNode, catchallParams]
         bestMatchPath = matchNode
         return true
       }
-      else if (!canMatchChild(matchNode, nextUrlPart)) {
+      // handle fallback candidate if URL is exhausted or the current node has no matching child
+      else if (!nextUrlPart || !(searchNode.dynamic || searchNode.statics?.has(nextUrlPart))) {
         if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
           bestStaticPath = matchNode
       }
