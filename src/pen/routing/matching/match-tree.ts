@@ -33,7 +33,7 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
   return candidate.searchNode.staticness > current.searchNode.staticness
 }
 
-function resolveDefaultContent(matchNode: MatchNode): ['default', RouteNode] | undefined {
+function createDefaultContent(matchNode: MatchNode): ['default', RouteNode] | undefined {
   const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   return contentNode && ['default', contentNode]
 }
@@ -70,7 +70,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     },
   })
   const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
-  matchNode.leafContent ??= resolveDefaultContent(matchNode) // populate default node if no true match was found
+  matchNode.leafContent ??= createDefaultContent(matchNode) // populate default node if no true match was found
   return matchNode
 }
 
