@@ -8,7 +8,7 @@ export type RouteModuleType = 'page' | 'default' | 'layout' | 'loading' | 'error
 export type RouteNode = {
   name: string
   segment: Segment
-  path: string                        // this node's route path, e.g. 'blog/[slug]' - '' for root
+  path: string
   modulePaths: Partial<Record<RouteModuleType, string>>
   parent?: RouteNode
   children: RouteNode[]
