@@ -35,16 +35,16 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): RenderLeaf | undefined {
   if (!matchNode.leaf) return  // return early if no page or default exists
-  const { type, node: leafNode , catchallParams } = matchNode.leaf
+  const { leafType, leafNode , catchallParams } = matchNode.leaf
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
 
   if (catchallParams) {
     const catchallName = leafNode.segment.value
     params[catchallName] = catchallParams
   }
-  const modulePath = leafNode.modulePaths[type]!
+  const modulePath = leafNode.modulePaths[leafType]!
   const routePath = leafNode.path
-  return { moduleType: type, modulePath, routePath, params }
+  return { moduleType: leafType, modulePath, routePath, params }
 }
 
 function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
@@ -61,7 +61,7 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
   const renderLeaf = createRenderLeaf(matchNode, mainParams)
   if (!renderLeaf) return
 
-  const { node: leafNode } = matchNode.leaf!
+  const leafNode = matchNode.leaf!.leafNode
   let renderNode: RenderNode = renderLeaf
   for (let node: RouteNode | undefined = leafNode ; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(renderNode, node)
@@ -85,7 +85,7 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   const renderLeaf = createRenderLeaf(mainMatchNode, {})
   if (!renderLeaf) return
 
-  const { node: leafNode } = mainMatchNode.leaf!
+  const leafNode = mainMatchNode.leaf!.leafNode
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
@@ -103,5 +103,5 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
-  return [mainMatchNode.leaf?.type === 'page', renderTree]
+  return [mainMatchNode.leaf?.leafType === 'page', renderTree]
 }
