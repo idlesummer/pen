@@ -66,6 +66,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
         if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
           bestStaticPath = matchNode
       }
+      // else, try another branch in the parent (all children were visited but no winner)
     },
   })
   const matchNode = bestMatchPath ?? bestStaticPath!  // guaranteed since url or tree eventually exhausts (safe to assert)
