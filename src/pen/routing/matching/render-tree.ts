@@ -104,7 +104,7 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
 }
 
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
-  const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
+  const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
-  return renderTree ? [mainMatchNode.leafContent?.[0] === 'page', renderTree] : [false] // Return nothing if not even a fallback exists
+  return [mainMatchNode.leafContent?.[0] === 'page', renderTree]
 }
