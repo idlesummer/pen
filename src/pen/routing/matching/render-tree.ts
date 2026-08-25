@@ -1,6 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchNode } from './match-tree'
+import type { MatchLeaf, MatchNode } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
 import { createMatchTree } from './match-tree'
 
@@ -33,10 +33,9 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): RenderLeaf | undefined {
-  if (!matchNode.leaf) return  // return early if no page or default exists
-  const { contentType, contentNode  , catchallParams } = matchNode.leaf
-  const params = { ...mainParamTable, ...getParamTable(matchNode) }
+function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchLeaf, mainParams: ParamTable): RenderLeaf | undefined {
+  const { contentType, contentNode  , catchallParams } = matchLeaf
+  const params = { ...mainParams, ...getParamTable(matchNode) }
 
   if (catchallParams) {
     const catchallName = contentNode .segment.value
@@ -58,7 +57,8 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
 }
 
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
-  const renderLeaf = createRenderLeaf(matchNode, mainParams)
+  if (!matchNode.leaf) return
+  const renderLeaf = createRenderLeaf(matchNode, matchNode.leaf, mainParams)
   if (!renderLeaf) return
 
   const contentNode  = matchNode.leaf!.contentNode
@@ -82,7 +82,8 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 }
 
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
-  const renderLeaf = createRenderLeaf(mainMatchNode, {})
+  if (!mainMatchNode.leaf) return
+  const renderLeaf = createRenderLeaf(mainMatchNode, mainMatchNode.leaf, {})
   if (!renderLeaf) return
 
   const contentNode  = mainMatchNode.leaf!.contentNode
