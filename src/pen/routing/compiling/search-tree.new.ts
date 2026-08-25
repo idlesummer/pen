@@ -27,9 +27,7 @@ function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: numbe
 function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
   const validation = searchNode.validation!
   const segmentType = routeNode.segment.type
-  const routeNodes = segmentType === 'catchall'
-    ? (validation.catchalls ??= [])
-    : (validation.pages ??= [])
+  const routeNodes = segmentType === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
   routeNodes.push(routeNode)
 
   // first claimant wins - same node validateSearchTree will flag as a duplicate if routeNodes.length > 1
