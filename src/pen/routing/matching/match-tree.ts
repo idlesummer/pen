@@ -1,6 +1,7 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import { findDefaultRouteNodeParent } from '../compiling/route-tree'
+import { hasConsumingChild } from '../compiling/search-tree'
 import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
@@ -62,7 +63,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
         return true
       }
       // handle fallback candidate if URL is exhausted or the current node has no matching child
-      else if (!nextUrlPart || !(searchNode.dynamic || searchNode.statics?.has(nextUrlPart))) {
+      else if (!nextUrlPart || !hasConsumingChild(searchNode, nextUrlPart)) {
         if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
           bestStaticPath = matchNode
       }
