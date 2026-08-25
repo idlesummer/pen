@@ -29,12 +29,6 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   return matchNodeChildren
 }
 
-function getContentNode(matchNode: MatchNode, nextUrlPart?: string): RouteNode | undefined {
-  const searchNode = matchNode.searchNode
-  if (!nextUrlPart) return searchNode.page // if url exhausted, this node's own page (if any)
-  return searchNode.catchall               // if url not exhausted, this node's catchall child (if any)
-}
-
 /** Whether a static or dynamic child could still consume nextUrlPart - i.e.
  *  whether this node should defer to a child instead of being judged itself. */
 function canMatchChild(matchNode: MatchNode, nextUrlPart?: string): boolean {
@@ -66,7 +60,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const contentNode = getContentNode(matchNode, nextUrlPart)
+      const contentNode = nextUrlPart ? searchNode.catchall : searchNode.page
 
       if (contentNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
