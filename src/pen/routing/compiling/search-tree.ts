@@ -24,15 +24,15 @@ function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: numbe
   return { anchor, urlDepth, staticness, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
-function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode) {
-  const validation = searchNode.validation!
-  const segmentType = routeNode.segment.type
-  const routeNodes = segmentType === 'catchall' ? (validation.catchalls ??= []) : (validation.pages ??= [])
-  routeNodes.push(routeNode)
-
-  // first claimant wins - same node validateSearchTree will flag as a duplicate if routeNodes.length > 1
-  if (segmentType === 'catchall') searchNode.catchall ??= routeNode
-  else searchNode.page ??= routeNode
+function addAcceptingRouteNode(searchNode: SearchNode, routeNode: RouteNode) {
+  if (routeNode.segment.type === 'catchall') {
+    (searchNode.validation!.catchalls ??= []).push(routeNode)
+    searchNode.catchall ??= routeNode
+  }
+  else {
+    (searchNode.validation!.pages ??= []).push(routeNode)
+    searchNode.page ??= routeNode
+  }
 }
 
 function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
@@ -67,8 +67,8 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   traverse(routeTree, {
     visit: (routeNode) => { // visit adds its accepting-route data to it.
       if (!routeNode.modulePaths.page) return
-      const parentSearchNode = searchNodeMap.get(routeNode)!
-      collectAcceptingRouteNodes(parentSearchNode, routeNode)
+      const searchNode = searchNodeMap.get(routeNode)!
+      addAcceptingRouteNode(searchNode, routeNode)
     },
     expand: (routeNode) => routeNode.children,
     attach: (childRouteNode, parentRouteNode) => { // attach creates each child's search node in the map
@@ -77,7 +77,6 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
       searchNodeMap.set(childRouteNode, childSearchNode)
     },
   })
-
   return searchTree
 }
 
