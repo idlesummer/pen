@@ -70,8 +70,8 @@ function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable):
   return renderNode
 }
 
-function createMainRenderNode(mainMatchNode: MatchNode, mainParamTable: ParamTable): RenderNode | undefined {
-  const content = createRenderLeaf(mainMatchNode, mainParamTable)
+function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
+  const content = createRenderLeaf(mainMatchNode, {})
   if (!content) return
 
   const [leaf, leafRouteNode] = content
@@ -89,7 +89,8 @@ function createMainRenderNode(mainMatchNode: MatchNode, mainParamTable: ParamTab
       const slotRenderNodes: SlotRenderNodes = {}
       for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
         const slotRenderNode = createSlotRenderNode(slotMatchNode, mainParamTable)
-        if (slotRenderNode) slotRenderNodes[slotName] = slotRenderNode
+        if (slotRenderNode)
+          slotRenderNodes[slotName] = slotRenderNode
       }
       if (Object.keys(slotRenderNodes).length)
         slots = slotRenderNodes
@@ -104,6 +105,6 @@ function createMainRenderNode(mainMatchNode: MatchNode, mainParamTable: ParamTab
 
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url) // Find search node path with params that match the url, slots resolved eagerly
-  const renderTree = createMainRenderNode(mainMatchNode, {})
+  const renderTree = createMainRenderNode(mainMatchNode)
   return renderTree ? [mainMatchNode.leafContent?.[0] === 'page', renderTree] : [false] // Return nothing if not even a fallback exists
 }
