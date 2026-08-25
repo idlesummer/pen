@@ -58,8 +58,8 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
   return { routePath, layout, loading, error, slots }
 }
 
-function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable): RenderNode | undefined {
-  const content = createRenderLeaf(matchNode, mainParamTable)
+function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
+  const content = createRenderLeaf(matchNode, mainParams)
   if (!content) return
 
   const [renderLeaf, contentNode] = content
