@@ -59,8 +59,8 @@ function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotR
   return { routePath, layout, loading, error, slots }
 }
 
-function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
-  const content = createRenderLeaf(matchNode, inheritedParams)
+function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable): RenderNode | undefined {
+  const content = createRenderLeaf(matchNode, mainParamTable)
   if (!content) return
 
   const [renderLeaf, leafRouteNode] = content
@@ -70,8 +70,8 @@ function createSlotRenderNode(matchNode: MatchNode, inheritedParams: ParamTable)
   return renderNode
 }
 
-function createMainRenderNode(mainMatchNode: MatchNode, inheritedParams: ParamTable): RenderNode | undefined {
-  const content = createRenderLeaf(mainMatchNode, inheritedParams)
+function createMainRenderNode(mainMatchNode: MatchNode, mainParamTable: ParamTable): RenderNode | undefined {
+  const content = createRenderLeaf(mainMatchNode, mainParamTable)
   if (!content) return
 
   const [leaf, leafRouteNode] = content
