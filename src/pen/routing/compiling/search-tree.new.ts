@@ -46,7 +46,7 @@ function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: Rou
       return parentSearchNode // inherits parents parent search node if catchall/group/malformed
 
     case 'static': {
-      const createStatic = () => createSearchNode(childRouteNode, urlDepth + 1, staticness)
+      const createStatic = () => createSearchNode(childRouteNode, urlDepth+1, staticness)
       return (parentSearchNode.statics ??= new Map()).getOrInsertComputed(segmentName, createStatic)
     }
     case 'dynamic': {
