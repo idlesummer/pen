@@ -29,7 +29,7 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   return matchNodeChildren
 }
 
-function getMatchNodeContent(matchNode: MatchNode, nextUrlPart?: string): RouteNode | undefined {
+function getContentNode(matchNode: MatchNode, nextUrlPart?: string): RouteNode | undefined {
   const searchNode = matchNode.searchNode
   if (!nextUrlPart) return searchNode.page // if url exhausted, this node's own page (if any)
   return searchNode.catchall               // if url not exhausted, this node's catchall child (if any)
