@@ -34,15 +34,15 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 }
 
 function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchLeaf, mainParams: ParamTable): RenderLeaf {
-  const { contentType, contentNode  , catchallParams } = matchLeaf
+  const { contentType, contentNode, catchallParams } = matchLeaf
   const params = { ...mainParams, ...getParamTable(matchNode) }
 
   if (catchallParams) {
     const catchallName = contentNode .segment.value
     params[catchallName] = catchallParams
   }
-  const modulePath = contentNode .modulePaths[contentType]!
-  const routePath = contentNode .path
+  const modulePath = contentNode.modulePaths[contentType]!
+  const routePath = contentNode.path
   return { moduleType: contentType, modulePath, routePath, params }
 }
 
