@@ -32,7 +32,7 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
-export function createRouteTree(filePaths: string[]): RouteNode {
+export function createRouteTree(filePaths: string[]): Readonly<RouteNode> {
   const routeNodeRoot = createRouteNode('', createSegment(''), '')
   const routeFilePaths = filePaths.filter(isRouteFilePath)  // ignore non-route-module files
 
