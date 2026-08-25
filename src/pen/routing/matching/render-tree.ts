@@ -70,35 +70,33 @@ function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable):
   return renderNode
 }
 
+function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
+  if (!matchNode.subtrees) return
+  const mainParamTable = getParamTable(matchNode)
+  const slotRenderNodes: SlotRenderNodes = {}
+
+  for (const [slotName, slotMatchNode] of matchNode.subtrees) {
+    const slotRenderNode = createSlotRenderNode(slotMatchNode, mainParamTable)
+    if (slotRenderNode)
+      slotRenderNodes[slotName] = slotRenderNode
+  }
+  return Object.keys(slotRenderNodes).length ? slotRenderNodes : undefined
+}
+
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
   const content = createRenderLeaf(mainMatchNode, {})
   if (!content) return
 
-  const [leaf, leafRouteNode] = content
+  const [leaf, contentNode] = content
   let renderNode: RenderNode = leaf
-  let currentRouteNode: RouteNode | undefined = leafRouteNode
-  let currentMatchNode: MatchNode | undefined = mainMatchNode
+  let matchNode: MatchNode | undefined = mainMatchNode
 
-  while (currentRouteNode) {
-    const searchNode: SearchNode | undefined = currentMatchNode?.searchNode
-    const aligned: boolean = searchNode?.anchor === currentRouteNode
-    let slots: SlotRenderNodes | undefined
-
-    if (aligned) {
-      const mainParamTable = getParamTable(currentMatchNode!)
-      const slotRenderNodes: SlotRenderNodes = {}
-      for (const [slotName, slotMatchNode] of currentMatchNode!.subtrees ?? []) {
-        const slotRenderNode = createSlotRenderNode(slotMatchNode, mainParamTable)
-        if (slotRenderNode)
-          slotRenderNodes[slotName] = slotRenderNode
-      }
-      if (Object.keys(slotRenderNodes).length)
-        slots = slotRenderNodes
-    }
-    renderNode = wrapRenderNode(currentRouteNode, renderNode, slots)
-    const parentRouteNode = getNonSlotParent(currentRouteNode)
-    currentMatchNode = aligned ? currentMatchNode?.parent : currentMatchNode
-    currentRouteNode = parentRouteNode
+  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
+    const isMatchNodeAnchor = matchNode?.searchNode.anchor === node
+    const slots = isMatchNodeAnchor ? createSlotRenderNodes(matchNode!) : undefined
+    renderNode = wrapRenderNode(node, renderNode, slots)
+    if (isMatchNodeAnchor)
+      matchNode = matchNode?.parent
   }
   return renderNode
 }
