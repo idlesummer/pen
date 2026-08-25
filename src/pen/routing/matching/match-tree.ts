@@ -10,8 +10,8 @@ export type MatchNode = {
   // Match metadata
   dynamicParam?: string             // captured url value for dynamic node
   leaf?: {
-    leafType: 'page' | 'default'        // which kind of module the node provides
-    leafNode: RouteNode                 // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
+    contentType: 'page' | 'default'        // which kind of module the node provides
+    contentNode: RouteNode                 // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
     catchallParams?: string[]       // captured url tail of this node's catchall child route; only set when type is 'page'
   }
 }
@@ -38,8 +38,8 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
 }
 
 function createDefaultLeaf(matchNode: MatchNode): MatchNode['leaf'] {
-  const leafNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return leafNode && { leafType: 'default', leafNode }
+  const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+  return contentNode && { contentType: 'default', contentNode }
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
@@ -56,12 +56,12 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const leafNode = nextUrlPart ? searchNode.catchall : searchNode.page  // acceptingNode
+      const contentNode = nextUrlPart ? searchNode.catchall : searchNode.page  // acceptingNode
 
       // handle winning match if a contentNode exists
-      if (leafNode) {
+      if (contentNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leaf = { leafType: 'page', leafNode, catchallParams }
+        matchNode.leaf = { contentType: 'page', contentNode, catchallParams }
         bestMatchPath = matchNode
         return true
       }
