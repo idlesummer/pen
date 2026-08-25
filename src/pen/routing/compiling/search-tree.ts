@@ -80,6 +80,11 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   return searchTree
 }
 
+/** Check if a child can consume the next URL part. */
+export function hasConsumingChild(searchNode: SearchNode, urlPart: string): boolean {
+  return !!(searchNode.dynamic || searchNode.statics?.has(urlPart))
+}
+
 export function forEachSearchNode(searchTree: SearchNode, visit: (searchNode: SearchNode) => void) {
   traverse(searchTree, {
     visit,
