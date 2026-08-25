@@ -36,8 +36,8 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
   if (!matchNode.leafContent) return  // return early if no page or default exists
   const [contentType, contentNode, catchallParams] = matchNode.leafContent
-
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
+
   if (catchallParams) {
     const catchallName = contentNode.segment.value
     params[catchallName] = catchallParams
