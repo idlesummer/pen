@@ -82,7 +82,7 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
   if (!mainMatchNode.leaf) return
   const renderLeaf = createRenderLeaf(mainMatchNode, mainMatchNode.leaf, {})
-  const contentNode  = mainMatchNode.leaf!.contentNode
+  const contentNode  = mainMatchNode.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
