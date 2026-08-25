@@ -38,8 +38,9 @@ function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
 }
 
 function createDefaultLeaf(matchNode: MatchNode): MatchNode['leaf'] {
+  const contentType = 'default'
   const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return contentNode && { contentType: 'default', contentNode }
+  return contentNode && { contentType, contentNode }
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
@@ -60,8 +61,9 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 
       // handle winning match if a contentNode exists
       if (contentNode) {
+        const contentType = 'page'
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.leaf = { contentType: 'page', contentNode, catchallParams }
+        matchNode.leaf = { contentType, contentNode, catchallParams }
         bestMatchPath = matchNode
         return true
       }
