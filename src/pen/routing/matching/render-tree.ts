@@ -62,7 +62,7 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
   const contentNode  = matchNode.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
 
-  for (let node: RouteNode | undefined = contentNode  ; node; node = getNonSlotParent(node))
+  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(renderNode, node)
   return renderNode
 }
