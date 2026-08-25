@@ -94,6 +94,7 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
     const isMatchNodeAnchor = matchNode?.searchNode.anchor === node
     const slots = isMatchNodeAnchor ? createSlotRenderNodes(matchNode!) : undefined
     renderNode = wrapRenderNode(renderNode, node, slots)
+
     if (isMatchNodeAnchor)
       matchNode = matchNode?.parent
   }
