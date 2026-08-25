@@ -38,24 +38,24 @@ function collectAcceptingRouteNodes(searchNode: SearchNode, routeNode: RouteNode
 }
 
 function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
-  const { type: segmentType, value: segmentName } = childRouteNode.segment
   const { urlDepth, staticness } = parentSearchNode
+  const segment = childRouteNode.segment
 
-  switch (segmentType) {
+  switch (segment.type) {
     default:
       return parentSearchNode // inherits parents parent search node if catchall/group/malformed
 
     case 'static': {
       const createStatic = () => createSearchNode(childRouteNode, urlDepth+1, staticness)
-      return (parentSearchNode.statics ??= new Map()).getOrInsertComputed(segmentName, createStatic)
+      return (parentSearchNode.statics ??= new Map()).getOrInsertComputed(segment.value, createStatic)
     }
     case 'dynamic': {
-      (parentSearchNode.validation!.dynamics ??= new Map()).getOrInsert(segmentName, childRouteNode) // for validation
+      (parentSearchNode.validation!.dynamics ??= new Map()).getOrInsert(segment.value, childRouteNode) // for validation
       return parentSearchNode.dynamic ??= createSearchNode(childRouteNode, urlDepth+1, staticness-1)
     }
     case 'slot': {  // slot can't consume url, so it inherits owner's urlDepth and staticness
       const createSlotNode = () => createSearchNode(childRouteNode, urlDepth, staticness)
-      return (parentSearchNode.slots ??= new Map()).getOrInsertComputed(segmentName, createSlotNode)
+      return (parentSearchNode.slots ??= new Map()).getOrInsertComputed(segment.value, createSlotNode)
     }
   }
 }
@@ -69,8 +69,8 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   traverse(routeTree, {
     visit: (routeNode) => { // visit adds its accepting-route data to it.
       if (!routeNode.modulePaths.page) return
-      const searchNode = searchNodeMap.get(routeNode)!
-      collectAcceptingRouteNodes(searchNode, routeNode)
+      const parentSearchNode = searchNodeMap.get(routeNode)!
+      collectAcceptingRouteNodes(parentSearchNode, routeNode)
     },
     expand: (routeNode) => routeNode.children,
     attach: (childRouteNode, parentRouteNode) => { // attach creates each child's search node in the map
