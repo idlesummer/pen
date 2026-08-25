@@ -59,10 +59,9 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
   if (!matchNode.leaf) return
   const renderLeaf = createRenderLeaf(matchNode, matchNode.leaf, mainParams)
-  if (!renderLeaf) return
-
   const contentNode  = matchNode.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
+
   for (let node: RouteNode | undefined = contentNode  ; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(renderNode, node)
   return renderNode
