@@ -33,7 +33,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [RenderLeaf, RouteNode] | undefined {
+function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): RenderLeaf | undefined {
   if (!matchNode.leafContent) return  // return early if no page or default exists
   const [contentType, contentNode, catchallParams] = matchNode.leafContent
   const params = { ...mainParamTable, ...getParamTable(matchNode) }
@@ -44,8 +44,7 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   }
   const modulePath = contentNode.modulePaths[contentType]!
   const routePath = contentNode.path
-  const renderLeaf: RenderLeaf = { moduleType: contentType, modulePath, routePath, params }
-  return [renderLeaf, contentNode]
+  return { moduleType: contentType, modulePath, routePath, params }
 }
 
 function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
@@ -59,10 +58,10 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
 }
 
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
-  const content = createRenderLeaf(matchNode, mainParams)
-  if (!content) return
+  const renderLeaf = createRenderLeaf(matchNode, mainParams)
+  if (!renderLeaf) return
 
-  const [renderLeaf, contentNode] = content
+  const [, contentNode] = matchNode.leafContent!
   let renderNode: RenderNode = renderLeaf
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(renderNode, node)
@@ -83,10 +82,10 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 }
 
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
-  const content = createRenderLeaf(mainMatchNode, {})
-  if (!content) return
+  const renderLeaf = createRenderLeaf(mainMatchNode, {})
+  if (!renderLeaf) return
 
-  const [renderLeaf, contentNode] = content
+  const [, contentNode] = mainMatchNode.leafContent!
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
