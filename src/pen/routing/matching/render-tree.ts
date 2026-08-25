@@ -73,15 +73,14 @@ function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable):
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
   if (!matchNode.subtrees) return
   const mainParamTable = getParamTable(matchNode)
-  const slotRenderNodes: SlotRenderNodes = {}
+  const slotNodes: SlotRenderNodes = {}
 
   for (const [slotName, slotMatchNode] of matchNode.subtrees) {
-    const slotRenderNode = createSlotRenderNode(slotMatchNode, mainParamTable)
-    if (slotRenderNode)
-      slotRenderNodes[slotName] = slotRenderNode
+    const slotNode = createSlotRenderNode(slotMatchNode, mainParamTable)
+    if (slotNode) slotNodes[slotName] = slotNode
   }
-  if (Object.keys(slotRenderNodes).length)
-    return slotRenderNodes
+  if (Object.keys(slotNodes).length)
+    return slotNodes
 }
 
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
