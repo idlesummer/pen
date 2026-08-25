@@ -48,14 +48,13 @@ function createRenderLeaf(matchNode: MatchNode, mainParamTable: ParamTable): [Re
   return [renderLeaf, contentNode]
 }
 
-function wrapRenderNode(routeNode: RouteNode, childRenderNode: RenderNode, slotRenderNodes?: SlotRenderNodes): RenderNode {
+function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
   const { layout, loading, error } = routeNode.modulePaths
-  if (!layout && !loading && !error && !slotRenderNodes)
-    return childRenderNode
+  if (!layout && !loading && !error && !slots)
+    return renderNode
 
-  const routePath = routeNode.path
-  const slots = slotRenderNodes ?? {} // warn users to not modify prototype chain
-  slots.children = childRenderNode
+  const routePath = routeNode.path;
+  (slots ??= {}).children = renderNode
   return { routePath, layout, loading, error, slots }
 }
 
@@ -66,7 +65,7 @@ function createSlotRenderNode(matchNode: MatchNode, mainParamTable: ParamTable):
   const [renderLeaf, contentNode] = content
   let renderNode: RenderNode = renderLeaf
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
-    renderNode = wrapRenderNode(node, renderNode)
+    renderNode = wrapRenderNode(renderNode, node)
   return renderNode
 }
 
@@ -94,7 +93,7 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
     const isMatchNodeAnchor = matchNode?.searchNode.anchor === node
     const slots = isMatchNodeAnchor ? createSlotRenderNodes(matchNode!) : undefined
-    renderNode = wrapRenderNode(node, renderNode, slots)
+    renderNode = wrapRenderNode(renderNode, node, slots)
     if (isMatchNodeAnchor)
       matchNode = matchNode?.parent
   }
