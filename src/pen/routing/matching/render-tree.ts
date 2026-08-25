@@ -92,7 +92,7 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
     else {
       const slots = createSlotRenderNodes(matchNode)
       renderNode = wrapRenderNode(renderNode, node, slots)
-      matchNode = matchNode.parent
+      matchNode = matchNode.parent  // update matchNode if an anchor is found
     }
   }
   return renderNode
