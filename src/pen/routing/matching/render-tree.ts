@@ -33,7 +33,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchLeaf, mainParams: ParamTable): RenderLeaf | undefined {
+function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchLeaf, mainParams: ParamTable): RenderLeaf {
   const { contentType, contentNode  , catchallParams } = matchLeaf
   const params = { ...mainParams, ...getParamTable(matchNode) }
 
@@ -61,7 +61,7 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
   const renderLeaf = createRenderLeaf(matchNode, matchNode.leaf, mainParams)
   if (!renderLeaf) return
 
-  const contentNode  = matchNode.leaf!.contentNode
+  const contentNode  = matchNode.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
   for (let node: RouteNode | undefined = contentNode  ; node; node = getNonSlotParent(node))
     renderNode = wrapRenderNode(renderNode, node)
