@@ -1,18 +1,7 @@
 import type { RouteNode } from './route-tree'
-import type { SearchNode } from './search-tree'
+import type { CompileDiagnostic } from './diagnostic'
+import { getDiagnosticPath } from './diagnostic'
 import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
-import { forEachSearchNode } from './search-tree'
-
-export type CompileDiagnostic = {
-  rule: string
-  severity: 'error' | 'warning'
-  message: string
-  files: string[]
-}
-
-function getDiagnosticPath(routeNode: RouteNode): string {
-  return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
-}
 
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
   const params = new Set<string>()
@@ -73,50 +62,6 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         severity: 'error',
         message: `"${paramName}" is used more than once as a dynamic segment name in this route's path`,
         files: [getDiagnosticPath(routeNode)],
-      })
-    }
-  })
-  return diagnostics
-}
-
-function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
-  if (!routeNodes) return
-  if (routeNodes.length < 2) return
-  return routeNodes.map(routeNode => routeNode.modulePaths.page!)
-}
-
-/** Runs relational validation between routes sharing the same URL position. */
-export function validateSearchTree(searchTree: SearchNode): CompileDiagnostic[] {
-  const diagnostics: CompileDiagnostic[] = []
-
-  forEachSearchNode(searchTree, (searchNode) => {
-    const validation = searchNode.validation
-    const pageConflicts = findConflictingRouteFiles(validation?.pages)
-    if (pageConflicts) {
-      diagnostics.push({
-        rule: 'duplicate-page-route',
-        severity: 'error',
-        message: 'multiple pages resolve to the same URL pattern',
-        files: pageConflicts,
-      })
-    }
-    const catchallConflicts = findConflictingRouteFiles(validation?.catchalls)
-    if (catchallConflicts) {
-      diagnostics.push({
-        rule: 'duplicate-catchall-route',
-        severity: 'error',
-        message: 'multiple catch-all pages resolve to the same URL pattern',
-        files: catchallConflicts,
-      })
-    }
-    const dynamicRoutes = validation?.dynamics
-    if (dynamicRoutes && dynamicRoutes.size > 1) {
-      const params = [...dynamicRoutes.keys()]
-      diagnostics.push({
-        rule: 'param-name-clash',
-        severity: 'error',
-        message: `two routes disagree on what to call the same URL parameter: ${params.join(' vs ')}`,
-        files: [...dynamicRoutes.values()].map(getDiagnosticPath),
       })
     }
   })
