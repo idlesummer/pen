@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { SearchNode } from './search-tree'
-import { forEachReachableRouteNode } from './route-tree'
+import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
 import { forEachSearchNode } from './search-tree'
 
 export type CompileDiagnostic = {
@@ -12,13 +12,6 @@ export type CompileDiagnostic = {
 
 function getDiagnosticPath(routeNode: RouteNode): string {
   return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
-}
-
-export function findNearestSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
-  for (let node = routeNode.parent; node; node = node.parent) {
-    if (node.segment.type === 'slot')
-      return node
-  }
 }
 
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
@@ -61,7 +54,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
       })
     }
     if (segmentType === 'slot') {
-      const ancestorRouteNode = findNearestSlotAncestor(routeNode)
+      const ancestorRouteNode = getSlotAncestor(routeNode)
       if (ancestorRouteNode) {
         diagnostics.push({
           rule: 'nested-slot',

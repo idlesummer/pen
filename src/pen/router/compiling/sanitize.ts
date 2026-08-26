@@ -1,8 +1,8 @@
 import type { RouteNode } from './route-tree.js'
 import type { SearchNode } from './search-tree.js'
 import { traverse } from '@/lib/traverse.js'
+import { getSlotAncestor } from './route-tree.js'
 import { forEachSearchNode } from './search-tree.js'
-import { findNearestSlotAncestor } from './validate.js'
 
 function shouldKeepRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): boolean {
   const isMalformed = childRouteNode.segment.type === 'malformed'
@@ -18,7 +18,7 @@ export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
       const segmentType = routeNode.segment.type
-      const isInsideSlot = segmentType === 'slot' || !!findNearestSlotAncestor(routeNode)
+      const isInsideSlot = segmentType === 'slot' || !!getSlotAncestor(routeNode)
       routeNode.children = segmentType !== 'catchall'
         ? routeNode.children.filter(child => shouldKeepRouteChild(child, isInsideSlot))
         : []
