@@ -55,9 +55,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   return routeNodeRoot
 }
 
-/** The next ancestor to continue climbing to - or undefined if `routeNode`
- *  is itself a slot's own folder, since slots are validated to never nest
- *  and climbing must stop there rather than escape into the owner's tree. */
+/** Returns the next non-slot ancestor, or undefined at a slot boundary. */
 export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
   if (routeNode.segment.type !== 'slot')
     return routeNode.parent
