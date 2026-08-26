@@ -4,6 +4,9 @@ import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { createSegment, isPrivateSegment } from './segment'
 
+const ROUTE_MODULE_TYPES =
+  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
+
 export type RouteModuleType = typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
 export type RouteNode = {
   name: string
@@ -14,16 +17,13 @@ export type RouteNode = {
   children: RouteNode[]
 }
 
-const ROUTE_MODULE_TYPES =
-  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
-
-function createRouteModuleType(fileName: string): RouteModuleType {
+function getRouteModuleType(fileName: string): RouteModuleType {
   return basename(fileName, '.tsx') as RouteModuleType
 }
 
 function isRouteFilePath(path: string): boolean {
   const fileName = basename(path)
-  const routeModuleType = createRouteModuleType(fileName)
+  const routeModuleType = getRouteModuleType(fileName)
   return fileName.endsWith('.tsx') && ROUTE_MODULE_TYPES.has(routeModuleType)
 }
 
@@ -38,8 +38,8 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   treeify(routeNodeRoot, routeFilePaths, sep, {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const part = parts[index]!      // always defined since `create` only yields existing indices.
-      if (index === parts.length-1) { // Create the route module if component is last
-        const routeModuleType = createRouteModuleType(part)
+      if (index === parts.length-1) { // Create the route module if file is last
+        const routeModuleType = getRouteModuleType(part)
         parentRouteNode.modulePaths[routeModuleType] = filePath
       }
       else if (!isPrivateSegment(part)) {
