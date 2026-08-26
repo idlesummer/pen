@@ -83,7 +83,7 @@ if (diagnostics.length) {
 function printRenderNode(node: RenderNode, indent: string): void {
   if (!('slots' in node)) {
     const suffix = Object.keys(node.params).length ? ` ${JSON.stringify(node.params)}` : ''
-    console.log(`${indent}${node.contentType}${suffix} (${node.modulePath})`)
+    console.log(`${indent}${node.contentType}${suffix} (${node.contentPath})`)
     return
   }
 
