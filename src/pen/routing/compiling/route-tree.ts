@@ -4,7 +4,7 @@ import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { createSegment, isPrivateSegment } from './segment'
 
-export type RouteModuleType = 'page' | 'default' | 'layout' | 'loading' | 'error'
+export type RouteModuleType = typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
 export type RouteNode = {
   name: string
   segment: Segment
@@ -14,9 +14,8 @@ export type RouteNode = {
   children: RouteNode[]
 }
 
-const ROUTE_MODULE_TYPES = new Set<RouteModuleType>([
-  'page', 'layout', 'loading', 'error', 'default',
-])
+const ROUTE_MODULE_TYPES =
+  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
 
 function createRouteModuleType(fileName: string): RouteModuleType {
   return basename(fileName, '.tsx') as RouteModuleType
