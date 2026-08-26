@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './diagnostic'
 import { traverse } from '@/lib/traverse'
-import { getDiagnosticPath } from './route-tree'
+import { getRouteSource } from './route-tree'
 import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
 
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
@@ -30,7 +30,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         rule: 'malformed-segment',
         severity: 'error',
         message: `"${routeNode.name}": ${routeNode.segment.value}`,
-        files: [getDiagnosticPath(routeNode)],
+        files: [getRouteSource(routeNode)],
       })
     }
     if (segmentType === 'catchall' && routeNode.children.length) {
@@ -40,7 +40,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         message:
           `"${routeNode.path}" is a catch-all route and must be terminal, ` +
           'but has routes nested beneath it that can never be reached',
-        files: [getDiagnosticPath(routeNode)],
+        files: [getRouteSource(routeNode)],
       })
     }
     if (segmentType === 'slot') {
@@ -52,7 +52,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
           message:
             `"${routeNode.path}" is a slot nested inside slot "${ancestorRouteNode.path}" ` +
             '- slot subtrees are terminal and can\'t declare further slots',
-          files: [getDiagnosticPath(routeNode)],
+          files: [getRouteSource(routeNode)],
         })
       }
     }
@@ -62,7 +62,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         rule: 'repeated-param-name',
         severity: 'error',
         message: `"${paramName}" is used more than once as a dynamic segment name in this route's path`,
-        files: [getDiagnosticPath(routeNode)],
+        files: [getRouteSource(routeNode)],
       })
     }
   })

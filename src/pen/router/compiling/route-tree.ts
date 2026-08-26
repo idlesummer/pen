@@ -87,6 +87,6 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
 }
 
 /** Gets the route's source file or falls back to its route path if no module exists. */
-export function getDiagnosticPath(routeNode: RouteNode): string {
+export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
 }
