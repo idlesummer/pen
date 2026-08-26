@@ -6,7 +6,6 @@ import { createMatchTree } from './match-tree'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
 type RenderLeaf = {
-  routePath: string
   contentType: 'page' | 'default' // page or default
   modulePath: string
   params: ParamTable
@@ -14,7 +13,6 @@ type RenderLeaf = {
 
 type SlotRenderNodes = Record<string, RenderNode>
 export type RenderNode = RenderLeaf | {
-  routePath: string
   layout?: string
   loading?: string
   error?: string
@@ -42,8 +40,7 @@ function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchLeaf, mainParams
     params[catchallName] = catchallParams
   }
   const modulePath = contentNode.modulePaths[contentType]!
-  const routePath = contentNode.path
-  return { contentType, modulePath, routePath, params }
+  return { contentType, modulePath, params }
 }
 
 function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
@@ -51,9 +48,8 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
   if (!layout && !loading && !error && !slots)
     return renderNode
 
-  const routePath = routeNode.path;
-  (slots ??= {}).children = renderNode
-  return { routePath, layout, loading, error, slots }
+  ;(slots ??= {}).children = renderNode
+  return { layout, loading, error, slots }
 }
 
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
