@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './diagnostic'
 import { traverse } from '@/lib/traverse'
-import { getDiagnosticPath } from './diagnostic'
+import { getDiagnosticPath } from './route-tree'
 import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
 
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
