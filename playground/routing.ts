@@ -2,9 +2,9 @@
 // Run with: npm run playground
 //
 // Edit filePaths to shape a route tree, edit urls to probe it, re-run.
-import type { RenderNode } from '@/pen/routing'
+import type { RenderNode } from '@/pen/router'
 import { sep } from 'node:path'
-import { createRouter } from '@/pen/routing'
+import { createRouter } from '@/pen/router'
 
 // createRouteTree splits each path on node:path's platform sep ('\' on
 // Windows), so these need converting from the '/'-written literals below -
