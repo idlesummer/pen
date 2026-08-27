@@ -17,6 +17,8 @@ const [match, diagnostics] = createRouter(routeFiles)
 
 if (diagnostics.length)
   console.log('diagnostics:', diagnostics)
+else
+  console.log('No errors.')
 
 for (const url of ['/', '/about', '/nope']) {
   const [hasPage, renderTree] = match(url)
