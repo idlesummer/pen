@@ -8,7 +8,7 @@ export function generateEntry(): string {
     '',
     'import { createElement } from "react"',
     'import { render } from "ink"',
-    'import { App, createRouter } from "pen"',
+    'import { App, createRouter } from "@idlesummer/pen"',
     'import { componentMap } from "./component-map"',
     'import { routeFiles } from "./route-files"',
     '',
