@@ -13,12 +13,17 @@ const routeFiles = readdirSync(appDir, { recursive: true, encoding: 'utf8' })
 
 console.log('routeFiles:', routeFiles)
 
-const [match, diagnostics] = createRouter(routeFiles)
+const [match, diagnostics, routeTree] = createRouter(routeFiles)
 
 if (diagnostics.length)
   console.log('diagnostics:', diagnostics)
 else
   console.log('No errors.')
+
+// routeTree is the actual nested tree - readdirSync only ever gives a flat
+// list, this is what turns that into structure. `parent` is dropped since
+// each node also points back up, which JSON.stringify can't follow.
+console.log('\nrouteTree:', JSON.stringify(routeTree, (key, value) => key === 'parent' ? undefined : value, 2))
 
 for (const url of ['/', '/about', '/nope']) {
   const [hasPage, renderTree] = match(url)
