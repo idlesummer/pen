@@ -13,11 +13,10 @@ export default defineConfig({
       },
       formats: ['es'],
     },
-    sourcemap: true, // Source maps for debugging
-    minify: true,    // SSR builds default to no minification - opt back in
+    sourcemap: true,  // Source maps for debugging
+    minify: true,     // SSR builds default to no minification - opt back in
     rolldownOptions: {
-      // External dependencies
-      external: [
+      external: [     // External dependencies
         'ink',
         'react',
         'react/jsx-runtime',
