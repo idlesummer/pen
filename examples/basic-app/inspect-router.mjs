@@ -1,6 +1,9 @@
+import { join } from 'node:path'
 import { createRouter } from 'pen'
 
-const routeFiles = ['page.tsx', 'about/page.tsx']
+// createRouter splits each path on the platform's separator (\ on Windows,
+// / elsewhere), so paths must use path.join, not a hardcoded '/'.
+const routeFiles = ['page.tsx', join('about', 'page.tsx')]
 const [match, diagnostics] = createRouter(routeFiles)
 
 if (diagnostics.length)
