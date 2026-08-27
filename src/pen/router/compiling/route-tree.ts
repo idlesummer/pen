@@ -1,7 +1,7 @@
 import type { Segment } from './segment'
 import { basename, sep } from 'node:path'
-import { treeify } from '@/lib/treeify'
-import { traverse } from '@/lib/traverse'
+import { treeify } from '@/pen/lib/treeify'
+import { traverse } from '@/pen/lib/traverse'
 import { createSegment, isPrivateSegment } from './segment'
 
 const ROUTE_MODULE_TYPES =
