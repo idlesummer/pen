@@ -12,7 +12,7 @@ it useful compared to doing the same thing manually.
 ## Install
 
 ```bash
-npm install PACKAGE_NAME
+npm install @idlesummer/pen
 ````
 
 ## Usage
