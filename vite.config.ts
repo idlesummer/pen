@@ -5,9 +5,15 @@ import pkg from './package.json' with { type: 'json' }
 
 export default defineConfig({
   plugins: [
-    dts({ entryRoot: 'src', include: ['src/index.ts', 'src/pen/**/*.ts', 'src/pen/**/*.tsx'] }),
+    dts({
+      entryRoot: 'src',
+      include: [
+        'src/index.ts',
+        'src/pen/**/*.ts',
+        'src/pen/**/*.tsx'],
+      },
+    ),
   ],
-
   build: {
     ssr: true,  // Targets Node (CLI + library), not a browser
     lib: {
