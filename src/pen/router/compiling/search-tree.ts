@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import { traverse } from '@/lib/traverse'
+import { traverse } from '@/pen/lib/traverse'
 
 export type SearchNode = {
   anchor: RouteNode                   // means nearest ancestor/self whose segment is static/dynamic/slot
