@@ -33,9 +33,9 @@ export default defineConfig({
       include: [
         'src/index.ts',
         'src/pen/**/*.ts',
-        'src/pen/**/*.tsx'],
-      },
-    ),
+        'src/pen/**/*.tsx',
+      ],
+    }),
   ],
   // Build-time constant injection
   define: {
