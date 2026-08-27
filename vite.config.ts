@@ -24,13 +24,10 @@ export default defineConfig({
       formats: ['es'],
     },
 
-    // Output options
-    outDir: 'dist',
-    sourcemap: true,   // Source maps for debugging
-    emptyOutDir: true, // Remove dist/ before build
-    minify: true,      // Minify the emitted JavaScript
+    sourcemap: true, // Source maps for debugging
+    minify: true,    // SSR builds default to no minification - opt back in
 
-    rollupOptions: {
+    rolldownOptions: {
       // External dependencies
       external: [
         'ink',
