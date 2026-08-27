@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { traverse } from '@/pen/lib/traverse'
+import { traverse } from './traverse'
 
 type FsNode = {
   path: string
@@ -14,16 +14,16 @@ function readChildren(dirPath: string): FsNode[] {
   }))
 }
 
-/** Recursively collects every `.tsx` file under `appDir`, as paths relative
- *  to it - the same separator `createRouteTree` splits nested routes on. */
-export function discoverRoutes(appDir: string): string[] {
+/** Recursively collects every file under `dir` whose name ends with
+ *  `extension`, as paths relative to `dir`. */
+export function discoverFiles(dir: string, extension: string): string[] {
   const filePaths: string[] = []
 
-  traverse<FsNode>({ path: appDir, isDirectory: true }, {
+  traverse<FsNode>({ path: dir, isDirectory: true }, {
     expand: node => node.isDirectory ? readChildren(node.path) : [],
     visit: (node) => {
-      if (!node.isDirectory && node.path.endsWith('.tsx'))
-        filePaths.push(relative(appDir, node.path))
+      if (!node.isDirectory && node.path.endsWith(extension))
+        filePaths.push(relative(dir, node.path))
     },
   })
   return filePaths.sort()
