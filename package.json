@@ -18,7 +18,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
@@ -33,7 +33,7 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "vite build && chmod +x dist/bin.mjs",
+    "build": "tsdown",
     "lint": "eslint",
     "lint:fix": "eslint --fix"
   },
@@ -48,10 +48,10 @@
     "@types/react": "^19.2.18",
     "ink": "^7.1.1",
     "react": "^19.2.8",
+    "tsdown": "^0.22.14",
     "tsx": "^4.23.12",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.67.0",
-    "unplugin-dts": "^1.0.3"
+    "typescript-eslint": "^8.67.0"
   },
   "peerDependencies": {
     "ink": "^7.1.1",
