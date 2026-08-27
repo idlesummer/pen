@@ -26,7 +26,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
   return [
     GENERATED_HEADER,
     '',
-    'import type { ComponentMap } from "pen"',
+    'import type { ComponentMap } from "@idlesummer/pen"',
     ...imports,
     '',
     'export const componentMap: ComponentMap = {',

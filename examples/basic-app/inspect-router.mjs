@@ -1,7 +1,7 @@
 import { readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createRouter } from 'pen'
+import { createRouter } from '@idlesummer/pen'
 
 const appDir = join(dirname(fileURLToPath(import.meta.url)), 'app')
 
