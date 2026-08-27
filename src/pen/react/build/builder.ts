@@ -1,8 +1,8 @@
 import type { CompileDiagnostic, RouteNode } from '@/pen/router'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { discoverFiles } from '@/pen/lib/discover-files'
 import { createRouter } from '@/pen/router'
-import { discoverRoutes } from './discover-routes'
 import { generateComponentMap } from './generate-component-map'
 import { generateEntry } from './generate-entry'
 import { generateRouteFiles } from './generate-route-files'
@@ -22,7 +22,7 @@ function collectModulePaths(routeNode: RouteNode, modulePaths = new Set<string>(
 /** Discovers route modules under `appDir` and emits the generated
  *  `route-files`, `component-map`, and `entry` files into `outDir`. */
 export function build(appDir: string, outDir: string): BuildResult {
-  const routeFiles = discoverRoutes(appDir)
+  const routeFiles = discoverFiles(appDir, '.tsx')
   const [, diagnostics, routeTree] = createRouter(routeFiles)
   const modulePaths = [...collectModulePaths(routeTree)].sort()
 
