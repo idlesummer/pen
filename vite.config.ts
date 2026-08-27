@@ -13,10 +13,8 @@ export default defineConfig({
       },
       formats: ['es'],
     },
-
     sourcemap: true, // Source maps for debugging
     minify: true,    // SSR builds default to no minification - opt back in
-
     rolldownOptions: {
       // External dependencies
       external: [
@@ -40,7 +38,6 @@ export default defineConfig({
       },
     ),
   ],
-
   // Build-time constant injection
   define: {
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
