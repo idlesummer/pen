@@ -1,9 +1,18 @@
-import { join } from 'node:path'
+import { readdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createRouter } from 'pen'
 
-// createRouter splits each path on the platform's separator (\ on Windows,
-// / elsewhere), so paths must use path.join, not a hardcoded '/'.
-const routeFiles = ['page.tsx', join('about', 'page.tsx')]
+const appDir = join(dirname(fileURLToPath(import.meta.url)), 'app')
+
+// Mirrors pen's own discoverFiles: readdirSync's recursive paths already use
+// the platform separator createRouter expects, so no path.join juggling needed.
+const routeFiles = readdirSync(appDir, { recursive: true, encoding: 'utf8' })
+  .filter(path => path.endsWith('.tsx'))
+  .sort()
+
+console.log('routeFiles:', routeFiles)
+
 const [match, diagnostics] = createRouter(routeFiles)
 
 if (diagnostics.length)
