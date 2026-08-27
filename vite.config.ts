@@ -4,16 +4,6 @@ import dts from 'unplugin-dts/vite'
 import pkg from './package.json' with { type: 'json' }
 
 export default defineConfig({
-  plugins: [
-    dts({
-      entryRoot: 'src',
-      include: [
-        'src/index.ts',
-        'src/pen/**/*.ts',
-        'src/pen/**/*.tsx'],
-      },
-    ),
-  ],
   build: {
     ssr: true,  // Targets Node (CLI + library), not a browser
     lib: {
@@ -43,6 +33,16 @@ export default defineConfig({
       },
     },
   },
+  plugins: [
+    dts({
+      entryRoot: 'src',
+      include: [
+        'src/index.ts',
+        'src/pen/**/*.ts',
+        'src/pen/**/*.tsx'],
+      },
+    ),
+  ],
 
   // Build-time constant injection
   define: {
