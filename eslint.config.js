@@ -5,6 +5,9 @@ import { defineConfig } from 'eslint/config'
 
 export default defineConfig(
   {
+    ignores: ['dist'],
+  },
+  {
     files: ['**/*.{js,ts,jsx,tsx}'],
 
     // Extend recommended rule sets from:
