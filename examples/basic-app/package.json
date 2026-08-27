@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "inspect-router": "node inspect-router.mjs"
+  },
   "dependencies": {
     "ink": "^7.1.1",
     "pen": "file:../..",
