@@ -12,7 +12,6 @@ const routeFiles = readdirSync(appDir, { recursive: true, encoding: 'utf8' })
   .sort()
 
 console.log('routeFiles:', routeFiles)
-
 const [match, diagnostics] = createRouter(routeFiles)
 
 if (diagnostics.length)
@@ -20,7 +19,7 @@ if (diagnostics.length)
 else
   console.log('No errors.')
 
-for (const url of ['/', '/about', '/nope']) {
+for (const url of ['/', '/home', '/home/about', '/nope']) {
   const [hasPage, renderTree] = match(url)
   console.log(`\n${url} -> hasPage: ${hasPage}`)
   console.log(JSON.stringify(renderTree, null, 2))
