@@ -1,44 +1,54 @@
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import type { RenderNode } from '@/pen/router'
-import { Suspense, use } from 'react'
+import type { ComponentMap } from './component-map'
+import type { ErrorFallbackProps } from './error-boundary'
+import { Suspense } from 'react'
 import { ErrorBoundary } from './error-boundary'
-import { loadModule } from './module-loader'
 
-type LazyContentProps = {
-  path: string
-  props?: Record<string, unknown>
+/** Looks up a route module's component by path. The specific prop shape
+ *  (`TProps`) can't be verified statically - it's resolved from a path
+ *  string at runtime - so callers assert the shape they expect. */
+function resolveComponent<TProps extends object = Record<string, unknown>>(
+  path: string,
+  componentMap: ComponentMap,
+): ComponentType<TProps> {
+  const Component = componentMap[path]
+  if (!Component)
+    throw new Error(`No component registered for route module "${path}". Regenerate the route builder output.`)
+  return Component as unknown as ComponentType<TProps>
 }
 
-function LazyContent({ path, props }: LazyContentProps) {
-  // eslint-disable-next-line @eslint-react/static-components -- resolved by `use()`, not created here
-  const Component = use(loadModule(path))
-  // eslint-disable-next-line @eslint-react/static-components -- resolved by `use()`, not created here
-  return <Component {...props} />
-}
-
-function renderSlots(slots: Record<string, RenderNode>): Record<string, ReactNode> {
+function renderSlots(slots: Record<string, RenderNode>, componentMap: ComponentMap): Record<string, ReactNode> {
   const rendered: Record<string, ReactNode> = {}
   for (const [slotName, slotNode] of Object.entries(slots))
-    rendered[slotName] = renderNode(slotNode)
+    rendered[slotName] = renderNode(slotNode, componentMap)
   return rendered
 }
 
 /** Recursively turns a router `RenderNode` into a React element tree,
- *  lazily loading each segment's page/layout/loading/error module on demand. */
-export function renderNode(node: RenderNode): ReactNode {
-  if ('contentType' in node)
-    return <LazyContent path={node.contentPath} props={{ params: node.params }} />
+ *  resolving each segment's page/layout/loading/error module from the
+ *  build-generated `componentMap` - no runtime module loading involved. */
+export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactNode {
+  if ('contentType' in node) {
+    const Content = resolveComponent(node.contentPath, componentMap)
+    return <Content params={node.params} />
+  }
 
   const { layout, loading, error, slots } = node
-  const { children, ...namedSlots } = renderSlots(slots)
+  const { children, ...namedSlots } = renderSlots(slots, componentMap)
   let content = children
 
-  if (error)
-    content = <ErrorBoundary path={error}>{content}</ErrorBoundary>
-  if (loading)
-    content = <Suspense fallback={<LazyContent path={loading} />}>{content}</Suspense>
+  if (error) {
+    const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
+    content = <ErrorBoundary Fallback={Fallback}>{content}</ErrorBoundary>
+  }
+  if (loading) {
+    const Loading = resolveComponent(loading, componentMap)
+    content = <Suspense fallback={<Loading />}>{content}</Suspense>
+  }
+  if (!layout)
+    return content
 
-  return layout
-    ? <LazyContent path={layout} props={{ ...namedSlots, children: content }} />
-    : content
+  const Layout = resolveComponent(layout, componentMap)
+  return <Layout {...namedSlots}>{content}</Layout>
 }
