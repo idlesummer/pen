@@ -1,0 +1,11 @@
+{
+  "name": "basic-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ink": "^7.1.1",
+    "pen": "file:../..",
+    "react": "^19.2.8"
+  }
+}
