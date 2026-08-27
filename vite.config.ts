@@ -5,17 +5,20 @@ import pkg from './package.json' with { type: 'json' }
 
 export default defineConfig({
   plugins: [
-    dts({ entryRoot: 'src', include: ['src/index.ts', 'src/pen/**/*.ts', 'src/pen/**/*.tsx'] }),
+    dts({
+      entryRoot: 'src',
+      include: [
+        'src/index.ts',
+        'src/pen/**/*.ts',
+        'src/pen/**/*.tsx'],
+      },
+    ),
   ],
-
   build: {
-    // Targets Node (CLI + library), not a browser - keeps node: imports as
-    // real externals instead of Vite's browser-compat shimming.
-    ssr: true,
-
+    ssr: true,  // Targets Node (CLI + library), not a browser
     lib: {
       entry: {
-        index: resolve(import.meta.dirname, 'src/index.ts'), // Library API
+        index: resolve(import.meta.dirname, 'src/index.ts'),  // Library API
         bin: resolve(import.meta.dirname, 'src/bin.ts'),      // CLI executable entry
       },
       formats: ['es'],
@@ -29,7 +32,12 @@ export default defineConfig({
 
     rollupOptions: {
       // External dependencies
-      external: ['ink', 'react', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+      external: [
+        'ink',
+        'react',
+        'react/jsx-runtime',
+        'react/jsx-dev-runtime',
+      ],
       output: {
         entryFileNames: '[name].mjs',
       },
