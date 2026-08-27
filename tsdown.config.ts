@@ -20,9 +20,4 @@ export default defineConfig({
     __DESCRIPTION__:  JSON.stringify(pkg.description),
     __VERSION__:      JSON.stringify(pkg.version),
   },
-
-  // External dependencies
-  deps: {
-    neverBundle: ['ink', 'react'],
-  },
 })
