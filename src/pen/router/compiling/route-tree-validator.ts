@@ -69,7 +69,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
   return diagnostics
 }
 
-function shouldKeepRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): boolean {
+function isValidRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): boolean {
   const isMalformed = childRouteNode.segment.type === 'malformed'
   const isNestedSlot = isInsideSlot && childRouteNode.segment.type === 'slot'
   return !isMalformed && !isNestedSlot
@@ -83,10 +83,13 @@ export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
       const segmentType = routeNode.segment.type
+      if (segmentType === 'catchall') {
+        routeNode.children = []
+        return
+      }
       const isInsideSlot = segmentType === 'slot' || !!getSlotAncestor(routeNode)
-      routeNode.children = segmentType !== 'catchall'
-        ? routeNode.children.filter(child => shouldKeepRouteChild(child, isInsideSlot))
-        : []
+      const filtered = routeNode.children.filter(child => isValidRouteChild(child, isInsideSlot))
+      routeNode.children = filtered
     },
     expand: (routeNode) =>
       routeNode.children,
