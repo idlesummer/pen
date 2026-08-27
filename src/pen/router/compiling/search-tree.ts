@@ -20,10 +20,6 @@ export type SearchNode = {
   }
 }
 
-function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: number): SearchNode {
-  return { anchor, urlDepth, staticness, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
-}
-
 function addAcceptingRouteNode(searchNode: SearchNode, routeNode: RouteNode) {
   if (routeNode.segment.type === 'catchall') {
     (searchNode.validation!.catchalls ??= []).push(routeNode)
@@ -33,6 +29,10 @@ function addAcceptingRouteNode(searchNode: SearchNode, routeNode: RouteNode) {
     (searchNode.validation!.pages ??= []).push(routeNode)
     searchNode.page ??= routeNode
   }
+}
+
+function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: number): SearchNode {
+  return { anchor, urlDepth, staticness, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
 function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
