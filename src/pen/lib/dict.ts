@@ -1,11 +1,7 @@
-/** A plain string-keyed lookup object, with no inherited prototype. */
+/** A string-keyed lookup object without `Object.prototype` properties. */
 export type Dict<T> = Record<string, T>
 
-/** Creates an empty `Dict`. Its prototype is `null`, so keys like
- *  `"constructor"` or `"__proto__"` can't collide with anything
- *  inherited from `Object.prototype` the way they would with `{}` -
- *  important since these keys come from route folder names, not
- *  anything under our control. */
+/** Creates an empty `Dict` without `Object.prototype` properties. */
 export function dict<T>(): Dict<T> {
   return Object.create(null)
 }
