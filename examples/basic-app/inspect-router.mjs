@@ -5,7 +5,7 @@ import { createRouter } from '@idlesummer/pen'
 
 const appDir = join(dirname(fileURLToPath(import.meta.url)), 'app')
 
-// Mirrors pen's own discoverFiles: readdirSync's recursive paths already use
+// Mirrors pen's own findFiles: readdirSync's recursive paths already use
 // the platform separator createRouter expects, so no path.join juggling needed.
 const routeFiles = readdirSync(appDir, { recursive: true, encoding: 'utf8' })
   .filter(path => path.endsWith('.tsx'))
