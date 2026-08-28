@@ -1,17 +1,18 @@
 import type { RouteNode } from './route-tree'
+import { dict } from '@/pen/lib/dict'
 import { traverse } from '@/pen/lib/traverse'
 
 export type SearchNode = {
-  anchor: RouteNode                   // means nearest ancestor/self whose segment is static/dynamic/slot
-  urlDepth: number                    // segments consumed to reach this position - 0 at root
-  staticness: number                  // how static-preferring the path to this node is; higher is better
+  anchor: RouteNode                    // means nearest ancestor/self whose segment is static/dynamic/slot
+  urlDepth: number                     // segments consumed to reach this position - 0 at root
+  staticness: number                   // how static-preferring the path to this node is; higher is better
   // Accepting route nodes
-  page?: RouteNode                    // checked during matching to decide if this position is a match
-  catchall?: RouteNode                // consuming folder's catch-all page
+  page?: RouteNode                     // checked during matching to decide if this position is a match
+  catchall?: RouteNode                 // consuming folder's catch-all page
   // Route types
-  slots?: Map<string, SearchNode>     // this position's own named slots, if its real folder has any @name children
-  statics?: Map<string, SearchNode>   // consuming folder's static children
-  dynamic?: SearchNode                // consuming folder's dynamic child - param name is dynamic.anchor.segment.value
+  slots?: Record<string, SearchNode>   // this position's own named slots, if its real folder has any @name children
+  statics?: Record<string, SearchNode> // consuming folder's static children
+  dynamic?: SearchNode                 // consuming folder's dynamic child - param name is dynamic.anchor.segment.value
   // Validation metadata
   validation?: {                      // candidates validation checks against (later removed in sanitizeSearchTree)
     pages?: RouteNode[]               // every page claimed here, for duplicate-route
@@ -45,7 +46,7 @@ function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: Rou
 
     case 'static': {
       const createStatic = () => createSearchNode(childRouteNode, urlDepth+1, staticness)
-      return (parentSearchNode.statics ??= new Map()).getOrInsertComputed(segment.value, createStatic)
+      return (parentSearchNode.statics ??= dict())[segment.value] ??= createStatic()
     }
     case 'dynamic': {
       (parentSearchNode.validation!.dynamics ??= new Map()).getOrInsert(segment.value, childRouteNode) // for validation
@@ -53,7 +54,7 @@ function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: Rou
     }
     case 'slot': {  // slot can't consume url, so it inherits owner's urlDepth and staticness
       const createSlotNode = () => createSearchNode(childRouteNode, urlDepth, staticness)
-      return (parentSearchNode.slots ??= new Map()).getOrInsertComputed(segment.value, createSlotNode)
+      return (parentSearchNode.slots ??= dict())[segment.value] ??= createSlotNode()
     }
   }
 }
@@ -84,9 +85,9 @@ export function forEachSearchNode(searchTree: SearchNode, visit: (searchNode: Se
   traverse(searchTree, {
     visit,
     expand: (searchNode) => {
-      const children = searchNode.statics ? [...searchNode.statics.values()] : []
+      const children = searchNode.statics ? Object.values(searchNode.statics) : []
       if (searchNode.dynamic) children.push(searchNode.dynamic)
-      if (searchNode.slots)   children.push(...searchNode.slots.values())
+      if (searchNode.slots)   children.push(...Object.values(searchNode.slots))
       return children
     },
   })
