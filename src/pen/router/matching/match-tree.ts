@@ -23,7 +23,7 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
 
   const parentSearchNode = parent.searchNode
   const matchNodeChildren: MatchNode[] = []
-  const staticChild = parentSearchNode.statics?.get(nextUrlPart)  // query url part in next node children
+  const staticChild = parentSearchNode.statics?.[nextUrlPart]  // query url part in next node children
   const dynamicChild = parentSearchNode.dynamic
 
   if (staticChild)  matchNodeChildren.push({ searchNode: staticChild, parent })
@@ -32,7 +32,7 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
 }
 
 function hasConsumingChild(searchNode: SearchNode, urlPart: string): boolean {
-  return !!(searchNode.dynamic || searchNode.statics?.has(urlPart))
+  return !!(searchNode.dynamic || searchNode.statics?.[urlPart])
 }
 
 function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
@@ -88,7 +88,7 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNod
     if (!node.searchNode.slots) continue
 
     node.subtrees = new Map()
-    for (const [slotName, searchSubtree] of node.searchNode.slots)
+    for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
       node.subtrees.set(slotName, createMatchPath(searchSubtree, url))
   }
   return mainMatchNode
