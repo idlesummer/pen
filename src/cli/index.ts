@@ -1,6 +1,6 @@
 import { defineCommand, runMain } from 'citty'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/lib/constants'
-import { buildCommand } from '@/react/cli'
+import { buildCommand } from './commands/build'
 
 const main = defineCommand({
   meta: {
