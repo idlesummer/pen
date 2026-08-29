@@ -21,7 +21,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
     `import Component${index} from '${toImportSpecifier(appDir, outDir, modulePath)}'`)
 
   const entries = modulePaths.map((modulePath, index) =>
-    `  '${modulePath}': Component${index},`)
+    `  ${JSON.stringify(modulePath)}: Component${index},`)
 
   return [
     GENERATED_HEADER,
