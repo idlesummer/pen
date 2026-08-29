@@ -7,17 +7,16 @@ type ComponentMapOptions = {
   modulePaths: string[] // relative to appDir
 }
 
+/** Converts a module path relative to `appDir` into an import specifier
+ *  relative to `outDir`. */
 function toImportSpecifier(appDir: string, outDir: string, modulePath: string): string {
   const moduleFile = join(appDir, modulePath)
-  const relativePath = relative(outDir, join(appDir, moduleFile)).replaceAll(sep, '/')
-  const specifier = relativePath.startsWith('.') ? relativePath : `./${relativePath}`
-  return specifier
+  return relative(outDir, moduleFile).replaceAll(sep, '/')
 }
 
-/** Emits the generated `component-map.ts`: a real, statically-imported
- *  component per route module, keyed by the same path `RenderNode` carries -
- *  turning the router's path strings into bundler-visible imports instead
- *  of runtime dynamic `import()` calls. */
+/** Emits the generated `component-map.ts`, statically importing each route
+ *  module and mapping its path to the imported component. Assumes `outDir`
+ *  is outside `appDir`. */
 export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentMapOptions): string {
   const imports: string[] = []
   const entries: string[] = []
