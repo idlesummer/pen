@@ -1,6 +1,6 @@
 import type { RouteNode } from './compiling/route-tree'
 import type { SearchNode } from './compiling/search-tree'
-import type { CompileDiagnostic } from './compiling/diagnostic'
+import type { CompileDiagnostic } from './compiling/compile-diagnostic'
 import { createRouteTree } from './compiling/route-tree'
 import { sanitizeRouteTree, validateRouteTree } from './compiling/route-validator'
 import { createSearchTree } from './compiling/search-tree'

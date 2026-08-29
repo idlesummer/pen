@@ -1,6 +1,6 @@
 import type { RouteNode } from './compiling/route-tree'
 import type { SearchNode } from './compiling/search-tree'
-import type { CompileDiagnostic } from './compiling/diagnostic'
+import type { CompileDiagnostic } from './compiling/compile-diagnostic'
 import type { Matcher } from './matcher'
 import { createCompiledRoutes } from './compiler'
 import { createMatcher } from './matcher'

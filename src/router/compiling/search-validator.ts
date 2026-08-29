@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { SearchNode } from './search-tree'
-import type { CompileDiagnostic } from './diagnostic'
+import type { CompileDiagnostic } from './compile-diagnostic'
 import { getRouteSource } from './route-tree'
 import { forEachSearchNode } from './search-tree'
 
