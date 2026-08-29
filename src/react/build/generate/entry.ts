@@ -1,4 +1,4 @@
-import { GENERATED_HEADER } from './generated-header'
+import { GENERATED_HEADER } from '../generated-header'
 
 /** Emits the generated `entry.ts`: wires the frozen route files and
  *  component map into a router and an Ink-rendered `App`. */
