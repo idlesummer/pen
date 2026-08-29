@@ -1,9 +1,9 @@
-import { useSyncExternalStore } from 'react'
-import { navigationStore } from '../store'
+import { use, useSyncExternalStore } from 'react'
+import { NavigationContext } from '../NavigationProvider'
 
 export function useNavigate() {
-  return useSyncExternalStore(
-    navigationStore.subscribe,
-    navigationStore.getSnapshot,
-  )
+  const store = use(NavigationContext)
+  if (!store) throw new Error('useNavigate must be used within a NavigationProvider')
+
+  return useSyncExternalStore(store.subscribe, store.getSnapshot)
 }

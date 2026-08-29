@@ -5,7 +5,11 @@ type NavigationHistory = {
 
 export class Navigation {
   private position = 0
-  private history: NavigationHistory[] = [{ url: '/' }]
+  private history: NavigationHistory[]
+
+  constructor(initialUrl = '/') {
+    this.history = [{ url: initialUrl }]
+  }
 
   push(url: string, searchParams?: unknown) {
     this.history.splice(this.position+1, Infinity, { url, searchParams })
