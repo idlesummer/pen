@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { Matcher } from '@/pen/router/matcher'
+import type { Matcher } from '@/router/matcher'
 import type { ComponentMap } from './component-map'
 import { usePathname } from '../api/hooks/use-pathname'
 import { renderNode } from './render'

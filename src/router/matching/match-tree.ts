@@ -1,7 +1,7 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import { findDefaultRouteNodeParent } from '../compiling/route-tree'
-import { traverse } from '@/pen/lib/traverse'
+import { traverse } from '@/lib/traverse'
 
 export type MatchLeaf = {
   contentType: 'page' | 'default' // content means page/catchall (acceptingNode) or default

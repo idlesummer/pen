@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './diagnostic'
-import { traverse } from '@/pen/lib/traverse'
+import { traverse } from '@/lib/traverse'
 import { getRouteSource } from './route-tree'
 import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
 
