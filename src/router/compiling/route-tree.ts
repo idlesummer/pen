@@ -87,7 +87,8 @@ export function getRouteModulePaths(routeTree: RouteNode): string[] {
       for (const path of Object.values(routeNode.modulePaths))
         modulePaths.add(path)
     },
-    expand: (routeNode) => routeNode.children,
+    expand: (routeNode) =>
+      routeNode.children,
   })
   return [...modulePaths].sort()
 }
