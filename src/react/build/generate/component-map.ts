@@ -8,8 +8,10 @@ type ComponentMapOptions = {
 }
 
 function toImportSpecifier(appDir: string, outDir: string, modulePath: string): string {
-  const relativePath = relative(outDir, join(appDir, modulePath)).split(sep).join('/')
-  return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
+  const moduleFile = join(appDir, modulePath)
+  const relativePath = relative(outDir, join(appDir, moduleFile)).replaceAll(sep, '/')
+  const specifier = relativePath.startsWith('.') ? relativePath : `./${relativePath}`
+  return specifier
 }
 
 /** Emits the generated `component-map.ts`: a real, statically-imported
@@ -17,11 +19,13 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
  *  turning the router's path strings into bundler-visible imports instead
  *  of runtime dynamic `import()` calls. */
 export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentMapOptions): string {
-  const imports = modulePaths.map((modulePath, index) =>
-    `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`)
+  const imports: string[] = []
+  const entries: string[] = []
 
-  const entries = modulePaths.map((modulePath, index) =>
-    `  "${modulePath}": Component${index},`)
+  for (const [index, modulePath] of modulePaths.entries()) {
+    imports.push(`import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`)
+    entries.push(`  "${modulePath}": Component${index},`)
+  }
 
   return [
     GENERATED_HEADER,
