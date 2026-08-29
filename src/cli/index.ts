@@ -10,5 +10,7 @@ export const main = defineCommand({
   },
   subCommands: {
     build: buildCommand,
+    // dev: devCommand,
+    // start: startCommand
   },
 })
