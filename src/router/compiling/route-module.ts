@@ -17,6 +17,6 @@ function isRouteFilePath(path: string): boolean {
 }
 
 /** Narrows a file list down to real route module files (page/layout/loading/error/default). */
-export function filterRouteFiles(filePaths: string[]): string[] {
+export function filterRouteFiles(filePaths: readonly string[]): string[] {
   return filePaths.filter(isRouteFilePath)
 }
