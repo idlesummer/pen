@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { runMain } from 'citty'
-import { main } from '@/cli'
+import { run } from '@/cli'
 
-runMain(main)
+run()

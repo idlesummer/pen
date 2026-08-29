@@ -1,8 +1,8 @@
-import { defineCommand } from 'citty'
+import { defineCommand, runMain } from 'citty'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/lib/constants'
 import { buildCommand } from '@/react/cli'
 
-export const main = defineCommand({
+const main = defineCommand({
   meta: {
     name: CLI_NAME,
     version: VERSION,
@@ -14,3 +14,7 @@ export const main = defineCommand({
     // start: startCommand
   },
 })
+
+export function run() {
+  runMain(main)
+}
