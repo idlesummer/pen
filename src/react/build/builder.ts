@@ -10,8 +10,8 @@ import { generateModulePaths } from './generate-module-paths'
 /** Discovers route modules under `appDir` and emits the generated
  *  `route-files`, `component-map`, and `entry` files into `outDir`. */
 export function build(appDir: string, outDir: string): CompileDiagnostic[] {
-  const files = findFiles(appDir, '.tsx')
-  const [diagnostics, routeTree] = createCompiledRoutes(files)
+  const filePaths = findFiles(appDir, '.tsx')
+  const [diagnostics, routeTree] = createCompiledRoutes(filePaths)
   const modulePaths = getRouteModulePaths(routeTree)
 
   mkdirSync(outDir, { recursive: true })
