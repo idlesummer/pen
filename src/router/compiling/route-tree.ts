@@ -3,7 +3,7 @@ import type { RouteModuleType } from './route-module'
 import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { getRouteModuleType } from './route-module'
+import { filterRouteFiles, getRouteModuleType } from './route-module'
 import { createSegment, isPrivateSegment } from './segment'
 
 export type RouteNode = {
@@ -19,10 +19,9 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
-/** Builds a route tree from route module file paths - callers are expected to
- *  have already narrowed the list with `filterRouteFiles` from `./route-module`. */
-export function createRouteTree(routeFilePaths: string[]): RouteNode {
+export function createRouteTree(filePaths: string[]): RouteNode {
   const routeNodeRoot = createRouteNode('', createSegment(''), '')
+  const routeFilePaths = filterRouteFiles(filePaths)
 
   treeify(routeNodeRoot, routeFilePaths, sep, {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
@@ -80,8 +79,8 @@ export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
 }
 
-/** Collects every unique module path referenced anywhere in the tree. */
-export function collectModulePaths(routeTree: RouteNode): Set<string> {
+/** Collects every unique module path referenced anywhere in the tree, sorted. */
+export function getRouteModulePaths(routeTree: RouteNode): string[] {
   const modulePaths = new Set<string>()
   traverse(routeTree, {
     visit: (routeNode) => {
@@ -90,5 +89,5 @@ export function collectModulePaths(routeTree: RouteNode): Set<string> {
     },
     expand: (routeNode) => routeNode.children,
   })
-  return modulePaths
+  return [...modulePaths].sort()
 }
