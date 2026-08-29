@@ -1,9 +1,9 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { RenderNode } from '@/router'
 import type { ComponentMap } from './component-map'
-import type { ErrorFallbackProps } from './error-boundary'
+import type { ErrorFallbackProps } from './ErrorBoundary'
 import { Suspense } from 'react'
-import { ErrorBoundary } from './error-boundary'
+import { ErrorBoundary } from './ErrorBoundary'
 
 /** Looks up a route module's component by path. The specific prop shape
  *  (`TProps`) can't be verified statically - it's resolved from a path
