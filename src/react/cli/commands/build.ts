@@ -1,4 +1,4 @@
-import { defineBuildCommand } from '@/cli/build-command'
+import { defineBuildCommand } from '@/cli/commands/build'
 import { reportDiagnostics } from '@/lib/report-diagnostics'
 import { build } from '@/react/build'
 
