@@ -1,13 +1,11 @@
 import type { Segment } from './segment'
-import { basename, sep } from 'node:path'
+import type { RouteModuleType } from './route-module'
+import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
+import { getRouteModuleType } from './route-module'
 import { createSegment, isPrivateSegment } from './segment'
 
-const ROUTE_MODULE_TYPES =
-  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
-
-export type RouteModuleType = typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
 export type RouteNode = {
   name: string
   segment: Segment
@@ -17,27 +15,12 @@ export type RouteNode = {
   children: RouteNode[]
 }
 
-function getRouteModuleType(fileName: string): RouteModuleType {
-  return basename(fileName, '.tsx') as RouteModuleType
-}
-
-function isRouteFilePath(path: string): boolean {
-  const fileName = basename(path)
-  const routeModuleType = getRouteModuleType(fileName)
-  return fileName.endsWith('.tsx') && ROUTE_MODULE_TYPES.has(routeModuleType)
-}
-
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
-/** Narrows a file list down to real route module files (page/layout/loading/error/default). */
-export function filterRouteFiles(filePaths: string[]): string[] {
-  return filePaths.filter(isRouteFilePath)
-}
-
 /** Builds a route tree from route module file paths - callers are expected to
- *  have already narrowed the list with {@link filterRouteFiles}. */
+ *  have already narrowed the list with `filterRouteFiles` from `./route-module`. */
 export function createRouteTree(routeFilePaths: string[]): RouteNode {
   const routeNodeRoot = createRouteNode('', createSegment(''), '')
 
