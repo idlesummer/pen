@@ -3,4 +3,5 @@ export type { SearchNode } from './compiling/search-tree'
 export type { CompileDiagnostic } from './compiling/diagnostic'
 export type { RenderNode } from './matching/render-tree'
 
+export { reportDiagnostics } from './compiling/diagnostic'
 export { createRouter } from './router'
