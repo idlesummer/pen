@@ -8,10 +8,7 @@ import { ErrorBoundary } from './ErrorBoundary'
 /** Looks up a route module's component by path. The specific prop shape
  *  (`TProps`) can't be verified statically - it's resolved from a path
  *  string at runtime - so callers assert the shape they expect. */
-function resolveComponent<TProps extends object = Record<string, unknown>>(
-  path: string,
-  componentMap: ComponentMap,
-): ComponentType<TProps> {
+function resolveComponent<TProps extends object = Record<string, unknown>>(path: string, componentMap: ComponentMap): ComponentType<TProps> {
   const Component = componentMap[path]
   if (!Component)
     throw new Error(`No component registered for route module "${path}". Regenerate the route builder output.`)
