@@ -20,10 +20,10 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
 }
 
 export function createRouteTree(filePaths: string[]): RouteNode {
-  const routeNodeRoot = createRouteNode('', createSegment(''), '')
+  const routeTree = createRouteNode('', createSegment(''), '')
   const routeFilePaths = filterRouteFiles(filePaths)
 
-  treeify(routeNodeRoot, routeFilePaths, sep, {
+  treeify(routeTree, routeFilePaths, sep, {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const part = parts[index]!      // always defined since `create` only yields existing indices.
       if (index === parts.length-1) { // Create the route module if file is last
@@ -40,7 +40,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
-  return routeNodeRoot
+  return routeTree
 }
 
 /** Returns the next non-slot ancestor, or undefined at a slot boundary. */
