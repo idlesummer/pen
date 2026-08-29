@@ -18,10 +18,10 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
  *  of runtime dynamic `import()` calls. */
 export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentMapOptions): string {
   const imports = modulePaths.map((modulePath, index) =>
-    `import Component${index} from '${toImportSpecifier(appDir, outDir, modulePath)}'`)
+    `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`)
 
   const entries = modulePaths.map((modulePath, index) =>
-    `  ${JSON.stringify(modulePath)}: Component${index},`)
+    `  "${modulePath}": Component${index},`)
 
   return [
     GENERATED_HEADER,
