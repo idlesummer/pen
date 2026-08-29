@@ -9,7 +9,7 @@ import { sanitizeSearchTree, validateSearchTree } from './compiling/search-valid
 /** Compiles file paths into route and search trees, validating and sanitizing
  *  both trees along the way. Returns any route issues found during validation
  *  and the compiled trees. */
-export function createCompiledRoutes(filePaths: readonly string[]): [CompileDiagnostic[], RouteNode, SearchNode] {
+export function createCompiledRoutes(filePaths: string[]): [CompileDiagnostic[], RouteNode, SearchNode] {
   const routeTree = createRouteTree(filePaths)
   const diagnostics = validateRouteTree(routeTree) // intrinsic issues
   sanitizeRouteTree(routeTree)

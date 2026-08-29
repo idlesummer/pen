@@ -11,7 +11,7 @@ export function generateModulePaths(routeFiles: string[]): string {
     '',
     'export const modulePaths = [',
     ...entries,
-    '] as const',
+    ']',
     '',
   ].join('\n')
 }
