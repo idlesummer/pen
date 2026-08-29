@@ -90,3 +90,12 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
 export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
 }
+
+/** Collects every unique module path referenced anywhere in the tree. */
+export function collectModulePaths(routeNode: RouteNode, modulePaths = new Set<string>()): Set<string> {
+  for (const path of Object.values(routeNode.modulePaths))
+    modulePaths.add(path)
+  for (const child of routeNode.children)
+    collectModulePaths(child, modulePaths)
+  return modulePaths
+}

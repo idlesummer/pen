@@ -15,7 +15,7 @@ export type Router = [
 /** Creates a router from route file paths, returning a matcher, diagnostics,
  *  and the compiled route and search trees. */
 export function createRouter(filePaths: string[]): Router {
-  const [routeTree, searchTree, diagnostics] = createCompiledRoutes(filePaths)
+  const [diagnostics, routeTree, searchTree] = createCompiledRoutes(filePaths)
   const matcher = createMatcher(searchTree)
   return [matcher, diagnostics, routeTree, searchTree]
 }

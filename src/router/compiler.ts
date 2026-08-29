@@ -7,9 +7,9 @@ import { createSearchTree } from './compiling/search-tree'
 import { sanitizeSearchTree, validateSearchTree } from './compiling/search-validator'
 
 /** Compiles file paths into route and search trees, validating and sanitizing
- *  both trees along the way. Returns the compiled trees and any route issues
- *  found during validation. */
-export function createCompiledRoutes(filePaths: string[]): [RouteNode, SearchNode, CompileDiagnostic[]] {
+ *  both trees along the way. Returns any route issues found during validation
+ *  and the compiled trees. */
+export function createCompiledRoutes(filePaths: string[]): [CompileDiagnostic[], RouteNode, SearchNode] {
   const routeTree = createRouteTree(filePaths)
   const diagnostics = validateRouteTree(routeTree) // intrinsic issues
   sanitizeRouteTree(routeTree)
@@ -18,5 +18,5 @@ export function createCompiledRoutes(filePaths: string[]): [RouteNode, SearchNod
   diagnostics.push(...validateSearchTree(searchTree)) // relational issues
   sanitizeSearchTree(searchTree)
 
-  return [routeTree, searchTree, diagnostics]
+  return [diagnostics, routeTree, searchTree]
 }
