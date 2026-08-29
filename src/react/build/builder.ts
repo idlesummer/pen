@@ -3,12 +3,12 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { findFiles } from '@/lib/find-files'
 import { createCompiledRoutes, getRouteModulePaths } from '@/router'
-import { generateComponentMap } from './generate-component-map'
-import { generateEntry } from './generate-entry'
-import { generateModulePaths } from './generate-module-paths'
+import { generateComponentMap } from './generate/component-map'
+import { generateEntry } from './generate/entry'
+import { generateModulePaths } from './generate/module-paths'
 
 /** Discovers route modules under `appDir` and emits the generated
- *  `route-files`, `component-map`, and `entry` files into `outDir`. */
+ *  `module-paths`, `component-map`, and `entry` files into `outDir`. */
 export function build(appDir: string, outDir: string): CompileDiagnostic[] {
   const files = findFiles(appDir, '.tsx')
   const [diagnostics, routeTree] = createCompiledRoutes(files)
