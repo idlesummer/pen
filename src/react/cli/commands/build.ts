@@ -7,5 +7,5 @@ export const buildCommand = defineBuildCommand(() => {
   reportDiagnostics(diagnostics)
 
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
-    process.exit(1)
+    throw new Error('Build failed')
 })
