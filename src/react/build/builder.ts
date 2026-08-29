@@ -5,7 +5,7 @@ import { findFiles } from '@/lib/find-files'
 import { createCompiledRoutes, getRouteModulePaths } from '@/router'
 import { generateComponentMap } from './generate-component-map'
 import { generateEntry } from './generate-entry'
-import { generateRouteFiles } from './generate-route-files'
+import { generateModulePaths } from './generate-module-paths'
 
 export type BuildResult = {
   diagnostics: CompileDiagnostic[]
@@ -19,7 +19,7 @@ export function build(appDir: string, outDir: string): BuildResult {
   const modulePaths = getRouteModulePaths(routeTree)
 
   mkdirSync(outDir, { recursive: true })
-  writeFileSync(join(outDir, 'route-files.ts'), generateRouteFiles(modulePaths))
+  writeFileSync(join(outDir, 'module-paths.ts'), generateModulePaths(modulePaths))
   writeFileSync(join(outDir, 'component-map.ts'), generateComponentMap({ appDir, outDir, modulePaths }))
   writeFileSync(join(outDir, 'entry.ts'), generateEntry())
 
