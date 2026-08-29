@@ -8,7 +8,7 @@ export const buildCommand = defineCommand({
     description: 'Compile routes and generate static entry files for a pen app',
   },
   run: () => {
-    const { diagnostics } = build('app', '.pen/dist')
+    const { diagnostics } = build('app', '.pen/generated')
     reportDiagnostics(diagnostics)
 
     if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
