@@ -1,5 +1,5 @@
 import { defineBuildCommand } from '@/cli/commands/build'
-import { reportDiagnostics } from '@/lib/report-diagnostics'
+import { reportDiagnostics } from '@/router'
 import { build } from '@/react/build'
 
 export const buildCommand = defineBuildCommand(() => {
