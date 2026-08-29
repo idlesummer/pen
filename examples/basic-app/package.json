@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pen build",
-    "start": "pen build && tsx start.mjs",
+    "start": "tsx start.mjs",
     "inspect": "node inspect-router.mjs"
   },
   "dependencies": {
