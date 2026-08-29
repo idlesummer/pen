@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from 'react'
-import type { RenderNode } from '@/pen/router'
+import type { RenderNode } from '@/router'
 import type { ComponentMap } from './component-map'
 import type { ErrorFallbackProps } from './error-boundary'
 import { Suspense } from 'react'
