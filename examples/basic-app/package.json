@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node inspect-router.mjs"
+    "inspect": "node inspect-router.mjs",
+    "test": "pen build"
   },
   "dependencies": {
     "@idlesummer/pen": "file:../..",
