@@ -1,15 +1,15 @@
 import { GENERATED_HEADER } from './generated-header'
 
-/** Emits the generated `route-files.ts`: the flat file list `createRouter`
+/** Emits the generated `module-paths.ts`: the flat file list `createRouter`
  *  compiles at runtime, frozen at build time so no filesystem walk happens
  *  once the app is running. */
-export function generateRouteFiles(routeFiles: string[]): string {
+export function generateModulePaths(routeFiles: string[]): string {
   const entries = routeFiles.map(path => `  ${JSON.stringify(path)},`)
 
   return [
     GENERATED_HEADER,
     '',
-    'export const routeFiles = [',
+    'export const modulePaths = [',
     ...entries,
     '] as const',
     '',
