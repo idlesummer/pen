@@ -43,9 +43,9 @@ export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactN
     const Loading = resolveComponent(loading, componentMap)
     content = <Suspense fallback={<Loading />}>{content}</Suspense>
   }
-  if (!layout)
-    return content
-
-  const Layout = resolveComponent(layout, componentMap)
-  return <Layout {...namedSlots}>{content}</Layout>
+  if (layout) {
+    const Layout = resolveComponent(layout, componentMap)
+    return <Layout {...namedSlots}>{content}</Layout>
+  }
+  return content
 }
