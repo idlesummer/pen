@@ -3,7 +3,8 @@ import { basename } from 'node:path'
 const ROUTE_MODULE_TYPES =
   new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
 
-export type RouteModuleType = typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
+export type RouteModuleType =
+  typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
 
 export function getRouteModuleType(fileName: string): RouteModuleType {
   return basename(fileName, '.tsx') as RouteModuleType
