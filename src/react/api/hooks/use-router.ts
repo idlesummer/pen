@@ -1,6 +1,9 @@
-import { navigationStore } from '../store'
+import { use } from 'react'
+import { NavigationContext } from '../NavigationProvider'
 
-// eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix
 export function useRouter() {
-  return navigationStore.actions
+  const store = use(NavigationContext)
+  if (!store) throw new Error('useRouter must be used within a NavigationProvider')
+
+  return store.actions
 }
