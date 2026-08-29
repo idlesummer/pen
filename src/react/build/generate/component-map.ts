@@ -23,7 +23,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
 
   for (const [index, modulePath] of modulePaths.entries()) {
     imports.push(`import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`)
-    entries.push(`  "${modulePath}": Component${index},`)
+    entries.push(`  ${JSON.stringify(modulePath)}: Component${index},`)
   }
 
   return [
