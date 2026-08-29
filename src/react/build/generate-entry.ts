@@ -10,7 +10,7 @@ export function generateEntry(): string {
     'import { render } from "ink"',
     'import { App, createRouter } from "@idlesummer/pen"',
     'import { componentMap } from "./component-map"',
-    'import { routeFiles } from "./route-files"',
+    'import { routeFiles } from "./module-paths"',
     '',
     'const [match] = createRouter([...routeFiles])',
     '',
