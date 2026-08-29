@@ -1,14 +1,17 @@
 import { defineCommand } from 'citty'
+import { reportDiagnostics } from '@/router'
+import { build } from '@/react/build'
 
-/** Creates a `build` CLI command that invokes the given build function. */
-export function defineBuildCommand<T>(build: () => T) {
-  return defineCommand({
-    meta: {
-      name: 'build',
-      description: 'Compile routes and generate static entry files for a pen app',
-    },
-    run: () => {
-      build()
-    },
-  })
-}
+export const buildCommand = defineCommand({
+  meta: {
+    name: 'build',
+    description: 'Compile routes and generate static entry files for a pen app',
+  },
+  run: () => {
+    const { diagnostics } = build('app', 'dist')
+    reportDiagnostics(diagnostics)
+
+    if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
+      throw new Error('Build failed')
+  },
+})
