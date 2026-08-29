@@ -14,7 +14,8 @@ export type BuildResult = {
 /** Discovers route modules under `appDir` and emits the generated
  *  `route-files`, `component-map`, and `entry` files into `outDir`. */
 export function build(appDir: string, outDir: string): BuildResult {
-  const routeFiles = filterRouteFiles(findFiles(appDir, '.tsx'))
+  const files = findFiles(appDir, '.tsx')
+  const routeFiles = filterRouteFiles(files)
   const [diagnostics, routeTree] = createCompiledRoutes(routeFiles)
   const modulePaths = [...collectModulePaths(routeTree)].sort()
 
