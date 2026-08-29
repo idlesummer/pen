@@ -5,7 +5,7 @@ node_modules/
 dist/
 *.tsbuildinfo
 
-# Generated pen app output (default `pen build` outDir convention, à la .next)
+# Generated pen app output
 .pen/
 
 # Logs
