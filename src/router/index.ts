@@ -1,10 +1,10 @@
 export type { RouteNode } from './compiling/route-tree'
 export type { SearchNode } from './compiling/search-tree'
-export type { CompileDiagnostic } from './compiling/diagnostic'
+export type { CompileDiagnostic } from './compiling/compile-diagnostic'
 export type { RenderNode } from './matching/render-tree'
 
 export { collectModulePaths } from './compiling/route-tree'
 export { filterRouteFiles } from './compiling/route-module'
-export { reportDiagnostics } from './compiling/diagnostic'
+export { reportDiagnostics } from './compiling/compile-diagnostic'
 export { createCompiledRoutes } from './compiler'
 export { createRouter } from './router'
