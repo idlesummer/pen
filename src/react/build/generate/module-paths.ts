@@ -1,4 +1,4 @@
-import { GENERATED_HEADER } from '../generated-header'
+import { GENERATED_HEADER } from './header'
 
 /** Emits the generated `module-paths.ts`: the flat file list `createRouter`
  *  compiles at runtime, frozen at build time so no filesystem walk happens

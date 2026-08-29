@@ -1,5 +1,5 @@
 import { join, relative, sep } from 'node:path'
-import { GENERATED_HEADER } from '../generated-header'
+import { GENERATED_HEADER } from './header'
 
 type ComponentMapOptions = {
   appDir: string
