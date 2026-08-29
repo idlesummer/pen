@@ -1,3 +1,4 @@
 import { mount } from './.pen/generated/entry.ts'
 
-mount()
+const { waitUntilExit } = mount()
+await waitUntilExit()
