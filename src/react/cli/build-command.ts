@@ -11,7 +11,7 @@ export const buildCommand = defineCommand({
     appDir: { type: 'positional', description: 'App directory containing route files', default: 'app' },
     outDir: { type: 'positional', description: 'Output directory for generated files', default: 'dist' },
   },
-  run({ args }) {
+  run: ({ args }) => {
     const { diagnostics } = build(args.appDir, args.outDir)
     reportDiagnostics(diagnostics)
 
