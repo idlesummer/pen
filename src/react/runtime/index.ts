@@ -1,5 +1,5 @@
 export { App } from './App'
 export { renderNode } from './render'
 export type { ComponentMap, RouteComponent } from './component-map'
-export { ErrorBoundary } from './error-boundary'
-export type { ErrorFallbackProps } from './error-boundary'
+export { ErrorBoundary } from './ErrorBoundary'
+export type { ErrorFallbackProps } from './ErrorBoundary'
