@@ -1,4 +1,4 @@
-export { App } from './app'
+export { App } from './App'
 export { renderNode } from './render'
 export type { ComponentMap, RouteComponent } from './component-map'
 export { ErrorBoundary } from './error-boundary'
