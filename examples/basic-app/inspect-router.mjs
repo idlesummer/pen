@@ -1,15 +1,19 @@
 import { readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createRouter } from '@idlesummer/pen'
+import { createRouter, filterRouteFiles } from '@idlesummer/pen'
 
 const appDir = join(dirname(fileURLToPath(import.meta.url)), 'app')
 
 // Mirrors pen's own findFiles: readdirSync's recursive paths already use
 // the platform separator createRouter expects, so no path.join juggling needed.
-const routeFiles = readdirSync(appDir, { recursive: true, encoding: 'utf8' })
-  .filter(path => path.endsWith('.tsx'))
-  .sort()
+// createRouter expects pre-filtered route files - filterRouteFiles narrows
+// the raw .tsx list down to real page/layout/loading/error/default modules.
+const routeFiles = filterRouteFiles(
+  readdirSync(appDir, { recursive: true, encoding: 'utf8' })
+    .filter(path => path.endsWith('.tsx'))
+    .sort(),
+)
 
 console.log('routeFiles:', routeFiles)
 const [match, diagnostics, routeTree] = createRouter(routeFiles)

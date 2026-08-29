@@ -31,9 +31,15 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
-export function createRouteTree(filePaths: string[]): RouteNode {
+/** Narrows a file list down to real route module files (page/layout/loading/error/default). */
+export function filterRouteFiles(filePaths: string[]): string[] {
+  return filePaths.filter(isRouteFilePath)
+}
+
+/** Builds a route tree from route module file paths - callers are expected to
+ *  have already narrowed the list with {@link filterRouteFiles}. */
+export function createRouteTree(routeFilePaths: string[]): RouteNode {
   const routeNodeRoot = createRouteNode('', createSegment(''), '')
-  const routeFilePaths = filePaths.filter(isRouteFilePath)  // ignore non-route-module files
 
   treeify(routeNodeRoot, routeFilePaths, sep, {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
@@ -92,10 +98,14 @@ export function getRouteSource(routeNode: RouteNode): string {
 }
 
 /** Collects every unique module path referenced anywhere in the tree. */
-export function collectModulePaths(routeNode: RouteNode, modulePaths = new Set<string>()): Set<string> {
-  for (const path of Object.values(routeNode.modulePaths))
-    modulePaths.add(path)
-  for (const child of routeNode.children)
-    collectModulePaths(child, modulePaths)
+export function collectModulePaths(routeTree: RouteNode): Set<string> {
+  const modulePaths = new Set<string>()
+  traverse(routeTree, {
+    visit: (routeNode) => {
+      for (const path of Object.values(routeNode.modulePaths))
+        modulePaths.add(path)
+    },
+    expand: (routeNode) => routeNode.children,
+  })
   return modulePaths
 }
