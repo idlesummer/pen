@@ -6,7 +6,7 @@ import { compile } from './compiler'
 import { createMatcher } from './matcher'
 
 export type Router = [
-  match: Matcher,
+  matcher: Matcher,
   diagnostic: CompileDiagnostic[],
   routeTree: RouteNode,
   searchTree: SearchNode,
