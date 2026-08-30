@@ -33,3 +33,26 @@ Both docs.page and docs.catchall belong to the same SearchNode (docs's), since [
 - MatchTree: which possible routes won for this URL?
 - RouteTree: what is actually defined at those routes?
 - RenderTree: combines the winning match with the defined content
+
+## default
+
+Next.js splits "nothing else claimed this position" into two files - `default.tsx` for an unmatched parallel-route slot, `not-found.tsx` for an unmatched URL. This framework treats them as the same situation and merges them into one: `default` is the framework's not-found boundary. There's no separate not-found.tsx.
+
+The root always has a default - a real one if the app provides one, the framework's own built-in fallback otherwise - guaranteed at compile time, not caught at runtime. A URL that matches nothing still resolves to a renderable tree; there's no "not found" state left for React to catch after the fact.
+
+Every slot gets that same guarantee independently, not just the root:
+
+```
+  app/
+  ├── page.tsx
+  ├── default.tsx        <- root's default; doubles as the app's not-found boundary
+  └── @sidebar/
+      └── widget/
+          └── page.tsx   <- @sidebar has no default.tsx of its own
+```
+
+- `/`     -> children: page.tsx,    sidebar: framework's built-in default (no match, no default.tsx in @sidebar)
+- `/widget` -> children: default.tsx, sidebar: widget/page.tsx (real match)
+- `/nope` -> children: default.tsx, sidebar: framework's built-in default
+
+Without this guarantee, `@sidebar` would just be missing from the render output whenever nothing in it matched - not an error, just a silently absent pane. Each slot owning its own default, always, is what keeps that from happening.
