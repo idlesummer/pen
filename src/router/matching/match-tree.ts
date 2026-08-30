@@ -86,8 +86,6 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTree {
-  // createMatchPath is shared with slot matches, where leaf can legitimately
-  // stay unset - only this call, the main path, carries the guarantee.
   const mainMatchNode = createMatchPath(searchTree, url) as MatchTree
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
