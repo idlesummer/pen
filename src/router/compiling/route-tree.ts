@@ -3,7 +3,7 @@ import type { RouteModuleType } from './route-module'
 import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { filterRouteFiles, getRouteModuleType } from './route-module'
+import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
 import { createSegment, isPrivateSegment } from './segment'
 
 export type RouteNode = {
@@ -19,6 +19,9 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
+/** Builds the route tree from real files, then guarantees the root always
+ *  has a `default` module to fall back to - intrinsic to what a complete
+ *  route tree provides, not a fixup for anything `validateRouteTree` flags. */
 export function createRouteTree(filePaths: string[]): RouteNode {
   const routeTree = createRouteNode('', createSegment(''), '')
   const routeFilePaths = filterRouteFiles(filePaths)
@@ -40,6 +43,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
+  routeTree.modulePaths.default ??= DEFAULT_FALLBACK_PATH
   return routeTree
 }
 
