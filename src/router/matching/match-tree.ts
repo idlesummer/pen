@@ -16,6 +16,7 @@ export type MatchNode = {
   subtrees?: Record<string, MatchNode> // each slot's own winning match
   // Match metadata
   dynamicParam?: string             // captured url value for dynamic node
+  isTerminal?: true                  // used to check if match node has no children
   leaf?: MatchLeaf
 }
 
@@ -32,10 +33,6 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   if (staticChild)  matchNodeChildren.push({ searchNode: staticChild, parent })
   if (dynamicChild) matchNodeChildren.push({ searchNode: dynamicChild, dynamicParam: nextUrlPart, parent })
   return matchNodeChildren
-}
-
-function hasConsumingChild(searchNode: SearchNode, urlPart: string): boolean {
-  return !!(searchNode.dynamic || searchNode.statics?.[urlPart])
 }
 
 function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
@@ -56,7 +53,9 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     expand: (matchNode) => {
       const searchNode = matchNode.searchNode
       const nextUrlPart = url[searchNode.urlDepth+1]
-      return createMatchNodeChildren(matchNode, nextUrlPart)
+      const children = createMatchNodeChildren(matchNode, nextUrlPart)
+      if (!children.length) matchNode.isTerminal = true
+      return children
     },
     leave: (matchNode) => {
       const searchNode = matchNode.searchNode
@@ -71,7 +70,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
         return true
       }
       // handle fallback candidate if URL is exhausted or the current node has no matching child
-      else if (!nextUrlPart || !hasConsumingChild(searchNode, nextUrlPart)) {
+      else if (matchNode.isTerminal) {
         if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
           bestStaticPath = matchNode
       }
