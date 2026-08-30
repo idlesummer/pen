@@ -35,10 +35,6 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
   return matchNodeChildren
 }
 
-function isMoreStatic(candidate: MatchNode, current: MatchNode): boolean {
-  return candidate.searchNode.staticness > current.searchNode.staticness
-}
-
 function createDefaultContent(matchNode: MatchNode): MatchContent | undefined {
   const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
   return contentNode && { type: 'default', node: contentNode }
@@ -46,8 +42,8 @@ function createDefaultContent(matchNode: MatchNode): MatchContent | undefined {
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   const matchTree: MatchNode = { searchNode: searchTree }
-  let bestMatchPath: MatchNode | undefined
-  let bestStaticPath: MatchNode | undefined // most static-preferring failed branch seen so far
+  let bestMatch: MatchNode | undefined
+  let bestStatic: MatchNode | undefined // most static-preferring failed branch seen so far
 
   traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
     expand: (matchNode) => {
@@ -66,18 +62,18 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       if (acceptingNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
         matchNode.content = { type: 'page', node: acceptingNode, catchallParams }
-        bestMatchPath = matchNode
+        bestMatch = matchNode
         return true
       }
       // store match node as candidate if terminal (farthest possible match)
       else if (matchNode.isTerminal) {
-        if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
-          bestStaticPath = matchNode
+        if (!bestStatic || matchNode.searchNode.staticness > bestStatic.searchNode.staticness)
+          bestStatic = matchNode
       }
       // else, try another branch in the parent (all children were visited but no winner)
     },
   })
-  const matchNode = bestMatchPath ?? bestStaticPath!    // guaranteed since url or tree eventually exhausts (safe to assert)
+  const matchNode = bestMatch ?? bestStatic!  // guaranteed since url or tree eventually exhausts (safe to assert)
   matchNode.content ??= createDefaultContent(matchNode) // populate default node if no true match was found
   return matchNode
 }
