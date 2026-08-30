@@ -23,7 +23,6 @@ export type MatchTree = MatchNode & { leaf: MatchLeaf }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
   if (!nextUrlPart) return [] // check if URL is exhausted by checking whether the next segment exists
-
   const parentSearchNode = parent.searchNode
   const matchNodeChildren: MatchNode[] = []
   const staticChild = parentSearchNode.statics?.[nextUrlPart]  // query url part in next node children
@@ -91,7 +90,6 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTre
   const mainMatchNode = createMatchPath(searchTree, url) as MatchTree
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
-
     node.subtrees = new Map()
     for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
       node.subtrees.set(slotName, createMatchPath(searchSubtree, url))
