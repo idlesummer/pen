@@ -17,7 +17,7 @@ export type MatchNode = {
   // Match metadata
   dynamicParam?: string                 // captured url value for dynamic node
   isTerminal?: true                     // set when match node has no children
-  content?: MatchContent                // values needed for render leaf
+  content?: MatchContent                // values needed for render leaf (only terminal nodes has this)
 }
 
 export type MatchTree =
