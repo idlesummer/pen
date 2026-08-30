@@ -13,6 +13,6 @@ type RouterProps = {
  *  built-in) ensures every URL resolves to at least that. */
 export function Router({ matcher, componentMap }: RouterProps) {
   const pathname = usePathname()
-  const [, renderTree] = matcher(pathname)
+  const renderTree = matcher(pathname)
   return renderNode(renderTree, componentMap)
 }
