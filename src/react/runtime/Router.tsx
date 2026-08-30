@@ -7,16 +7,16 @@ import { renderNode } from './render'
 type RouterProps = {
   match: Matcher
   componentMap: ComponentMap
-  NotFound?: ComponentType
+  Default?: ComponentType
 }
 
 /** Re-matches the route on every navigation and renders the resulting
- *  tree, or `NotFound` when nothing matched at all - not even a `default.tsx`. */
-export function Router({ match, componentMap, NotFound }: RouterProps) {
+ *  tree, or `Default` when nothing matched at all - not even a `default.tsx`. */
+export function Router({ match, componentMap, Default }: RouterProps) {
   const pathname = usePathname()
   const [, renderTree] = match(pathname)
 
   if (!renderTree)
-    return NotFound ? <NotFound /> : null
+    return Default ? <Default /> : null
   return renderNode(renderTree, componentMap)
 }
