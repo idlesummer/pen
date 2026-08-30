@@ -69,7 +69,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
         bestMatchPath = matchNode
         return true
       }
-      // store match node as candidate if terminal or farthest possible match
+      // store match node as candidate if terminal (farthest possible match)
       else if (matchNode.isTerminal) {
         if (!bestStaticPath || isMoreStatic(matchNode, bestStaticPath))
           bestStaticPath = matchNode
