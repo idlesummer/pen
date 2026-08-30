@@ -75,7 +75,7 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 }
 
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode {
-  const mainLeaf = mainMatchNode.leaf!
+  const mainLeaf = mainMatchNode.leaf!  // main match node always has a leaf (see route-tree)
   const renderLeaf = createRenderLeaf(mainMatchNode, mainLeaf, {})
   const contentNode = mainLeaf.contentNode
   let renderNode: RenderNode = renderLeaf
