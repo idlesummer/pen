@@ -13,10 +13,10 @@ export type MatchLeaf = {
 export type MatchNode = {
   searchNode: SearchNode
   parent?: MatchNode
-  subtrees?: Record<string, MatchNode> // each slot's own winning match
+  subtrees?: Record<string, MatchNode>  // each slot's own winning match
   // Match metadata
-  dynamicParam?: string             // captured url value for dynamic node
-  isTerminal?: true                  // used to check if match node has no children
+  dynamicParam?: string                 // captured url value for dynamic node
+  isTerminal?: true                     // set when match node has no children
   leaf?: MatchLeaf
 }
 
