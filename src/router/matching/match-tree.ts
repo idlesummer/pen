@@ -18,9 +18,7 @@ export type MatchNode = {
   leaf?: MatchLeaf
 }
 
-/** The main path's own match node specifically - unlike a slot's, its leaf
- *  is guaranteed populated (the root always has a default, real or built-in,
- *  and the main path's ancestor walk never crosses a slot boundary). */
+/** The main path's own match node. */
 export type MainMatchNode = MatchNode & { leaf: MatchLeaf }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
