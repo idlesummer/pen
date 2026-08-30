@@ -18,6 +18,5 @@ export function Router({ match, componentMap, NotFound }: RouterProps) {
 
   if (!hasPage || !renderTree)
     return NotFound ? <NotFound /> : null
-
   return renderNode(renderTree, componentMap)
 }
