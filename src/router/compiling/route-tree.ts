@@ -68,18 +68,14 @@ export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
 
 /** Finds the nearest ancestor route node that is itself a slot, if any. */
 export function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
-  for (let node = routeNode.parent; node; node = node.parent) {
-    if (node.segment.type === 'slot')
-      return node
-  }
+  for (let node = routeNode.parent; node; node = node.parent)
+    if (node.segment.type === 'slot') return node
 }
 
 /** Finds the nearest ancestor route node with a default module, skipping slot boundaries. */
 export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode | undefined {
-  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node)) {
-    if (node.modulePaths.default)
-      return node
-  }
+  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
+    if (node.modulePaths.default) return node
 }
 
 /** Gets the route's source file or falls back to its route path if no module exists. */
