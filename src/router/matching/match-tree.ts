@@ -40,6 +40,7 @@ function createDefaultContent(matchNode: MatchNode): MatchContent | undefined {
   return contentNode && { type: 'default', node: contentNode }
 }
 
+/** Creates a complete match path from the root to the matched node. */
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchTree {
   const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatch: MatchNode | undefined
