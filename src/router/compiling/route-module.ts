@@ -6,10 +6,7 @@ const ROUTE_MODULE_TYPES =
 export type RouteModuleType =
   typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
 
-/** Sentinel `default` module path assigned to the root route node when no
- *  `default.tsx` exists anywhere in the tree - never a real file path, so
- *  it can't collide with one. Codegen recognizes it and imports pen's own
- *  built-in fallback component instead of an app file. */
+/** Sentinel path for the root route when no `default.tsx` exists. */
 export const DEFAULT_FALLBACK_PATH = '\0pen:default'
 
 export function getRouteModuleType(fileName: string): RouteModuleType {
