@@ -74,10 +74,6 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-/** The main path's leaf is never actually undefined here, unlike a slot's -
- *  createRouteTree guarantees the root always has a default (real or
- *  sentinel), and the main path's ancestor walk never crosses a slot
- *  boundary, so findDefaultRouteNodeParent always resolves something. */
 function createMainRenderNode(mainMatchNode: MatchNode): RenderNode {
   const mainLeaf = mainMatchNode.leaf!
   const renderLeaf = createRenderLeaf(mainMatchNode, mainLeaf, {})
