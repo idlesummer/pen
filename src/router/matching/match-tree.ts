@@ -85,7 +85,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTree {
-  const mainMatchNode = createMatchPath(searchTree, url) as MatchTree // safe since leaf always exists
+  const mainMatchNode = createMatchPath(searchTree, url) as MatchTree // safe since content always exists
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
