@@ -27,7 +27,7 @@ else
 console.log('\nrouteTree:', JSON.stringify(routeTree, (key, value) => key === 'parent' ? undefined : value, 2))
 
 for (const url of ['/', '/home', '/home/about', '/nope']) {
-  const [hasPage, renderTree] = match(url)
-  console.log(`\n${url} -> hasPage: ${hasPage}`)
+  const renderTree = match(url)
+  console.log(`\n${url} ->`)
   console.log(JSON.stringify(renderTree, null, 2))
 }
