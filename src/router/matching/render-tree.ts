@@ -2,6 +2,7 @@ import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchContent, MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
+import { dict } from '@/lib/dict'
 import { createMatchTree } from './match-tree'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
@@ -20,7 +21,7 @@ export type RenderNode = RenderLeaf | {
 }
 
 function getParamTable(matchNode: MatchNode): ParamTable {
-  const params: ParamTable = {}
+  const params: ParamTable = dict()
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
     if (!node.dynamicParam) continue
     const dynamicNode = node.searchNode.anchor
@@ -32,7 +33,7 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 
 function createRenderLeaf(matchNode: MatchNode, matchContent: MatchContent, mainParams: ParamTable): RenderLeaf {
   const { type: contentType, node: contentNode, catchallParams } = matchContent
-  const params = { ...mainParams, ...getParamTable(matchNode) }
+  const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchNode))
 
   if (catchallParams) {
     const catchallName = contentNode .segment.value
@@ -47,7 +48,7 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
   if (!layout && !loading && !error && !slots)
     return renderNode
 
-  ;(slots ??= {}).children = renderNode
+  ;(slots ??= dict()).children = renderNode
   return { layout, loading, error, slots }
 }
 
@@ -64,7 +65,7 @@ function createSlotRenderNode(matchTree: MatchTree, mainParams: ParamTable): Ren
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
   if (!matchNode.subtrees) return
   const params = getParamTable(matchNode)
-  const slots: SlotRenderNodes = {}
+  const slots: SlotRenderNodes = dict()
 
   for (const [subtreeName, subtree] of Object.entries(matchNode.subtrees))
     slots[subtreeName] = createSlotRenderNode(subtree, params)
