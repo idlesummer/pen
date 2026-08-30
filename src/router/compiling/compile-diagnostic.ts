@@ -12,8 +12,8 @@ export function reportDiagnostics(diagnostics: CompileDiagnostic[]): void {
       ? console.error
       : console.warn
 
-    log(`[${severity}] ${rule}: ${message}`)
-    for (const file of files)
-      log(`  at ${file}`)
+    const header = `[${severity}] ${rule}: ${message}`
+    const output = [header, ...files.map(file => `  at ${file}`)]
+    log(output)
   }
 }
