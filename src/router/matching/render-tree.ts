@@ -99,5 +99,5 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode {
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
-  return [mainMatchNode.leaf?.contentType === 'page', renderTree]
+  return [mainMatchNode.leaf!.contentType === 'page', renderTree]
 }
