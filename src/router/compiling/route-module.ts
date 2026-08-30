@@ -1,10 +1,10 @@
 import { basename } from 'node:path'
 
-const ROUTE_MODULE_TYPES =
-  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
-
 export type RouteModuleType =
   typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
+
+const ROUTE_MODULE_TYPES =
+  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
 
 /** Sentinel path for the root route when no `default.tsx` exists. */
 export const DEFAULT_FALLBACK_PATH = '\0pen:default'
