@@ -28,7 +28,7 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
   })
 }
 
-/** Builds the route tree from real files, then guarantees the root and every
+/** Builds the route tree from a file list, then guarantees the root and every
  *  slot always have a `default` module to fall back to - intrinsic to what a
  *  complete route tree provides, not a fixup for anything `validateRouteTree`
  *  flags. */
