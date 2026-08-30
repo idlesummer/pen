@@ -19,9 +19,10 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
-/** Builds the route tree from real files, then guarantees the root always
- *  has a `default` module to fall back to - intrinsic to what a complete
- *  route tree provides, not a fixup for anything `validateRouteTree` flags. */
+/** Builds the route tree from real files, then guarantees the root and every
+ *  slot always have a `default` module to fall back to - intrinsic to what a
+ *  complete route tree provides, not a fixup for anything `validateRouteTree`
+ *  flags. */
 export function createRouteTree(filePaths: string[]): RouteNode {
   const routeTree = createRouteNode('', createSegment(''), '')
   const routeFilePaths = filterRouteFiles(filePaths)
@@ -44,6 +45,10 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     },
   })
   routeTree.modulePaths.default ??= DEFAULT_FALLBACK_PATH
+  forEachReachableRouteNode(routeTree, (node) => {
+    if (node.segment.type === 'slot')
+      node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
+  })
   return routeTree
 }
 
@@ -83,17 +88,19 @@ export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
 }
 
-/** Collects every module path referenced anywhere in the tree, sorted. Assumes
- *  `routeTree` came from `createRouteTree` - each file is assigned to exactly
- *  one node's modulePaths there, so paths are already unique by construction. */
+/** Collects every distinct module path referenced anywhere in the tree, sorted.
+ *  Real files are already unique by construction (`createRouteTree` assigns each
+ *  to exactly one node), but the `default` sentinel can legitimately repeat
+ *  across the root and every slot, so duplicates are collapsed here. */
 export function getRouteModulePaths(routeTree: RouteNode): string[] {
-  const modulePaths: string[] = []
+  const modulePaths = new Set<string>()
   traverse(routeTree, {
     visit: (routeNode) => {
-      modulePaths.push(...Object.values(routeNode.modulePaths))
+      for (const modulePath of Object.values(routeNode.modulePaths))
+        modulePaths.add(modulePath)
     },
     expand: (routeNode) =>
       routeNode.children,
   })
-  return modulePaths.sort()
+  return [...modulePaths].sort()
 }
