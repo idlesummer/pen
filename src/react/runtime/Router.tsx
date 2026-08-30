@@ -11,12 +11,12 @@ type RouterProps = {
 }
 
 /** Re-matches the route on every navigation and renders the resulting
- *  tree, or `NotFound` when the URL has no matching page. */
+ *  tree, or `NotFound` when nothing matched at all - not even a `default.tsx`. */
 export function Router({ match, componentMap, NotFound }: RouterProps) {
   const pathname = usePathname()
-  const [hasPage, renderTree] = match(pathname)
+  const [, renderTree] = match(pathname)
 
-  if (!hasPage || !renderTree)
+  if (!renderTree)
     return NotFound ? <NotFound /> : null
   return renderNode(renderTree, componentMap)
 }
