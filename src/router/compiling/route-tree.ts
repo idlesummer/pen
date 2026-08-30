@@ -63,8 +63,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
 
 /** Returns the next non-slot ancestor, or undefined at a slot boundary. */
 export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
-  if (routeNode.segment.type !== 'slot')
-    return routeNode.parent
+  return routeNode.segment.type !== 'slot' ? routeNode.parent : undefined
 }
 
 /** Finds the nearest ancestor route node that is itself a slot, if any. */
