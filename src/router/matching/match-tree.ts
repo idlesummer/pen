@@ -19,8 +19,8 @@ export type MatchNode = {
   leaf?: MatchLeaf
 }
 
-/** The main path's own match node. */
-export type MatchTree = MatchNode & { leaf: MatchLeaf }
+export type MatchTree =
+  MatchNode & { leaf: MatchLeaf }
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
   if (!nextUrlPart) return [] // check if URL is exhausted by checking whether the next segment exists
