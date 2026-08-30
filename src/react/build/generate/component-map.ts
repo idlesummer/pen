@@ -1,4 +1,5 @@
 import { join, relative, sep } from 'node:path'
+import { DEFAULT_FALLBACK_PATH } from '@/router'
 import { GENERATED_HEADER } from './header'
 
 type ComponentMapOptions = {
@@ -14,6 +15,15 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
   return relative(outDir, moduleFile).replaceAll(sep, '/')
 }
 
+/** Emits the import statement for one module path - pen's own built-in
+ *  fallback for the sentinel `default` path, otherwise a real app file. */
+function toImportStatement(appDir: string, outDir: string, modulePath: string, index: number): string {
+  if (modulePath === DEFAULT_FALLBACK_PATH)
+    return `import { DefaultFallback as Component${index} } from "@idlesummer/pen"`
+
+  return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
+}
+
 /** Emits the generated `component-map.ts`, statically importing each route
  *  module and mapping its path to the imported component. Assumes `outDir`
  *  is outside `appDir`. */
@@ -22,7 +32,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
   const entries: string[] = []
 
   for (const [index, modulePath] of modulePaths.entries()) {
-    imports.push(`import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`)
+    imports.push(toImportStatement(appDir, outDir, modulePath, index))
     entries.push(`  ${JSON.stringify(modulePath)}: Component${index},`)
   }
 

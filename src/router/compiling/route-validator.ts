@@ -1,6 +1,7 @@
 import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { traverse } from '@/lib/traverse'
+import { DEFAULT_FALLBACK_PATH } from './route-module'
 import { getRouteSource } from './route-tree'
 import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
 
@@ -78,7 +79,8 @@ function isValidRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): bo
 /** Clears a catch-all's children (nothing can nest under one), drops
  *  malformed children outright, and prunes slots nested inside another
  *  slot's subtree (both flagged by validateRouteTree above) - before
- *  expand descends further. */
+ *  expand descends further. Also guarantees the root always has a
+ *  `default` module to fall back to, so every URL resolves to something. */
 export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
@@ -94,4 +96,5 @@ export function sanitizeRouteTree(routeTree: RouteNode) {
     expand: (routeNode) =>
       routeNode.children,
   })
+  routeTree.modulePaths.default ??= DEFAULT_FALLBACK_PATH
 }
