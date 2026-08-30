@@ -1,6 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchContent, MatchNode, MatchTree } from './match-tree'
+import type { MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
 import { dict } from '@/lib/dict'
 import { createMatchTree } from './match-tree'
@@ -31,9 +31,9 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, matchContent: MatchContent, mainParams: ParamTable): RenderLeaf {
-  const { type: contentType, node: contentNode, catchallParams } = matchContent
-  const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchNode))
+function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderLeaf {
+  const { type: contentType, node: contentNode, catchallParams } = matchTree.content
+  const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchTree))
 
   if (catchallParams) {
     const catchallName = contentNode .segment.value
@@ -53,7 +53,7 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
 }
 
 function createSlotRenderNode(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
-  const renderLeaf = createRenderLeaf(matchTree, matchTree.content, mainParams)
+  const renderLeaf = createRenderLeaf(matchTree, mainParams)
   const contentNode = matchTree.content.node
   let renderNode: RenderNode = renderLeaf
 
@@ -73,7 +73,7 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 }
 
 function createMainRenderNode(matchTree: MatchTree): RenderNode {
-  const renderLeaf = createRenderLeaf(matchTree, matchTree.content, {})
+  const renderLeaf = createRenderLeaf(matchTree, {})
   const contentNode = matchTree.content.node
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = matchTree
