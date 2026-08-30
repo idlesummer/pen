@@ -1,6 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MainMatchNode, MatchLeaf, MatchNode } from './match-tree'
+import type { MatchLeaf, MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
 import { createMatchTree } from './match-tree'
 
@@ -74,7 +74,7 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-function createMainRenderNode(mainMatchNode: MainMatchNode): RenderNode {
+function createMainRenderNode(mainMatchNode: MatchTree): RenderNode {
   const renderLeaf = createRenderLeaf(mainMatchNode, mainMatchNode.leaf, {})
   const contentNode = mainMatchNode.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
