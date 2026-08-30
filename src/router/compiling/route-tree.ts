@@ -19,6 +19,15 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return { name, segment, path, modulePaths: {}, children: [] }
 }
 
+/** Visits every reachable route node, pruning descendants beneath catch-all routes. */
+export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: RouteNode) => void) {
+  traverse(root, {
+    visit,
+    expand: (routeNode) =>
+      routeNode.segment.type !== 'catchall' ? routeNode.children : [],
+  })
+}
+
 /** Builds the route tree from real files, then guarantees the root and every
  *  slot always have a `default` module to fall back to - intrinsic to what a
  *  complete route tree provides, not a fixup for anything `validateRouteTree`
@@ -72,15 +81,6 @@ export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode | un
     if (node.modulePaths.default)
       return node
   }
-}
-
-/** Visits every reachable route node, pruning descendants beneath catch-all routes. */
-export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: RouteNode) => void) {
-  traverse(root, {
-    visit,
-    expand: (routeNode) =>
-      routeNode.segment.type !== 'catchall' ? routeNode.children : [],
-  })
 }
 
 /** Gets the route's source file or falls back to its route path if no module exists. */
