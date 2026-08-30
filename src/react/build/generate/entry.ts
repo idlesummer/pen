@@ -1,3 +1,4 @@
+import { PACKAGE_NAME } from '@/lib/constants'
 import { GENERATED_HEADER } from './header'
 
 /** Emits the generated `entry.ts`: derives the frozen route list from the
@@ -8,7 +9,7 @@ export function generateEntry(): string {
     '',
     'import { createElement } from "react"',
     'import { render } from "ink"',
-    'import { App, createRouter } from "@idlesummer/pen"',
+    `import { App, createRouter } from "${PACKAGE_NAME}"`,
     'import { componentMap } from "./component-map"',
     '',
     'const [match] = createRouter(Object.keys(componentMap))',

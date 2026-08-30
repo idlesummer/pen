@@ -1,4 +1,5 @@
 import { join, relative, sep } from 'node:path'
+import { PACKAGE_NAME } from '@/lib/constants'
 import { DEFAULT_FALLBACK_PATH } from '@/router'
 import { GENERATED_HEADER } from './header'
 
@@ -19,7 +20,7 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
  *  fallback for the sentinel `default` path, otherwise a real app file. */
 function toImportStatement(appDir: string, outDir: string, modulePath: string, index: number): string {
   if (modulePath === DEFAULT_FALLBACK_PATH)
-    return `import { DefaultFallback as Component${index} } from "@idlesummer/pen"`
+    return `import { DefaultFallback as Component${index} } from "${PACKAGE_NAME}"`
 
   return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
 }
@@ -39,7 +40,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
   return [
     GENERATED_HEADER,
     '',
-    'import type { ComponentMap } from "@idlesummer/pen"',
+    `import type { ComponentMap } from "${PACKAGE_NAME}"`,
     ...imports,
     '',
     'export const componentMap: ComponentMap = {',
