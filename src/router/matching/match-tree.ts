@@ -18,6 +18,11 @@ export type MatchNode = {
   leaf?: MatchLeaf
 }
 
+/** The main path's own match node specifically - unlike a slot's, its leaf
+ *  is guaranteed populated (the root always has a default, real or built-in,
+ *  and the main path's ancestor walk never crosses a slot boundary). */
+export type MainMatchNode = MatchNode & { leaf: MatchLeaf }
+
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
   if (!nextUrlPart) return [] // check if URL is exhausted by checking whether the next segment exists
 
@@ -82,8 +87,10 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
-export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
-  const mainMatchNode = createMatchPath(searchTree, url)
+export function createMatchTree(searchTree: SearchNode, url: string[]): MainMatchNode {
+  // createMatchPath is shared with slot matches, where leaf can legitimately
+  // stay unset - only this call, the main path, carries the guarantee.
+  const mainMatchNode = createMatchPath(searchTree, url) as MainMatchNode
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 

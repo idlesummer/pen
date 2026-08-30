@@ -1,6 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchLeaf, MatchNode } from './match-tree'
+import type { MainMatchNode, MatchLeaf, MatchNode } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
 import { createMatchTree } from './match-tree'
 
@@ -74,10 +74,9 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-function createMainRenderNode(mainMatchNode: MatchNode): RenderNode {
-  const mainLeaf = mainMatchNode.leaf!  // main match node always has a leaf (see route-tree)
-  const renderLeaf = createRenderLeaf(mainMatchNode, mainLeaf, {})
-  const contentNode = mainLeaf.contentNode
+function createMainRenderNode(mainMatchNode: MainMatchNode): RenderNode {
+  const renderLeaf = createRenderLeaf(mainMatchNode, mainMatchNode.leaf, {})
+  const contentNode = mainMatchNode.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
@@ -99,5 +98,5 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode {
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
-  return [mainMatchNode.leaf!.contentType === 'page', renderTree]
+  return [mainMatchNode.leaf.contentType === 'page', renderTree]
 }
