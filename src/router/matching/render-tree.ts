@@ -1,6 +1,6 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchLeaf, MatchNode, MatchTree } from './match-tree'
+import type { MatchContent, MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
 import { createMatchTree } from './match-tree'
 
@@ -30,8 +30,8 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchLeaf, mainParams: ParamTable): RenderLeaf {
-  const { contentType, contentNode, catchallParams } = matchLeaf
+function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchContent, mainParams: ParamTable): RenderLeaf {
+  const { type: contentType, node: contentNode, catchallParams } = matchLeaf
   const params = { ...mainParams, ...getParamTable(matchNode) }
 
   if (catchallParams) {
@@ -52,9 +52,9 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
 }
 
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
-  if (!matchNode.leaf) return
-  const renderLeaf = createRenderLeaf(matchNode, matchNode.leaf, mainParams)
-  const contentNode = matchNode.leaf.contentNode
+  if (!matchNode.content) return
+  const renderLeaf = createRenderLeaf(matchNode, matchNode.content, mainParams)
+  const contentNode = matchNode.content.node
   let renderNode: RenderNode = renderLeaf
 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
@@ -75,8 +75,8 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 }
 
 function createMainRenderNode(matchTree: MatchTree): RenderNode {
-  const renderLeaf = createRenderLeaf(matchTree, matchTree.leaf, {})
-  const contentNode = matchTree.leaf.contentNode
+  const renderLeaf = createRenderLeaf(matchTree, matchTree.content, {})
+  const contentNode = matchTree.content.node
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = matchTree
 
@@ -98,5 +98,5 @@ function createMainRenderNode(matchTree: MatchTree): RenderNode {
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree: RenderNode] {
   const matchTree = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(matchTree)
-  return [matchTree.leaf.contentType === 'page', renderTree]
+  return [matchTree.content.contentType === 'page', renderTree]
 }
