@@ -21,9 +21,11 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
 
 /** Visits every reachable route node, pruning descendants beneath catch-all routes. */
 export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: RouteNode) => void) {
-  const expand = (routeNode: RouteNode) =>
-    routeNode.segment.type !== 'catchall' ? routeNode.children : []
-  traverse(root, { visit, expand })
+  traverse(root, {
+    visit,
+    expand: (routeNode) =>
+      routeNode.segment.type !== 'catchall' ? routeNode.children : [],
+  })
 }
 
 /** Builds the route tree from a file list, then guarantees the root and every
