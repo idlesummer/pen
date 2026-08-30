@@ -91,9 +91,10 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTre
   const mainMatchNode = createMatchPath(searchTree, url) as MatchTree
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
-    node.subtrees = dict()
+    const subtrees = node.subtrees = dict()
+
     for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
-      node.subtrees[slotName] = createMatchPath(searchSubtree, url)
+      subtrees[slotName] = createMatchPath(searchSubtree, url)
   }
   return mainMatchNode
 }
