@@ -13,7 +13,7 @@ export type MatchContent = {
 export type MatchNode = {
   searchNode: SearchNode
   parent?: MatchNode
-  subtrees?: Record<string, MatchNode>  // each slot's own winning match
+  subtrees?: Record<string, MatchTree>  // each slot's own winning match
   // Match metadata
   dynamicParam?: string                 // captured url value for dynamic node
   isTerminal?: true                     // set when match node has no children
@@ -81,13 +81,13 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTree {
-  const mainMatchNode = createMatchPath(searchTree, url) as MatchTree // safe since content always exists
+  const mainMatchNode = createMatchPath(searchTree, url) as MatchTree // safe since every root - main or slot - guarantees a default
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
     node.subtrees = dict()
     for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
-      node.subtrees[slotName] = createMatchPath(searchSubtree, url)
+      node.subtrees[slotName] = createMatchPath(searchSubtree, url) as MatchTree // same guarantee, applied to the slot's own root
   }
   return mainMatchNode
 }

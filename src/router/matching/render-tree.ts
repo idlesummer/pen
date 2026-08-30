@@ -51,10 +51,9 @@ function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: Sl
   return { layout, loading, error, slots }
 }
 
-function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode | undefined {
-  if (!matchNode.content) return
-  const renderLeaf = createRenderLeaf(matchNode, matchNode.content, mainParams)
-  const contentNode = matchNode.content.node
+function createSlotRenderNode(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
+  const renderLeaf = createRenderLeaf(matchTree, matchTree.content, mainParams)
+  const contentNode = matchTree.content.node
   let renderNode: RenderNode = renderLeaf
 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
@@ -65,12 +64,10 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
   if (!matchNode.subtrees) return
   const params = getParamTable(matchNode)
-  let slots: SlotRenderNodes | undefined
+  const slots: SlotRenderNodes = {}
 
-  for (const [subtreeName, subtree] of Object.entries(matchNode.subtrees)) {
-    const slotNode = createSlotRenderNode(subtree, params)
-    if (slotNode) (slots ??= {})[subtreeName] = slotNode
-  }
+  for (const [subtreeName, subtree] of Object.entries(matchNode.subtrees))
+    slots[subtreeName] = createSlotRenderNode(subtree, params)
   return slots
 }
 
