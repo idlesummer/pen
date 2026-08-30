@@ -1,6 +1,7 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import { findDefaultRouteNodeParent } from '../compiling/route-tree'
+import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 
 export type MatchLeaf = {
@@ -12,7 +13,7 @@ export type MatchLeaf = {
 export type MatchNode = {
   searchNode: SearchNode
   parent?: MatchNode
-  subtrees?: Map<string, MatchNode> // each slot's own winning match
+  subtrees?: Record<string, MatchNode> // each slot's own winning match
   // Match metadata
   dynamicParam?: string             // captured url value for dynamic node
   leaf?: MatchLeaf
@@ -90,9 +91,9 @@ export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTre
   const mainMatchNode = createMatchPath(searchTree, url) as MatchTree
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
-    node.subtrees = new Map()
+    node.subtrees = dict()
     for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
-      node.subtrees.set(slotName, createMatchPath(searchSubtree, url))
+      node.subtrees[slotName] = createMatchPath(searchSubtree, url)
   }
   return mainMatchNode
 }
