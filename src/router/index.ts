@@ -5,5 +5,5 @@ export type { RenderNode } from './matching/render-tree'
 
 export { getRouteModulePaths } from './compiling/route-tree'
 export { reportDiagnostics } from './compiling/compile-diagnostic'
-export { createCompiledRoutes } from './compiler'
+export { compile } from './compiler'
 export { createRouter } from './router'
