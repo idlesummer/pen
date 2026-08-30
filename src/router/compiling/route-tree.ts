@@ -52,6 +52,8 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
+
+  // Add default fallback to the root and every reachable slot
   routeTree.modulePaths.default ??= DEFAULT_FALLBACK_PATH
   forEachReachableRouteNode(routeTree, (node) => {
     if (node.segment.type === 'slot')
