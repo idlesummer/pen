@@ -2,7 +2,7 @@ import type { RouteNode } from './compiling/route-tree'
 import type { SearchNode } from './compiling/search-tree'
 import type { CompileDiagnostic } from './compiling/compile-diagnostic'
 import type { Matcher } from './matcher'
-import { createCompiledRoutes } from './compiler'
+import { compile } from './compiler'
 import { createMatcher } from './matcher'
 
 export type Router = [
@@ -15,7 +15,7 @@ export type Router = [
 /** Creates a router from route file paths, returning a matcher, diagnostics,
  *  and the compiled route and search trees. */
 export function createRouter(filePaths: string[]): Router {
-  const [diagnostics, routeTree, searchTree] = createCompiledRoutes(filePaths)
+  const [diagnostics, routeTree, searchTree] = compile(filePaths)
   const matcher = createMatcher(searchTree)
   return [matcher, diagnostics, routeTree, searchTree]
 }
