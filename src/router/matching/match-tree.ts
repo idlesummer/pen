@@ -21,7 +21,7 @@ export type MatchNode = {
 }
 
 export type MatchTree =
-  MatchNode & { leaf: MatchContent }
+  MatchNode & Required<Pick<MatchNode, 'content'>>
 
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
   if (!nextUrlPart) return [] // check if URL is exhausted by checking whether the next segment exists
