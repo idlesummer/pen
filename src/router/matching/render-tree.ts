@@ -30,8 +30,8 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchNode: MatchNode, matchLeaf: MatchContent, mainParams: ParamTable): RenderLeaf {
-  const { type: contentType, node: contentNode, catchallParams } = matchLeaf
+function createRenderLeaf(matchNode: MatchNode, matchContent: MatchContent, mainParams: ParamTable): RenderLeaf {
+  const { type: contentType, node: contentNode, catchallParams } = matchContent
   const params = { ...mainParams, ...getParamTable(matchNode) }
 
   if (catchallParams) {
