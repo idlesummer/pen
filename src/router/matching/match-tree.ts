@@ -63,7 +63,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
       const acceptingNode = nextUrlPart ? searchNode.catchall : searchNode.page
 
-      // handle winning match if a contentNode exists
+      // handle winning match if an accepting node exists
       if (acceptingNode) {
         const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
         matchNode.leaf = { contentType: 'page', contentNode: acceptingNode, catchallParams }
