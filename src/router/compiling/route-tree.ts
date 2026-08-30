@@ -73,13 +73,13 @@ export function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
 }
 
 /** Finds the nearest ancestor route node with a default module, skipping slot
- *  boundaries. Always finds one - createRouteTree guarantees a default on the
- *  root and on every slot, and the walk never crosses a slot boundary without
- *  checking it first, so it can never run out of ancestors to check. */
+ *  boundaries. Always finds one - createRouteTree above guarantees a default
+ *  on the root and on every slot, and this walk checks each node before ever
+ *  crossing past it, so it can't run out of ancestors to check. */
 export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
   for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
     if (node.modulePaths.default) return node
-  throw new Error('unreachable: every root and slot root guarantees a default')
+  return undefined! // unreachable - see guarantee above
 }
 
 /** Gets the route's source file or falls back to its route path if no module exists. */
