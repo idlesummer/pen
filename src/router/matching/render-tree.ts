@@ -74,11 +74,11 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-function createMainRenderNode(mainMatchNode: MatchTree): RenderNode {
-  const renderLeaf = createRenderLeaf(mainMatchNode, mainMatchNode.leaf, {})
-  const contentNode = mainMatchNode.leaf.contentNode
+function createMainRenderNode(matchTree: MatchTree): RenderNode {
+  const renderLeaf = createRenderLeaf(matchTree, matchTree.leaf, {})
+  const contentNode = matchTree.leaf.contentNode
   let renderNode: RenderNode = renderLeaf
-  let matchNode: MatchNode | undefined = mainMatchNode
+  let matchNode: MatchNode | undefined = matchTree
 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
     if (matchNode?.searchNode.anchor !== node)
@@ -96,7 +96,7 @@ function createMainRenderNode(mainMatchNode: MatchTree): RenderNode {
  *  renderTree is never undefined - the root's guaranteed default ensures
  *  the main path always resolves to something. */
 export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree: RenderNode] {
-  const mainMatchNode = createMatchTree(searchTree, url)
-  const renderTree = createMainRenderNode(mainMatchNode)
-  return [mainMatchNode.leaf.contentType === 'page', renderTree]
+  const matchTree = createMatchTree(searchTree, url)
+  const renderTree = createMainRenderNode(matchTree)
+  return [matchTree.leaf.contentType === 'page', renderTree]
 }
