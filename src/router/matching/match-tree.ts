@@ -40,7 +40,7 @@ function createDefaultContent(matchNode: MatchNode): MatchContent | undefined {
   return contentNode && { type: 'default', node: contentNode }
 }
 
-function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
+function createMatchPath(searchTree: SearchNode, url: string[]): MatchTree {
   const matchTree: MatchNode = { searchNode: searchTree }
   let bestMatch: MatchNode | undefined
   let bestStatic: MatchNode | undefined // most static-preferring failed branch seen so far
@@ -75,19 +75,19 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   })
   const matchNode = bestMatch ?? bestStatic!  // guaranteed since url or tree eventually exhausts (safe to assert)
   matchNode.content ??= createDefaultContent(matchNode) // populate default node if no true match was found
-  return matchNode
+  return matchNode as MatchTree // safe since every root - main or slot - guarantees a default
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTree {
-  const mainMatchNode = createMatchPath(searchTree, url) as MatchTree // safe since every root - main or slot - guarantees a default
+  const mainMatchNode = createMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
     node.subtrees = dict()
     for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
-      node.subtrees[slotName] = createMatchPath(searchSubtree, url) as MatchTree // same guarantee, applied to the slot's own root
+      node.subtrees[slotName] = createMatchPath(searchSubtree, url)
   }
   return mainMatchNode
 }
