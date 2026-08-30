@@ -35,11 +35,10 @@ export function createRouteTree(filePaths: string[]): RouteNode {
 
   treeify(routeTree, routeFilePaths, sep, {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
-      const part = parts[index]!      // always defined since `create` only yields existing indices.
-      if (index === parts.length-1) { // Create the route module if file is last
-        const routeModuleType = getRouteModuleType(part)
-        parentRouteNode.modulePaths[routeModuleType] = filePath
-      }
+      const part = parts[index]!    // always defined since `create` only yields existing indices.
+      if (index === parts.length-1) // Create the route module if file is last
+        parentRouteNode.modulePaths[getRouteModuleType(part)] = filePath
+
       else if (!isPrivateSegment(part)) {
         const path = parentRouteNode.path ? `${parentRouteNode.path}/${part}` : part
         return createRouteNode(part, createSegment(part), path)
