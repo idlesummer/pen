@@ -74,10 +74,14 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined {
-  if (!mainMatchNode.leaf) return
-  const renderLeaf = createRenderLeaf(mainMatchNode, mainMatchNode.leaf, {})
-  const contentNode = mainMatchNode.leaf.contentNode
+/** The main path's leaf is never actually undefined here, unlike a slot's -
+ *  createRouteTree guarantees the root always has a default (real or
+ *  sentinel), and the main path's ancestor walk never crosses a slot
+ *  boundary, so findDefaultRouteNodeParent always resolves something. */
+function createMainRenderNode(mainMatchNode: MatchNode): RenderNode {
+  const mainLeaf = mainMatchNode.leaf!
+  const renderLeaf = createRenderLeaf(mainMatchNode, mainLeaf, {})
+  const contentNode = mainLeaf.contentNode
   let renderNode: RenderNode = renderLeaf
   let matchNode: MatchNode | undefined = mainMatchNode
 
@@ -93,8 +97,10 @@ function createMainRenderNode(mainMatchNode: MatchNode): RenderNode | undefined 
   return renderNode
 }
 
-/** Creates the render tree for a URL and reports whether it matched a page. */
-export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree?: RenderNode] {
+/** Creates the render tree for a URL and reports whether it matched a page.
+ *  renderTree is never undefined - the root's guaranteed default ensures
+ *  the main path always resolves to something. */
+export function createRenderTree(url: string[], searchTree: SearchNode): [success: boolean, renderTree: RenderNode] {
   const mainMatchNode = createMatchTree(searchTree, url)
   const renderTree = createMainRenderNode(mainMatchNode)
   return [mainMatchNode.leaf?.contentType === 'page', renderTree]
