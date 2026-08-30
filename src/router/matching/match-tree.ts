@@ -36,8 +36,8 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
 }
 
 function createDefaultContent(matchNode: MatchNode): MatchContent {
-  const contentNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return { type: 'default', node: contentNode }
+  const defaultNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
+  return { type: 'default', node: defaultNode }
 }
 
 /** Creates a complete match path from the root to the matched node and returns that match node. */
