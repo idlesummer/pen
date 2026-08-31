@@ -12,9 +12,9 @@ export const NavigationContext =
  *  starts there. createNavigationStore itself still accepts an initialUrl, for tests
  *  that want to seed a store directly without going through this provider. */
 export function NavigationProvider({ children }: NavigationProviderProps) {
-  const [store] = useState(() => createNavigationStore('/'))
+  const [navigationStore] = useState(() => createNavigationStore('/'))
   return (
-    <NavigationContext value={store}>
+    <NavigationContext value={navigationStore}>
       {children}
     </NavigationContext>
   )
