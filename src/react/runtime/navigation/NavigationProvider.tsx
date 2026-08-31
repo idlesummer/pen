@@ -1,18 +1,18 @@
 import type { PropsWithChildren } from 'react'
 import type { NavigationStore } from './store'
 import { createContext, useState } from 'react'
-import { createStore } from './store'
+import { createNavigationStore } from './store'
+
+type NavigationProviderProps = PropsWithChildren
 
 export const NavigationContext =
   createContext<NavigationStore | null>(null)
 
-type NavigationProviderProps =
-  PropsWithChildren<{ initialUrl?: string }>
-
-/** Owns one navigation store for the subtree, seeded at `initialUrl` once on
- *  mount - later changes to the prop don't reseed an already-running store. */
-export function NavigationProvider({ initialUrl, children }: NavigationProviderProps) {
-  const [store] = useState(() => createStore(initialUrl))
+/** Owns one navigation store for the subtree, seeded at the root - every app
+ *  starts there. createNavigationStore itself still accepts an initialUrl, for tests
+ *  that want to seed a store directly without going through this provider. */
+export function NavigationProvider({ children }: NavigationProviderProps) {
+  const [store] = useState(() => createNavigationStore())
   return (
     <NavigationContext value={store}>
       {children}

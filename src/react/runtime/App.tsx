@@ -6,18 +6,14 @@ import { Router } from './Router'
 type AppProps = {
   matcher: Matcher
   componentMap: ComponentMap
-  initialUrl?: string
 }
 
 /** Root component: owns the navigation store for this app instance, seeded
- *  at `initialUrl`, and renders whatever the current URL matches. */
-export function App({ matcher, componentMap, initialUrl }: AppProps) {
+ *  at the root, and renders whatever the current URL matches. */
+export function App({ matcher, componentMap }: AppProps) {
   return (
-    <NavigationProvider initialUrl={initialUrl}>
-      <Router
-        matcher={matcher}
-        componentMap={componentMap}
-      />
+    <NavigationProvider>
+      <Router matcher={matcher} componentMap={componentMap} />
     </NavigationProvider>
   )
 }
