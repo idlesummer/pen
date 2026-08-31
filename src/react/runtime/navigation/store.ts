@@ -50,7 +50,8 @@ class NavigationStore {
   }
 }
 
-export type { NavigationStore }
+export type NavigationStoreAPI =
+  ReturnType<typeof createNavigationStore>
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
