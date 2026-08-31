@@ -33,12 +33,10 @@ export function createNavigationStore(initialUrl: string) {
         emit()
       },
       back: () => {
-        navigation.back()
-        emit()
+        if (navigation.back()) emit()
       },
       forward: () => {
-        navigation.forward()
-        emit()
+        if (navigation.forward()) emit()
       },
     },
   }
