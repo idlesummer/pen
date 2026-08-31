@@ -1,10 +1,10 @@
 import type { PropsWithChildren } from 'react'
-import type { NavigationStoreAPI } from './store'
+import type { NavigationStore } from './store'
 import { createContext, useState } from 'react'
 import { createNavigationStore } from './store'
 
 export const NavigationContext =
-  createContext<NavigationStoreAPI | null>(null)
+  createContext<NavigationStore | null>(null)
 
 /** Owns one navigation store for the subtree, seeded at the root - every app
  *  starts there. createNavigationStore itself still accepts an initialUrl, for tests
