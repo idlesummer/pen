@@ -18,7 +18,7 @@ type RenderFrame = {
 
 function createRenderFrameChildren(parent: RenderFrame): RenderFrame[] {
   if ('contentType' in parent.node)
-    return []
+    return [] // if content type exists then render node is a leaf (has no children)
 
   const slotEntries = Object.entries(parent.node.slots)
   return slotEntries.map(([slotName, node]) => ({ node, parent, slotName, slots: {} }))
