@@ -8,6 +8,7 @@ export class NavigationStore {
   private navigation
   private snapshot
 
+  /** Public store interface. */
   readonly subscribe
   readonly getSnapshot
   readonly push
