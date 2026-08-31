@@ -5,6 +5,9 @@ export class NavigationStore {
   private listeners
   private navigation
   private snapshot
+
+  readonly subscribe
+  readonly getSnapshot
   readonly actions
 
   constructor(initialUrl: string) {
@@ -12,6 +15,8 @@ export class NavigationStore {
     this.navigation = new Navigation(initialUrl)
     this.snapshot = this.navigation.getSnapshot()
 
+    this.subscribe = this.subscribeListeners.bind(this)
+    this.getSnapshot = this.getNavigationSnapshot.bind(this)
     this.actions = {
       push:    this.push.bind(this),
       replace: this.replace.bind(this),
@@ -20,14 +25,14 @@ export class NavigationStore {
     }
   }
 
-  /* Store interface */
-  subscribe(listener: () => void) {
+  /* Store methods */
+  private subscribeListeners(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
     return unsubscribe
   }
 
-  getSnapshot() {
+  private getNavigationSnapshot() {
     return this.snapshot
   }
 
