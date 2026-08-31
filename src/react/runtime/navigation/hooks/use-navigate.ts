@@ -1,6 +1,8 @@
 import { use, useSyncExternalStore } from 'react'
 import { NavigationContext } from '../NavigationProvider'
 
+/** Returns a function for navigating to a different URL.
+ *  Use this hook to programmatically navigate within the application. */
 export function useNavigate() {
   const store = use(NavigationContext)
   if (!store)
