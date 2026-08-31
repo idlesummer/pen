@@ -16,7 +16,7 @@ class NavigationStoreCore {
     this.listeners.forEach(listener => listener())
   }
 
-  // Store interface
+  /* Store interface */
   subscribe(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
@@ -26,7 +26,7 @@ class NavigationStoreCore {
     return this.snapshot
   }
 
-  // Navigation actions
+  /* Navigation actions */
   push(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
