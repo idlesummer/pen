@@ -1,6 +1,6 @@
 import type { Matcher } from '@/router/matcher'
 import type { ComponentMap } from './component-map'
-import { usePathname } from '../api/hooks/use-pathname'
+import { usePathname } from './hooks/use-pathname'
 import { renderNode } from './render'
 
 type RouterProps = {
