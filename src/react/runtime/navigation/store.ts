@@ -1,6 +1,7 @@
 import { Navigation } from './navigation'
 
-export type NavigationStore = ReturnType<typeof createNavigationStore>
+export type NavigationStore =
+  ReturnType<typeof createNavigationStore>
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
@@ -19,26 +20,20 @@ export function createNavigationStore(initialUrl?: string) {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },
-
-    getSnapshot:
-      () => snapshot,
-
+    getSnapshot: () => snapshot,
     actions: {
       push: (url: string, searchParams?: unknown) => {
         navigation.push(url, searchParams)
         emit()
       },
-
       replace: (url: string, searchParams?: unknown) => {
         navigation.replace(url, searchParams)
         emit()
       },
-
       back: () => {
         navigation.back()
         emit()
       },
-
       forward: () => {
         navigation.forward()
         emit()
