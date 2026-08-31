@@ -15,7 +15,6 @@ export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactN
     const Content = resolveComponent(node.contentPath, componentMap)
     return <Content params={node.params} />
   }
-
   const { layout, loading, error, default: defaultPath, slots } = node
   const rendered: Record<string, ReactNode> = {}
   for (const [slotName, slotNode] of Object.entries(slots))
