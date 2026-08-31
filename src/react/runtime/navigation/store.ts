@@ -5,7 +5,7 @@ import { Navigation } from './navigation'
  *  methods are arrow fields, not regular ones - React and consumers detach
  *  them from `this` (`useSyncExternalStore(store.subscribe, store.getSnapshot)`,
  *  `const { push } = useRouter()`), so they can't rely on a receiver. */
-class NavigationStore {
+class NavigationStoreCore {
   private listeners = new Set<() => void>()
   private navigation: Navigation
   private snapshot: Navigation['snapshot']
@@ -50,13 +50,13 @@ class NavigationStore {
   }
 }
 
-export type NavigationStoreAPI =
+export type NavigationStore =
   ReturnType<typeof createNavigationStore>
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
 export function createNavigationStore(initialUrl: string) {
-  const store = new NavigationStore(initialUrl)
+  const store = new NavigationStoreCore(initialUrl)
   return {
     subscribe: store.subscribe.bind(store),
     getSnapshot: store.getSnapshot.bind(store),
