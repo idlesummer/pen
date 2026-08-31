@@ -85,7 +85,9 @@ function useSyncExternalStore(subscribe, getSnapshot) {
       // Fired whenever OUR store's emit() runs. Re-check the source of
       // truth, and only bother re-rendering if it actually changed - the
       // Object.is safety net, though it only catches identical references.
-      if (!Object.is(getSnapshot(), value))
+      const currentValue = getSnapshot()
+      const hasChanged = !Object.is(currentValue, value)
+      if (hasChanged)
         forceRerender(x => !x)
     }
     const unsubscribe = subscribe(handleChange)   // register on mount
