@@ -38,14 +38,14 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
       createRenderFrameChildren,
 
     leave: (frame) => {
-      const node = frame.node
+      const renderNode = frame.node
 
-      if ('contentType' in node) {
-        const Content = resolveComponent(node.contentPath, componentMap)
-        frame.rendered = <Content params={node.params} />
+      if ('contentType' in renderNode) {
+        const Content = resolveComponent(renderNode.contentPath, componentMap)
+        frame.rendered = <Content params={renderNode.params} />
       }
       else {
-        const { layout, loading, error, default: defaultPath } = node
+        const { layout, loading, error, default: defaultPath } = renderNode
         const { children, ...namedSlots } = frame.slots
         let content = children
 
