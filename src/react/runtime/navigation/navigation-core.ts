@@ -3,7 +3,7 @@ type NavigationHistory = {
   searchParams?: unknown
 }
 
-export type NavigationSnapshot = {
+type NavigationSnapshot = {
   history: Readonly<NavigationHistory[]>
   position: number
 }
