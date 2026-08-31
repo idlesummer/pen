@@ -1,7 +1,7 @@
 import type { Matcher } from '@/router/matcher'
-import type { ComponentMap } from './component-map'
-import { usePathname } from './hooks/use-pathname'
-import { renderNode } from './render'
+import type { ComponentMap } from './rendering/component-map'
+import { usePathname } from './navigation/hooks/use-pathname'
+import { renderNode } from './rendering/render'
 
 type RouterProps = {
   matcher: Matcher
