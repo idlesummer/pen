@@ -8,15 +8,15 @@ import { Navigation } from './navigation'
 class NavigationStoreCore {
   private listeners = new Set<() => void>()
   private navigation: Navigation
-  private snapshot: Navigation['snapshot']
+  private snapshot: ReturnType<Navigation['getSnapshot']>
 
   constructor(initialUrl: string) {
     this.navigation = new Navigation(initialUrl)
-    this.snapshot = this.navigation.snapshot
+    this.snapshot = this.navigation.getSnapshot()
   }
 
   private emit() {
-    this.snapshot = this.navigation.snapshot
+    this.snapshot = this.navigation.getSnapshot()
     this.listeners.forEach(fn => fn())
   }
 
