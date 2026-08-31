@@ -1,45 +1,56 @@
 import { Navigation } from './navigation'
 
-export type NavigationStore =
-  ReturnType<typeof createNavigationStore>
+/** Wraps `Navigation` and adds what it has none of: a `listeners` Set,
+ *  `subscribe`/`getSnapshot`, and actions that mutate then notify. Public
+ *  methods are arrow fields, not regular ones - React and consumers detach
+ *  them from `this` (`useSyncExternalStore(store.subscribe, store.getSnapshot)`,
+ *  `const { push } = useRouter()`), so they can't rely on a receiver. */
+class NavigationStore {
+  private listeners = new Set<() => void>()
+  private navigation: Navigation
+  private snapshot: Navigation['snapshot']
+
+  constructor(initialUrl: string) {
+    this.navigation = new Navigation(initialUrl)
+    this.snapshot = this.navigation.snapshot
+  }
+
+  private emit() {
+    this.snapshot = this.navigation.snapshot
+    this.listeners.forEach(fn => fn())
+  }
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener)
+    return () => this.listeners.delete(listener)
+  }
+
+  getSnapshot = () => this.snapshot
+
+  actions = {
+    push: (url: string, searchParams?: unknown) => {
+      this.navigation.push(url, searchParams)
+      this.emit()
+    },
+    replace: (url: string, searchParams?: unknown) => {
+      this.navigation.replace(url, searchParams)
+      this.emit()
+    },
+    back: () => {
+      if (this.navigation.back())
+        this.emit()
+    },
+    forward: () => {
+      if (this.navigation.forward())
+        this.emit()
+    },
+  }
+}
+
+export type { NavigationStore }
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
-export function createNavigationStore(initialUrl: string) {
-  const listeners = new Set<() => void>()
-  const navigation = new Navigation(initialUrl)
-  let snapshot = navigation.snapshot
-
-  const emit = () => {
-    snapshot = navigation.snapshot
-    listeners.forEach(fn => fn())
-  }
-
-  return {
-    subscribe: (listener: () => void) => {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
-    },
-    getSnapshot:
-      () => snapshot,
-
-    actions: {
-      push: (url: string, searchParams?: unknown) => {
-        navigation.push(url, searchParams)
-        emit()
-      },
-      replace: (url: string, searchParams?: unknown) => {
-        navigation.replace(url, searchParams)
-        emit()
-      },
-      back: () => {
-        if (navigation.back())
-          emit()
-      },
-      forward: () => {
-        if (navigation.forward())
-          emit()
-      },
-    },
-  }
+export function createNavigationStore(initialUrl: string): NavigationStore {
+  return new NavigationStore(initialUrl)
 }
