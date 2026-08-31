@@ -13,9 +13,9 @@ export class NavigationStore {
     this.snapshot = this.navigation.getSnapshot()
 
     this.actions = {
-      push: this.push.bind(this),
+      push:    this.push.bind(this),
       replace: this.replace.bind(this),
-      back: this.back.bind(this),
+      back:    this.back.bind(this),
       forward: this.forward.bind(this),
     }
   }
