@@ -30,7 +30,7 @@ export class Navigation {
     return this.position < this.history.length-1 && (this.position++, true)
   }
 
-  get snapshot() {
+  getSnapshot() {
     const history = this.history as Readonly<typeof this.history>
     const position = this.position
     return { history, position }
