@@ -7,7 +7,7 @@ export class Navigation {
   private position = 0
   private history: NavigationHistory[]
 
-  constructor(initialUrl='/') {
+  constructor(initialUrl: string) {
     this.history = [{ url: initialUrl }]
   }
 
