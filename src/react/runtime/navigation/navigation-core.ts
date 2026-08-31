@@ -3,7 +3,7 @@ type NavigationHistory = {
   searchParams?: unknown
 }
 
-export type NavigationSnapshot = {
+type NavigationSnapshot = {
   history: Readonly<NavigationHistory[]>
   position: number
 }
@@ -17,7 +17,7 @@ export class Navigation {
     this.history = [{ url: initialUrl }]
   }
 
-  /* State */
+  /* Navigation State */
 
   getSnapshot(): NavigationSnapshot {
     const history = this.history
@@ -25,7 +25,7 @@ export class Navigation {
     return { history, position }
   }
 
-  /* Actions */
+  /* Navigation Actions */
 
   push(url: string, searchParams?: unknown) {
     this.history.splice(this.position+1, Infinity, { url, searchParams })
