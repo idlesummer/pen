@@ -1,5 +1,5 @@
-import type { NavigationSnapshot } from './navigation'
-import { Navigation } from './navigation'
+import type { NavigationSnapshot } from './navigation-core'
+import { Navigation } from './navigation-core'
 
 /** Adds store state and subscriptions around `Navigation`. */
 class NavigationStoreCore {
