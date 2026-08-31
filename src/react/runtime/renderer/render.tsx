@@ -16,13 +16,14 @@ type RenderFrame = {
   rendered?: ReactNode              // set once this frame itself leaves
 }
 
-/** Turns a router `RenderNode` into a React element tree, resolving each
- *  segment's page/layout/loading/error module from the build-generated
- *  `componentMap` - no runtime module loading involved. Walks the tree with
- *  `traverse`: `expand` describes each frame's slots, `leave` composes a
- *  frame's own element only once every slot beneath it has already resolved. */
-export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactNode {
-  const rootFrame: RenderFrame = { node: root, slots: {} }
+/** Renders a router `RenderNode` tree into a React element tree.
+  *
+  * Resolves each node's page, layout, loading, error, and default components
+  * from the build-generated `componentMap`, then composes them according to
+  * the tree's slot structure. Components are resolved from the map at runtime;
+  * no module loading is performed during rendering. */
+export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): ReactNode {
+  const rootFrame: RenderFrame = { node: renderTree, slots: {} }
 
   traverse(rootFrame, {
     expand: (frame) => {
