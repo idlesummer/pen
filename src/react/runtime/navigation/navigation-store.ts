@@ -25,7 +25,8 @@ export class NavigationStore {
     }
   }
 
-  /* Store methods */
+  /* Store interface */
+
   private subscribeListeners(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
@@ -37,6 +38,7 @@ export class NavigationStore {
   }
 
   /* Navigation actions */
+
   private push(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
@@ -58,6 +60,7 @@ export class NavigationStore {
   }
 
   /* Internal helpers */
+
   private emit() {
     this.snapshot = this.navigation.getSnapshot()
     this.listeners.forEach(listener => listener())
