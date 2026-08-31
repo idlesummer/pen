@@ -10,9 +10,9 @@ import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
 type RenderFrame = {
   node: RenderNode
-  parent: RenderFrame | null
-  slotName: string | null // the name this frame fills in its parent's slots, if any
-  slotResults: Record<string, ReactNode> // filled in by children as they leave
+  parent?: RenderFrame
+  slotName?: string // the name this frame fills in its parent's slots, if any
+  slots: Record<string, ReactNode> // filled in by children as they leave
   rendered?: ReactNode // set once this frame itself leaves
 }
 
@@ -22,7 +22,7 @@ type RenderFrame = {
  *  `traverse`: `expand` describes each frame's slots, `leave` composes a
  *  frame's own element only once every slot beneath it has already resolved. */
 export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactNode {
-  const rootFrame: RenderFrame = { node: root, parent: null, slotName: null, slotResults: {} }
+  const rootFrame: RenderFrame = { node: root, slots: {} }
 
   traverse(rootFrame, {
     expand: (frame) => {
@@ -30,7 +30,7 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
         return []
 
       return Object.entries(frame.node.slots).map(([slotName, slotNode]): RenderFrame =>
-        ({ node: slotNode, parent: frame, slotName, slotResults: {} }))
+        ({ node: slotNode, parent: frame, slotName, slots: {} }))
     },
     leave: (frame) => {
       const { node } = frame
@@ -41,7 +41,7 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
       }
       else {
         const { layout, loading, error, default: defaultPath } = node
-        const { children, ...namedSlots } = frame.slotResults
+        const { children, ...namedSlots } = frame.slots
         let content = children
 
         if (defaultPath) {
@@ -64,7 +64,7 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
       }
 
       if (frame.parent && frame.slotName)
-        frame.parent.slotResults[frame.slotName] = frame.rendered
+        frame.parent.slots[frame.slotName] = frame.rendered
     },
   })
 
