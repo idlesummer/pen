@@ -11,9 +11,9 @@ import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 type RenderFrame = {
   node: RenderNode
   parent?: RenderFrame
-  slotName?: string // the name this frame fills in its parent's slots, if any
-  slots: Record<string, ReactNode> // filled in by children as they leave
-  rendered?: ReactNode // set once this frame itself leaves
+  slotName?: string                 // the name this frame fills in its parent's slots, if any
+  slots: Record<string, ReactNode>  // filled in by children as they leave
+  rendered?: ReactNode              // set once this frame itself leaves
 }
 
 /** Turns a router `RenderNode` into a React element tree, resolving each
