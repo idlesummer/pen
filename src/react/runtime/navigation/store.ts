@@ -20,30 +20,33 @@ class NavigationStore {
     this.listeners.forEach(fn => fn())
   }
 
-  subscribe = (listener: () => void) => {
+  subscribe(listener: () => void) {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
   }
 
-  getSnapshot = () => this.snapshot
+  getSnapshot() {
+    return this.snapshot
+  }
 
-  actions = {
-    push: (url: string, searchParams?: unknown) => {
-      this.navigation.push(url, searchParams)
+  push(url: string, searchParams?: unknown) {
+    this.navigation.push(url, searchParams)
+    this.emit()
+  }
+
+  replace(url: string, searchParams?: unknown) {
+    this.navigation.replace(url, searchParams)
+    this.emit()
+  }
+
+  back() {
+    if (this.navigation.back())
       this.emit()
-    },
-    replace: (url: string, searchParams?: unknown) => {
-      this.navigation.replace(url, searchParams)
+  }
+
+  forward() {
+    if (this.navigation.forward())
       this.emit()
-    },
-    back: () => {
-      if (this.navigation.back())
-        this.emit()
-    },
-    forward: () => {
-      if (this.navigation.forward())
-        this.emit()
-    },
   }
 }
 
@@ -51,6 +54,16 @@ export type { NavigationStore }
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
-export function createNavigationStore(initialUrl: string): NavigationStore {
-  return new NavigationStore(initialUrl)
+export function createNavigationStore(initialUrl: string) {
+  const store = new NavigationStore(initialUrl)
+  return {
+    subscribe: store.subscribe.bind(store),
+    getSnapshot: store.getSnapshot.bind(store),
+    actions: {
+      push: store.push.bind(store),
+      replace: store.replace.bind(store),
+      back: store.back.bind(store),
+      forward: store.forward.bind(store),
+    },
+  }
 }
