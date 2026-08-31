@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
-import type { NavigationStore } from './store'
+import type { NavigationStore } from './navigation-store'
 import { createContext, useState } from 'react'
-import { createNavigationStore } from './store'
+import { createNavigationStore } from './navigation-store'
 
 export const NavigationContext =
   createContext<NavigationStore | null>(null)
