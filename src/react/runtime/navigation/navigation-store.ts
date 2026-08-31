@@ -1,6 +1,6 @@
 import { Navigation } from './navigation-core'
 
-/** Stateful store around `Navigation`.
+/** Stateful store around {@link Navigation}.
  *  The class owns its store state, while bound fields form the public interface
  *  so consumers can pass them directly without invoking or binding methods. */
 export class NavigationStore {
