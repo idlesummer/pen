@@ -1,6 +1,8 @@
 import { Navigation } from './navigation-core'
 
-/** Adds store state and subscriptions around `Navigation`. */
+/** Stateful store around `Navigation`.
+ *  The class owns its store state, while bound fields form the public interface
+ *  so consumers can pass them directly without invoking or binding methods. */
 export class NavigationStore {
   private listeners
   private navigation
