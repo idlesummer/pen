@@ -71,12 +71,12 @@ Navigation state is the one thing genuinely runtime-only - it doesn't exist unti
 
 ```js
 function useSyncExternalStore(subscribe, getSnapshot) {
-  const [, forceRerender] = useState(0)      // dummy lever, value never read
+  const [, forceRerender] = useState(false)  // dummy lever, value never read
   const value = getSnapshot()                 // real data, re-pulled every render
 
   useEffect(() => {
     const handleChange = () => {
-      if (!Object.is(getSnapshot(), value)) forceRerender(n => n+1)
+      if (!Object.is(getSnapshot(), value)) forceRerender(x => !x)
     }
     return subscribe(handleChange)            // register on mount, unsubscribe on unmount
   }, [subscribe, getSnapshot])
