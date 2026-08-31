@@ -27,7 +27,7 @@ export class Navigation {
 
   /** Returns whether it actually moved, so the store knows whether to notify. */
   forward(): boolean {
-    return this.position < this.history.length-1 && (this.position, true)
+    return this.position < this.history.length-1 && (this.position++, true)
   }
 
   get snapshot() {
