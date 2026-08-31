@@ -10,7 +10,10 @@ export class NavigationStore {
 
   readonly subscribe
   readonly getSnapshot
-  readonly actions
+  readonly push
+  readonly replace
+  readonly back
+  readonly forward
 
   constructor(initialUrl: string) {
     this.listeners = new Set<() => void>()
@@ -19,12 +22,10 @@ export class NavigationStore {
 
     this.subscribe = this.subscribeListeners.bind(this)
     this.getSnapshot = this.getNavigationSnapshot.bind(this)
-    this.actions = {
-      push:    this.push.bind(this),
-      replace: this.replace.bind(this),
-      back:    this.back.bind(this),
-      forward: this.forward.bind(this),
-    }
+    this.push = this.pushUrl.bind(this)
+    this.replace = this.replaceUrl.bind(this)
+    this.back = this.goBack.bind(this)
+    this.forward = this.goForward.bind(this)
   }
 
   /* Store interface */
@@ -41,22 +42,22 @@ export class NavigationStore {
 
   /* Navigation actions */
 
-  private push(url: string, searchParams?: unknown) {
+  private pushUrl(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
   }
 
-  private replace(url: string, searchParams?: unknown) {
+  private replaceUrl(url: string, searchParams?: unknown) {
     this.navigation.replace(url, searchParams)
     this.emit()
   }
 
-  private back() {
+  private goBack() {
     if (this.navigation.back())
       this.emit()
   }
 
-  private forward() {
+  private goForward() {
     if (this.navigation.forward())
       this.emit()
   }
