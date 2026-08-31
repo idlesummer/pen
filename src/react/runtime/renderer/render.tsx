@@ -22,7 +22,6 @@ export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactN
     const Content = resolveComponent(node.contentPath, componentMap)
     return <Content params={node.params} />
   }
-
   const { layout, loading, error, default: defaultPath, slots } = node
   const { children, ...namedSlots } = renderSlots(slots, componentMap)
   let content = children
