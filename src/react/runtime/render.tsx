@@ -38,11 +38,11 @@ export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactN
 
   if (defaultPath) {
     const Fallback = resolveComponent(defaultPath, componentMap)
-    content = <DefaultBoundary Fallback={Fallback}>{content}</DefaultBoundary>
+    content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
   }
   if (error) {
     const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
-    content = <ErrorBoundary Fallback={Fallback}>{content}</ErrorBoundary>
+    content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
   }
   if (loading) {
     const Loading = resolveComponent(loading, componentMap)

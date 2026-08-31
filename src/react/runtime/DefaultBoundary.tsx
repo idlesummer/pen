@@ -3,7 +3,7 @@ import { Component } from 'react'
 import { DefaultSignal } from './notFound'
 
 type Props = {
-  Fallback: ComponentType
+  fallback: ComponentType
   children: ReactNode
 }
 
@@ -26,7 +26,7 @@ export class DefaultBoundary extends Component<Props, State> {
 
   render() {
     const { triggered } = this.state
-    const { Fallback, children } = this.props
+    const { fallback: Fallback, children } = this.props
     if (!triggered) return children
     return <Fallback />
   }

@@ -8,7 +8,7 @@ export type ErrorFallbackProps = {
 }
 
 type Props = {
-  Fallback: ComponentType<ErrorFallbackProps>
+  fallback: ComponentType<ErrorFallbackProps>
   children: ReactNode
 }
 
@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     const { error } = this.state
-    const { Fallback, children } = this.props
+    const { fallback: Fallback, children } = this.props
     if (!error) return children
     return <Fallback error={error} reset={this.reset} />
   }
