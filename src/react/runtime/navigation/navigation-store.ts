@@ -52,7 +52,7 @@ export class NavigationStore {
       this.emit()
   }
 
-  /* Internal */
+  /* Internal helpers */
   private emit() {
     this.snapshot = this.navigation.getSnapshot()
     this.listeners.forEach(listener => listener())
