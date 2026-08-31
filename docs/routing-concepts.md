@@ -71,15 +71,27 @@ Navigation state is the one thing genuinely runtime-only - it doesn't exist unti
 
 ```js
 function useSyncExternalStore(subscribe, getSnapshot) {
-  const [, forceRerender] = useState(false)  // dummy lever, value never read
-  const value = getSnapshot()                 // real data, re-pulled every render
+  // A hidden useState whose value is never read - it exists purely as a
+  // lever to pull. Calling its setter is what schedules a re-render;
+  // the value itself means nothing.
+  const [, forceRerender] = useState(false)
+
+  // Called on every render (unlike the effect below) - the actual data,
+  // read fresh each time, since React never stores a copy of it.
+  const value = getSnapshot()
 
   useEffect(() => {
     const handleChange = () => {
+      // Fired whenever OUR store's emit() runs. Re-check the source of
+      // truth, and only bother re-rendering if it actually changed - the
+      // Object.is safety net, though it only catches identical references.
       if (!Object.is(getSnapshot(), value)) forceRerender(x => !x)
     }
-    return subscribe(handleChange)            // register on mount, unsubscribe on unmount
+    const unsubscribe = subscribe(handleChange)   // register on mount
+    return unsubscribe                             // unsubscribe on unmount
   }, [subscribe, getSnapshot])
+  // Both listed, not because THIS caller's values ever change, but
+  // because the hook has no way to know that about any caller.
 
   return value
 }
