@@ -56,3 +56,33 @@ Every slot gets that same guarantee independently, not just the root:
 - `/nope` -> children: default.tsx, sidebar: framework's built-in default
 
 Without this guarantee, `@sidebar` would just be missing from the render output whenever nothing in it matched - not an error, just a silently absent pane. Each slot owning its own default, always, is what keeps that from happening.
+
+## runtime
+
+`src/router/` (decision layer) and `src/react/runtime/` (runtime layer) are deliberately separate - router has zero React/Ink imports anywhere, produces plain data (a `RenderNode` tree), and every "what if" (unmatched URL, missing slot content) gets resolved *inside* it, provably, before any component ever renders. The runtime layer only translates already-decided data into elements; it never has to guess.
+
+Navigation state is the one thing genuinely runtime-only - it doesn't exist until an app instance is alive. Three layers:
+
+- `Navigation` (navigation.ts) - a plain class, no React, no way to be observed. Mutates `position`/`history`, that's it.
+- the store (store.ts) - wraps `Navigation` and adds what it has none of: a `listeners` Set, `subscribe`/`getSnapshot`, and actions that mutate then `emit()`. Still zero React - this is the generic observable-wrapper shape, pluggable into anything.
+- `useSyncExternalStore(store.subscribe, store.getSnapshot)` - the one React-specific piece, in `use-navigate.ts`. Every other hook derives from this one call.
+
+`getSnapshot` is where the value comes from - called on *every* render, not once, because React never owns a copy of external data the way it owns `useState`'s. `subscribe` is the doorbell, called once per mount, telling React when to go re-check that door. The listener React registers carries no data - `emit()` calls every listener with zero arguments - it's a "something changed, go look" ping, not a push. Simplified shape of what's inside `useSyncExternalStore`:
+
+```js
+function useSyncExternalStore(subscribe, getSnapshot) {
+  const [, forceRerender] = useState(0)      // dummy lever, value never read
+  const value = getSnapshot()                 // real data, re-pulled every render
+
+  useEffect(() => {
+    const handleChange = () => {
+      if (!Object.is(getSnapshot(), value)) forceRerender(n => n+1)
+    }
+    return subscribe(handleChange)            // register on mount, unsubscribe on unmount
+  }, [subscribe, getSnapshot])
+
+  return value
+}
+```
+
+That `Object.is` check is a real safety net, but only for identical references - it doesn't catch a freshly-rebuilt object with unchanged values. `Navigation.back()`/`forward()` used to let the store's `emit()` fire unconditionally, even sitting at the start/end of history where nothing actually moved - producing a new snapshot object every time and wasting a re-render React's own check couldn't have caught. Fixed by having `back()`/`forward()` report whether they actually moved, so the store only emits when something real changed - the guard condition stays in exactly one place (`Navigation`), never duplicated at the store level.
