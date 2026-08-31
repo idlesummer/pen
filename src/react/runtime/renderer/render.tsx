@@ -7,13 +7,6 @@ import { resolveComponent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
-function renderSlots(slots: Record<string, RenderNode>, componentMap: ComponentMap): Record<string, ReactNode> {
-  const rendered: Record<string, ReactNode> = {}
-  for (const [slotName, slotNode] of Object.entries(slots))
-    rendered[slotName] = renderNode(slotNode, componentMap)
-  return rendered
-}
-
 /** Recursively turns a router `RenderNode` into a React element tree,
  *  resolving each segment's page/layout/loading/error module from the
  *  build-generated `componentMap` - no runtime module loading involved. */
@@ -24,7 +17,11 @@ export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactN
   }
 
   const { layout, loading, error, default: defaultPath, slots } = node
-  const { children, ...namedSlots } = renderSlots(slots, componentMap)
+  const rendered: Record<string, ReactNode> = {}
+  for (const [slotName, slotNode] of Object.entries(slots))
+    rendered[slotName] = renderNode(slotNode, componentMap)
+
+  const { children, ...namedSlots } = rendered
   let content = children
 
   if (defaultPath) {
