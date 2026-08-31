@@ -38,13 +38,11 @@ class NavigationStoreCore {
   }
 
   back() {
-    if (this.navigation.back())
-      this.emit()
+    if (this.navigation.back()) this.emit()
   }
 
   forward() {
-    if (this.navigation.forward())
-      this.emit()
+    if (this.navigation.forward()) this.emit()
   }
 }
 
