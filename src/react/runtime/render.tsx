@@ -4,7 +4,7 @@ import type { ComponentMap } from './component-map'
 import type { ErrorFallbackProps } from './ErrorBoundary'
 import { Suspense } from 'react'
 import { ErrorBoundary } from './ErrorBoundary'
-import { NotFoundBoundary } from './NotFoundBoundary'
+import { DefaultBoundary } from './DefaultBoundary'
 
 /** Looks up a route module's component by path. The specific prop shape
  *  (`TProps`) can't be verified statically - it's resolved from a path
@@ -38,7 +38,7 @@ export function renderNode(node: RenderNode, componentMap: ComponentMap): ReactN
 
   if (defaultPath) {
     const Fallback = resolveComponent(defaultPath, componentMap)
-    content = <NotFoundBoundary Fallback={Fallback}>{content}</NotFoundBoundary>
+    content = <DefaultBoundary Fallback={Fallback}>{content}</DefaultBoundary>
   }
   if (error) {
     const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
