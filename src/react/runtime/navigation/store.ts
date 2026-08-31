@@ -19,7 +19,8 @@ class NavigationStoreCore {
 
   subscribe(listener: () => void) {
     this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
+    const unsubscribe = () => this.listeners.delete(listener)
+    return unsubscribe
   }
 
   getSnapshot() {
