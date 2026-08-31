@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import { Component } from 'react'
+import { NotFoundSignal } from './notFound'
 
 export type ErrorFallbackProps = {
   error: Error
@@ -21,6 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
 
   static getDerivedStateFromError(error: Error): State {
+    if (error instanceof NotFoundSignal) throw error // let it climb to a NotFoundBoundary instead
     return { error }
   }
 
