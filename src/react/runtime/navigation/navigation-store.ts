@@ -11,7 +11,6 @@ class NavigationStoreCore {
     this.navigation = new Navigation(initialUrl)
     this.snapshot = this.navigation.getSnapshot()
   }
-
   private emit() {
     this.snapshot = this.navigation.getSnapshot()
     this.listeners.forEach(listener => listener())
