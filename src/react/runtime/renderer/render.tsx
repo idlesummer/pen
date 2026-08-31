@@ -29,7 +29,6 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
     expand: (frame) => {
       if ('contentType' in frame.node)
         return []
-
       return Object.entries(frame.node.slots).map(([slotName, slotNode]): RenderFrame =>
         ({ node: slotNode, parent: frame, slotName, slots: {} }))
     },
