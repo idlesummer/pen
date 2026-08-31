@@ -18,33 +18,27 @@ class NavigationStoreCore {
   }
 
   // Store interface
-
   subscribe(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
     return unsubscribe
   }
-
   getSnapshot() {
     return this.snapshot
   }
 
   // Navigation actions
-
   push(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
   }
-
   replace(url: string, searchParams?: unknown) {
     this.navigation.replace(url, searchParams)
     this.emit()
   }
-
   back() {
     if (this.navigation.back()) this.emit()
   }
-
   forward() {
     if (this.navigation.forward()) this.emit()
   }
