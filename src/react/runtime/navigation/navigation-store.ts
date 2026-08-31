@@ -17,6 +17,8 @@ class NavigationStoreCore {
     this.listeners.forEach(listener => listener())
   }
 
+  // Store interface
+
   subscribe(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
