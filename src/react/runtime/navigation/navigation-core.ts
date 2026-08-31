@@ -8,6 +8,7 @@ export type NavigationSnapshot = {
   position: number
 }
 
+/** Manages navigation history and exposes its current state. */
 export class Navigation {
   private position = 0
   private history: NavigationHistory[]
