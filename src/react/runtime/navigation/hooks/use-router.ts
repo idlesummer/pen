@@ -1,8 +1,8 @@
 import { use } from 'react'
 import { NavigationContext } from '../NavigationProvider'
 
-/** Returns the router for the nearest NavigationProvider.
- *  The router provides access to the current navigation state and navigation actions. */
+/** Returns navigation actions - push, replace, back, forward.
+ *  Doesn't subscribe to navigation state, so calling this never triggers a re-render. */
 export function useRouter() {
   const store = use(NavigationContext)
   if (!store)
