@@ -11,10 +11,7 @@ export class NavigationStore {
   /** Public store interface. */
   readonly subscribe
   readonly getSnapshot
-  readonly push
-  readonly replace
-  readonly back
-  readonly forward
+  readonly actions
 
   constructor(initialUrl: string) {
     this.listeners = new Set<() => void>()
@@ -23,10 +20,12 @@ export class NavigationStore {
 
     this.subscribe = this.subscribeListeners.bind(this)
     this.getSnapshot = this.getNavigationSnapshot.bind(this)
-    this.push = this.pushUrl.bind(this)
-    this.replace = this.replaceUrl.bind(this)
-    this.back = this.goBack.bind(this)
-    this.forward = this.goForward.bind(this)
+    this.actions = {
+      push:    this.pushUrl.bind(this),
+      replace: this.replaceUrl.bind(this),
+      back:    this.goBack.bind(this),
+      forward: this.goForward.bind(this),
+    }
   }
 
   /* Store interface */
