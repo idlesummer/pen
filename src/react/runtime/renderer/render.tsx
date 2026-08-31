@@ -16,12 +16,16 @@ type RenderFrame = {
   rendered?: ReactNode              // set once this frame itself leaves
 }
 
+function createRenderFrame(node: RenderNode, parent?: RenderFrame, slotName?: string): RenderFrame {
+  return { node, parent, slotName, slots: {} }
+}
+
 function createRenderFrameChildren(parent: RenderFrame): RenderFrame[] {
   if ('contentType' in parent.node)
     return [] // if content type exists then render node is a leaf (has no children)
 
   const slotEntries = Object.entries(parent.node.slots)
-  return slotEntries.map(([slotName, node]) => ({ node, parent, slotName, slots: {} }))
+  return slotEntries.map(([slotName, slotNode]) => createRenderFrame(slotNode, parent, slotName))
 }
 
 /** Renders a router `RenderNode` tree into a React element tree.
