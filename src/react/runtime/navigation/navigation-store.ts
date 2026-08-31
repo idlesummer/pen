@@ -27,6 +27,8 @@ class NavigationStoreCore {
     return this.snapshot
   }
 
+  // Navigation actions
+
   push(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
