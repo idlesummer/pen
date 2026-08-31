@@ -1,14 +1,11 @@
+import type { NavigationSnapshot } from './navigation'
 import { Navigation } from './navigation'
 
-/** Wraps `Navigation` and adds what it has none of: a `listeners` Set,
- *  `subscribe`/`getSnapshot`, and actions that mutate then notify. Public
- *  methods are arrow fields, not regular ones - React and consumers detach
- *  them from `this` (`useSyncExternalStore(store.subscribe, store.getSnapshot)`,
- *  `const { push } = useRouter()`), so they can't rely on a receiver. */
+/** Adds store state and subscriptions around `Navigation`. */
 class NavigationStoreCore {
   private listeners = new Set<() => void>()
   private navigation: Navigation
-  private snapshot: ReturnType<Navigation['getSnapshot']>
+  private snapshot: NavigationSnapshot
 
   constructor(initialUrl: string) {
     this.navigation = new Navigation(initialUrl)
@@ -53,8 +50,7 @@ class NavigationStoreCore {
 export type NavigationStore =
   ReturnType<typeof createNavigationStore>
 
-/** Creates an isolated navigation store seeded at `initialUrl` - one per
- *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
+/** Creates an isolated navigation store seeded at `initialUrl`. */
 export function createNavigationStore(initialUrl: string) {
   const store = new NavigationStoreCore(initialUrl)
   return {
