@@ -14,7 +14,10 @@ type AppProps = {
 export function App({ matcher, componentMap, initialUrl }: AppProps) {
   return (
     <NavigationProvider initialUrl={initialUrl}>
-      <Router matcher={matcher} componentMap={componentMap} />
+      <Router
+        matcher={matcher}
+        componentMap={componentMap}
+      />
     </NavigationProvider>
   )
 }
