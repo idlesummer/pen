@@ -11,30 +11,37 @@ class NavigationStoreCore {
     this.navigation = new Navigation(initialUrl)
     this.snapshot = this.navigation.getSnapshot()
   }
+
   private emit() {
     this.snapshot = this.navigation.getSnapshot()
     this.listeners.forEach(fn => fn())
   }
+
   subscribe(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
     return unsubscribe
   }
+
   getSnapshot() {
     return this.snapshot
   }
+
   push(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
   }
+
   replace(url: string, searchParams?: unknown) {
     this.navigation.replace(url, searchParams)
     this.emit()
   }
+
   back() {
     if (this.navigation.back())
       this.emit()
   }
+
   forward() {
     if (this.navigation.forward())
       this.emit()
