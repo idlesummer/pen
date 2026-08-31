@@ -3,6 +3,11 @@ type NavigationHistory = {
   searchParams?: unknown
 }
 
+export type NavigationSnapshot = {
+  history: Readonly<NavigationHistory[]>
+  position: number
+}
+
 export class Navigation {
   private position = 0
   private history: NavigationHistory[]
@@ -30,8 +35,8 @@ export class Navigation {
     return this.position < this.history.length-1 && (this.position++, true)
   }
 
-  getSnapshot() {
-    const history = this.history as Readonly<typeof this.history>
+  getSnapshot(): NavigationSnapshot {
+    const history = this.history
     const position = this.position
     return { history, position }
   }
