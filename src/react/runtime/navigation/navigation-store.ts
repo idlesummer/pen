@@ -14,7 +14,7 @@ class NavigationStoreCore {
 
   private emit() {
     this.snapshot = this.navigation.getSnapshot()
-    this.listeners.forEach(fn => fn())
+    this.listeners.forEach(listener => listener())
   }
 
   subscribe(listener: () => void) {
