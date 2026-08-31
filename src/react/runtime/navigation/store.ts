@@ -20,7 +20,9 @@ export function createNavigationStore(initialUrl: string) {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },
-    getSnapshot: () => snapshot,
+    getSnapshot:
+      () => snapshot,
+
     actions: {
       push: (url: string, searchParams?: unknown) => {
         navigation.push(url, searchParams)
