@@ -16,6 +16,13 @@ type RenderFrame = {
   rendered?: ReactNode              // set once this frame itself leaves
 }
 
+function createRenderFrameChildren(frame: RenderFrame): RenderFrame[] {
+  if ('contentType' in frame.node)
+    return []
+  return Object.entries(frame.node.slots).map(([slotName, slotNode]): RenderFrame =>
+    ({ node: slotNode, parent: frame, slotName, slots: {} }))
+}
+
 /** Renders a router `RenderNode` tree into a React element tree.
   *
   * Resolves each node's page, layout, loading, error, and default components
@@ -26,14 +33,11 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
   const rootFrame: RenderFrame = { node: renderTree, slots: {} }
 
   traverse(rootFrame, {
-    expand: (frame) => {
-      if ('contentType' in frame.node)
-        return []
-      return Object.entries(frame.node.slots).map(([slotName, slotNode]): RenderFrame =>
-        ({ node: slotNode, parent: frame, slotName, slots: {} }))
-    },
+    expand:
+      createRenderFrameChildren,
+
     leave: (frame) => {
-      const { node } = frame
+      const node = frame.node
 
       if ('contentType' in node) {
         const Content = resolveComponent(node.contentPath, componentMap)
@@ -67,6 +71,5 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
         frame.parent.slots[frame.slotName] = frame.rendered
     },
   })
-
   return rootFrame.rendered!
 }
