@@ -1,6 +1,6 @@
 import type { Matcher } from '@/router/matcher'
 import type { ComponentMap } from './component-map'
-import { NavigationProvider } from '../api/NavigationProvider'
+import { NavigationProvider } from './NavigationProvider'
 import { Router } from './Router'
 
 type AppProps = {
