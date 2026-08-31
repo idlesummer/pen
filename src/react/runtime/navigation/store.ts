@@ -5,7 +5,7 @@ export type NavigationStore =
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
-export function createNavigationStore(initialUrl?: string) {
+export function createNavigationStore(initialUrl: string) {
   const listeners = new Set<() => void>()
   const navigation = new Navigation(initialUrl)
   let snapshot = navigation.snapshot
