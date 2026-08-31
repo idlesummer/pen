@@ -67,6 +67,8 @@ Navigation state is the one thing genuinely runtime-only - it doesn't exist unti
 - the store (store.ts) - wraps `Navigation` and adds what it has none of: a `listeners` Set, `subscribe`/`getSnapshot`, and actions that mutate then `emit()`. Still zero React - this is the generic observable-wrapper shape, pluggable into anything.
 - `useSyncExternalStore(store.subscribe, store.getSnapshot)` - the one React-specific piece, in `use-navigate.ts`. Every other hook derives from this one call.
 
+Getting the store to those hooks: `NavigationProvider` creates the ONE store per app instance - `const [navigationStore] = useState(() => createNavigationStore('/'))` - and provides it via `<NavigationContext value={navigationStore}>`. Every hook retrieves that same reference with `use(NavigationContext)`. Calling `useSyncExternalStore(store.subscribe, store.getSnapshot)` is what "subscribing" concretely means - it hands the store a callback (React's own re-render trigger) that gets added to the store's `listeners` Set.
+
 `getSnapshot` is where the value comes from - called on *every* render, not once, because React never owns a copy of external data the way it owns `useState`'s. `subscribe` is the doorbell, called once per mount, telling React when to go re-check that door. The listener React registers carries no data - `emit()` calls every listener with zero arguments - it's a "something changed, go look" ping, not a push. Simplified shape of what's inside `useSyncExternalStore`:
 
 ```js
@@ -101,3 +103,10 @@ function useSyncExternalStore(subscribe, getSnapshot) {
 ```
 
 That `Object.is` check is a real safety net, but only for identical references - it doesn't catch a freshly-rebuilt object with unchanged values. `Navigation.back()`/`forward()` used to let the store's `emit()` fire unconditionally, even sitting at the start/end of history where nothing actually moved - producing a new snapshot object every time and wasting a re-render React's own check couldn't have caught. Fixed by having `back()`/`forward()` report whether they actually moved, so the store only emits when something real changed - the guard condition stays in exactly one place (`Navigation`), never duplicated at the store level.
+
+Thinking of the store's whole surface in CRUD terms makes it fall out cleanly - and it's two separate collections that never cross:
+
+- the `listeners` Set - `subscribe` = Create, the `unsubscribe` it returns = Delete. Nothing else touches it.
+- the navigation data - `getSnapshot` = Read, `push` = Create+Update (drops any forward history, appends a new entry), `replace` = Update, `back`/`forward` = Update-only (no Create, no Delete - just moves `position`).
+
+Subscribing never touches navigation data, and pushing/replacing never touches `listeners`. The only thing that crosses between the two is `emit()` - it reads the fresh navigation data into `snapshot`, then walks `listeners` to say "go look."
