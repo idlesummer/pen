@@ -1,19 +1,23 @@
-import type { NavigationSnapshot } from './navigation-core'
 import { Navigation } from './navigation-core'
 
 /** Adds store state and subscriptions around `Navigation`. */
-class NavigationStoreCore {
-  private listeners = new Set<() => void>()
-  private navigation: Navigation
-  private snapshot: NavigationSnapshot
+export class NavigationStore {
+  private listeners
+  private navigation
+  private snapshot
+  readonly actions
 
   constructor(initialUrl: string) {
+    this.listeners = new Set<() => void>()
     this.navigation = new Navigation(initialUrl)
     this.snapshot = this.navigation.getSnapshot()
-  }
-  private emit() {
-    this.snapshot = this.navigation.getSnapshot()
-    this.listeners.forEach(listener => listener())
+
+    this.actions = {
+      push: this.push.bind(this),
+      replace: this.replace.bind(this),
+      back: this.back.bind(this),
+      forward: this.forward.bind(this),
+    }
   }
 
   /* Store interface */
@@ -22,43 +26,35 @@ class NavigationStoreCore {
     const unsubscribe = () => this.listeners.delete(listener)
     return unsubscribe
   }
+
   getSnapshot() {
     return this.snapshot
   }
 
   /* Navigation actions */
-  push(url: string, searchParams?: unknown) {
+  private push(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
   }
-  replace(url: string, searchParams?: unknown) {
+
+  private replace(url: string, searchParams?: unknown) {
     this.navigation.replace(url, searchParams)
     this.emit()
   }
-  back() {
+
+  private back() {
     if (this.navigation.back())
       this.emit()
   }
-  forward() {
+
+  private forward() {
     if (this.navigation.forward())
       this.emit()
   }
-}
 
-export type NavigationStore =
-  ReturnType<typeof createNavigationStore>
-
-/** Creates an isolated navigation store seeded at `initialUrl`. */
-export function createNavigationStore(initialUrl: string) {
-  const store = new NavigationStoreCore(initialUrl)
-  return {
-    subscribe: store.subscribe.bind(store),
-    getSnapshot: store.getSnapshot.bind(store),
-    actions: {
-      push: store.push.bind(store),
-      replace: store.replace.bind(store),
-      back: store.back.bind(store),
-      forward: store.forward.bind(store),
-    },
+  /* Internal */
+  private emit() {
+    this.snapshot = this.navigation.getSnapshot()
+    this.listeners.forEach(listener => listener())
   }
 }
