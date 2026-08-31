@@ -1,10 +1,10 @@
 import { Navigation } from './navigation'
 
-export type NavigationStore = ReturnType<typeof createStore>
+export type NavigationStore = ReturnType<typeof createNavigationStore>
 
 /** Creates an isolated navigation store seeded at `initialUrl` - one per
  *  `NavigationProvider` instance, so multiple apps (or tests) never share history. */
-export function createStore(initialUrl?: string) {
+export function createNavigationStore(initialUrl?: string) {
   const listeners = new Set<() => void>()
   const navigation = new Navigation(initialUrl)
   let snapshot = navigation.snapshot
