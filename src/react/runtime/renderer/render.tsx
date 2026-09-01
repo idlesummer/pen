@@ -59,7 +59,7 @@ type RenderFrame = {
   node: RenderNode
   parent?: RenderFrame
   child?: ReactNode // filled in once this frame's own children-link leaves
-  rendered?: ReactNode // set once this frame itself leaves
+  content?: ReactNode // set once this frame itself leaves
 }
 
 /** Turns a router `RenderNode` into a React element tree. The main spine
@@ -80,7 +80,7 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
 
       if ('contentType' in node) {
         const Content = resolveComponent(node.contentPath, componentMap)
-        frame.rendered = <Content params={node.params} />
+        frame.content = <Content params={node.params} />
       }
       else {
         const resolvedSlots: Record<string, ReactNode> = {}
@@ -88,11 +88,11 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
           if (slotName !== 'children')
             resolvedSlots[slotName] = renderChain(slotNode, componentMap)
 
-        frame.rendered = wrapContent(node, frame.child, resolvedSlots, componentMap)
+        frame.content = wrapContent(node, frame.child, resolvedSlots, componentMap)
       }
       if (frame.parent)
-        frame.parent.child = frame.rendered
+        frame.parent.child = frame.content
     },
   })
-  return rootFrame.rendered!
+  return rootFrame.content!
 }
