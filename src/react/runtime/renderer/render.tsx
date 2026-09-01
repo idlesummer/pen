@@ -35,22 +35,22 @@ function createRenderFrameChildren(parent: RenderFrame): RenderFrame[] {
   * the tree's slot structure. Components are resolved from the map at runtime;
   * no module loading is performed during rendering. */
 export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): ReactNode {
-  const rootFrame: RenderFrame = { renderNode: renderTree, slotNodes: {} }
+  const rootFrame = createRenderFrame(renderTree)
 
   traverse(rootFrame, {
     expand:
       createRenderFrameChildren,
 
-    leave: (frame) => {
-      const renderNode = frame.renderNode
+    leave: (renderFrame) => {
+      const renderNode = renderFrame.renderNode
 
       if ('contentType' in renderNode) {
         const Content = resolveComponent(renderNode.contentPath, componentMap)
-        frame.rendered = <Content params={renderNode.params} />
+        renderFrame.rendered = <Content params={renderNode.params} />
       }
       else {
         const { layout, loading, error, default: defaultPath } = renderNode
-        const { children, ...namedSlots } = frame.slotNodes
+        const { children, ...namedSlots } = renderFrame.slotNodes
         let content = children
 
         if (defaultPath) {
@@ -69,10 +69,10 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
           const Layout = resolveComponent(layout, componentMap)
           content = <Layout {...namedSlots}>{content}</Layout>
         }
-        frame.rendered = content
+        renderFrame.rendered = content
       }
-      if (frame.parent && frame.slotName)
-        frame.parent.slotNodes[frame.slotName] = frame.rendered
+      if (renderFrame.parent && renderFrame.slotName)
+        renderFrame.parent.slotNodes[renderFrame.slotName] = renderFrame.rendered
     },
   })
   return rootFrame.rendered!
