@@ -24,8 +24,8 @@ function createRenderFrameChildren(parent: RenderFrame): RenderFrame[] {
   if ('contentType' in parent.renderNode)
     return [] // if content type exists then render renderNode is a leaf (has no children)
 
-  const slotEntries = Object.entries(parent.renderNode.slots)
-  return slotEntries.map(([slotName, slotNode]) => createRenderFrame(slotNode, parent, slotName))
+  const slots = Object.entries(parent.renderNode.slots)
+  return slots.map(([slotName, slotNode]) => createRenderFrame(slotNode, parent, slotName))
 }
 
 /** Renders a router `RenderNode` tree into a React element tree.
