@@ -8,18 +8,11 @@ import { resolveComponent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
-type RenderNodeWraps = {
-  layout?: string
-  loading?: string
-  error?: string
-  default?: string
-}
-
 /** Wraps already-resolved `content` in whichever of a node's default/error/
  *  loading/layout modules are present - the one place this composition
  *  happens, shared by both the main spine (`renderNode`) and a slot's own
  *  chain (`renderChain`). */
-function wrapContent(node: RenderNodeWraps, content: ReactNode, namedSlots: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
+function wrapContent(node: RenderNode, content: ReactNode, namedSlots: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
   const { layout, loading, error, default: defaultPath } = node
 
   if (defaultPath) {
