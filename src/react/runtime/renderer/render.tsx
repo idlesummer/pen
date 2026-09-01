@@ -50,25 +50,24 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
       else {
         const { layout, loading, error, default: defaultPath } = renderNode
         const { children, ...slotNodes } = renderFrame.slotNodes
-        let content = children
+        renderFrame.content = children
 
         if (defaultPath) {
           const Fallback = resolveComponent(defaultPath, componentMap)
-          content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
+          renderFrame.content = <DefaultBoundary fallback={Fallback}>{renderFrame.content}</DefaultBoundary>
         }
         if (error) {
           const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
-          content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
+          renderFrame.content = <ErrorBoundary fallback={Fallback}>{renderFrame.content}</ErrorBoundary>
         }
         if (loading) {
           const Loading = resolveComponent(loading, componentMap)
-          content = <Suspense fallback={<Loading />}>{content}</Suspense>
+          renderFrame.content = <Suspense fallback={<Loading />}>{renderFrame.content}</Suspense>
         }
         if (layout) { // TODO: allow layout to receive params
           const Layout = resolveComponent(layout, componentMap)
-          content = <Layout {...slotNodes}>{content}</Layout>
+          renderFrame.content = <Layout {...slotNodes}>{renderFrame.content}</Layout>
         }
-        renderFrame.content = content
       }
       if (renderFrame.parent && renderFrame.slotName)
         renderFrame.parent.slotNodes[renderFrame.slotName] = renderFrame.content
