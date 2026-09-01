@@ -64,7 +64,7 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
           const Loading = resolveComponent(loading, componentMap)
           content = <Suspense fallback={<Loading />}>{content}</Suspense>
         }
-        if (layout) {
+        if (layout) { // TODO: allow layout to receive params
           const Layout = resolveComponent(layout, componentMap)
           content = <Layout {...slotNodes}>{content}</Layout>
         }
