@@ -14,11 +14,16 @@ type RenderLeaf = {
 
 type SlotRenderNodes = Record<string, RenderNode>
 export type RenderNode = RenderLeaf | {
-  layout?: string
-  loading?: string
-  error?: string
-  default?: string
   slots: SlotRenderNodes
+  layout?: string
+  error?: string
+  loading?: string
+  default?: string
+  content?: {
+    type: 'page' | 'default'
+    path: string
+    params: ParamTable
+  }
 }
 
 function getParamTable(matchNode: MatchNode): ParamTable {
