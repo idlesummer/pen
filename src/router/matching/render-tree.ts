@@ -6,21 +6,15 @@ import { dict } from '@/lib/dict'
 import { createMatchTree } from './match-tree'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
-type RenderLeaf = {
-  contentType: 'page' | 'default' // page or default
-  contentPath: string
-  params: ParamTable
-}
 
 type SlotRenderNodes = Record<string, RenderNode>
-export type RenderNode = RenderLeaf | {
+export type RenderNode = {
   slots: SlotRenderNodes
   layout?: string
   error?: string
   loading?: string
   default?: string
   content?: {
-    type: 'page' | 'default'
     path: string
     params: ParamTable
   }
@@ -37,16 +31,16 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   return params
 }
 
-function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderLeaf {
-  const { type: contentType, node: contentNode, catchallParams } = matchTree.content
+function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
+  const { type, node: contentNode, catchallParams } = matchTree.content
   const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchTree))
 
   if (catchallParams) {
     const catchallName = contentNode .segment.value
     params[catchallName] = catchallParams
   }
-  const contentPath = contentNode.modulePaths[contentType]!
-  return { contentType, contentPath, params }
+  const path = contentNode.modulePaths[type]!
+  return { slots: dict(), content: { path, params } }
 }
 
 function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
