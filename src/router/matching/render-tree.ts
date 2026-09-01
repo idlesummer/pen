@@ -6,8 +6,8 @@ import { dict } from '@/lib/dict'
 import { createMatchTree } from './match-tree'
 
 type ParamTable = Record<string, string | string[]> // dynamic route parameters or catchall parameters as string arrays
-
 type SlotRenderNodes = Record<string, RenderNode>
+
 export type RenderNode = {
   slots: SlotRenderNodes
   layout?: string
