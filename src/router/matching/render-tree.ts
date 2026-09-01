@@ -80,13 +80,10 @@ function createMainRenderNode(matchTree: MatchTree): RenderNode {
   let childMatchNode: MatchNode | undefined = matchTree
 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
-    if (childMatchNode?.searchNode.anchor !== node)
-      childRenderNode = wrapRenderNode(childRenderNode, node.modulePaths)
-    else {
-      const slots = createSlotRenderNodes(childMatchNode) // TODO: disallow @children slot name
-      childRenderNode = wrapRenderNode(childRenderNode, node.modulePaths, slots)
-      childMatchNode = childMatchNode.parent  // update matchNode if an anchor is found
-    }
+    const isAnchor = childMatchNode?.searchNode.anchor === node
+    const slots = isAnchor ? createSlotRenderNodes(childMatchNode!) : undefined // TODO: disallow @children slot name
+    childRenderNode = wrapRenderNode(childRenderNode, node.modulePaths, slots)
+    if (isAnchor) childMatchNode = childMatchNode!.parent  // advance to the next anchor
   }
   return childRenderNode // at this point it becomes the root render node
 }
