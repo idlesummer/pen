@@ -1,4 +1,4 @@
-import type { RouteNode } from '../compiling/route-tree'
+import type { RouteNode, RouteModulePaths } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
@@ -43,7 +43,7 @@ function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderN
   return { slots: dict(), content: { path, params } }
 }
 
-function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteNode['modulePaths'], slots?: SlotRenderNodes): RenderNode {
+function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePaths, slots?: SlotRenderNodes): RenderNode {
   const { layout, loading, error, default: defaultPath } = modulePaths
   if (!layout && !loading && !error && !defaultPath && !slots)  // don't wrap if nothing to wrap
     return childRenderNode
