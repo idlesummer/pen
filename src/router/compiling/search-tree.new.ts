@@ -27,15 +27,6 @@ export type SearchNode = {
   }
 }
 
-function addAcceptingRouteNode(searchNode: SearchNode, routeNode: RouteNode) {
-  // No more branching on segment.type here - by the time visit() reaches a
-  // routeNode with its own modulePaths.page, searchNodeMap already resolves
-  // it to the SearchNode that's actually its own (catch-all included), so
-  // every accepting node is uniformly "this position's own page" now.
-  (searchNode.validation!.pages ??= []).push(routeNode)
-  searchNode.page ??= routeNode
-}
-
 function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: number): SearchNode {
   return { anchor, urlDepth, staticness, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
@@ -77,7 +68,8 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     visit: (routeNode) => { // visit adds its accepting-route data to it.
       if (!routeNode.modulePaths.page) return
       const searchNode = searchNodeMap.get(routeNode)!
-      addAcceptingRouteNode(searchNode, routeNode)
+      searchNode.page ??= routeNode;
+      (searchNode.validation!.pages ??= []).push(routeNode)
     },
     expand: (routeNode) => routeNode.children,
     attach: (childRouteNode, parentRouteNode) => { // attach creates each child's search node in the map
