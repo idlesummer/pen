@@ -6,11 +6,12 @@ import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
 import { createSegment, isPrivateSegment } from './segment'
 
+export type RouteModulePaths = Partial<Record<RouteModuleType, string>>
 export type RouteNode = {
   name: string
   segment: Segment
   path: string
-  modulePaths: Partial<Record<RouteModuleType, string>>
+  modulePaths: RouteModulePaths
   parent?: RouteNode
   children: RouteNode[]
 }
