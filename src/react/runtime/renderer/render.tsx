@@ -9,40 +9,40 @@ import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
 type RenderFrame = {
-  node: RenderNode
+  renderNode: RenderNode
   parent?: RenderFrame
-  slotName?: string                 // the name this frame fills in its parent's slots, if any
-  slots: Record<string, ReactNode>  // filled in by children as they leave
+  slotName?: string                 // the name this frame fills in its parent's slotNodes, if any
+  slotNodes: Record<string, ReactNode>  // filled in by children as they leave
   rendered?: ReactNode              // set once this frame itself leaves
 }
 
-function createRenderFrame(node: RenderNode, parent?: RenderFrame, slotName?: string): RenderFrame {
-  return { node, parent, slotName, slots: {} }
+function createRenderFrame(renderNode: RenderNode, parent?: RenderFrame, slotName?: string): RenderFrame {
+  return { renderNode, parent, slotName, slotNodes: {} }
 }
 
 function createRenderFrameChildren(parent: RenderFrame): RenderFrame[] {
-  if ('contentType' in parent.node)
-    return [] // if content type exists then render node is a leaf (has no children)
+  if ('contentType' in parent.renderNode)
+    return [] // if content type exists then render renderNode is a leaf (has no children)
 
-  const slotEntries = Object.entries(parent.node.slots)
+  const slotEntries = Object.entries(parent.renderNode.slots)
   return slotEntries.map(([slotName, slotNode]) => createRenderFrame(slotNode, parent, slotName))
 }
 
 /** Renders a router `RenderNode` tree into a React element tree.
   *
-  * Resolves each node's page, layout, loading, error, and default components
+  * Resolves each renderNode's page, layout, loading, error, and default components
   * from the build-generated `componentMap`, then composes them according to
   * the tree's slot structure. Components are resolved from the map at runtime;
   * no module loading is performed during rendering. */
 export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): ReactNode {
-  const rootFrame: RenderFrame = { node: renderTree, slots: {} }
+  const rootFrame: RenderFrame = { renderNode: renderTree, slotNodes: {} }
 
   traverse(rootFrame, {
     expand:
       createRenderFrameChildren,
 
     leave: (frame) => {
-      const renderNode = frame.node
+      const renderNode = frame.renderNode
 
       if ('contentType' in renderNode) {
         const Content = resolveComponent(renderNode.contentPath, componentMap)
@@ -50,7 +50,7 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
       }
       else {
         const { layout, loading, error, default: defaultPath } = renderNode
-        const { children, ...namedSlots } = frame.slots
+        const { children, ...namedSlots } = frame.slotNodes
         let content = children
 
         if (defaultPath) {
@@ -72,7 +72,7 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
         frame.rendered = content
       }
       if (frame.parent && frame.slotName)
-        frame.parent.slots[frame.slotName] = frame.rendered
+        frame.parent.slotNodes[frame.slotName] = frame.rendered
     },
   })
   return rootFrame.rendered!
