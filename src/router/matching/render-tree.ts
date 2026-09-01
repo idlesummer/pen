@@ -79,12 +79,12 @@ function createMainRenderNode(matchTree: MatchTree): RenderNode {
   let childRenderNode: RenderNode = renderLeaf  // child since traversal is bottom up
   let childMatchNode: MatchNode | undefined = matchTree
 
-  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
-    if (childMatchNode?.searchNode.anchor !== node)
-      childRenderNode = wrapRenderNode(childRenderNode, node.modulePaths)
+  for (let routeNode: RouteNode | undefined = contentNode; routeNode; routeNode = getNonSlotParent(routeNode)) {
+    if (childMatchNode?.searchNode.anchor !== routeNode)
+      childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths)
     else {
       const slots = createSlotRenderNodes(childMatchNode) // TODO: disallow @children slot name
-      childRenderNode = wrapRenderNode(childRenderNode, node.modulePaths, slots)
+      childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, slots)
       childMatchNode = childMatchNode.parent  // update matchNode if an anchor is found
     }
   }
