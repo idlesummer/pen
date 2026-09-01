@@ -8,49 +8,74 @@ import { resolveComponent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
+/** Resolves a node's own subtree by walking straight down through nested
+ *  `slots.children` until a leaf is hit - safe because a slot's own subtree
+ *  can never fork into a second named slot of its own (render-tree.ts only
+ *  ever calls wrapRenderNode without a slots argument inside a slot's own
+ *  chain). Used for named slots only - the main spine goes through renderNode. */
+function renderChain(node: RenderNode, componentMap: ComponentMap): ReactNode {
+  if ('contentType' in node) {
+    const Content = resolveComponent(node.contentPath, componentMap)
+    return <Content params={node.params} />
+  }
+
+  const { layout, loading, error, default: defaultPath, slots } = node
+  let content = renderChain(slots.children!, componentMap)
+
+  if (defaultPath) {
+    const Fallback = resolveComponent(defaultPath, componentMap)
+    content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
+  }
+  if (error) {
+    const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
+    content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
+  }
+  if (loading) {
+    const Loading = resolveComponent(loading, componentMap)
+    content = <Suspense fallback={<Loading />}>{content}</Suspense>
+  }
+  if (layout) {
+    const Layout = resolveComponent(layout, componentMap)
+    content = <Layout>{content}</Layout> // no named slots to spread inside a slot's own chain
+  }
+  return content
+}
+
 type RenderFrame = {
   renderNode: RenderNode
   parent?: RenderFrame
-  slotName?: string                     // the name this frame fills in its parent's slotNodes, if any
-  slotNodes: Record<string, ReactNode>  // filled in by children as they leave
-  content?: ReactNode                  // set once this frame itself leaves
+  child?: ReactNode // filled in once this frame's own children-link leaves
+  rendered?: ReactNode // set once this frame itself leaves
 }
 
-function createRenderFrame(renderNode: RenderNode, parent?: RenderFrame, slotName?: string): RenderFrame {
-  return { renderNode, parent, slotName, slotNodes: {} }
-}
-
-function createRenderFrameChildren(parent: RenderFrame): RenderFrame[] {
-  if ('contentType' in parent.renderNode)
-    return [] // if content type exists then render renderNode is a leaf (has no children)
-
-  const slots = Object.entries(parent.renderNode.slots)
-  return slots.map(([slotName, slotNode]) => createRenderFrame(slotNode, parent, slotName))
-}
-
-/** Renders a router `RenderNode` tree into a React element tree.
-  *
-  * Resolves each renderNode's page, layout, loading, error, and default components
-  * from the build-generated `componentMap`, then composes them according to
-  * the tree's slot structure. Components are resolved from the map at runtime;
-  * no module loading is performed during rendering. */
-export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): ReactNode {
-  const rootFrame = createRenderFrame(renderTree)
+/** Turns a router `RenderNode` into a React element tree. The main spine
+ *  (the `children` chain) walks via `traverse`; each named slot along the
+ *  way is resolved separately via `renderChain`, since it can never fork
+ *  again on its own. */
+export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactNode {
+  const rootFrame: RenderFrame = { node: root }
 
   traverse(rootFrame, {
-    expand:
-      createRenderFrameChildren,
+    expand: (frame) => {
+      if ('contentType' in frame.node)
+        return []
+      return [{ node: frame.node.slots.children!, parent: frame }]
+    },
+    leave: (frame) => {
+      const { node } = frame
 
-    leave: (renderFrame) => {
-      const renderNode = renderFrame.renderNode
-      if ('contentType' in renderNode) {
-        const Content = resolveComponent(renderNode.contentPath, componentMap)
-        renderFrame.content = <Content params={renderNode.params} />
+      if ('contentType' in node) {
+        const Content = resolveComponent(node.contentPath, componentMap)
+        frame.rendered = <Content params={node.params} />
       }
       else {
-        const { layout, loading, error, default: defaultPath } = renderNode
-        const { children, ...slotNodes } = renderFrame.slotNodes
-        renderFrame.content = children
+        const { layout, loading, error, default: defaultPath, slots } = node
+        const resolvedSlots: Record<string, ReactNode> = {}
+        for (const [slotName, slotNode] of Object.entries(slots))
+          if (slotName !== 'children')
+            resolvedSlots[slotName] = renderChain(slotNode, componentMap)
+
+        let content = frame.child
 
         if (defaultPath) {
           const Fallback = resolveComponent(defaultPath, componentMap)
@@ -66,11 +91,12 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
         }
         if (layout) { // TODO: allow layout to receive params
           const Layout = resolveComponent(layout, componentMap)
-          renderFrame.content = <Layout {...slotNodes}>{renderFrame.content}</Layout>
+          content = <Layout {...resolvedSlots}>{content}</Layout>
         }
       }
-      if (renderFrame.parent && renderFrame.slotName)
-        renderFrame.parent.slotNodes[renderFrame.slotName] = renderFrame.content
+
+      if (frame.parent)
+        frame.parent.child = frame.rendered
     },
   })
   return rootFrame.content!
