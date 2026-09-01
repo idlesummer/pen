@@ -1,4 +1,4 @@
-import type { RouteNode } from '../compiling/route-tree'
+import type { RouteNode, RouteModulePaths } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
@@ -43,14 +43,14 @@ function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderN
   return { slots: dict(), content: { path, params } }
 }
 
-function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteNode['modulePaths'], slots?: SlotRenderNodes): RenderNode {
-  const { layout, loading, error, default: defaultPath } = modulePaths
-  if (!layout && !loading && !error && !defaultPath && !slots)  // don't wrap if nothing to wrap
+function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePaths, slots?: SlotRenderNodes): RenderNode {
+  const { layout, loading, error, default: def } = modulePaths
+  if (!layout && !loading && !error && !def && !slots)  // don't wrap if nothing to wrap
     return childRenderNode
 
   slots ??= dict()
   slots.children = childRenderNode
-  return { layout, loading, error, default: defaultPath, slots }
+  return { layout, loading, error, default: def, slots }
 }
 
 function createSlotRenderNode(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
@@ -79,10 +79,10 @@ function createMainRenderNode(matchTree: MatchTree): RenderNode {
   let childRenderNode: RenderNode = renderLeaf  // child since traversal is bottom up
   let childMatchNode: MatchNode | undefined = matchTree
 
-  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node)) {
-    const isAnchor = childMatchNode?.searchNode.anchor === node
+  for (let routeNode: RouteNode | undefined = contentNode; routeNode; routeNode = getNonSlotParent(routeNode)) {
+    const isAnchor = childMatchNode?.searchNode.anchor === routeNode
     const slots = isAnchor ? createSlotRenderNodes(childMatchNode!) : undefined // TODO: disallow @children slot name
-    childRenderNode = wrapRenderNode(childRenderNode, node.modulePaths, slots)
+    childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, slots)
     if (isAnchor) childMatchNode = childMatchNode!.parent  // advance to the next anchor
   }
   return childRenderNode // at this point it becomes the root render node
