@@ -36,7 +36,7 @@ function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderN
   const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchTree))
 
   if (catchallParams) {
-    const catchallName = contentNode .segment.value
+    const catchallName = contentNode.segment.value
     params[catchallName] = catchallParams
   }
   const path = contentNode.modulePaths[type]!
