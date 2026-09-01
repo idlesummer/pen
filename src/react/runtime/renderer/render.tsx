@@ -11,9 +11,9 @@ import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 type RenderFrame = {
   renderNode: RenderNode
   parent?: RenderFrame
-  slotName?: string                 // the name this frame fills in its parent's slotNodes, if any
+  slotName?: string                     // the name this frame fills in its parent's slotNodes, if any
   slotNodes: Record<string, ReactNode>  // filled in by children as they leave
-  rendered?: ReactNode              // set once this frame itself leaves
+  rendered?: ReactNode                  // set once this frame itself leaves
 }
 
 function createRenderFrame(renderNode: RenderNode, parent?: RenderFrame, slotName?: string): RenderFrame {
