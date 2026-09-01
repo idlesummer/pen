@@ -42,7 +42,7 @@ function renderChain(node: RenderNode, componentMap: ComponentMap): ReactNode {
 }
 
 type RenderFrame = {
-  renderNode: RenderNode
+  node: RenderNode
   parent?: RenderFrame
   child?: ReactNode // filled in once this frame's own children-link leaves
   rendered?: ReactNode // set once this frame itself leaves
@@ -79,25 +79,27 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
 
         if (defaultPath) {
           const Fallback = resolveComponent(defaultPath, componentMap)
-          renderFrame.content = <DefaultBoundary fallback={Fallback}>{renderFrame.content}</DefaultBoundary>
+          content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
         }
         if (error) {
           const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
-          renderFrame.content = <ErrorBoundary fallback={Fallback}>{renderFrame.content}</ErrorBoundary>
+          content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
         }
         if (loading) {
           const Loading = resolveComponent(loading, componentMap)
-          renderFrame.content = <Suspense fallback={<Loading />}>{renderFrame.content}</Suspense>
+          content = <Suspense fallback={<Loading />}>{content}</Suspense>
         }
-        if (layout) { // TODO: allow layout to receive params
+        if (layout) {
           const Layout = resolveComponent(layout, componentMap)
           content = <Layout {...resolvedSlots}>{content}</Layout>
         }
+        frame.rendered = content
       }
 
       if (frame.parent)
         frame.parent.child = frame.rendered
     },
   })
-  return rootFrame.content!
+
+  return rootFrame.rendered!
 }
