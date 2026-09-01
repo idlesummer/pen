@@ -50,7 +50,7 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
       }
       else {
         const { layout, loading, error, default: defaultPath } = renderNode
-        const { children, ...namedSlots } = renderFrame.slotNodes
+        const { children, ...slotNodes } = renderFrame.slotNodes
         let content = children
 
         if (defaultPath) {
@@ -67,7 +67,7 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
         }
         if (layout) {
           const Layout = resolveComponent(layout, componentMap)
-          content = <Layout {...namedSlots}>{content}</Layout>
+          content = <Layout {...slotNodes}>{content}</Layout>
         }
         renderFrame.rendered = content
       }
