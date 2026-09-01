@@ -13,7 +13,7 @@ type RenderFrame = {
   parent?: RenderFrame
   slotName?: string                     // the name this frame fills in its parent's slotNodes, if any
   slotNodes: Record<string, ReactNode>  // filled in by children as they leave
-  rendered?: ReactNode                  // set once this frame itself leaves
+  content?: ReactNode                  // set once this frame itself leaves
 }
 
 function createRenderFrame(renderNode: RenderNode, parent?: RenderFrame, slotName?: string): RenderFrame {
@@ -45,7 +45,7 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
       const renderNode = renderFrame.renderNode
       if ('contentType' in renderNode) {
         const Content = resolveComponent(renderNode.contentPath, componentMap)
-        renderFrame.rendered = <Content params={renderNode.params} />
+        renderFrame.content = <Content params={renderNode.params} />
       }
       else {
         const { layout, loading, error, default: defaultPath } = renderNode
@@ -68,11 +68,11 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
           const Layout = resolveComponent(layout, componentMap)
           content = <Layout {...slotNodes}>{content}</Layout>
         }
-        renderFrame.rendered = content
+        renderFrame.content = content
       }
       if (renderFrame.parent && renderFrame.slotName)
-        renderFrame.parent.slotNodes[renderFrame.slotName] = renderFrame.rendered
+        renderFrame.parent.slotNodes[renderFrame.slotName] = renderFrame.content
     },
   })
-  return rootFrame.rendered!
+  return rootFrame.content!
 }
