@@ -44,13 +44,13 @@ function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderN
 }
 
 function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePaths, slots?: SlotRenderNodes): RenderNode {
-  const { layout, loading, error, default: defaultPath } = modulePaths
-  if (!layout && !loading && !error && !defaultPath && !slots)  // don't wrap if nothing to wrap
+  const { layout, loading, error, default: def } = modulePaths
+  if (!layout && !loading && !error && !def && !slots)  // don't wrap if nothing to wrap
     return childRenderNode
 
   slots ??= dict()
   slots.children = childRenderNode
-  return { layout, loading, error, default: defaultPath, slots }
+  return { layout, loading, error, default: def, slots }
 }
 
 function createSlotRenderNode(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
