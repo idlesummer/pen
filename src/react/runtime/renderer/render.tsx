@@ -19,7 +19,7 @@ type RenderNodeWraps = {
  *  loading/layout modules are present - the one place this composition
  *  happens, shared by both the main spine (`renderNode`) and a slot's own
  *  chain (`renderChain`). */
-function applyWraps(node: RenderNodeWraps, content: ReactNode, namedSlots: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
+function wrapContent(node: RenderNodeWraps, content: ReactNode, namedSlots: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
   const { layout, loading, error, default: defaultPath } = node
 
   if (defaultPath) {
@@ -51,9 +51,8 @@ function renderChain(node: RenderNode, componentMap: ComponentMap): ReactNode {
     const Content = resolveComponent(node.contentPath, componentMap)
     return <Content params={node.params} />
   }
-
   const content = renderChain(node.slots.children!, componentMap)
-  return applyWraps(node, content, {}, componentMap) // no named slots to spread inside a slot's own chain
+  return wrapContent(node, content, {}, componentMap) // no named slots to spread inside a slot's own chain
 }
 
 type RenderFrame = {
@@ -77,7 +76,7 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
       return [{ node: frame.node.slots.children!, parent: frame }]
     },
     leave: (frame) => {
-      const { node } = frame
+      const node = frame.node
 
       if ('contentType' in node) {
         const Content = resolveComponent(node.contentPath, componentMap)
@@ -89,13 +88,11 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
           if (slotName !== 'children')
             resolvedSlots[slotName] = renderChain(slotNode, componentMap)
 
-        frame.rendered = applyWraps(node, frame.child, resolvedSlots, componentMap)
+        frame.rendered = wrapContent(node, frame.child, resolvedSlots, componentMap)
       }
-
       if (frame.parent)
         frame.parent.child = frame.rendered
     },
   })
-
   return rootFrame.rendered!
 }
