@@ -48,7 +48,8 @@ function wrapRenderNode(childRenderNode: RenderNode, routeNode: RouteNode, slots
   if (!layout && !loading && !error && !defaultPath && !slots)  // don't wrap if nothing to wrap
     return childRenderNode
 
-  ;(slots ??= dict()).children = childRenderNode
+  slots ??= dict()
+  slots.children = childRenderNode
   return { layout, loading, error, default: defaultPath, slots }
 }
 
