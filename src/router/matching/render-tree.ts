@@ -82,7 +82,7 @@ function createMainRenderNode(matchTree: MatchTree): RenderNode {
     if (matchNode?.searchNode.anchor !== node)
       childRenderNode = wrapRenderNode(childRenderNode, node)
     else {
-      const slots = createSlotRenderNodes(matchNode)
+      const slots = createSlotRenderNodes(matchNode)  // TODO: disallow @children slot name
       childRenderNode = wrapRenderNode(childRenderNode, node, slots)
       matchNode = matchNode.parent  // update matchNode if an anchor is found
     }
