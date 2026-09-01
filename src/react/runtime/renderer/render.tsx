@@ -43,7 +43,6 @@ export function renderNode(renderTree: RenderNode, componentMap: ComponentMap): 
 
     leave: (renderFrame) => {
       const renderNode = renderFrame.renderNode
-
       if ('contentType' in renderNode) {
         const Content = resolveComponent(renderNode.contentPath, componentMap)
         renderFrame.rendered = <Content params={renderNode.params} />
