@@ -45,7 +45,7 @@ function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderN
 
 function wrapRenderNode(renderNode: RenderNode, routeNode: RouteNode, slots?: SlotRenderNodes): RenderNode {
   const { layout, loading, error, default: defaultPath } = routeNode.modulePaths
-  if (!layout && !loading && !error && !defaultPath && !slots)
+  if (!layout && !loading && !error && !defaultPath && !slots)  // don't wrap if nothing to wrap
     return renderNode
 
   ;(slots ??= dict()).children = renderNode
