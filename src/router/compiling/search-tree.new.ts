@@ -12,7 +12,7 @@ export type SearchNode = {
   slots?: Record<string, SearchNode>   // this position's own named slots, if its real folder has any @name children
   statics?: Record<string, SearchNode> // consuming folder's static children
   dynamic?: SearchNode                 // consuming folder's dynamic child - param name is dynamic.anchor.segment.value
-  catchall?: SearchNode                // consuming folder's catch-all child, promoted to a real position - meant to be last, same as before this change
+  catchall?: SearchNode                // consuming folder's catch-all child
   // Validation metadata
   validation?: {                      // candidates validation checks against (later removed in sanitizeSearchTree)
     pages?: RouteNode[]               // every page claimed here, for duplicate-route
