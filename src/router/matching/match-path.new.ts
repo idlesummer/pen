@@ -26,11 +26,10 @@ export type Match = {
 function createMatchNodeChildren(parent: MatchNode, nextUrlPart: string | undefined, url: string[]): MatchNode[] {
   if (!nextUrlPart) return [] // url is exhausted - nothing left to consume, so no children
   const parentSearchNode = parent.searchNode
-  const children: MatchNode[] = []
-
   const staticChild = parentSearchNode.statics?.[nextUrlPart]
   const dynamicChild = parentSearchNode.dynamic
   const catchallChild = parentSearchNode.catchall
+  const children: MatchNode[] = []
 
   if (staticChild)
     children.push({ searchNode: staticChild, position: { type: 'static', segment: nextUrlPart, parent } })
