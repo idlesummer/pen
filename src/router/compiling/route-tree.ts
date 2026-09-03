@@ -11,7 +11,7 @@ export type RouteNode = {
   name: string
   segment: Segment
   path: string
-  modulePaths: RouteModulePaths
+  modules: RouteModulePaths
   default: RouteNode // itself, or its nearest ancestor that has a default
   urlDepth: number    // segments consumed to reach this position - 0 at root, resolved alongside default
   staticness: number  // how static-preferring the path to this node is; higher is better, resolved alongside default
@@ -20,7 +20,7 @@ export type RouteNode = {
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
-  const node = { name, segment, path, modulePaths: {}, urlDepth: 0, staticness: 0, children: [] } as unknown as RouteNode
+  const node = { name, segment, path, modules: {}, urlDepth: 0, staticness: 0, children: [] } as unknown as RouteNode
   node.default = node // temporary placeholder until resolveDefaults overwrites it
   return node
 }
@@ -41,7 +41,7 @@ export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
 
 function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
   for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
-    if (node.modulePaths.default) return node
+    if (node.modules.default) return node
   return undefined as never // unreachable - see guarantee above
 }
 
@@ -57,7 +57,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const part = parts[index]!    // always defined since `create` only yields existing indices.
       if (index === parts.length-1) // Create the route module if file is last
-        parentRouteNode.modulePaths[getRouteModuleType(part)] = filePath
+        parentRouteNode.modules[getRouteModuleType(part)] = filePath
 
       else if (!isPrivate(part)) {
         const path = parentRouteNode.path ? `${parentRouteNode.path}/${part}` : part
@@ -72,7 +72,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   forEachReachableRouteNode(routeTree, (node) => {
     // ensures a default fallback in each tree
     if (!node.parent || node.segment.type === 'slot')
-      node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
+      node.modules.default ??= DEFAULT_FALLBACK_PATH
 
     // resolves the nearest default route in its ancestor chain
     node.default = findDefaultRouteNodeParent(node)
@@ -95,7 +95,7 @@ export function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
 
 /** Gets the route's source file or falls back to its route path if no module exists. */
 export function getRouteSource(routeNode: RouteNode): string {
-  return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
+  return Object.values(routeNode.modules)[0] ?? routeNode.path
 }
 
 /** Collects every distinct module path referenced anywhere in the tree, sorted.
@@ -106,7 +106,7 @@ export function getRouteModulePaths(routeTree: RouteNode): string[] {
   const modulePaths = new Set<string>()
   traverse(routeTree, {
     visit: (routeNode) => {
-      for (const modulePath of Object.values(routeNode.modulePaths))
+      for (const modulePath of Object.values(routeNode.modules))
         modulePaths.add(modulePath)
     },
     expand: (routeNode) =>
