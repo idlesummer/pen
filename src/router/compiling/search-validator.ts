@@ -7,7 +7,7 @@ import { forEachSearchNode } from './search-tree'
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
   if (!routeNodes) return
   if (routeNodes.length < 2) return
-  return routeNodes.map(routeNode => routeNode.modulePaths.page!)
+  return routeNodes.map(routeNode => routeNode.modules.page!)
 }
 
 /** Runs relational validation between routes sharing the same URL position. */
