@@ -23,12 +23,6 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return node
 }
 
-function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
-  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
-    if (node.modulePaths.default) return node
-  return undefined as never // unreachable - see guarantee above
-}
-
 /** Visits every reachable route node, pruning descendants beneath catch-all routes. */
 export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: RouteNode) => void) {
   traverse(root, {
@@ -36,6 +30,17 @@ export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: Ro
     expand: (routeNode) =>
       routeNode.segment.type !== 'catchall' ? routeNode.children : [],
   })
+}
+
+/** Returns the next non-slot ancestor, or undefined at a slot boundary. */
+export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
+  return routeNode.segment.type !== 'slot' ? routeNode.parent : undefined
+}
+
+function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
+  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
+    if (node.modulePaths.default) return node
+  return undefined as never // unreachable - see guarantee above
 }
 
 /** Builds the route tree from a file list, then guarantees the root and every
@@ -69,15 +74,10 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   // ancestor (root/slot included) has already had its own guarantee applied.
   forEachReachableRouteNode(routeTree, (node) => {
     if (!node.parent || node.segment.type === 'slot')
-      node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
-    node.default = findDefaultRouteNodeParent(node)
+      node.modulePaths.default ??= DEFAULT_FALLBACK_PATH  // ensures a default fallback in each tree
+    node.default = findDefaultRouteNodeParent(node) // resolves the nearest default route in its ancestor chain
   })
   return routeTree
-}
-
-/** Returns the next non-slot ancestor, or undefined at a slot boundary. */
-export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
-  return routeNode.segment.type !== 'slot' ? routeNode.parent : undefined
 }
 
 /** Finds the nearest ancestor route node that is itself a slot, if any. */
