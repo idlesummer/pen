@@ -4,7 +4,7 @@ import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
-import { createSegment, isPrivateSegment } from './segment'
+import { createSegment, isPrivateSegment, isUrlSegment } from './segment'
 
 export type RouteModulePaths = Partial<Record<RouteModuleType, string>>
 export type RouteNode = {
@@ -86,8 +86,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     // resolves the node's URL depth and staticness from its parent
     if (node.parent) {
       const segmentType = node.segment.type
-      const consumesUrl = segmentType === 'static' || segmentType === 'dynamic' || segmentType === 'catchall'
-      node.urlDepth = node.parent.urlDepth + +consumesUrl // slot/group/malformed don't consume url
+      node.urlDepth = node.parent.urlDepth + +isUrlSegment(node.segment)  // slot/group/malformed don't consume url
       node.staticness = node.parent.staticness - (segmentType === 'dynamic' || segmentType === 'catchall' ? 1 : 0)
     }
   })
