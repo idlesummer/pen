@@ -92,13 +92,13 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): Match {
-  const match = createMainMatchPath(searchTree, url)
+  const match = createMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = match.node; node; node = node.position?.parent) {
     if (!node.searchNode.slots) continue
 
     node.subtrees = dict()
     for (const [slotName, slotSearchTree] of Object.entries(node.searchNode.slots))
-      node.subtrees[slotName] = createMainMatchPath(slotSearchTree, url)
+      node.subtrees[slotName] = createMatchPath(slotSearchTree, url)
   }
   return match
 }
