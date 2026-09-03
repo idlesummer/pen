@@ -76,15 +76,19 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   // visits top-down, so every ancestor (root/slot included) is already
   // resolved by the time a descendant is visited.
   forEachReachableRouteNode(routeTree, (node) => {
+    // ensures a default fallback in each tree
     if (!node.parent || node.segment.type === 'slot')
-      node.modulePaths.default ??= DEFAULT_FALLBACK_PATH  // ensures a default fallback in each tree
-    node.default = findDefaultRouteNodeParent(node) // resolves the nearest default route in its ancestor chain
+      node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
 
+    // resolves the nearest default route in its ancestor chain
+    node.default = findDefaultRouteNodeParent(node)
+
+    // resolves the node's URL depth and staticness from its parent
     if (node.parent) {
-      const { type } = node.segment
-      const consumesUrl = type === 'static' || type === 'dynamic' || type === 'catchall'
-      node.urlDepth = node.parent.urlDepth + (consumesUrl ? 1 : 0) // slot/group/malformed don't consume url
-      node.staticness = node.parent.staticness - (type === 'dynamic' || type === 'catchall' ? 1 : 0)
+      const segmentType = node.segment.type
+      const consumesUrl = segmentType === 'static' || segmentType === 'dynamic' || segmentType === 'catchall'
+      node.urlDepth = node.parent.urlDepth + +consumesUrl // slot/group/malformed don't consume url
+      node.staticness = node.parent.staticness - (segmentType === 'dynamic' || segmentType === 'catchall' ? 1 : 0)
     }
   })
   return routeTree
