@@ -4,7 +4,7 @@ import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
-import { createSegment, isDynamicOrCatchall, isPrivate, isUrlConsuming } from './segment'
+import { createSegment, isPrivate } from './segment'
 
 export type RouteModulePaths = Partial<Record<RouteModuleType, string>>
 export type RouteNode = {
@@ -17,12 +17,10 @@ export type RouteNode = {
   children: RouteNode[]
   // Resolution
   default: RouteNode  // itself, or its nearest ancestor that has a default
-  urlDepth: number    // segments consumed to reach this position - 0 at root, resolved alongside default
-  staticness: number  // how static-preferring the path to this node is; higher is better, resolved alongside default
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
-  const node = { name, segment, path, modules: {}, urlDepth: 0, staticness: 0, children: [] } as unknown as RouteNode
+  const node = { name, segment, path, modules: {}, children: [] } as unknown as RouteNode
   node.default = node // temporary placeholder until resolveDefaults overwrites it
   return node
 }
@@ -78,13 +76,6 @@ export function createRouteTree(filePaths: string[]): RouteNode {
 
     // resolves the nearest default route in its ancestor chain
     node.default = findDefaultRouteNodeParent(node)
-
-    // resolves the node's URL depth and staticness from its parent
-    if (node.parent) {
-      const segment = node.segment
-      node.urlDepth = node.parent.urlDepth + +isUrlConsuming(segment)  // slot/group/malformed don't consume url
-      node.staticness = node.parent.staticness - +isDynamicOrCatchall(segment)
-    }
   })
   return routeTree
 }
