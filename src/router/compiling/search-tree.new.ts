@@ -46,7 +46,7 @@ function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: Rou
       (parentSearchNode.validation!.catchalls ??= []).push(childRouteNode) // for duplicate-route validation
       return parentSearchNode.catchall ??= createSearchNode(childRouteNode, parentSearchNode)
 
-    case 'slot':  // slot can't consume url - isUrlConsuming/isDynamicOrCatchall are both false, so it inherits owner's urlDepth/staticness unchanged
+    case 'slot':  // slots can't consume url
       return (parentSearchNode.slots ??= dict())[segment.value] ??= createSearchNode(childRouteNode, parentSearchNode)
   }
 }
