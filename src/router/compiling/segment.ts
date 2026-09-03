@@ -64,3 +64,9 @@ export function isUrlSegment(segment: Segment): boolean {
   const segmentType = segment.type
   return segment.type === 'static' || segmentType === 'dynamic' || segmentType === 'catchall'
 }
+
+/** True if the segment is dynamic or catch-all. */
+export function isDynamicOrCatchall(segment: Segment): boolean {
+  const segmentType = segment.type
+  return segmentType === 'dynamic' || segmentType === 'catchall'
+}
