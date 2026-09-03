@@ -4,7 +4,7 @@ import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
-import { createSegment, isPrivateSegment, isUrlSegment } from './segment'
+import { createSegment, isDynamicOrCatchall, isPrivateSegment, isUrlSegment } from './segment'
 
 export type RouteModulePaths = Partial<Record<RouteModuleType, string>>
 export type RouteNode = {
@@ -69,12 +69,6 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
-  // One top-down pass: guarantee root/slot fallbacks and resolve each node's
-  // own default, urlDepth, and staticness in the same visit. All three are
-  // safe together - none depends on anything beyond a node's own segment
-  // type and its parent's already-resolved values, and forEachReachableRouteNode
-  // visits top-down, so every ancestor (root/slot included) is already
-  // resolved by the time a descendant is visited.
   forEachReachableRouteNode(routeTree, (node) => {
     // ensures a default fallback in each tree
     if (!node.parent || node.segment.type === 'slot')
@@ -85,9 +79,9 @@ export function createRouteTree(filePaths: string[]): RouteNode {
 
     // resolves the node's URL depth and staticness from its parent
     if (node.parent) {
-      const segmentType = node.segment.type
-      node.urlDepth = node.parent.urlDepth + +isUrlSegment(node.segment)  // slot/group/malformed don't consume url
-      node.staticness = node.parent.staticness - (segmentType === 'dynamic' || segmentType === 'catchall' ? 1 : 0)
+      const segment = node.segment
+      node.urlDepth = node.parent.urlDepth + +isUrlSegment(segment)  // slot/group/malformed don't consume url
+      node.staticness = node.parent.staticness - +isDynamicOrCatchall(segment)
     }
   })
   return routeTree
