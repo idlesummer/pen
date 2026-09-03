@@ -24,7 +24,7 @@ export type Match = {
 
 function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] {
   const parentSearchNode = parent.searchNode
-  const segment = url[parentSearchNode.urlDepth+1] // get next url segment
+  const segment = url[parentSearchNode.anchor.urlDepth+1] // get next url segment
   if (!segment) return [] // url is exhausted - nothing left to consume, so no children
 
   const { statics, dynamic, catchall } = parentSearchNode
@@ -41,7 +41,7 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
       position: { type: 'dynamic', url: segment, parent },
     })
   if (catchall) {
-    const tail = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
+    const tail = url.slice(parentSearchNode.anchor.urlDepth+1) // always non-empty since segment is defined here
     children.push({
       searchNode: catchall,
       position: { type: 'catchall', url: tail, parent },
@@ -64,7 +64,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
     },
     leave: (matchNode) => {
       const { searchNode, position } = matchNode
-      const isExhausted = !url[searchNode.urlDepth+1]
+      const isExhausted = !url[searchNode.anchor.urlDepth+1]
       const isAccepting = isExhausted || position?.type === 'catchall' // check for exhaustion or catchall
 
       if (isAccepting && searchNode.page) {
@@ -74,7 +74,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
       }
       // store match node as candidate if terminal (farthest possible match)
       else if (matchNode.isTerminal) {
-        if (!bestStatic || searchNode.staticness > bestStatic.searchNode.staticness)
+        if (!bestStatic || searchNode.anchor.staticness > bestStatic.searchNode.anchor.staticness)
           bestStatic = matchNode
       }
       // else, try another branch in the parent (all children were visited but no winner)
