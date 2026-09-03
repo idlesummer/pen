@@ -29,16 +29,13 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart: string | undefi
   const children: MatchNode[] = []
 
   const staticChild = parentSearchNode.statics?.[nextUrlPart]
+  const dynamicChild = parentSearchNode.dynamic
+  const catchallChild = parentSearchNode.catchall
+
   if (staticChild)
     children.push({ searchNode: staticChild, position: { type: 'static', segment: nextUrlPart, parent } })
-
-  const dynamicChild = parentSearchNode.dynamic
   if (dynamicChild)
     children.push({ searchNode: dynamicChild, position: { type: 'dynamic', segment: nextUrlPart, parent } })
-
-  // Pushed last so it's explored last - static and dynamic (and everything
-  // beneath them) always get first crack, catchall is genuinely last resort.
-  const catchallChild = parentSearchNode.catchall
   if (catchallChild) {
     const segments = url.slice(parentSearchNode.urlDepth+1) // always non-empty since nextUrlPart is truthy here
     children.push({ searchNode: catchallChild, position: { type: 'catchall', segments, parent } })
