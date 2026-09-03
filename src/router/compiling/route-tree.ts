@@ -12,7 +12,7 @@ export type RouteNode = {
   segment: Segment
   path: string
   modulePaths: RouteModulePaths
-  default: RouteNode // itself, or its nearest ancestor that has a default module - resolved once the whole tree exists, see resolveDefaults
+  default: RouteNode // itself, or its nearest ancestor that has a default
   urlDepth: number    // segments consumed to reach this position - 0 at root, resolved alongside default
   staticness: number  // how static-preferring the path to this node is; higher is better, resolved alongside default
   parent?: RouteNode
