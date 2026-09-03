@@ -4,7 +4,7 @@ import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
-import { createSegment, isDynamicOrCatchall, isPrivateSegment, isUrlSegment } from './segment'
+import { createSegment, isDynamicOrCatchall, isPrivate, isUrlConsuming } from './segment'
 
 export type RouteModulePaths = Partial<Record<RouteModuleType, string>>
 export type RouteNode = {
@@ -59,7 +59,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       if (index === parts.length-1) // Create the route module if file is last
         parentRouteNode.modulePaths[getRouteModuleType(part)] = filePath
 
-      else if (!isPrivateSegment(part)) {
+      else if (!isPrivate(part)) {
         const path = parentRouteNode.path ? `${parentRouteNode.path}/${part}` : part
         return createRouteNode(part, createSegment(part), path)
       }
@@ -80,7 +80,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     // resolves the node's URL depth and staticness from its parent
     if (node.parent) {
       const segment = node.segment
-      node.urlDepth = node.parent.urlDepth + +isUrlSegment(segment)  // slot/group/malformed don't consume url
+      node.urlDepth = node.parent.urlDepth + +isUrlConsuming(segment)  // slot/group/malformed don't consume url
       node.staticness = node.parent.staticness - +isDynamicOrCatchall(segment)
     }
   })

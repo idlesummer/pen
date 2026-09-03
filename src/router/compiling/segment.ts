@@ -60,7 +60,7 @@ export function isPrivate(name: string): boolean {
 }
 
 /** True if the segment consumes url segments. */
-export function isUrlConsuing(segment: Segment): boolean {
+export function isUrlConsuming(segment: Segment): boolean {
   const segmentType = segment.type
   return segment.type === 'static' || segmentType === 'dynamic' || segmentType === 'catchall'
 }
