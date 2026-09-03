@@ -13,12 +13,14 @@ export type RouteNode = {
   path: string
   modulePaths: RouteModulePaths
   default: RouteNode // itself, or its nearest ancestor that has a default module - resolved once the whole tree exists, see resolveDefaults
+  urlDepth: number    // segments consumed to reach this position - 0 at root, resolved alongside default
+  staticness: number  // how static-preferring the path to this node is; higher is better, resolved alongside default
   parent?: RouteNode
   children: RouteNode[]
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
-  const node = { name, segment, path, modulePaths: {}, children: [] } as unknown as RouteNode
+  const node = { name, segment, path, modulePaths: {}, urlDepth: 0, staticness: 0, children: [] } as unknown as RouteNode
   node.default = node // temporary placeholder until resolveDefaults overwrites it
   return node
 }
@@ -68,14 +70,22 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     },
   })
   // One top-down pass: guarantee root/slot fallbacks and resolve each node's
-  // own default in the same visit. Safe together since findDefaultRouteNodeParent
-  // only reads modulePaths.default, a purely local assignment with no
-  // dependency on any other node - by the time a node is visited, every
-  // ancestor (root/slot included) has already had its own guarantee applied.
+  // own default, urlDepth, and staticness in the same visit. All three are
+  // safe together - none depends on anything beyond a node's own segment
+  // type and its parent's already-resolved values, and forEachReachableRouteNode
+  // visits top-down, so every ancestor (root/slot included) is already
+  // resolved by the time a descendant is visited.
   forEachReachableRouteNode(routeTree, (node) => {
     if (!node.parent || node.segment.type === 'slot')
       node.modulePaths.default ??= DEFAULT_FALLBACK_PATH  // ensures a default fallback in each tree
     node.default = findDefaultRouteNodeParent(node) // resolves the nearest default route in its ancestor chain
+
+    if (node.parent) {
+      const { type } = node.segment
+      const consumesUrl = type === 'static' || type === 'dynamic' || type === 'catchall'
+      node.urlDepth = node.parent.urlDepth + (consumesUrl ? 1 : 0) // slot/group/malformed don't consume url
+      node.staticness = node.parent.staticness - (type === 'dynamic' || type === 'catchall' ? 1 : 0)
+    }
   })
   return routeTree
 }

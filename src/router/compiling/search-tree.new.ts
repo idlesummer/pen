@@ -3,9 +3,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 
 export type SearchNode = {
-  anchor: RouteNode                    // means nearest ancestor/self whose segment is static/dynamic/slot/catchall
-  urlDepth: number                     // segments consumed to reach this position - 0 at root
-  staticness: number                   // how static-preferring the path to this node is; higher is better
+  anchor: RouteNode                    // means nearest ancestor/self whose segment is static/dynamic/slot/catchall - urlDepth/staticness live there now
   // Accepting route nodes
   page?: RouteNode                     // checked during matching to decide if this position is a match
   // Route types
@@ -21,41 +19,37 @@ export type SearchNode = {
   }
 }
 
-function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: number): SearchNode {
-  return { anchor, urlDepth, staticness, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
+function createSearchNode(anchor: RouteNode): SearchNode {
+  return { anchor, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
 function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {
-  const { urlDepth, staticness } = parentSearchNode
   const segment = childRouteNode.segment
 
   switch (segment.type) {
     default:
       return parentSearchNode // inherits parents parent search node if group/malformed
 
-    case 'static': {
-      const createStatic = () => createSearchNode(childRouteNode, urlDepth+1, staticness)
-      return (parentSearchNode.statics ??= dict())[segment.value] ??= createStatic()
-    }
-    case 'dynamic': {
+    case 'static':
+      return (parentSearchNode.statics ??= dict())[segment.value] ??= createSearchNode(childRouteNode)
+
+    case 'dynamic':
       (parentSearchNode.validation!.dynamics ??= new Map()).getOrInsert(segment.value, childRouteNode) // for validation
-      return parentSearchNode.dynamic ??= createSearchNode(childRouteNode, urlDepth+1, staticness-1)
-    }
-    case 'catchall': {
+      return parentSearchNode.dynamic ??= createSearchNode(childRouteNode)
+
+    case 'catchall':
       (parentSearchNode.validation!.catchalls ??= []).push(childRouteNode) // for duplicate-route validation
-      return parentSearchNode.catchall ??= createSearchNode(childRouteNode, urlDepth+1, staticness-1)
-    }
-    case 'slot': {  // slot can't consume url, so it inherits owner's urlDepth and staticness
-      const createSlotNode = () => createSearchNode(childRouteNode, urlDepth, staticness)
-      return (parentSearchNode.slots ??= dict())[segment.value] ??= createSlotNode()
-    }
+      return parentSearchNode.catchall ??= createSearchNode(childRouteNode)
+
+    case 'slot':  // slot can't consume url - its RouteNode already inherits owner's urlDepth/staticness
+      return (parentSearchNode.slots ??= dict())[segment.value] ??= createSearchNode(childRouteNode)
   }
 }
 
 /** Creates the search tree from a route tree and populates each search node
  *  with its associated modules and validation data. */
 export function createSearchTree(routeTree: RouteNode): SearchNode {
-  const searchTree = createSearchNode(routeTree, 0, 0)
+  const searchTree = createSearchNode(routeTree)
   const searchNodeMap = new Map([[routeTree, searchTree]]) // temp map to hold routenode to searchnode pairs
 
   traverse(routeTree, {
