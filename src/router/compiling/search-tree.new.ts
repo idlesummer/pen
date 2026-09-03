@@ -15,10 +15,10 @@ export type SearchNode = {
   dynamic?: SearchNode                 // consuming folder's dynamic child - param name is dynamic.anchor.segment.value
   catchall?: SearchNode                // consuming folder's catch-all child
   // Validation metadata
-  validation?: {                      // candidates validation checks against (later removed in sanitizeSearchTree)
-    pages?: RouteNode[]               // every page claimed here, for duplicate-route
-    dynamics?: Map<string, RouteNode> // every dynamic name claimed here -> the route that claimed it, for param-name-clash
-    catchalls?: RouteNode[]           // every catch-all child claimed here, for duplicate-route
+  validation?: {                         // candidates validation checks against (later removed in sanitizeSearchTree)
+    pages?: RouteNode[]                  // every page claimed here, for duplicate-route
+    dynamics?: Record<string, RouteNode> // every dynamic name claimed here -> the route that claimed it, for param-name-clash
+    catchalls?: RouteNode[]              // every catch-all child claimed here, for duplicate-route
   }
 }
 
@@ -39,7 +39,7 @@ function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: Rou
       return (parentSearchNode.statics ??= dict())[segment.value] ??= createSearchNode(childRouteNode, parentSearchNode)
 
     case 'dynamic':
-      (parentSearchNode.validation!.dynamics ??= new Map()).getOrInsert(segment.value, childRouteNode) // for validation
+      (parentSearchNode.validation!.dynamics ??= dict())[segment.value] ??= childRouteNode // for validation
       return parentSearchNode.dynamic ??= createSearchNode(childRouteNode, parentSearchNode)
 
     case 'catchall':
