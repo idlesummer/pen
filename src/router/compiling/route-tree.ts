@@ -12,12 +12,15 @@ export type RouteNode = {
   segment: Segment
   path: string
   modulePaths: RouteModulePaths
+  default: RouteNode // itself, or its nearest ancestor that has a default module - resolved once the whole tree exists, see resolveDefaults
   parent?: RouteNode
   children: RouteNode[]
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
-  return { name, segment, path, modulePaths: {}, children: [] }
+  const node = { name, segment, path, modulePaths: {}, children: [] } as unknown as RouteNode
+  node.default = node // temporary placeholder until resolveDefaults overwrites it
+  return node
 }
 
 /** Visits every reachable route node, pruning descendants beneath catch-all routes. */
@@ -59,6 +62,11 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     if (node.segment.type === 'slot')
       node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
   })
+  // Resolve each node's own applicable default now that every default-bearing
+  // node (root, every slot) is guaranteed to have its own modulePaths.default
+  forEachReachableRouteNode(routeTree, (node) => {
+    node.default = findDefaultRouteNodeParent(node)
+  })
   return routeTree
 }
 
@@ -74,8 +82,9 @@ export function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
 }
 
 /** Finds the nearest ancestor with a default module, skipping slot boundaries.
- *  The route tree guarantees that one always exists. */
-export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
+ *  The route tree guarantees that one always exists. Only called once per
+ *  node, while building the tree - use node.default afterward instead. */
+function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
   for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
     if (node.modulePaths.default) return node
   return undefined as never // unreachable - see guarantee above
