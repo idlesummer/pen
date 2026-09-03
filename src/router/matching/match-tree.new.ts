@@ -51,7 +51,7 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
   return children
 }
 
-function createMainMatchPath(searchTree: SearchNode, url: string[]): Match {
+function createMatchPath(searchTree: SearchNode, url: string[]): Match {
   const root: MatchNode = { searchNode: searchTree }
   let winnerNode: MatchNode | undefined
   let winnerPage: Page | undefined
@@ -91,7 +91,7 @@ function createMainMatchPath(searchTree: SearchNode, url: string[]): Match {
 
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
-export function createMatchPath(searchTree: SearchNode, url: string[]): Match {
+export function createMatchTree(searchTree: SearchNode, url: string[]): Match {
   const match = createMainMatchPath(searchTree, url)
   for (let node: MatchNode | undefined = match.node; node; node = node.position?.parent) {
     if (!node.searchNode.slots) continue
