@@ -23,6 +23,12 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return node
 }
 
+function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
+  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
+    if (node.modulePaths.default) return node
+  return undefined as never // unreachable - see guarantee above
+}
+
 /** Visits every reachable route node, pruning descendants beneath catch-all routes. */
 export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: RouteNode) => void) {
   traverse(root, {
@@ -79,15 +85,6 @@ export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
 export function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
   for (let node = routeNode.parent; node; node = node.parent)
     if (node.segment.type === 'slot') return node
-}
-
-/** Finds the nearest ancestor with a default module, skipping slot boundaries.
- *  The route tree guarantees that one always exists. Only called once per
- *  node, while building the tree - use node.default afterward instead. */
-function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
-  for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
-    if (node.modulePaths.default) return node
-  return undefined as never // unreachable - see guarantee above
 }
 
 /** Gets the route's source file or falls back to its route path if no module exists. */
