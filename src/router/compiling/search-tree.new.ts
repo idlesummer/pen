@@ -2,12 +2,6 @@ import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 
-// Exploratory variant of search-tree.ts: promotes catch-all from a bare
-// RouteNode reference stashed on its parent into a first-class SearchNode
-// of its own, symmetric with static/dynamic/slot. Not wired into
-// match-tree.ts or any other downstream consumer yet - this only changes
-// the shape of the search tree itself.
-
 export type SearchNode = {
   anchor: RouteNode                    // means nearest ancestor/self whose segment is static/dynamic/slot/catchall
   urlDepth: number                     // segments consumed to reach this position - 0 at root
