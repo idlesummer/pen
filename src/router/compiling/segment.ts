@@ -55,12 +55,12 @@ export function createSegment(name: string): Segment {
 }
 
 /** True for a private folder name (`_lib`), erased from routing entirely. */
-export function isPrivateSegment(name: string): boolean {
+export function isPrivate(name: string): boolean {
   return name.startsWith('_')
 }
 
 /** True if the segment consumes url segments. */
-export function isUrlSegment(segment: Segment): boolean {
+export function isUrlConsuing(segment: Segment): boolean {
   const segmentType = segment.type
   return segment.type === 'static' || segmentType === 'dynamic' || segmentType === 'catchall'
 }
