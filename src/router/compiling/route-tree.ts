@@ -12,11 +12,13 @@ export type RouteNode = {
   segment: Segment
   path: string
   modules: RouteModulePaths
-  default: RouteNode // itself, or its nearest ancestor that has a default
-  urlDepth: number    // segments consumed to reach this position - 0 at root, resolved alongside default
-  staticness: number  // how static-preferring the path to this node is; higher is better, resolved alongside default
+  // Tree
   parent?: RouteNode
   children: RouteNode[]
+  // Resolution
+  default: RouteNode  // itself, or its nearest ancestor that has a default
+  urlDepth: number    // segments consumed to reach this position - 0 at root, resolved alongside default
+  staticness: number  // how static-preferring the path to this node is; higher is better, resolved alongside default
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
