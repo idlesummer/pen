@@ -9,8 +9,8 @@ export type MatchNode = {
   subtrees?: Record<string, Match>   // each slot's own winning match - attached after the main walk resolves
   isTerminal?: true
   position?:
-    | { type: 'static' | 'dynamic'; segment: string; parent: MatchNode }
-    | { type: 'catchall'; segments: string[]; parent: MatchNode } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
+    | { type: 'static' | 'dynamic'; url: string; parent: MatchNode }
+    | { type: 'catchall'; url: string[]; parent: MatchNode } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
 }
 
 export type Page = {
@@ -34,18 +34,18 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
   if (statics?.[segment])
     children.push({
       searchNode: statics[segment],
-      position: { type: 'static', segment, parent },
+      position: { type: 'static', url: segment, parent },
     })
   if (dynamic)
     children.push({
       searchNode: dynamic,
-      position: { type: 'dynamic', segment, parent },
+      position: { type: 'dynamic', url: segment, parent },
     })
   if (catchall) {
-    const segments = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
+    const tail = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
     children.push({
       searchNode: catchall,
-      position: { type: 'catchall', segments, parent },
+      position: { type: 'catchall', url: tail, parent },
     })
   }
   return children
