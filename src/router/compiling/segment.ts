@@ -58,3 +58,9 @@ export function createSegment(name: string): Segment {
 export function isPrivateSegment(name: string): boolean {
   return name.startsWith('_')
 }
+
+/** True if the segment consumes url segments. */
+export function isUrlSegment(segment: Segment): boolean {
+  const segmentType = segment.type
+  return segment.type === 'static' || segmentType === 'dynamic' || segmentType === 'catchall'
+}
