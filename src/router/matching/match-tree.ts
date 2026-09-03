@@ -1,6 +1,5 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import { findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 
@@ -36,8 +35,7 @@ function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): Match
 }
 
 function createDefaultContent(matchNode: MatchNode): MatchContent {
-  const defaultNode = findDefaultRouteNodeParent(matchNode.searchNode.anchor)
-  return { type: 'default', node: defaultNode }
+  return { type: 'default', node: matchNode.searchNode.anchor.default }
 }
 
 /** Creates a complete match path from the root to the matched node and returns that match node. */

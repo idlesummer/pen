@@ -1,6 +1,5 @@
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree.new'
-import { findDefaultRouteNodeParent } from '../compiling/route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 
@@ -85,8 +84,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
     return { node: winnerNode, page: winnerPage }
 
   const node = bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
-  const defaultNode = findDefaultRouteNodeParent(node.searchNode.anchor)
-  return { node, page: { type: 'default', node: defaultNode } }
+  return { node, page: { type: 'default', node: node.searchNode.anchor.default } }
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
