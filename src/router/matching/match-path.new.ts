@@ -81,7 +81,6 @@ function createMainMatchPath(searchTree: SearchNode, url: string[]): Match {
       // else, try another branch in the parent (all children were visited but no winner)
     },
   })
-
   if (winner && winnerPage)
     return { node: winner, page: winnerPage }
 
@@ -94,7 +93,6 @@ function createMainMatchPath(searchTree: SearchNode, url: string[]): Match {
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchPath(searchTree: SearchNode, url: string[]): Match {
   const match = createMainMatchPath(searchTree, url)
-
   for (let node: MatchNode | undefined = match.node; node; node = node.position?.parent) {
     if (!node.searchNode.slots) continue
 
