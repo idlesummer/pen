@@ -62,15 +62,14 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
-  // Add default fallback to the root and every reachable slot
-  routeTree.modulePaths.default ??= DEFAULT_FALLBACK_PATH
+  // One top-down pass: guarantee root/slot fallbacks and resolve each node's
+  // own default in the same visit. Safe together since findDefaultRouteNodeParent
+  // only reads modulePaths.default, a purely local assignment with no
+  // dependency on any other node - by the time a node is visited, every
+  // ancestor (root/slot included) has already had its own guarantee applied.
   forEachReachableRouteNode(routeTree, (node) => {
-    if (node.segment.type === 'slot')
+    if (!node.parent || node.segment.type === 'slot')
       node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
-  })
-  // Resolve each node's own applicable default now that every default-bearing
-  // node (root, every slot) is guaranteed to have its own modulePaths.default
-  forEachReachableRouteNode(routeTree, (node) => {
     node.default = findDefaultRouteNodeParent(node)
   })
   return routeTree
