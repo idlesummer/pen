@@ -33,7 +33,7 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         files: [getRouteSource(routeNode)],
       })
     }
-    if (segmentType === 'catchall' && routeNode.children.length) {
+    if (segmentType === 'catchall' && routeNode.hasPrunedChildren) {
       diagnostics.push({
         rule: 'non-terminal-catchall',
         severity: 'warning',
@@ -75,19 +75,15 @@ function isValidRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): bo
   return !isMalformed && !isNestedSlot
 }
 
-/** Clears a catch-all's children (nothing can nest under one), drops
- *  malformed children outright, and prunes slots nested inside another
- *  slot's subtree (both flagged by validateRouteTree above) - before
- *  expand descends further. */
+/** Drops malformed children outright and prunes slots nested inside another
+ *  slot's subtree (both flagged by validateRouteTree above) - before expand
+ *  descends further. Catch-all children never get attached in the first
+ *  place (createRouteTree drops them at the source), so there's nothing
+ *  left to clear here for that case. */
 export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
-      const segmentType = routeNode.segment.type
-      if (segmentType === 'catchall') {
-        routeNode.children = []
-        return
-      }
-      const isInsideSlot = segmentType === 'slot' || !!getSlotAncestor(routeNode)
+      const isInsideSlot = routeNode.segment.type === 'slot' || !!getSlotAncestor(routeNode)
       const filtered = routeNode.children.filter(child => isValidRouteChild(child, isInsideSlot))
       routeNode.children = filtered
     },
