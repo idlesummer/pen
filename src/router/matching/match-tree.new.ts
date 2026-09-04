@@ -84,7 +84,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
     return { node: winnerNode, page: winnerPage }
 
   const node = bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
-  return { node, page: { type: 'default', node: node.searchNode.anchor.default } }
+  return { node, page: { type: 'default', node: node.searchNode.default } }
 }
 
 /** Walks up the winning path, finds slots on each node, creates their

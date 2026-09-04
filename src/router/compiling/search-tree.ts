@@ -1,11 +1,13 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
+import { findDefaultRouteNodeParent } from './route-tree'
 
 export type SearchNode = {
   anchor: RouteNode                    // means nearest ancestor/self whose segment is static/dynamic/slot
   urlDepth: number                     // segments consumed to reach this position - 0 at root
   staticness: number                   // how static-preferring the path to this node is; higher is better
+  default: RouteNode                   // nearest default-bearing route above (or at) anchor - only computed for nodes that get a SearchNode
   // Accepting route nodes
   page?: RouteNode                     // checked during matching to decide if this position is a match
   catchall?: RouteNode                 // consuming folder's catch-all page
@@ -33,7 +35,8 @@ function addAcceptingRouteNode(searchNode: SearchNode, routeNode: RouteNode) {
 }
 
 function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: number): SearchNode {
-  return { anchor, urlDepth, staticness, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
+  const defaultNode = findDefaultRouteNodeParent(anchor)
+  return { anchor, urlDepth, staticness, default: defaultNode, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
 function getOrCreateSearchNode(parentSearchNode: SearchNode, childRouteNode: RouteNode): SearchNode {

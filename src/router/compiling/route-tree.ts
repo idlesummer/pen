@@ -11,7 +11,6 @@
     segment: Segment
     path: string
     modules: RouteModulePaths
-    default: RouteNode  // itself, or its nearest ancestor that has a default
     // Tree
     parent?: RouteNode
     children: RouteNode[]
@@ -19,9 +18,7 @@
 
   function createRouteNode(name: string, path: string): RouteNode {
     const segment = createSegment(name)
-    const routeNode = { name, segment, path, modules: {}, children: [] } as unknown as RouteNode  // to reference itself after
-    routeNode.default = routeNode
-    return routeNode
+    return { name, segment, path, modules: {}, children: [] }
   }
 
   /** Visits every route node. */
@@ -35,7 +32,8 @@
       return routeNode.parent
   }
 
-  function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
+  /** Finds the nearest ancestor (or self) with a `default` module. */
+  export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
     for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
       if (node.modules.default) return node
     return undefined as never // unreachable - see guarantee above
@@ -66,7 +64,6 @@
     forEach(routeTree, (node) => {
       if (!node.parent || node.segment.type === 'slot') // ensures a default fallback in each tree
         node.modules.default ??= DEFAULT_FALLBACK_PATH
-      node.default = findDefaultRouteNodeParent(node)   // resolves the nearest default route in its ancestor chain
     })
     return routeTree
   }
