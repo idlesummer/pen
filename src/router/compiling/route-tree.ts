@@ -32,7 +32,8 @@
 
   /** Returns the next non-slot ancestor, or undefined at a slot boundary. */
   export function getNonSlotParent(routeNode: RouteNode): RouteNode | undefined {
-    return routeNode.segment.type !== 'slot' ? routeNode.parent : undefined
+    if (routeNode.segment.type !== 'slot')
+      return routeNode.parent
   }
 
   function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
