@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { traverse } from '@/lib/traverse'
 import { getRouteSource } from './route-tree'
-import { forEach, getSlotAncestor } from './route-tree'
+import { forEach } from './route-tree'
 
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
   const params = new Set<string>()
@@ -43,18 +43,15 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
         files: [getRouteSource(routeNode)],
       })
     }
-    if (segmentType === 'slot') {
-      const ancestorRouteNode = getSlotAncestor(routeNode)
-      if (ancestorRouteNode) {
-        diagnostics.push({
-          rule: 'nested-slot',
-          severity: 'error',
-          message:
-            `"${routeNode.path}" is a slot nested inside slot "${ancestorRouteNode.path}" ` +
-            '- slot subtrees are terminal and can\'t declare further slots',
-          files: [getRouteSource(routeNode)],
-        })
-      }
+    if (segmentType === 'slot' && routeNode.hasPrunedChildren) {
+      diagnostics.push({
+        rule: 'nested-slot',
+        severity: 'error',
+        message:
+          `"${routeNode.path}" is a slot and can't declare a nested slot ` +
+          '- slot subtrees are terminal',
+        files: [getRouteSource(routeNode)],
+      })
     }
     if (segmentType === 'dynamic' || segmentType === 'catchall') {
       const paramName = findDuplicateParam(routeNode)
@@ -69,23 +66,18 @@ export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
   return diagnostics
 }
 
-function isValidRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): boolean {
-  const isMalformed = childRouteNode.segment.type === 'malformed'
-  const isNestedSlot = isInsideSlot && childRouteNode.segment.type === 'slot'
-  return !isMalformed && !isNestedSlot
+function isValidRouteChild(childRouteNode: RouteNode): boolean {
+  return childRouteNode.segment.type !== 'malformed'
 }
 
-/** Drops malformed children outright and prunes slots nested inside another
- *  slot's subtree (both flagged by validateRouteTree above) - before expand
- *  descends further. Catch-all children never get attached in the first
- *  place (createRouteTree drops them at the source), so there's nothing
- *  left to clear here for that case. */
+/** Drops malformed children outright (flagged by validateRouteTree above)
+ *  before expand descends further. Catch-all descendants and nested slots
+ *  never get attached in the first place (createRouteTree drops them at
+ *  the source), so there's nothing left to clear here for either case. */
 export function sanitizeRouteTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (routeNode) => {
-      const isInsideSlot = routeNode.segment.type === 'slot' || !!getSlotAncestor(routeNode)
-      const filtered = routeNode.children.filter(child => isValidRouteChild(child, isInsideSlot))
-      routeNode.children = filtered
+      routeNode.children = routeNode.children.filter(isValidRouteChild)
     },
     expand: (routeNode) =>
       routeNode.children,
