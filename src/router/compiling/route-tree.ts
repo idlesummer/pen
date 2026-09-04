@@ -15,7 +15,6 @@
     // Tree
     parent?: RouteNode
     children: RouteNode[]
-    hasPrunedChildren?: true // true when files were dropped during construction (catch-all descendants, or a nested slot)
   }
 
   function createRouteNode(name: string, path: string): RouteNode {
@@ -54,21 +53,7 @@
         if (index === parts.length-1) // Create the route module if file is last
           parentRouteNode.modules[getRouteModuleType(moduleName)] = filePath
 
-        else if (isPrivate(moduleName))
-          return
-
-        else if (parentRouteNode.segment.type === 'catchall') // catch-all must be terminal, drop nesteed routes
-          parentRouteNode.hasPrunedChildren = true
-
-        else {
-          const segment = createSegment(moduleName)
-          if (segment.type === 'slot') {
-            const slotNode = getSlotNode(parentRouteNode)
-            if (slotNode) {
-              slotNode.hasPrunedChildren = true
-              return
-            }
-          }
+        else if (!isPrivate(moduleName)) {
           const path = parentRouteNode.path ? `${parentRouteNode.path}/${moduleName}` : moduleName
           return createRouteNode(moduleName, path)
         }
@@ -84,12 +69,6 @@
       node.default = findDefaultRouteNodeParent(node)   // resolves the nearest default route in its ancestor chain
     })
     return routeTree
-  }
-
-  /** Finds the nearest slot route node, if any. */
-  function getSlotNode(routeNode: RouteNode): RouteNode | undefined {
-    for (let node: RouteNode | undefined = routeNode; node; node = node.parent)
-      if (node.segment.type === 'slot') return node
   }
 
   /** Gets the route's source file or falls back to its route path if no module exists. */
