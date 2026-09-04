@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import type { SearchNode } from './search-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { getRouteSource } from './route-tree'
-import { forEachSearchNode } from './search-tree'
+import { forEach } from './search-tree'
 
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
   if (!routeNodes) return
@@ -14,7 +14,7 @@ function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefin
 export function validateSearchTree(searchTree: SearchNode): CompileDiagnostic[] {
   const diagnostics: CompileDiagnostic[] = []
 
-  forEachSearchNode(searchTree, (searchNode) => {
+  forEach(searchTree, (searchNode) => {
     const validation = searchNode.validation
     const pageConflicts = findConflictingRouteFiles(validation?.pages)
     if (pageConflicts) {
@@ -53,7 +53,7 @@ export function validateSearchTree(searchTree: SearchNode): CompileDiagnostic[] 
  *  collected. Must run after validateSearchTree, same as sanitizeRouteTree
  *  after validateRouteTree. */
 export function sanitizeSearchTree(searchTree: SearchNode) {
-  forEachSearchNode(searchTree, (searchNode) => {
+  forEach(searchTree, (searchNode) => {
     searchNode.validation = undefined // cheaper than delete - avoids a hidden-class transition
   })
 }
