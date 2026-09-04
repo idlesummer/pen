@@ -92,14 +92,10 @@ export function getRouteSource(routeNode: RouteNode): string {
 
 /** Collects every distinct module path referenced in the tree, sorted. */
 export function getRouteModulePaths(routeTree: RouteNode): string[] {
-  const modulePaths = new Set<string>()
-  traverse(routeTree, {
-    visit: (routeNode) => {
-      for (const modulePath of Object.values(routeNode.modules))
-        modulePaths.add(modulePath)
-    },
-    expand: (routeNode) =>
-      routeNode.children,
+  const modules = new Set<string>()
+  forEachReachableRouteNode(routeTree, (routeNode) => {
+    for (const modulePath of Object.values(routeNode.modules))
+      modules.add(modulePath)
   })
-  return [...modulePaths].sort()
+  return [...modules].sort()
 }
