@@ -28,7 +28,7 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
 
 /** Visits every route node. */
 export function forEach(root: RouteNode, visit: (routeNode: RouteNode) => void) {
-  traverse(root, { visit, expand: (routeNode) => routeNode.children })
+  traverse(root, { visit, expand: routeNode => routeNode.children })
 }
 
 /** Returns the next non-slot ancestor, or undefined at a slot boundary. */
