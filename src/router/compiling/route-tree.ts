@@ -21,9 +21,9 @@ export type RouteNode = {
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
-  const node = { name, segment, path, modules: {}, children: [] } as unknown as RouteNode
-  node.default = node // temporary placeholder until resolveDefaults overwrites it
-  return node
+  const routeNode = { name, segment, path, modules: {}, children: [] } as unknown as RouteNode
+  routeNode.default = routeNode
+  return routeNode
 }
 
 /** Visits every reachable route node, pruning descendants beneath catch-all routes. */
