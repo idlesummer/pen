@@ -70,8 +70,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
         winnerNode = matchNode
         return true
       }
-      // store match node as candidate if terminal (farthest possible match)
-      else if (matchNode.isTerminal) {
+      else if (matchNode.isTerminal) {  // store as candidate if terminal (farthest possible match)
         if (!bestStatic || searchNode.staticness > bestStatic.searchNode.staticness)
           bestStatic = matchNode
       }
