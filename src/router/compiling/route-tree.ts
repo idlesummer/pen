@@ -15,7 +15,7 @@
     // Tree
     parent?: RouteNode
     children: RouteNode[]
-    hasPrunedChildren?: true // true when files were found nested beneath this catch-all and dropped
+    hasPrunedChildren?: true // true when files were dropped during construction (catch-all descendants, or a nested slot)
   }
 
   function createRouteNode(name: string, path: string): RouteNode {
@@ -58,6 +58,12 @@
           parentRouteNode.hasPrunedChildren = true
 
         else if (!isPrivate(moduleName)) {
+          const isSlot = createSegment(moduleName).type === 'slot'
+          const slotAncestor = isSlot && (parentRouteNode.segment.type === 'slot' ? parentRouteNode : getSlotAncestor(parentRouteNode))
+          if (slotAncestor) { // slot subtrees are terminal, drop nested slots
+            slotAncestor.hasPrunedChildren = true
+            return
+          }
           const path = parentRouteNode.path ? `${parentRouteNode.path}/${moduleName}` : moduleName
           return createRouteNode(moduleName, path)
         }
@@ -76,7 +82,7 @@
   }
 
   /** Finds the nearest ancestor route node that is itself a slot, if any. */
-  export function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
+  function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
     for (let node = routeNode.parent; node; node = node.parent)
       if (node.segment.type === 'slot') return node
   }
