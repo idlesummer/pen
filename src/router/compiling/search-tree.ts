@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findDefaultRouteNodeParent } from './route-tree'
+import { findDefaultAncestor } from './route-tree'
 
 export type SearchNode = {
   anchor: RouteNode                    // means nearest ancestor/self whose segment is static/dynamic/slot
@@ -35,7 +35,7 @@ function addAcceptingRouteNode(searchNode: SearchNode, routeNode: RouteNode) {
 }
 
 function createSearchNode(anchor: RouteNode, urlDepth: number, staticness: number): SearchNode {
-  const defaultNode = findDefaultRouteNodeParent(anchor)
+  const defaultNode = findDefaultAncestor(anchor)
   return { anchor, urlDepth, staticness, default: defaultNode, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 
