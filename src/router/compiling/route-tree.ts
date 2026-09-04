@@ -21,7 +21,7 @@
 
   function createRouteNode(name: string, path: string): RouteNode {
     const segment = createSegment(name)
-    const routeNode = { name, segment, path, modules: {}, children: [] } as unknown as RouteNode
+    const routeNode = { name, segment, path, modules: {}, children: [] } as unknown as RouteNode  // to reference itself after
     routeNode.default = routeNode
     return routeNode
   }
