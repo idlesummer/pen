@@ -60,9 +60,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       if (index === parts.length-1) // Create the route module if file is last
         parentRouteNode.modules[getRouteModuleType(part)] = filePath
 
-      // catch-all must be terminal - drop anything nested beneath it rather
-      // than let it leak into search-tree, but keep a trace for diagnostics
-      else if (parentRouteNode.segment.type === 'catchall')
+      else if (parentRouteNode.segment.type === 'catchall') // catch-all must be terminal, drop anything nested beneath it rather
         parentRouteNode.hasPrunedChildren = true
 
       else if (!isPrivate(part)) {
