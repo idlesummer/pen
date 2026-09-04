@@ -53,7 +53,6 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
 function createMatchPath(searchTree: SearchNode, url: string[]): Match {
   const root: MatchNode = { searchNode: searchTree }
   let winnerNode: MatchNode | undefined
-  let winnerPage: Page | undefined
   let bestStatic: MatchNode | undefined // most static-preferring failed branch seen so far
 
   traverse(root, {   // Performs a regular MatchNode traversal restricted to static/dynamic/catchall
@@ -69,7 +68,6 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
 
       if (isAccepting && searchNode.page) {
         winnerNode = matchNode
-        winnerPage = { type: 'page', node: searchNode.page }
         return true
       }
       // store match node as candidate if terminal (farthest possible match)
@@ -80,8 +78,8 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
       // else, try another branch in the parent (all children were visited but no winner)
     },
   })
-  if (winnerNode && winnerPage)
-    return { node: winnerNode, page: winnerPage }
+  if (winnerNode)
+    return { node: winnerNode, page: { type: 'page', node: winnerNode.searchNode.page! } }
 
   const node = bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
   return { node, page: { type: 'default', node: node.searchNode.default } }
