@@ -81,7 +81,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   return searchTree
 }
 
-export function forEachSearchNode(searchTree: SearchNode, visit: (searchNode: SearchNode) => void) {
+export function forEach(searchTree: SearchNode, visit: (searchNode: SearchNode) => void) {
   traverse(searchTree, {
     visit,
     expand: (searchNode) => {
