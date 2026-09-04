@@ -36,7 +36,7 @@
   export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
     for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
       if (node.modules.default) return node
-    return undefined as never // unreachable - see guarantee above
+    return undefined as never // unreachable, see guarantee in createRouteTree
   }
 
   /** Builds the route tree from a file list, ensuring its root and slots always
@@ -48,7 +48,7 @@
     treeify(routeTree, routeFilePaths, sep, {
       create: (parentRouteNode, { index, parts, path: filePath }) => {
         const moduleName = parts[index]!    // always defined since `create` only yields existing indices.
-        if (index === parts.length-1) // Create the route module if file is last
+        if (index === parts.length-1)       // Create the route module if file is last
           parentRouteNode.modules[getRouteModuleType(moduleName)] = filePath
 
         else if (!isPrivate(moduleName)) {
