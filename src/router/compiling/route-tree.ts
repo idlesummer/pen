@@ -12,12 +12,11 @@ export type RouteNode = {
   segment: Segment
   path: string
   modules: RouteModulePaths
+  default: RouteNode  // itself, or its nearest ancestor that has a default
   // Tree
   parent?: RouteNode
   children: RouteNode[]
   hasPrunedChildren?: true // true when files were found nested beneath this catch-all and dropped - must be last, nothing can validly nest there
-  // Resolution
-  default: RouteNode  // itself, or its nearest ancestor that has a default
 }
 
 function createRouteNode(name: string, segment: Segment, path: string): RouteNode {
