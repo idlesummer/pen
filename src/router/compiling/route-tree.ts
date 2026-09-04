@@ -15,6 +15,7 @@ export type RouteNode = {
   // Tree
   parent?: RouteNode
   children: RouteNode[]
+  hasPrunedChildren?: true // true when files were found nested beneath this catch-all and dropped - must be last, nothing can validly nest there
   // Resolution
   default: RouteNode  // itself, or its nearest ancestor that has a default
 }
@@ -58,6 +59,11 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       const part = parts[index]!    // always defined since `create` only yields existing indices.
       if (index === parts.length-1) // Create the route module if file is last
         parentRouteNode.modules[getRouteModuleType(part)] = filePath
+
+      // catch-all must be terminal - drop anything nested beneath it rather
+      // than let it leak into search-tree, but keep a trace for diagnostics
+      else if (parentRouteNode.segment.type === 'catchall')
+        parentRouteNode.hasPrunedChildren = true
 
       else if (!isPrivate(part)) {
         const path = parentRouteNode.path ? `${parentRouteNode.path}/${part}` : part
