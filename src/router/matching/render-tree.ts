@@ -1,5 +1,5 @@
-import type { RouteNode } from '../compiling/route-tree'
 import type { RouteModulePaths } from '../compiling/route-module'
+import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode, MatchTree } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
