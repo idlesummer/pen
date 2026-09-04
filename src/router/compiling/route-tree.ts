@@ -58,11 +58,10 @@
           parentRouteNode.hasPrunedChildren = true
 
         else if (!isPrivate(moduleName)) {
-          const isSlot = createSegment(moduleName).type === 'slot'
-          const slotAncestor = isSlot && (parentRouteNode.segment.type === 'slot' ? parentRouteNode : getSlotAncestor(parentRouteNode))
-          if (slotAncestor) { // slot subtrees are terminal, drop nested slots
-            slotAncestor.hasPrunedChildren = true
-            return
+          const segment = createSegment(moduleName)
+          if (segment.type === 'slot') {
+            const slotNode = getSlotNode(parentRouteNode)
+            if (slotNode) slotNode.hasPrunedChildren = true
           }
           const path = parentRouteNode.path ? `${parentRouteNode.path}/${moduleName}` : moduleName
           return createRouteNode(moduleName, path)
@@ -81,9 +80,9 @@
     return routeTree
   }
 
-  /** Finds the nearest ancestor route node that is itself a slot, if any. */
-  function getSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
-    for (let node = routeNode.parent; node; node = node.parent)
+  /** Finds the nearest slot route node, if any. */
+  function getSlotNode(routeNode: RouteNode): RouteNode | undefined {
+    for (let node: RouteNode | undefined = routeNode; node; node = node.parent)
       if (node.segment.type === 'slot') return node
   }
 
