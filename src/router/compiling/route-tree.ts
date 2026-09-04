@@ -54,14 +54,20 @@
         if (index === parts.length-1) // Create the route module if file is last
           parentRouteNode.modules[getRouteModuleType(moduleName)] = filePath
 
+        else if (isPrivate(moduleName))
+          return
+
         else if (parentRouteNode.segment.type === 'catchall') // catch-all must be terminal, drop nesteed routes
           parentRouteNode.hasPrunedChildren = true
 
-        else if (!isPrivate(moduleName)) {
+        else {
           const segment = createSegment(moduleName)
           if (segment.type === 'slot') {
             const slotNode = getSlotNode(parentRouteNode)
-            if (slotNode) slotNode.hasPrunedChildren = true
+            if (slotNode)  {
+              slotNode.hasPrunedChildren = true
+              return
+            }
           }
           const path = parentRouteNode.path ? `${parentRouteNode.path}/${moduleName}` : moduleName
           return createRouteNode(moduleName, path)
