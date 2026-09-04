@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findDefaultRouteNodeParent } from './route-tree'
+import { findDefaultAncestor } from './route-tree'
 import { isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 export type SearchNode = {
@@ -27,7 +27,7 @@ export type SearchNode = {
 function createSearchNode(anchor: RouteNode, parent?: SearchNode): SearchNode {
   const urlDepth = (parent?.urlDepth ?? 0) + +isUrlConsuming(anchor.segment)
   const staticness = (parent?.staticness ?? 0) - +isDynamicOrCatchall(anchor.segment)
-  const defaultNode = findDefaultRouteNodeParent(anchor)
+  const defaultNode = findDefaultAncestor(anchor)
   return { anchor, urlDepth, staticness, default: defaultNode, validation: {} } // Validation is guaranteed to exist here, it's only removed later at sanitization
 }
 

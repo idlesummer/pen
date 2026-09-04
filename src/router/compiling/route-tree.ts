@@ -33,7 +33,7 @@
   }
 
   /** Finds the nearest ancestor (or self) with a `default` module. */
-  export function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
+  export function findDefaultAncestor(routeNode: RouteNode): RouteNode {
     for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
       if (node.modules.default) return node
     return undefined as never // unreachable, see guarantee in createRouteTree
