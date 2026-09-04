@@ -1,6 +1,5 @@
 import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
-import { traverse } from '@/lib/traverse'
 import { getRouteSource } from './route-tree'
 import { forEach } from './route-tree'
 
@@ -86,16 +85,12 @@ function isValidRouteChild(childRouteNode: RouteNode, isInsideSlot: boolean): bo
  *  above) - before expand descends further, so descendants are dropped in
  *  one pass. */
 export function sanitizeRouteTree(routeTree: RouteNode) {
-  traverse(routeTree, {
-    visit: (routeNode) => {
-      if (routeNode.segment.type === 'catchall') { // catch-all must be terminal, drop nested routes
-        routeNode.children = []
-        return
-      }
-      const isInsideSlot = routeNode.segment.type === 'slot' || !!getSlotAncestor(routeNode)
-      routeNode.children = routeNode.children.filter(child => isValidRouteChild(child, isInsideSlot))
-    },
-    expand: (routeNode) =>
-      routeNode.children,
+  forEach(routeTree, (routeNode) => {
+    if (routeNode.segment.type === 'catchall') { // catch-all must be terminal, drop nested routes
+      routeNode.children = []
+      return
+    }
+    const isInsideSlot = routeNode.segment.type === 'slot' || !!getSlotAncestor(routeNode)
+    routeNode.children = routeNode.children.filter(child => isValidRouteChild(child, isInsideSlot))
   })
 }
