@@ -72,12 +72,9 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     },
   })
   forEachReachableRouteNode(routeTree, (node) => {
-    // ensures a default fallback in each tree
-    if (!node.parent || node.segment.type === 'slot')
+    if (!node.parent || node.segment.type === 'slot') // ensures a default fallback in each tree
       node.modules.default ??= DEFAULT_FALLBACK_PATH
-
-    // resolves the nearest default route in its ancestor chain
-    node.default = findDefaultRouteNodeParent(node)
+    node.default = findDefaultRouteNodeParent(node)   // resolves the nearest default route in its ancestor chain
   })
   return routeTree
 }
