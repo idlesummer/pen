@@ -16,7 +16,7 @@
     // Tree
     parent?: RouteNode
     children: RouteNode[]
-    hasPrunedChildren?: true // true when files were found nested beneath this catch-all and dropped - must be last, nothing can validly nest there
+    hasPrunedChildren?: true // true when files were found nested beneath this catch-all and dropped
   }
 
   function createRouteNode(name: string, path: string): RouteNode {
