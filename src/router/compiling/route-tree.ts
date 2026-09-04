@@ -41,10 +41,8 @@ function findDefaultRouteNodeParent(routeNode: RouteNode): RouteNode {
   return undefined as never // unreachable - see guarantee above
 }
 
-/** Builds the route tree from a file list, then guarantees the root and every
- *  slot always have a `default` module to fall back to - intrinsic to what a
- *  complete route tree provides, not a fixup for anything `validateRouteTree`
- *  flags. */
+/** Builds the route tree from a file list, ensuring its root and slots always
+ *  have a `default` module as an inherent tree invariant. */
 export function createRouteTree(filePaths: string[]): RouteNode {
   const routeTree = createRouteNode('', createSegment(''), '')
   const routeFilePaths = filterRouteFiles(filePaths)
