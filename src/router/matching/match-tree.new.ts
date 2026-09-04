@@ -5,21 +5,16 @@ import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
   searchNode: SearchNode
-  subtrees?: Record<string, Match>   // each slot's own winning match - attached after the main walk resolves
+  subtrees?: Record<string, ResolvedMatchNode>   // each slot's own winning match - attached after the main walk resolves
   isTerminal?: true
   position?:
     | { type: 'static' | 'dynamic'; url: string; parent: MatchNode }
     | { type: 'catchall'; url: string[]; parent: MatchNode } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
 }
 
-export type Page = {
-  type: 'page' | 'default'
-  node: RouteNode
-}
-
-export type Match = {
-  node: MatchNode  // the winning chain - walk .position.parent to collect dynamic params
-  page: Page        // the accepting decision - which RouteNode, real page/catchall or default fallback
+/** A MatchNode resolved to its accepting decision - walk .position.parent to collect dynamic params. */
+export type ResolvedMatchNode = MatchNode & {
+  page: { type: 'page' | 'default'; node: RouteNode } // which RouteNode to render - a real page/catchall, or the default fallback
 }
 
 function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] {
@@ -50,7 +45,7 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
   return children
 }
 
-function createMatchPath(searchTree: SearchNode, url: string[]): Match {
+function createMatchPath(searchTree: SearchNode, url: string[]): ResolvedMatchNode {
   const root: MatchNode = { searchNode: searchTree }
   let winnerNode: MatchNode | undefined
   let bestStatic: MatchNode | undefined // most static-preferring failed branch seen so far
@@ -77,18 +72,21 @@ function createMatchPath(searchTree: SearchNode, url: string[]): Match {
       // else, try another branch in the parent (all children were visited but no winner)
     },
   })
-  if (winnerNode)
-    return { node: winnerNode, page: { type: 'page', node: winnerNode.searchNode.page! } }
-
-  const node = bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
-  return { node, page: { type: 'default', node: node.searchNode.default } }
+  if (winnerNode) {
+    const resolvedNode = winnerNode as ResolvedMatchNode
+    resolvedNode.page = { type: 'page', node: winnerNode.searchNode.page! }
+    return resolvedNode
+  }
+  const node = bestStatic! as ResolvedMatchNode // guaranteed since url or tree eventually exhausts (safe to assert)
+  node.page = { type: 'default', node: node.searchNode.default }
+  return node
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
-export function createMatchTree(searchTree: SearchNode, url: string[]): Match {
+export function createMatchTree(searchTree: SearchNode, url: string[]): ResolvedMatchNode {
   const match = createMatchPath(searchTree, url)
-  for (let node: MatchNode | undefined = match.node; node; node = node.position?.parent) {
+  for (let node: MatchNode | undefined = match; node; node = node.position?.parent) {
     if (!node.searchNode.slots) continue
 
     node.subtrees = dict()
