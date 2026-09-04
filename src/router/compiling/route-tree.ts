@@ -26,13 +26,9 @@ function createRouteNode(name: string, segment: Segment, path: string): RouteNod
   return routeNode
 }
 
-/** Visits every reachable route node, pruning descendants beneath catch-all routes. */
-export function forEachReachableRouteNode(root: RouteNode, visit: (routeNode: RouteNode) => void) {
-  traverse(root, {
-    visit,
-    expand: (routeNode) =>
-      routeNode.segment.type !== 'catchall' ? routeNode.children : [],
-  })
+/** Visits every route node. */
+export function forEach(root: RouteNode, visit: (routeNode: RouteNode) => void) {
+  traverse(root, { visit, expand: (routeNode) => routeNode.children })
 }
 
 /** Returns the next non-slot ancestor, or undefined at a slot boundary. */
@@ -71,7 +67,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
-  forEachReachableRouteNode(routeTree, (node) => {
+  forEach(routeTree, (node) => {
     if (!node.parent || node.segment.type === 'slot') // ensures a default fallback in each tree
       node.modules.default ??= DEFAULT_FALLBACK_PATH
     node.default = findDefaultRouteNodeParent(node)   // resolves the nearest default route in its ancestor chain
@@ -93,7 +89,7 @@ export function getRouteSource(routeNode: RouteNode): string {
 /** Collects every distinct module path referenced in the tree, sorted. */
 export function getRouteModulePaths(routeTree: RouteNode): string[] {
   const modules = new Set<string>()
-  forEachReachableRouteNode(routeTree, (routeNode) => {
+  forEach(routeTree, (routeNode) => {
     for (const modulePath of Object.values(routeNode.modules))
       modules.add(modulePath)
   })

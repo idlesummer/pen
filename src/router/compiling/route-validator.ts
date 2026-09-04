@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { traverse } from '@/lib/traverse'
 import { getRouteSource } from './route-tree'
-import { forEachReachableRouteNode, getSlotAncestor } from './route-tree'
+import { forEach, getSlotAncestor } from './route-tree'
 
 function findDuplicateParam(routeNode: RouteNode): string | undefined {
   const params = new Set<string>()
@@ -22,7 +22,7 @@ function findDuplicateParam(routeNode: RouteNode): string | undefined {
 export function validateRouteTree(root: RouteNode): CompileDiagnostic[] {
   const diagnostics: CompileDiagnostic[] = []
 
-  forEachReachableRouteNode(root, (routeNode) => {
+  forEach(root, (routeNode) => {
     const segmentType = routeNode.segment.type
 
     if (segmentType === 'malformed') {
