@@ -64,7 +64,7 @@
           const segment = createSegment(moduleName)
           if (segment.type === 'slot') {
             const slotNode = getSlotNode(parentRouteNode)
-            if (slotNode)  {
+            if (slotNode) {
               slotNode.hasPrunedChildren = true
               return
             }
