@@ -90,10 +90,7 @@ export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modules)[0] ?? routeNode.path
 }
 
-/** Collects every distinct module path referenced anywhere in the tree, sorted.
- *  Real files are already unique by construction (`createRouteTree` assigns each
- *  to exactly one node), but the `default` sentinel can legitimately repeat
- *  across the root and every slot, so duplicates are collapsed here. */
+/** Collects every distinct module path referenced in the tree, sorted. */
 export function getRouteModulePaths(routeTree: RouteNode): string[] {
   const modulePaths = new Set<string>()
   traverse(routeTree, {
