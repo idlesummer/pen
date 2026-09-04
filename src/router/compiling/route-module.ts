@@ -1,7 +1,10 @@
 import { basename } from 'node:path'
 
-export type RouteModuleType =
+type RouteModuleType =
   typeof ROUTE_MODULE_TYPES extends Set<infer T> ? T : never
+
+export type RouteModulePaths =
+  Partial<Record<RouteModuleType, string>>
 
 const ROUTE_MODULE_TYPES =
   new Set(['page', 'layout', 'loading', 'error', 'default'] as const)

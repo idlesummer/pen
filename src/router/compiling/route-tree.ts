@@ -1,12 +1,11 @@
   import type { Segment } from './segment'
-  import type { RouteModuleType } from './route-module'
+  import type { RouteModulePaths } from './route-module'
   import { sep } from 'node:path'
   import { treeify } from '@/lib/treeify'
   import { traverse } from '@/lib/traverse'
   import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
   import { createSegment, isPrivate } from './segment'
 
-  export type RouteModulePaths = Partial<Record<RouteModuleType, string>>
   export type RouteNode = {
     name: string
     segment: Segment
