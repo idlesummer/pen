@@ -59,7 +59,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       const part = parts[index]!    // always defined since `create` only yields existing indices.
       if (index === parts.length-1) // Create the route module if file is last
         parentRouteNode.modules[getRouteModuleType(part)] = filePath
-      else if (parentRouteNode.segment.type === 'catchall') // catch-all must be terminal, drop anything nested beneath it rather
+      else if (parentRouteNode.segment.type === 'catchall') // catch-all must be terminal, drop nesteed routes
         parentRouteNode.hasPrunedChildren = true
       else if (!isPrivate(part)) {
         const path = parentRouteNode.path ? `${parentRouteNode.path}/${part}` : part
