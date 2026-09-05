@@ -25,10 +25,9 @@ function getParamTable(matchNode: MatchNode): ParamTable {
   const params: ParamTable = dict()
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
     const position = node.position
-    if (position && position.type !== 'static') {
-      const paramName = node.searchNode.anchor.segment.value
-      params[paramName] = position.url
-    }
+    if (!position || position.type === 'static') continue // if root or static, skip
+    const paramName = node.searchNode.anchor.segment.value
+    params[paramName] = position.url
   }
   return params
 }
