@@ -5,11 +5,12 @@ import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
   searchNode: SearchNode
+  parent?: MatchNode   // tree structure - which node led here, independent of how
   subtrees?: Record<string, MatchNode>   // each slot's own winning match - attached after the main walk resolves
   isTerminal?: true
   position?:
-    | { type: 'static' | 'dynamic'; url: string; parent: MatchNode }
-    | { type: 'catchall'; url: string[]; parent: MatchNode } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
+    | { type: 'static' | 'dynamic'; url: string }
+    | { type: 'catchall'; url: string[] } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
   page?: RouteNode // the accepting page/catchall route, if this resolved node is a real match; absent means render searchNode.default instead - only ever set on the node a walk resolves to, not on its ancestors
 }
 
@@ -24,18 +25,21 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
   if (statics?.[segment])
     children.push({
       searchNode: statics[segment],
-      position: { type: 'static', url: segment, parent },
+      parent,
+      position: { type: 'static', url: segment },
     })
   if (dynamic)
     children.push({
       searchNode: dynamic,
-      position: { type: 'dynamic', url: segment, parent },
+      parent,
+      position: { type: 'dynamic', url: segment },
     })
   if (catchall) {
     const tail = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
     children.push({
       searchNode: catchall,
-      position: { type: 'catchall', url: tail, parent },
+      parent,
+      position: { type: 'catchall', url: tail },
     })
   }
   return children
@@ -79,7 +83,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
  *  match paths, and attaches them to the corresponding node. */
 export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
   const match = createMatchPath(searchTree, url)
-  for (let node: MatchNode | undefined = match; node; node = node.position?.parent) {
+  for (let node: MatchNode | undefined = match; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
     node.subtrees = dict()
