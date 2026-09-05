@@ -10,7 +10,7 @@
     name: string
     segment: Segment
     path: string
-    modules: RouteModulePaths
+    modulePaths: RouteModulePaths
     // Tree
     parent?: RouteNode
     children: RouteNode[]
@@ -18,7 +18,7 @@
 
   function createRouteNode(name: string, path: string): RouteNode {
     const segment = createSegment(name)
-    return { name, segment, path, modules: {}, children: [] }
+    return { name, segment, path, modulePaths: {}, children: [] }
   }
 
   /** Visits every route node. */
@@ -35,7 +35,7 @@
   /** Finds the nearest ancestor (or self) with a `default` module. */
   export function findDefaultAncestor(routeNode: RouteNode): RouteNode {
     for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
-      if (node.modules.default) return node
+      if (node.modulePaths.default) return node
     return undefined as never // unreachable, see guarantee in createRouteTree
   }
 
@@ -49,7 +49,7 @@
       create: (parentRouteNode, { index, parts, path: filePath }) => {
         const moduleName = parts[index]!    // always defined since `create` only yields existing indices.
         if (index === parts.length-1)       // Create the route module if file is last
-          parentRouteNode.modules[getRouteModuleType(moduleName)] = filePath
+          parentRouteNode.modulePaths[getRouteModuleType(moduleName)] = filePath
 
         else if (!isPrivate(moduleName)) {
           const path = parentRouteNode.path ? `${parentRouteNode.path}/${moduleName}` : moduleName
@@ -63,21 +63,21 @@
     })
     forEach(routeTree, (node) => {
       if (!node.parent || node.segment.type === 'slot') // ensures a default fallback in each tree
-        node.modules.default ??= DEFAULT_FALLBACK_PATH
+        node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
     })
     return routeTree
   }
 
   /** Gets the route's source file or falls back to its route path if no module exists. */
   export function getRouteSource(routeNode: RouteNode): string {
-    return Object.values(routeNode.modules)[0] ?? routeNode.path
+    return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
   }
 
   /** Collects every distinct module path referenced in the tree, sorted. */
   export function getRouteModulePaths(routeTree: RouteNode): string[] {
     const modules = new Set<string>()
     forEach(routeTree, (routeNode) => {
-      for (const modulePath of Object.values(routeNode.modules))
+      for (const modulePath of Object.values(routeNode.modulePaths))
         modules.add(modulePath)
     })
     return [...modules].sort()
