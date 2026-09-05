@@ -39,6 +39,12 @@
     return undefined as never // unreachable, see guarantee in createRouteTree
   }
 
+  /** Visits routeNode and each non-slot ancestor above it, root-ward. */
+  export function forEachAncestor(routeNode: RouteNode, visit: (routeNode: RouteNode) => void) {
+    for (let node: RouteNode | undefined = routeNode; node; node = getNonSlotParent(node))
+      visit(node)
+  }
+
   /** Builds the route tree from a file list, ensuring its root and slots always
    *  have a `default` module as an inherent tree invariant. */
   export function createRouteTree(filePaths: string[]): RouteNode {
