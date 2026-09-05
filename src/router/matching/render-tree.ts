@@ -1,8 +1,7 @@
 import type { RouteModulePaths } from '../compiling/route-module'
-import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode } from './match-tree'
-import { getNonSlotParent } from '../compiling/route-tree'
+import { forEachAncestor } from '../compiling/route-tree'
 import { dict } from '@/lib/dict'
 import { createMatchTree } from './match-tree'
 
@@ -55,8 +54,9 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
   const contentNode = matchNode.page ?? matchNode.searchNode.default
   let renderNode: RenderNode = renderLeaf
 
-  for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
+  forEachAncestor(contentNode, (node) => {
     renderNode = wrapRenderNode(renderNode, node.modulePaths)
+  })
   return renderNode
 }
 
@@ -75,7 +75,7 @@ function createMainRenderNode(matchNode: MatchNode): RenderNode {
   let childMatchNode: MatchNode | undefined = matchNode
   let childRenderNode = createRenderLeaf(matchNode, {})  // child since traversal is bottom up
 
-  for (let routeNode: RouteNode | undefined = contentNode; routeNode; routeNode = getNonSlotParent(routeNode)) {
+  forEachAncestor(contentNode, (routeNode) => {
     if (childMatchNode?.searchNode.anchor !== routeNode)
       childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths)
     else {
@@ -83,7 +83,7 @@ function createMainRenderNode(matchNode: MatchNode): RenderNode {
       childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, slots)
       childMatchNode = childMatchNode.parent  // update matchNode if an anchor is found
     }
-  }
+  })
   return childRenderNode // at this point it becomes the root render node
 }
 
