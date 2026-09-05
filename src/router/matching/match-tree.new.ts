@@ -46,14 +46,14 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
 }
 
 function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
-  const root: MatchNode = { searchNode: searchTree }
+  const matchNodeRoot: MatchNode = { searchNode: searchTree }
   let winnerNode: MatchNode | undefined
   let bestStatic: MatchNode | undefined // most static-preferring failed branch seen so far
 
-  traverse(root, {   // Performs a regular MatchNode traversal restricted to static/dynamic/catchall
+  traverse(matchNodeRoot, {
     expand: (matchNode) => {
       const children = createMatchNodeChildren(matchNode, url)
-      if (!children.length) matchNode.isTerminal = true
+      if (!children.length) matchNode.isTerminal = true // set to be read by leave
       return children
     },
     leave: (matchNode) => {
