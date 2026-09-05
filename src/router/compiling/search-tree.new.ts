@@ -62,7 +62,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 
   traverse(routeTree, {
     visit: (routeNode) => { // visit adds its accepting-route data to it.
-      if (!routeNode.modules.page) return
+      if (!routeNode.modulePaths.page) return
       const searchNode = searchNodeMap.get(routeNode)!
       searchNode.page ??= routeNode;
       (searchNode.validation!.pages ??= []).push(routeNode)
