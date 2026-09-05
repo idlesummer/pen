@@ -1,8 +1,8 @@
 import type { RouteNode } from './route-tree'
-import type { SearchNode } from './search-tree.new'
+import type { SearchNode } from './search-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { getRouteSource } from './route-tree'
-import { forEach } from './search-tree.new'
+import { forEach } from './search-tree'
 
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
   if (!routeNodes) return

@@ -3,90 +3,83 @@ import type { SearchNode } from '../compiling/search-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 
-export type MatchContent = {
-  type: 'page' | 'default'  // content means page/catchall (acceptingNode) or default
-  node: RouteNode           // page/catchall accepted by the searchNode, or nearest default ancestor if none was found
-  catchallParams?: string[] // captured url tail of this node's catchall child route; only set when type is 'page'
-}
-
 export type MatchNode = {
   searchNode: SearchNode
-  parent?: MatchNode
-  subtrees?: Record<string, MatchTree>  // each slot's own winning match
-  // Match metadata
-  dynamicParam?: string                 // captured url value for dynamic node
-  isTerminal?: true                     // set when match node has no children
-  content?: MatchContent                // values needed for render leaf (only terminal nodes has this)
+  // Runtime url metadata
+  subtrees?: Record<string, MatchNode>  // winning match for each slot subtree
+  position?: { type: 'static' | 'dynamic'; url: string } | { type: 'catchall'; url: string[] }
+  page?: RouteNode    // matched accepting page/catchall; otherwise render searchNode.default
+  // Traversal
+  parent?: MatchNode  // tree structure - which node led here, independent of how
+  isTerminal?: true   // internal signal to check if match node is terminal
 }
 
-export type MatchTree =
-  MatchNode & Required<Pick<MatchNode, 'content'>>
-
-function createMatchNodeChildren(parent: MatchNode, nextUrlPart?: string): MatchNode[] {
-  if (!nextUrlPart) return [] // check if URL is exhausted by checking whether the next segment exists
+function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] {
   const parentSearchNode = parent.searchNode
-  const matchNodeChildren: MatchNode[] = []
-  const staticChild = parentSearchNode.statics?.[nextUrlPart]  // query url part in next node children
-  const dynamicChild = parentSearchNode.dynamic
+  const segment = url[parentSearchNode.urlDepth+1] // get next url segment
+  if (!segment) return [] // url is exhausted - nothing left to consume, so no children
 
-  if (staticChild)  matchNodeChildren.push({ searchNode: staticChild, parent })
-  if (dynamicChild) matchNodeChildren.push({ searchNode: dynamicChild, dynamicParam: nextUrlPart, parent })
-  return matchNodeChildren
+  const { statics, dynamic, catchall } = parentSearchNode
+  const children: MatchNode[] = []
+
+  if (statics?.[segment]) {
+    const position = { type: 'static', url: segment } as const
+    children.push({ searchNode: statics[segment], parent, position })
+  }
+  if (dynamic) {
+    const position = { type: 'dynamic', url: segment } as const
+    children.push({ searchNode: dynamic, parent, position })
+  }
+  if (catchall) {
+    const segments = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
+    const position = { type: 'catchall', url: segments } as const
+    children.push({ searchNode: catchall, parent, position })
+  }
+  return children
 }
 
-function createDefaultContent(matchNode: MatchNode): MatchContent {
-  return { type: 'default', node: matchNode.searchNode.default }
-}
-
-/** Creates a complete match path from the root to the matched node and returns that match node. */
-function createMatchPath(searchTree: SearchNode, url: string[]): MatchTree {
-  const matchTree: MatchNode = { searchNode: searchTree }
-  let bestMatch: MatchNode | undefined
+function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
+  const matchNodeRoot: MatchNode = { searchNode: searchTree }
+  let winnerNode: MatchNode | undefined
   let bestStatic: MatchNode | undefined // most static-preferring failed branch seen so far
 
-  traverse(matchTree, {   // Performs a regular MatchNode traversal restricted to static and dynamic
+  traverse(matchNodeRoot, {
     expand: (matchNode) => {
-      const searchNode = matchNode.searchNode
-      const nextUrlPart = url[searchNode.urlDepth+1]
-      const children = createMatchNodeChildren(matchNode, nextUrlPart)
-      if (!children.length) matchNode.isTerminal = true
+      const children = createMatchNodeChildren(matchNode, url)
+      if (!children.length)
+        matchNode.isTerminal = true // set to be read by leave
       return children
     },
     leave: (matchNode) => {
-      const searchNode = matchNode.searchNode
-      const nextUrlPart = url[searchNode.urlDepth+1] // if urlPart is undefined it means it's exhausted
-      const acceptingNode = nextUrlPart ? searchNode.catchall : searchNode.page
+      const { searchNode, position } = matchNode
+      const isExhausted = !url[searchNode.urlDepth+1]
+      const isAccepting = isExhausted || position?.type === 'catchall' // check for exhaustion or catchall
 
-      // handle winning match if an accepting node exists
-      if (acceptingNode) {
-        const catchallParams = nextUrlPart ? url.slice(searchNode.urlDepth+1) : undefined
-        matchNode.content = { type: 'page', node: acceptingNode, catchallParams }
-        bestMatch = matchNode
+      if (isAccepting && searchNode.page) {
+        matchNode.page = searchNode.page  // record the winning page
+        winnerNode = matchNode
         return true
       }
-      // store match node as candidate if terminal (farthest possible match)
-      else if (matchNode.isTerminal) {
-        if (!bestStatic || matchNode.searchNode.staticness > bestStatic.searchNode.staticness)
+      else if (matchNode.isTerminal) {  // store as candidate if terminal (farthest possible match)
+        if (!bestStatic || searchNode.staticness > bestStatic.searchNode.staticness)
           bestStatic = matchNode
       }
       // else, try another branch in the parent (all children were visited but no winner)
     },
   })
-  const matchNode = bestMatch ?? bestStatic!  // guaranteed since url or tree eventually exhausts (safe to assert)
-  matchNode.content ??= createDefaultContent(matchNode) // populate default node if no true match was found
-  return matchNode as MatchTree // safe since every root - main or slot - guarantees a default
+  return winnerNode ?? bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
  *  match paths, and attaches them to the corresponding node. */
-export function createMatchTree(searchTree: SearchNode, url: string[]): MatchTree {
-  const mainMatchNode = createMatchPath(searchTree, url)
-  for (let node: MatchNode | undefined = mainMatchNode; node; node = node.parent) {
+export function createMatchTree(searchTree: SearchNode, url: string[]): MatchNode {
+  const match = createMatchPath(searchTree, url)
+  for (let node: MatchNode | undefined = match; node; node = node.parent) {
     if (!node.searchNode.slots) continue
 
     node.subtrees = dict()
-    for (const [slotName, searchSubtree] of Object.entries(node.searchNode.slots))
-      node.subtrees[slotName] = createMatchPath(searchSubtree, url)
+    for (const [slotName, slotSearchTree] of Object.entries(node.searchNode.slots))
+      node.subtrees[slotName] = createMatchPath(slotSearchTree, url)
   }
-  return mainMatchNode
+  return match
 }
