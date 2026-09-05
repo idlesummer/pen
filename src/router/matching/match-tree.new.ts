@@ -5,13 +5,13 @@ import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
   searchNode: SearchNode
+  // Metadata
+  subtrees?: Record<string, MatchNode>  // winning match for each slot subtree
+  position?: { type: 'static' | 'dynamic'; url: string } | { type: 'catchall'; url: string[] }
+  page?: RouteNode // matched accepting page/catchall; otherwise render searchNode.default
+  // Tree
   parent?: MatchNode   // tree structure - which node led here, independent of how
-  subtrees?: Record<string, MatchNode>   // each slot's own winning match - attached after the main walk resolves
   isTerminal?: true
-  position?:
-    | { type: 'static' | 'dynamic'; url: string }
-    | { type: 'catchall'; url: string[] } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
-  page?: RouteNode // the accepting page/catchall route, if this resolved node is a real match; absent means render searchNode.default instead - only ever set on the node a walk resolves to, not on its ancestors
 }
 
 function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] {
