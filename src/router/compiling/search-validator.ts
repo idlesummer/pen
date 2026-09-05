@@ -1,8 +1,8 @@
 import type { RouteNode } from './route-tree'
-import type { SearchNode } from './search-tree'
+import type { SearchNode } from './search-tree.new'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { getRouteSource } from './route-tree'
-import { forEach } from './search-tree'
+import { forEach } from './search-tree.new'
 
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
   if (!routeNodes) return
@@ -35,13 +35,13 @@ export function validateSearchTree(searchTree: SearchNode): CompileDiagnostic[] 
       })
     }
     const dynamicRoutes = validation?.dynamics
-    if (dynamicRoutes && dynamicRoutes.size > 1) {
-      const params = [...dynamicRoutes.keys()]
+    const params = dynamicRoutes && Object.keys(dynamicRoutes)
+    if (params && params.length > 1) {
       diagnostics.push({
         rule: 'param-name-clash',
         severity: 'error',
         message: `two routes disagree on what to call the same URL parameter: ${params.join(' vs ')}`,
-        files: [...dynamicRoutes.values()].map(getRouteSource),
+        files: Object.values(dynamicRoutes).map(getRouteSource),
       })
     }
   })

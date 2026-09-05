@@ -1,9 +1,9 @@
 import type { RouteNode } from './compiling/route-tree'
-import type { SearchNode } from './compiling/search-tree'
+import type { SearchNode } from './compiling/search-tree.new'
 import type { CompileDiagnostic } from './compiling/compile-diagnostic'
 import { createRouteTree } from './compiling/route-tree'
 import { sanitizeRouteTree, validateRouteTree } from './compiling/route-validator'
-import { createSearchTree } from './compiling/search-tree'
+import { createSearchTree } from './compiling/search-tree.new'
 import { sanitizeSearchTree, validateSearchTree } from './compiling/search-validator'
 
 /** Compiles file paths into route and search trees, validating and sanitizing
