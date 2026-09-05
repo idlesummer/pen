@@ -56,7 +56,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const isAccepting = isExhausted || position?.type === 'catchall' // check for exhaustion or catchall
 
       if (isAccepting && searchNode.page) {
-        matchNode.page = searchNode.page
+        matchNode.page = searchNode.page  // record the winning page
         winnerNode = matchNode
         return true
       }
