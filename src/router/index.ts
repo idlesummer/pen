@@ -1,7 +1,7 @@
 export type { RouteNode } from './compiling/route-tree'
-export type { SearchNode } from './compiling/search-tree.new'
+export type { SearchNode } from './compiling/search-tree'
 export type { CompileDiagnostic } from './compiling/compile-diagnostic'
-export type { RenderNode } from './matching/render-tree.new'
+export type { RenderNode } from './matching/render-tree'
 
 export { getRouteModulePaths } from './compiling/route-tree'
 export { DEFAULT_FALLBACK_PATH } from './compiling/route-module'

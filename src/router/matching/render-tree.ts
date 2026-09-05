@@ -1,7 +1,7 @@
 import type { RouteModulePaths } from '../compiling/route-module'
 import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
-import type { MatchNode, MatchTree } from './match-tree'
+import type { MatchNode } from './match-tree'
 import { getNonSlotParent } from '../compiling/route-tree'
 import { dict } from '@/lib/dict'
 import { createMatchTree } from './match-tree'
@@ -21,26 +21,25 @@ export type RenderNode = {
   }
 }
 
+/** Collects every dynamic/catchall param captured along the way to `matchNode`,
+ *  walking up via `.parent`. Static positions contribute nothing. */
 function getParamTable(matchNode: MatchNode): ParamTable {
   const params: ParamTable = dict()
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
-    if (!node.dynamicParam) continue
-    const dynamicNode = node.searchNode.anchor
-    const paramName = dynamicNode.segment.value
-    params[paramName] = node.dynamicParam
+    const position = node.position
+    if (position && position.type !== 'static') {
+      const paramName = node.searchNode.anchor.segment.value
+      params[paramName] = position.url
+    }
   }
   return params
 }
 
-function createRenderLeaf(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
-  const { type, node: contentNode, catchallParams } = matchTree.content
-  const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchTree))
-
-  if (catchallParams) {
-    const catchallName = contentNode.segment.value
-    params[catchallName] = catchallParams
-  }
-  const path = contentNode.modulePaths[type]!
+function createRenderLeaf(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
+  const contentNode = matchNode.page ?? matchNode.searchNode.default
+  const moduleType = matchNode.page ? 'page' : 'default'
+  const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchNode))
+  const path = contentNode.modulePaths[moduleType]!
   return { slots: dict(), content: { path, params } }
 }
 
@@ -54,9 +53,9 @@ function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePat
   return { layout, loading, error, default: def, slots }
 }
 
-function createSlotRenderNode(matchTree: MatchTree, mainParams: ParamTable): RenderNode {
-  const renderLeaf = createRenderLeaf(matchTree, mainParams)
-  const contentNode = matchTree.content.node
+function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
+  const renderLeaf = createRenderLeaf(matchNode, mainParams)
+  const contentNode = matchNode.page ?? matchNode.searchNode.default
   let renderNode: RenderNode = renderLeaf
 
   for (let node: RouteNode | undefined = contentNode; node; node = getNonSlotParent(node))
@@ -74,11 +73,11 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-function createMainRenderNode(matchTree: MatchTree): RenderNode {
-  const renderLeaf = createRenderLeaf(matchTree, {})
-  const contentNode = matchTree.content.node
+function createMainRenderNode(matchNode: MatchNode): RenderNode {
+  const renderLeaf = createRenderLeaf(matchNode, {})
+  const contentNode = matchNode.page ?? matchNode.searchNode.default
   let childRenderNode: RenderNode = renderLeaf  // child since traversal is bottom up
-  let childMatchNode: MatchNode | undefined = matchTree
+  let childMatchNode: MatchNode | undefined = matchNode
 
   for (let routeNode: RouteNode | undefined = contentNode; routeNode; routeNode = getNonSlotParent(routeNode)) {
     if (childMatchNode?.searchNode.anchor !== routeNode)
@@ -95,6 +94,6 @@ function createMainRenderNode(matchTree: MatchTree): RenderNode {
 /** Creates the render tree for a URL - never undefined, since the root's
  *  guaranteed default ensures the main path always resolves to something. */
 export function createRenderTree(url: string[], searchTree: SearchNode): RenderNode {
-  const matchTree = createMatchTree(searchTree, url)
-  return createMainRenderNode(matchTree)
+  const matchNode = createMatchTree(searchTree, url)
+  return createMainRenderNode(matchNode)
 }
