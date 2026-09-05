@@ -21,8 +21,6 @@ export type RenderNode = {
   }
 }
 
-/** Collects every dynamic/catchall param captured along the way to `matchNode`,
- *  walking up via `.parent`. Static positions contribute nothing. */
 function getParamTable(matchNode: MatchNode): ParamTable {
   const params: ParamTable = dict()
   for (let node: MatchNode | undefined = matchNode; node; node = node.parent) {
