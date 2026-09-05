@@ -10,7 +10,7 @@ export type MatchNode = {
   position?:
     | { type: 'static' | 'dynamic'; url: string; parent: MatchNode }
     | { type: 'catchall'; url: string[]; parent: MatchNode } // captured at birth - the catchall's own SearchNode makes this knowable immediately, no leave-time wait needed
-  page?: { type: 'page' | 'default'; node: RouteNode } // which RouteNode to render - a real page/catchall, or the default fallback; only set on the node a walk resolves to, not on its ancestors
+  page?: RouteNode // the accepting page/catchall route, if this resolved node is a real match; absent means render searchNode.default instead - only ever set on the node a walk resolves to, not on its ancestors
 }
 
 function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] {
@@ -69,12 +69,10 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
     },
   })
   if (winnerNode) {
-    winnerNode.page = { type: 'page', node: winnerNode.searchNode.page! }
+    winnerNode.page = winnerNode.searchNode.page!
     return winnerNode
   }
-  const node = bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
-  node.page = { type: 'default', node: node.searchNode.default }
-  return node
+  return bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert) - .page left unset, meaning "use searchNode.default"
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
