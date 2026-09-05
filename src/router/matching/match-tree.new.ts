@@ -5,13 +5,13 @@ import { traverse } from '@/lib/traverse'
 
 export type MatchNode = {
   searchNode: SearchNode
-  // Metadata
+  // Runtime url metadata
   subtrees?: Record<string, MatchNode>  // winning match for each slot subtree
   position?: { type: 'static' | 'dynamic'; url: string } | { type: 'catchall'; url: string[] }
-  page?: RouteNode // matched accepting page/catchall; otherwise render searchNode.default
+  page?: RouteNode    // matched accepting page/catchall; otherwise render searchNode.default
   // Tree
-  parent?: MatchNode   // tree structure - which node led here, independent of how
-  isTerminal?: true
+  parent?: MatchNode  // tree structure - which node led here, independent of how
+  isTerminal?: true   // internal signal to check if match node is terminal
 }
 
 function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] {
@@ -35,11 +35,11 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
       position: { type: 'dynamic', url: segment },
     })
   if (catchall) {
-    const tail = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
+    const segments = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
     children.push({
       searchNode: catchall,
       parent,
-      position: { type: 'catchall', url: tail },
+      position: { type: 'catchall', url: segments },
     })
   }
   return children
@@ -62,6 +62,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       const isAccepting = isExhausted || position?.type === 'catchall' // check for exhaustion or catchall
 
       if (isAccepting && searchNode.page) {
+        matchNode.page = searchNode.page
         winnerNode = matchNode
         return true
       }
@@ -72,11 +73,7 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
       // else, try another branch in the parent (all children were visited but no winner)
     },
   })
-  if (winnerNode) {
-    winnerNode.page = winnerNode.searchNode.page!
-    return winnerNode
-  }
-  return bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert) - .page left unset, meaning "use searchNode.default"
+  return winnerNode ?? bestStatic! // guaranteed since url or tree eventually exhausts (safe to assert)
 }
 
 /** Walks up the winning path, finds slots on each node, creates their
