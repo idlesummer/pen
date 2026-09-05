@@ -23,24 +23,12 @@ function createMatchNodeChildren(parent: MatchNode, url: string[]): MatchNode[] 
   const children: MatchNode[] = []
 
   if (statics?.[segment])
-    children.push({
-      searchNode: statics[segment],
-      parent,
-      position: { type: 'static', url: segment },
-    })
+    children.push({ searchNode: statics[segment], parent, position: { type: 'static', url: segment } })
   if (dynamic)
-    children.push({
-      searchNode: dynamic,
-      parent,
-      position: { type: 'dynamic', url: segment },
-    })
+    children.push({ searchNode: dynamic, parent, position: { type: 'dynamic', url: segment } })
   if (catchall) {
     const segments = url.slice(parentSearchNode.urlDepth+1) // always non-empty since segment is defined here
-    children.push({
-      searchNode: catchall,
-      parent,
-      position: { type: 'catchall', url: segments },
-    })
+    children.push({ searchNode: catchall, parent, position: { type: 'catchall', url: segments } })
   }
   return children
 }
