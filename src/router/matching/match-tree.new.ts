@@ -9,7 +9,7 @@ export type MatchNode = {
   subtrees?: Record<string, MatchNode>  // winning match for each slot subtree
   position?: { type: 'static' | 'dynamic'; url: string } | { type: 'catchall'; url: string[] }
   page?: RouteNode    // matched accepting page/catchall; otherwise render searchNode.default
-  // Tree
+  // Traversal
   parent?: MatchNode  // tree structure - which node led here, independent of how
   isTerminal?: true   // internal signal to check if match node is terminal
 }
