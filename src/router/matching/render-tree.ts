@@ -76,7 +76,7 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 function createMainRenderNode(matchNode: MatchNode): RenderNode {
   const renderLeaf = createRenderLeaf(matchNode, {})
   const contentNode = matchNode.page ?? matchNode.searchNode.default
-  let childRenderNode: RenderNode = renderLeaf  // child since traversal is bottom up
+  let childRenderNode = renderLeaf  // child since traversal is bottom up
   let childMatchNode: MatchNode | undefined = matchNode
 
   for (let routeNode: RouteNode | undefined = contentNode; routeNode; routeNode = getNonSlotParent(routeNode)) {
