@@ -1,6 +1,6 @@
-import type { SearchNode } from './compiling/search-tree'
-import type { RenderNode } from './matching/render-tree'
-import { createRenderTree } from './matching/render-tree'
+import type { SearchNode } from './compiling/search-tree.new'
+import type { RenderNode } from './matching/render-tree.new'
+import { createRenderTree } from './matching/render-tree.new'
 import { normalizeUrl } from './matching/url-path'
 
 export type Matcher =
