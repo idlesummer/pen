@@ -46,7 +46,8 @@ function createMatchPath(searchTree: SearchNode, url: string[]): MatchNode {
   traverse(matchNodeRoot, {
     expand: (matchNode) => {
       const children = createMatchNodeChildren(matchNode, url)
-      if (!children.length) matchNode.isTerminal = true // set to be read by leave
+      if (!children.length)
+        matchNode.isTerminal = true // set to be read by leave
       return children
     },
     leave: (matchNode) => {
