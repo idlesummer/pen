@@ -52,8 +52,6 @@ function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePat
   return { layout, loading, error, default: def, slots, params: layout ? params : undefined }
 }
 
-/** Walks a slot's own ancestors - never attaches slots of its own, since
- *  nested slots are structurally disallowed (no cycle back into wrapAncestors). */
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
   const contentNode = getContentNode(matchNode)
   let currMatchNode: MatchNode | undefined = matchNode
