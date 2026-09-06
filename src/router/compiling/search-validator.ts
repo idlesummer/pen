@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { TrieNode } from './route-trie'
+import type { SearchNode } from './search-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { getRouteSource } from './route-tree'
 
@@ -10,7 +10,7 @@ function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefin
 }
 
 /** Runs relational validation between routes sharing the same URL position. */
-export function validateRouteTrie(nodes: TrieNode[]): CompileDiagnostic[] {
+export function validateSearchTree(nodes: SearchNode[]): CompileDiagnostic[] {
   const diagnostics: CompileDiagnostic[] = []
 
   for (const node of nodes) {
@@ -47,10 +47,10 @@ export function validateRouteTrie(nodes: TrieNode[]): CompileDiagnostic[] {
   return diagnostics
 }
 
-/** Drops each position's validation candidates now that validateRouteTrie has
- *  had its look. This is also what releases the last references from the trie
+/** Drops each position's validation candidates now that validateSearchTree has
+ *  had its look. This is also what releases the last references from the search tree
  *  into the route tree, so the route tree can be collected. */
-export function sanitizeRouteTrie(nodes: TrieNode[]) {
+export function sanitizeSearchTree(nodes: SearchNode[]) {
   for (const node of nodes)
     node.validation = undefined // cheaper than delete - avoids a hidden-class transition
 }

@@ -2,7 +2,7 @@
 
 ## anchor
 
-static/dynamic/catchall/slot folders each open their own position (a `TrieNode`); group/malformed folders are transparent and fold into the position around them. The folder that opens a position is its *anchor*.
+static/dynamic/catchall/slot folders each open their own position (a `SearchNode`); group/malformed folders are transparent and fold into the position around them. The folder that opens a position is its *anchor*.
 
 ```
   blog/                     <- anchor (static)
@@ -35,11 +35,11 @@ A catch-all is not transparent: `docs/[...slug]/` opens a position of its own, o
 
 Three stages, each reading only the one before it:
 
-- **RouteTree** (`compiling/route-tree.ts`) - what the filesystem actually defines. Validated, then used to build the trie, then never read again.
-- **RouteTrie** (`compiling/route-trie.ts`) - what URLs are possible, plus, for every position, the complete wrapper chain to render there. Every decision that does not depend on the URL is settled here.
+- **RouteTree** (`compiling/route-tree.ts`) - what the filesystem actually defines. Validated, then used to build the search tree, then never read again.
+- **SearchTree** (`compiling/search-tree.ts`) - what URLs are possible, plus, for every position, the complete wrapper chain to render there. Every decision that does not depend on the URL is settled here.
 - **MatchPath / RenderPlan** (`matching/`) - which position won for this URL, and the flat list of layers to render around it.
 
-The trie holds no reference back into the route tree, so the route tree is collectable once compilation ends - and a lint rule keeps `matching/` from importing it. That boundary is what keeps a navigation from re-deriving, per keystroke, a folder-to-URL mapping that never changes.
+The search tree holds no reference back into the route tree, so the route tree is collectable once compilation ends - and a lint rule keeps `matching/` from importing it. That boundary is what keeps a navigation from re-deriving, per keystroke, a folder-to-URL mapping that never changes.
 
 ## default
 

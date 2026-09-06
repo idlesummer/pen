@@ -53,7 +53,7 @@ export default defineConfig(
       'no-restricted-imports': ['error', {
         patterns: [{
           group: ['**/compiling/route-tree', '**/compiling/segment', '**/compiling/route-module'],
-          message: 'matching/ must not read the route tree - everything it needs belongs on the trie, resolved at compile time',
+          message: 'matching/ must not read the route tree - everything it needs belongs on the search tree, resolved at compile time',
         }],
       }],
     },

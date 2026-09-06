@@ -1,5 +1,5 @@
-import type { TrieNode } from '../compiling/route-trie'
-import type { Endpoint } from '../compiling/route-trie'
+import type { SearchNode } from '../compiling/search-tree'
+import type { Endpoint } from '../compiling/search-tree'
 import { dict } from '@/lib/dict'
 
 export type Params = Record<string, string | string[]>
@@ -7,18 +7,18 @@ export type Params = Record<string, string | string[]>
 /** One position on the winning path, with the params visible AT that position
  *  - bound on the way down, never re-derived by walking back up. */
 export type Step = {
-  node: TrieNode
+  node: SearchNode
   params: Params
 }
 
 export type MatchPath = {
-  steps: Step[]      // root-ward to leaf-ward, index === TrieNode.depth
+  steps: Step[]      // root-ward to leaf-ward, index === SearchNode.depth
   endpoint: Endpoint // the page that accepted, or the fallback for where we stopped
 }
 
 const NO_PARAMS: Params = dict()
 
-function bindParams(params: Params, node: TrieNode, url: string[]): Params {
+function bindParams(params: Params, node: SearchNode, url: string[]): Params {
   if (!node.param) return params
   const value = node.isCatchall ? url.slice(node.urlDepth) : url[node.urlDepth]!
   const bound = Object.assign(dict<string | string[]>(), params)
@@ -26,7 +26,7 @@ function bindParams(params: Params, node: TrieNode, url: string[]): Params {
   return bound
 }
 
-/** Matches a URL against a trie, returning the winning path and what to
+/** Matches a URL against the search tree, returning the winning path and what to
  *  render at the end of it.
  *
  *  The walk carries its own path on the call stack, so a branch that loses
@@ -37,12 +37,12 @@ function bindParams(params: Params, node: TrieNode, url: string[]): Params {
  *
  *  `base` seeds the params, so a slot's own match path inherits the params of
  *  the position that declares it - a slot under `[id]` sees `id` throughout. */
-export function matchUrl(root: TrieNode, url: string[], base: Params = NO_PARAMS): MatchPath {
+export function matchUrl(root: SearchNode, url: string[], base: Params = NO_PARAMS): MatchPath {
   const steps: Step[] = []
   let best: Step[] | undefined
   let bestStaticness = 0
 
-  function descend(node: TrieNode, params: Params): boolean {
+  function descend(node: SearchNode, params: Params): boolean {
     steps.push({ node, params })
     const segment = url[node.urlDepth + 1]
     let hasChildren = false

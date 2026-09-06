@@ -1,4 +1,4 @@
-import type { Frame, TrieNode } from '../compiling/route-trie'
+import type { Frame, SearchNode } from '../compiling/search-tree'
 import type { Params, Step } from './match'
 import { dict } from '@/lib/dict'
 import { matchUrl } from './match'
@@ -31,8 +31,8 @@ function createLayer(frame: Frame, steps: Step[], url: string[]): Layer {
 
   if (frame.slots && layout) { // without a layout there is nothing to receive them
     const slots = dict<RenderPlan>()
-    for (const [slotName, slotTrie] of Object.entries(frame.slots))
-      slots[slotName] = createPlan(slotTrie, url, params) // a slot sees its declaring position's params
+    for (const [slotName, slotSearchTree] of Object.entries(frame.slots))
+      slots[slotName] = createPlan(slotSearchTree, url, params) // a slot sees its declaring position's params
     layer.slots = slots
   }
   return layer
@@ -42,13 +42,13 @@ function createLayer(frame: Frame, steps: Step[], url: string[]): Layer {
  *  already knows every frame that wraps it; the match only supplies the params
  *  each frame sees and resolves the slots along the way. Nothing walks upward,
  *  and nothing reads the route tree. */
-function createPlan(trie: TrieNode, url: string[], base?: Params): RenderPlan {
-  const { steps, endpoint } = matchUrl(trie, url, base)
+function createPlan(searchTree: SearchNode, url: string[], base?: Params): RenderPlan {
+  const { steps, endpoint } = matchUrl(searchTree, url, base)
   const layers = endpoint.frames.map(frame => createLayer(frame, steps, url))
   return { layers, content: endpoint.content, params: steps[endpoint.contentDepth]!.params }
 }
 
 /** Creates the render plan for a URL. */
-export function createRenderPlan(url: string[], trie: TrieNode): RenderPlan {
-  return createPlan(trie, url)
+export function createRenderPlan(url: string[], searchTree: SearchNode): RenderPlan {
+  return createPlan(searchTree, url)
 }

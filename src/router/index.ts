@@ -1,5 +1,5 @@
 export type { RouteNode } from './compiling/route-tree'
-export type { Endpoint, Frame, TrieNode } from './compiling/route-trie'
+export type { Endpoint, Frame, SearchNode } from './compiling/search-tree'
 export type { CompileDiagnostic } from './compiling/compile-diagnostic'
 export type { Layer, RenderPlan } from './matching/render-plan'
 export type { Params } from './matching/match'
