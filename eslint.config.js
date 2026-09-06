@@ -43,19 +43,4 @@ export default defineConfig(
       'semi': ['warn', 'never'],
     },
   },
-  {
-    // The pipeline runs one way: compiling/ resolves everything that does not
-    // depend on the URL, matching/ reads only what compiling produced. A
-    // matching-stage file reaching back into the route tree is what forced the
-    // old render stage to zip two trees together on every navigation.
-    files: ['src/router/matching/**'],
-    rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['**/compiling/route-tree', '**/compiling/segment', '**/compiling/route-module'],
-          message: 'matching/ must not read the route tree - everything it needs belongs on the trie, resolved at compile time',
-        }],
-      }],
-    },
-  },
 )

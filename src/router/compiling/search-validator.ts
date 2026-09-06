@@ -1,7 +1,8 @@
 import type { RouteNode } from './route-tree'
-import type { TrieNode } from './route-trie'
+import type { SearchNode } from './search-tree'
 import type { CompileDiagnostic } from './compile-diagnostic'
 import { getRouteSource } from './route-tree'
+import { forEach } from './search-tree'
 
 function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefined {
   if (!routeNodes) return
@@ -10,11 +11,11 @@ function findConflictingRouteFiles(routeNodes?: RouteNode[]): string[] | undefin
 }
 
 /** Runs relational validation between routes sharing the same URL position. */
-export function validateRouteTrie(nodes: TrieNode[]): CompileDiagnostic[] {
+export function validateSearchTree(searchTree: SearchNode): CompileDiagnostic[] {
   const diagnostics: CompileDiagnostic[] = []
 
-  for (const node of nodes) {
-    const validation = node.validation
+  forEach(searchTree, (searchNode) => {
+    const validation = searchNode.validation
     const pageConflicts = findConflictingRouteFiles(validation?.pages)
     if (pageConflicts) {
       diagnostics.push({
@@ -43,14 +44,16 @@ export function validateRouteTrie(nodes: TrieNode[]): CompileDiagnostic[] {
         files: Object.values(dynamicRoutes).map(getRouteSource),
       })
     }
-  }
+  })
   return diagnostics
 }
 
-/** Drops each position's validation candidates now that validateRouteTrie has
- *  had its look. This is also what releases the last references from the trie
- *  into the route tree, so the route tree can be collected. */
-export function sanitizeRouteTrie(nodes: TrieNode[]) {
-  for (const node of nodes)
-    node.validation = undefined // cheaper than delete - avoids a hidden-class transition
+/** Drops each node's `validation` candidates now that validateSearchTree above
+ *  has had its look - page/catchall are already live, set as each was
+ *  collected. Must run after validateSearchTree, same as sanitizeRouteTree
+ *  after validateRouteTree. */
+export function sanitizeSearchTree(searchTree: SearchNode) {
+  forEach(searchTree, (searchNode) => {
+    searchNode.validation = undefined // cheaper than delete - avoids a hidden-class transition
+  })
 }

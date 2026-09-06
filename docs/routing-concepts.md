@@ -2,7 +2,7 @@
 
 ## anchor
 
-static/dynamic/catchall/slot folders each open their own position (a `TrieNode`); group/malformed folders are transparent and fold into the position around them. The folder that opens a position is its *anchor*.
+static/dynamic/slot folders each get their own SearchNode; group/catchall/malformed folders are transparent and share their parent's.
 
 ```
   blog/                     <- anchor (static)
@@ -16,30 +16,23 @@ static/dynamic/catchall/slot folders each open their own position (a `TrieNode`)
 
 Both featured and archive anchor to themselves; (reviews) and (critics) anchor to blog, the nearest real folder before the group chain began.
 
-Two folders can open the same position - `blog/(a)/docs` and `blog/(b)/docs` are the same URL - in which case the first one reached depth-first is the anchor, and the position's fallback is resolved from there.
+## page / catchall
 
-## page / territory
-
-Where anchor looks outward (nearest ancestor-or-self of a real type), page looks inward: the nearest descendant-or-self, reachable only through transparent (group/malformed) folders, that actually owns a page.tsx. Each position has a "territory" - its own anchor folder plus every descendant reachable without crossing into another position - and its page is whichever folder in that territory owns a page.tsx.
+Where anchor looks outward (nearest ancestor-or-self of a real type), page/catchall look inward: the nearest descendant-or-self, reachable only through transparent (group/catchall/malformed) folders, that actually owns a page.tsx. Each SearchNode has a "territory" - its own anchor folder plus every descendant reachable without crossing into another anchor - and page/catchall is whichever folder in that territory owns a page.tsx, split by that folder's own segment type.
 
 ```
-  docs/                     <- anchor (static); territory = {docs, (guides)}
-  ├── page.tsx              <- docs's page (docs itself owns it, so owner === anchor)
-  └── (guides)/             <- NOT an anchor (group) - still inside docs's territory
-      └── layout.tsx        <- wraps the page below it, without a URL segment of its own
+  docs/                     <- anchor (static); territory = {docs, [...slug]}
+  ├── page.tsx              <- docs.page   (docs itself owns this, so page === anchor)
+  └── [...slug]/            <- NOT anchor (catchall) - but still inside docs's territory
+      └── page.tsx          <- docs.catchall (the descendant that actually claims it)
 ```
 
-A catch-all is not transparent: `docs/[...slug]/` opens a position of its own, one below docs, and accepts whatever segments are left. So `/docs` resolves to docs's page and `/docs/a/b` to the catch-all's.
+Both docs.page and docs.catchall belong to the same SearchNode (docs's), since [...slug] never gets its own anchor - it's transparent, so its page.tsx still lands in docs's territory. Which one gets used at match time depends on whether the URL is exhausted exactly at docs (/docs -> docs.page) or has more segments left (/docs/a/b -> docs.catchall).
 
-## pipeline
-
-Three stages, each reading only the one before it:
-
-- **RouteTree** (`compiling/route-tree.ts`) - what the filesystem actually defines. Validated, then used to build the trie, then never read again.
-- **RouteTrie** (`compiling/route-trie.ts`) - what URLs are possible, plus, for every position, the complete wrapper chain to render there. Every decision that does not depend on the URL is settled here.
-- **MatchPath / RenderPlan** (`matching/`) - which position won for this URL, and the flat list of layers to render around it.
-
-The trie holds no reference back into the route tree, so the route tree is collectable once compilation ends - and a lint rule keeps `matching/` from importing it. That boundary is what keeps a navigation from re-deriving, per keystroke, a folder-to-URL mapping that never changes.
+- SearchTree: what routes are possible?
+- MatchTree: which possible routes won for this URL?
+- RouteTree: what is actually defined at those routes?
+- RenderTree: combines the winning match with the defined content
 
 ## default
 
@@ -66,7 +59,7 @@ Without this guarantee, `@sidebar` would just be missing from the render output 
 
 ## runtime
 
-`src/router/` (decision layer) and `src/react/runtime/` (runtime layer) are deliberately separate - router has zero React/Ink imports anywhere, produces plain data (a `RenderPlan`), and every "what if" (unmatched URL, missing slot content) gets resolved *inside* it, provably, before any component ever renders. The runtime layer only translates already-decided data into elements; it never has to guess. A plan is a flat list of layers, so rendering it is a fold from the inside out - `renderPlan` has no traversal and no special case for a slot, since a slot is just another plan.
+`src/router/` (decision layer) and `src/react/runtime/` (runtime layer) are deliberately separate - router has zero React/Ink imports anywhere, produces plain data (a `RenderNode` tree), and every "what if" (unmatched URL, missing slot content) gets resolved *inside* it, provably, before any component ever renders. The runtime layer only translates already-decided data into elements; it never has to guess.
 
 Navigation state is the one thing genuinely runtime-only - it doesn't exist until an app instance is alive. Three layers:
 
