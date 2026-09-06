@@ -52,6 +52,32 @@ function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePat
   return { layout, loading, error, default: def, slots, params: layout ? params : undefined }
 }
 
+/** Walks a slot's own ancestors - never attaches slots of its own, since
+ *  nested slots are structurally disallowed (no cycle back into wrapAncestors). */
+function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
+  const contentNode = getContentNode(matchNode)
+  let currMatchNode: MatchNode | undefined = matchNode
+  let childRenderNode = createRenderLeaf(matchNode, mainParams)
+
+  forEachAncestor(contentNode, (routeNode) => {
+    const params = routeNode.modulePaths.layout ? getParamTable(currMatchNode!) : undefined
+    childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params)
+    if (currMatchNode?.searchNode.anchor === routeNode)
+      currMatchNode = currMatchNode.parent
+  })
+  return childRenderNode
+}
+
+function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
+  if (!matchNode.subtrees) return
+  const params = getParamTable(matchNode)
+  const slots = dict<RenderNode>()
+
+  for (const [subtreeName, matchPath] of Object.entries(matchNode.subtrees))
+    slots[subtreeName] = createSlotRenderNode(matchPath, params)
+  return slots
+}
+
 function wrapAncestors(matchNode: MatchNode, childRenderNode: RenderNode): RenderNode {
   const contentNode = getContentNode(matchNode)
   let currMatchNode: MatchNode | undefined = matchNode
@@ -68,21 +94,6 @@ function wrapAncestors(matchNode: MatchNode, childRenderNode: RenderNode): Rende
     }
   })
   return childRenderNode
-}
-
-function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
-  const renderLeaf = createRenderLeaf(matchNode, mainParams)
-  return wrapAncestors(matchNode, renderLeaf)
-}
-
-function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
-  if (!matchNode.subtrees) return
-  const params = getParamTable(matchNode)
-  const slots = dict<RenderNode>()
-
-  for (const [subtreeName, matchPath] of Object.entries(matchNode.subtrees))
-    slots[subtreeName] = createSlotRenderNode(matchPath, params)
-  return slots
 }
 
 /** Creates the render tree given the search tree and the URL. */
