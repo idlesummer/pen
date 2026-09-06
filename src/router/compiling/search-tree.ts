@@ -1,5 +1,6 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
+import { traverse } from '@/lib/traverse'
 import { findDefaultAncestor, forEachAncestor } from './route-tree'
 import { isDynamicOrCatchall, isUrlConsuming } from './segment'
 
@@ -150,44 +151,31 @@ function openPosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContex
   }
 }
 
-/** Opens the slot positions a folder declares, registering them on the
- *  POSITION rather than the folder - a slot declared inside a group belongs
- *  to the position that group folds into, and lands on that position's
- *  layout. Each slot is the root of its own match path - hence `depth` 0 -
- *  and consumes no URL, so `urlDepth` carries over. */
-function openSlots(routeNode: RouteNode, position: SearchNode, ctx: BuildContext) {
-  for (const child of routeNode.children) {
-    if (child.segment.type !== 'slot') continue
+/** Opens the position for a declared slot, or returns the one already there -
+ *  two folders in the same position can declare the same slot name, and they
+ *  merge. Slots are registered on the POSITION rather than the folder: a slot
+ *  declared inside a group belongs to the position that group folds into, and
+ *  lands on that position's layout. A slot roots its own match path - hence
+ *  `depth` 0 - and consumes no URL, so `urlDepth` carries over. */
+function openSlot(routeNode: RouteNode, position: SearchNode, ctx: BuildContext): SearchNode {
+  const slots = ctx.slotsOf.getOrInsertComputed(position, dict<SearchNode>)
+  const existing = slots[routeNode.segment.value]
+  if (existing) return existing
 
-    const slots = ctx.slotsOf.getOrInsertComputed(position, dict<SearchNode>)
-    let slotSearchTree = slots[child.segment.value]
-    if (!slotSearchTree) { // two folders can declare the same slot name; they merge
-      slotSearchTree = createSearchNode(child, position, ctx)
-      slotSearchTree.depth = 0 // a slot starts a match path of its own
-      slots[child.segment.value] = slotSearchTree
-    }
-    walk(child, slotSearchTree, ctx)
-  }
+  const slotSearchNode = createSearchNode(routeNode, position, ctx)
+  slotSearchNode.depth = 0 // a slot starts a match path of its own
+  return slots[routeNode.segment.value] = slotSearchNode
 }
 
-/** Walks one folder: records the position it belongs to and turns it into a
- *  Frame if it wraps anything, then descends. */
-function walk(routeNode: RouteNode, position: SearchNode, ctx: BuildContext) {
-  openSlots(routeNode, position, ctx)
-  const frame = createFrame(routeNode, position)
-
-  ctx.positionOf.set(routeNode, position)
-  if (frame) ctx.frameOf.set(routeNode, frame)
-
-  if (routeNode.modulePaths.page) {
-    if (!ctx.pageOwnerOf.has(position)) ctx.pageOwnerOf.set(position, routeNode);
-    (position.validation!.pages ??= []).push(routeNode)
-  }
-
-  for (const child of routeNode.children) {
-    if (child.segment.type === 'slot') continue // already opened by openSlots
-    walk(child, isTransparent(child) ? position : openPosition(child, position, ctx), ctx)
-  }
+/** Which position a child folder belongs to: a transparent folder stays in its
+ *  parent's, a slot opens one that roots its own match path, and anything else
+ *  opens (or reuses) a URL position of its own. */
+function resolvePosition(routeNode: RouteNode, parentPosition: SearchNode, ctx: BuildContext): SearchNode {
+  if (isTransparent(routeNode))
+    return parentPosition
+  if (routeNode.segment.type === 'slot')
+    return openSlot(routeNode, parentPosition, ctx)
+  return openPosition(routeNode, parentPosition, ctx)
 }
 
 /** Flattens a content owner's ancestry into the chain that wraps it, once,
@@ -243,14 +231,31 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, SearchNode[
   }
   const ctx: BuildContext = {
     anchorOf: new Map([[root, routeTree]]),
-    positionOf: new Map(),
+    positionOf: new Map([[routeTree, root]]), // seeded, so every child can read its parent's
     frameOf: new Map(),
     slotsOf: new Map(),
     pageOwnerOf: new Map(),
     nodes: [root],
   }
 
-  walk(routeTree, root, ctx)
+  traverse(routeTree, {
+    visit: (routeNode) => { // the folder's own contribution: its frame, and any page it owns
+      const position = ctx.positionOf.get(routeNode)!
+      const frame = createFrame(routeNode, position)
+      if (frame) ctx.frameOf.set(routeNode, frame)
+
+      if (routeNode.modulePaths.page) {
+        if (!ctx.pageOwnerOf.has(position)) ctx.pageOwnerOf.set(position, routeNode);
+        (position.validation!.pages ??= []).push(routeNode)
+      }
+    },
+    expand: (routeNode) => routeNode.children,
+    attach: (childRouteNode, parentRouteNode) => { // carries the position down, in place of a parameter
+      const parentPosition = ctx.positionOf.get(parentRouteNode)!
+      ctx.positionOf.set(childRouteNode, resolvePosition(childRouteNode, parentPosition, ctx))
+    },
+  })
+
   attachSlots(ctx)
   resolveEndpoints(ctx)
   return [root, ctx.nodes]

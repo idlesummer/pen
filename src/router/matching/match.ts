@@ -26,17 +26,23 @@ function bindParams(params: Params, node: SearchNode, url: string[]): Params {
   return bound
 }
 
-/** Matches a URL against the search tree, returning the winning path and what to
- *  render at the end of it.
+/** Matches a URL against the search tree, returning the winning path and what
+ *  to render at the end of it.
  *
- *  The walk carries its own path on the call stack, so a branch that loses
- *  costs nothing on the heap. A branch that reaches a page wins outright;
- *  otherwise the most static-preferring dead end is kept, and its position's
- *  fallback renders. Either way something renders - the default guarantee is
- *  a compile-time property of every position.
+ *  A branch that reaches a page wins outright; otherwise the most
+ *  static-preferring dead end is kept, and its position's fallback renders.
+ *  Either way something renders - the default guarantee is a compile-time
+ *  property of every position.
  *
  *  `base` seeds the params, so a slot's own match path inherits the params of
- *  the position that declares it - a slot under `[id]` sees `id` throughout. */
+ *  the position that declares it - a slot under `[id]` sees `id` throughout.
+ *
+ *  This is the one walk here that recurses rather than using `traverse`. The
+ *  path rides the call stack, so a branch that loses costs nothing on the
+ *  heap; an explicit-stack walk has to materialise a node per candidate,
+ *  losers included, which is what the old match tree did and where most of its
+ *  garbage came from. Depth is bounded by the URL's segment count and
+ *  branching is at most three, so the stack stays shallow. */
 export function matchUrl(root: SearchNode, url: string[], base: Params = NO_PARAMS): MatchPath {
   const steps: Step[] = []
   let best: Step[] | undefined

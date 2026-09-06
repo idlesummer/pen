@@ -16,7 +16,7 @@ static/dynamic/catchall/slot folders each open their own position (a `SearchNode
 
 Both featured and archive anchor to themselves; (reviews) and (critics) anchor to blog, the nearest real folder before the group chain began.
 
-Two folders can open the same position - `blog/(a)/docs` and `blog/(b)/docs` are the same URL - in which case the first one reached depth-first is the anchor, and the position's fallback is resolved from there.
+Two folders can open the same position - `blog/(a)/docs` and `blog/(b)/docs` are the same URL - in which case one of them becomes the anchor and the position's fallback is resolved from there. Which one is an artifact of traversal order, so an app shouldn't lean on it; the wrapper chains are unaffected, since those are built from each content owner's own ancestry rather than from the anchor.
 
 ## page / territory
 
