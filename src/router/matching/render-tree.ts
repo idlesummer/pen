@@ -52,19 +52,10 @@ function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePat
   return { layout, loading, error, default: def, slots, params: layout ? params : undefined }
 }
 
-/** Walks routeNode's ancestors, wrapping childRenderNode at each one. Params
- *  are recomputed at every step from the nearest at-or-below match position
- *  (childMatchNode) - not just at anchors - since a group between two
- *  anchors owns no match position of its own but still inherits whatever
- *  the nearer anchor already captured. Slots only ever attach at anchors,
- *  since only an anchor's SearchNode can carry a `.slots` map. */
 function wrapAncestors(matchNode: MatchNode, contentNode: RouteNode, childRenderNode: RenderNode, includeSlots: boolean): RenderNode {
   let childMatchNode: MatchNode | undefined = matchNode
 
   forEachAncestor(contentNode, (routeNode) => {
-    // childMatchNode is guaranteed defined here: the route tree's own root always
-    // gets a SearchNode (see createSearchTree), so the anchor chain never runs
-    // out before the route-node walk does.
     const params = routeNode.modulePaths.layout ? getParamTable(childMatchNode!) : undefined
     let slots: SlotRenderNodes | undefined
 
