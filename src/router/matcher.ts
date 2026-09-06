@@ -1,13 +1,13 @@
-import type { SearchNode } from './compiling/search-tree'
-import type { RenderNode } from './matching/render-tree'
-import { createRenderTree } from './matching/render-tree'
+import type { TrieNode } from './compiling/route-trie'
+import type { RenderPlan } from './matching/render-plan'
+import { createRenderPlan } from './matching/render-plan'
 import { normalizeUrl } from './matching/url-path'
 
 export type Matcher =
-  (url: string) => RenderNode
+  (url: string) => RenderPlan
 
-/** Given a compiled SearchNode tree, returns a matcher for that tree -
- *  the runtime half, no filesystem/compile-time dependency at all. */
-export function createMatcher(searchTree: SearchNode): Matcher {
-  return (url) => createRenderTree(normalizeUrl(url), searchTree)
+/** Given a compiled URL trie, returns a matcher for it - the runtime half,
+ *  with no filesystem or compile-time dependency at all. */
+export function createMatcher(routeTrie: TrieNode): Matcher {
+  return (url) => createRenderPlan(normalizeUrl(url), routeTrie)
 }
