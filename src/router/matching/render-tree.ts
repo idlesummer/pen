@@ -83,7 +83,7 @@ function wrapAncestors(matchNode: MatchNode, childRenderNode: RenderNode): Rende
   forEachAncestor(contentNode, (routeNode) => {
     const params = routeNode.modulePaths.layout ? getParamTable(currMatchNode!) : undefined
 
-    if (currMatchNode?.searchNode.anchor !== routeNode)
+    if (currMatchNode?.searchNode.anchor !== routeNode) // wrap only if non anchor
       childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params)
     else {
       const slots = createSlotRenderNodes(currMatchNode) // TODO: disallow @children slot name
