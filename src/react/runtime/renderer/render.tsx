@@ -29,7 +29,7 @@ function wrapContent(node: RenderNode, content: ReactNode, namedSlots: Record<st
   }
   if (layout) {
     const Layout = resolveComponent(layout, componentMap)
-    content = <Layout {...namedSlots}>{content}</Layout>
+    content = <Layout params={node.params} {...namedSlots}>{content}</Layout>
   }
   return content
 }
@@ -41,8 +41,8 @@ function wrapContent(node: RenderNode, content: ReactNode, namedSlots: Record<st
  *  chain). Used for named slots only - the main spine goes through renderNode. */
 function renderChain(node: RenderNode, componentMap: ComponentMap): ReactNode {
   if (node.content) {
-    const Content = resolveComponent(node.content.path, componentMap)
-    return <Content params={node.content.params} />
+    const Content = resolveComponent(node.content, componentMap)
+    return <Content params={node.params} />
   }
   const content = renderChain(node.slots.children!, componentMap)
   return wrapContent(node, content, {}, componentMap) // no named slots to spread inside a slot's own chain
@@ -72,8 +72,8 @@ export function renderNode(root: RenderNode, componentMap: ComponentMap): ReactN
       const node = frame.node
 
       if (node.content) {
-        const Content = resolveComponent(node.content.path, componentMap)
-        frame.content = <Content params={node.content.params} />
+        const Content = resolveComponent(node.content, componentMap)
+        frame.content = <Content params={node.params} />
       }
       else {
         const resolvedSlots: Record<string, ReactNode> = {}

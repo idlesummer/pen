@@ -1,4 +1,5 @@
 import type { RouteModulePaths } from '../compiling/route-module'
+import type { RouteNode } from '../compiling/route-tree'
 import type { SearchNode } from '../compiling/search-tree'
 import type { MatchNode } from './match-tree'
 import { forEachAncestor } from '../compiling/route-tree'
@@ -14,10 +15,12 @@ export type RenderNode = {
   error?: string
   loading?: string
   default?: string
-  content?: {
-    path: string
-    params: ParamTable
-  }
+  content?: string
+  params?: ParamTable // present on leaves always, and on wrappers only when they own a layout module
+}
+
+function getContentNode(matchNode: MatchNode): RouteNode {
+  return matchNode.page ?? matchNode.searchNode.default
 }
 
 function getParamTable(matchNode: MatchNode): ParamTable {
@@ -32,32 +35,51 @@ function getParamTable(matchNode: MatchNode): ParamTable {
 }
 
 function createRenderLeaf(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
-  const contentNode = matchNode.page ?? matchNode.searchNode.default
+  const contentNode = getContentNode(matchNode)
   const moduleType = matchNode.page ? 'page' : 'default'
   const params: ParamTable = Object.assign(dict(), mainParams, getParamTable(matchNode))
-  const path = contentNode.modulePaths[moduleType]!
-  return { slots: dict(), content: { path, params } }
+  const content = contentNode.modulePaths[moduleType]!
+  return { slots: dict(), content, params }
 }
 
-function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePaths, slots?: SlotRenderNodes): RenderNode {
+function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePaths, params?: ParamTable, slots?: SlotRenderNodes): RenderNode {
   const { layout, loading, error, default: def } = modulePaths
   if (!layout && !loading && !error && !def && !slots)  // don't wrap if nothing to wrap
     return childRenderNode
 
   slots ??= dict()
   slots.children = childRenderNode
-  return { layout, loading, error, default: def, slots }
+  return { layout, loading, error, default: def, slots, params: layout ? params : undefined }
+}
+
+/** Walks routeNode's ancestors, wrapping childRenderNode at each one. Params
+ *  are recomputed at every step from the nearest at-or-below match position
+ *  (childMatchNode) - not just at anchors - since a group between two
+ *  anchors owns no match position of its own but still inherits whatever
+ *  the nearer anchor already captured. Slots only ever attach at anchors,
+ *  since only an anchor's SearchNode can carry a `.slots` map. */
+function wrapAncestors(matchNode: MatchNode, contentNode: RouteNode, childRenderNode: RenderNode, includeSlots: boolean): RenderNode {
+  let childMatchNode: MatchNode | undefined = matchNode
+
+  forEachAncestor(contentNode, (routeNode) => {
+    // childMatchNode is guaranteed defined here: the route tree's own root always
+    // gets a SearchNode (see createSearchTree), so the anchor chain never runs
+    // out before the route-node walk does.
+    const params = routeNode.modulePaths.layout ? getParamTable(childMatchNode!) : undefined
+    let slots: SlotRenderNodes | undefined
+
+    if (childMatchNode?.searchNode.anchor === routeNode) {
+      slots = includeSlots ? createSlotRenderNodes(childMatchNode) : undefined // TODO: disallow @children slot name
+      childMatchNode = childMatchNode.parent
+    }
+    childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params, slots)
+  })
+  return childRenderNode
 }
 
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
   const renderLeaf = createRenderLeaf(matchNode, mainParams)
-  const contentNode = matchNode.page ?? matchNode.searchNode.default
-  let renderNode = renderLeaf
-
-  forEachAncestor(contentNode, (node) => {
-    renderNode = wrapRenderNode(renderNode, node.modulePaths)
-  })
-  return renderNode
+  return wrapAncestors(matchNode, getContentNode(matchNode), renderLeaf, false)
 }
 
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
@@ -71,20 +93,8 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
 }
 
 function createMainRenderNode(matchNode: MatchNode): RenderNode {
-  const contentNode = matchNode.page ?? matchNode.searchNode.default
-  let childMatchNode: MatchNode | undefined = matchNode
-  let childRenderNode = createRenderLeaf(matchNode, {})  // child since traversal is bottom up
-
-  forEachAncestor(contentNode, (routeNode) => {
-    if (childMatchNode?.searchNode.anchor !== routeNode)
-      childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths)
-    else {
-      const slots = createSlotRenderNodes(childMatchNode) // TODO: disallow @children slot name
-      childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, slots)
-      childMatchNode = childMatchNode.parent  // update matchNode if an anchor is found
-    }
-  })
-  return childRenderNode // at this point it becomes the root render node
+  const renderLeaf = createRenderLeaf(matchNode, {})
+  return wrapAncestors(matchNode, getContentNode(matchNode), renderLeaf, true)
 }
 
 /** Creates the render tree for a URL - never undefined, since the root's
