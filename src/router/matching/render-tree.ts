@@ -52,7 +52,7 @@ function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePat
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
   const renderLeaf = createRenderLeaf(matchNode, mainParams)
   const contentNode = matchNode.page ?? matchNode.searchNode.default
-  let renderNode: RenderNode = renderLeaf
+  let renderNode = renderLeaf
 
   forEachAncestor(contentNode, (node) => {
     renderNode = wrapRenderNode(renderNode, node.modulePaths)
