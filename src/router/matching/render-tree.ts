@@ -89,8 +89,7 @@ function createMainRenderNode(matchNode: MatchNode): RenderNode {
   return wrapAncestors(matchNode, getContentNode(matchNode), renderLeaf, true)
 }
 
-/** Creates the render tree for a URL - never undefined, since the root's
- *  guaranteed default ensures the main path always resolves to something. */
+/** Creates the render tree given the search tree and the URL. */
 export function createRenderTree(url: string[], searchTree: SearchNode): RenderNode {
   const matchNode = createMatchTree(searchTree, url)
   return createMainRenderNode(matchNode)
