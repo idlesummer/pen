@@ -70,6 +70,7 @@ type BuildContext = {
   anchorOf: Map<SearchNode, RouteNode>                 // position -> the folder that opened it
   positionOf: Map<RouteNode, SearchNode>               // folder -> the position it belongs to
   frameOf: Map<RouteNode, Frame>                       // folder -> its frame, when it wraps anything
+  strippedOf: Map<Frame, Frame>                        // frame -> the same frame without its own default
   slotsOf: Map<SearchNode, Record<string, SearchNode>> // position -> the slots declared in it
   pageOwnerOf: Map<SearchNode, RouteNode>              // position -> the folder owning its page
   nodes: SearchNode[]                                  // every position, for validation
@@ -101,6 +102,13 @@ function attachSlots(ctx: BuildContext) {
     }
     frame.slots = slots
   }
+}
+
+/** The same frame without its own `default` - for an endpoint whose content IS
+ *  that default, so it is not also a boundary around itself. */
+function stripOwnDefault(frame: Frame): Frame {
+  const { layout, loading, error, slots, paramDepth } = frame
+  return { layout, loading, error, slots, paramDepth }
 }
 
 /** True if a frame still renders something. Slots alone do not: without a
@@ -189,10 +197,11 @@ function createEndpoint(owner: RouteNode, content: string, stripDefault: boolean
   })
   frames.reverse() // forEachAncestor walks leafward-to-rootward; chains render outermost first
 
+  // Memoised: every position whose fallback resolves to the same folder wants
+  // the same stripped frame, so build it once rather than once per position.
   if (stripDefault && frames.length) {
     const last = frames.length - 1
-    const { layout, loading, error, slots, paramDepth } = frames[last]! // same frame, minus its default
-    frames[last] = { layout, loading, error, slots, paramDepth }
+    frames[last] = ctx.strippedOf.getOrInsertComputed(frames[last]!, stripOwnDefault)
   }
   // A frame with nothing left to wrap renders nothing - drop it here rather
   // than carrying an empty layer through every navigation.
@@ -233,6 +242,7 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, SearchNode[
     anchorOf: new Map([[root, routeTree]]),
     positionOf: new Map([[routeTree, root]]), // seeded, so every child can read its parent's
     frameOf: new Map(),
+    strippedOf: new Map(),
     slotsOf: new Map(),
     pageOwnerOf: new Map(),
     nodes: [root],
