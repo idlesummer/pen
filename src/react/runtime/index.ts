@@ -1,6 +1,6 @@
 export { App } from './App'
 export { DefaultFallback } from './boundaries/DefaultFallback'
-export { renderPlan } from './renderer/render'
+export { renderNode } from './renderer/render'
 export type { ComponentMap, RouteComponent } from './renderer/component-map'
 export { ErrorBoundary } from './boundaries/ErrorBoundary'
 export type { ErrorFallbackProps } from './boundaries/ErrorBoundary'
