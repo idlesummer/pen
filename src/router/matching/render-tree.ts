@@ -57,13 +57,14 @@ function wrapAncestors(matchNode: MatchNode, contentNode: RouteNode, childRender
 
   forEachAncestor(contentNode, (routeNode) => {
     const params = routeNode.modulePaths.layout ? getParamTable(childMatchNode!) : undefined
-    let slots: SlotRenderNodes | undefined
 
-    if (childMatchNode?.searchNode.anchor === routeNode) {
-      slots = includeSlots ? createSlotRenderNodes(childMatchNode) : undefined // TODO: disallow @children slot name
+    if (childMatchNode?.searchNode.anchor !== routeNode)
+      childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params)
+    else {
+      const slots = includeSlots ? createSlotRenderNodes(childMatchNode) : undefined // TODO: disallow @children slot name
+      childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params, slots)
       childMatchNode = childMatchNode.parent
     }
-    childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params, slots)
   })
   return childRenderNode
 }
