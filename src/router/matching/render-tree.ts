@@ -63,7 +63,7 @@ function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): Ren
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
   if (!matchNode.subtrees) return
   const params = getParamTable(matchNode)
-  const slots: SlotRenderNodes = dict()
+  const slots = dict<RenderNode>()
 
   for (const [subtreeName, subtree] of Object.entries(matchNode.subtrees))
     slots[subtreeName] = createSlotRenderNode(subtree, params)
