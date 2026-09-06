@@ -52,18 +52,19 @@ function wrapRenderNode(childRenderNode: RenderNode, modulePaths: RouteModulePat
   return { layout, loading, error, default: def, slots, params: layout ? params : undefined }
 }
 
-function wrapAncestors(matchNode: MatchNode, contentNode: RouteNode, childRenderNode: RenderNode, includeSlots: boolean): RenderNode {
-  let childMatchNode: MatchNode | undefined = matchNode
+function wrapAncestors(matchNode: MatchNode, childRenderNode: RenderNode): RenderNode {
+  const contentNode = getContentNode(matchNode)
+  let currMatchNode: MatchNode | undefined = matchNode
 
   forEachAncestor(contentNode, (routeNode) => {
-    const params = routeNode.modulePaths.layout ? getParamTable(childMatchNode!) : undefined
+    const params = routeNode.modulePaths.layout ? getParamTable(currMatchNode!) : undefined
 
-    if (childMatchNode?.searchNode.anchor !== routeNode)
+    if (currMatchNode?.searchNode.anchor !== routeNode)
       childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params)
     else {
-      const slots = includeSlots ? createSlotRenderNodes(childMatchNode) : undefined // TODO: disallow @children slot name
+      const slots = createSlotRenderNodes(currMatchNode) // TODO: disallow @children slot name
       childRenderNode = wrapRenderNode(childRenderNode, routeNode.modulePaths, params, slots)
-      childMatchNode = childMatchNode.parent
+      currMatchNode = currMatchNode.parent
     }
   })
   return childRenderNode
@@ -71,7 +72,7 @@ function wrapAncestors(matchNode: MatchNode, contentNode: RouteNode, childRender
 
 function createSlotRenderNode(matchNode: MatchNode, mainParams: ParamTable): RenderNode {
   const renderLeaf = createRenderLeaf(matchNode, mainParams)
-  return wrapAncestors(matchNode, getContentNode(matchNode), renderLeaf, false)
+  return wrapAncestors(matchNode, renderLeaf)
 }
 
 function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefined {
@@ -84,13 +85,10 @@ function createSlotRenderNodes(matchNode: MatchNode): SlotRenderNodes | undefine
   return slots
 }
 
-function createMainRenderNode(matchNode: MatchNode): RenderNode {
-  const renderLeaf = createRenderLeaf(matchNode, {})
-  return wrapAncestors(matchNode, getContentNode(matchNode), renderLeaf, true)
-}
-
 /** Creates the render tree given the search tree and the URL. */
 export function createRenderTree(url: string[], searchTree: SearchNode): RenderNode {
   const matchNode = createMatchTree(searchTree, url)
-  return createMainRenderNode(matchNode)
+  const renderLeaf = createRenderLeaf(matchNode, {})
+  const renderTree = wrapAncestors(matchNode, renderLeaf)
+  return renderTree
 }
