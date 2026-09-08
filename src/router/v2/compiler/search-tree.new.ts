@@ -1,6 +1,7 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
+import { createRouteTree } from './route-tree'
 import { isDynamicOrCatchall, isUrlConsuming } from '@/router/compiling/segment'
 
 /** One URL position: somewhere a URL segment can land. Groups fold
@@ -81,6 +82,23 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     },
   })
   return searchTree
+}
+
+// Runs only when this file is executed directly (`npx tsx search-tree.new.ts`),
+// never when it's imported - a quick way to eyeball the tree while building it.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const routeTree = createRouteTree([
+    'page.tsx',
+    '(marketing)/blog/page.tsx',
+    'blog/page.tsx',
+    'blog/[id]/page.tsx',
+    'blog/[slug]/page.tsx',
+    'blog/[...rest]/page.tsx',
+    'blog/[...rest]/dead/page.tsx',
+    '[bad/page.tsx',
+    '@modal/page.tsx',
+  ])
+  console.log(JSON.stringify(createSearchTree(routeTree), null, 2))
 }
 
 // if they have lots of hearts you exhaust your own hearts
