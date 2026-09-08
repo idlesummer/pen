@@ -84,8 +84,25 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   return searchTree
 }
 
-// Runs only when this file is executed directly (`npx tsx search-tree.new.ts`),
-// never when it's imported - a quick way to eyeball the tree while building it.
+// app/
+// ├── page.tsx
+// ├── (marketing)/
+// │   └── blog/
+// │       └── page.tsx
+// ├── blog/
+// │   ├── page.tsx
+// │   ├── [id]/
+// │   │   └── page.tsx
+// │   ├── [slug]/
+// │   │   └── page.tsx
+// │   └── [...rest]/
+// │       ├── page.tsx
+// │       └── dead/
+// │           └── page.tsx
+// ├── [bad/
+// │   └── page.tsx
+// └── @modal/
+//     └── page.tsx
 const routeTree = createRouteTree([
   'page.tsx',
   '(marketing)/blog/page.tsx',
