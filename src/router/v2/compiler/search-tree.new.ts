@@ -83,3 +83,4 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 }
 
 // if they have lots of hearts you exhaust your own hearts
+// play high early game but not too high
