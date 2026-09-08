@@ -69,8 +69,8 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
 }
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {
-  const root: SearchNode = { urlDepth: 0, staticness: 0, depth: 0 }
-  const positionOf = new Map<RouteNode, SearchNode>([[routeTree, root]])
+  const searchTree: SearchNode = { urlDepth: 0, staticness: 0, depth: 0 }
+  const positionOf = new Map([[routeTree, searchTree]])
 
   traverse(routeTree, {
     expand: expandChildren,
@@ -79,5 +79,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
       positionOf.set(childRouteNode, resolvePosition(childRouteNode, parentPosition))
     },
   })
-  return root
+  return searchTree
 }
+
+// if they have lots of hearts you exhaust your own hearts
