@@ -12,6 +12,7 @@ export type SearchNode = {
   depth: number        // this position's index in its own match path
   param?: string       // the name this position binds, for dynamic/catch-all
   isCatchall?: true    // accepts even with url segments left over
+  // Tree children
   statics?: Record<string, SearchNode>
   dynamic?: SearchNode
   catchall?: SearchNode
@@ -84,3 +85,6 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 
 // if they have lots of hearts you exhaust your own hearts
 // play high early game but not too high
+// dont play trump card early game
+// when they put down high cards, put down high cards next game
+//
