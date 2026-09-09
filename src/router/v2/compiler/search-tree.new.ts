@@ -67,6 +67,58 @@ function wraps(frame: Frame): boolean {
   return !!(frame.layout || frame.loading || frame.error || frame.default)
 }
 
+/** The next ancestor routing inherits from, or nothing at a slot boundary -
+ *  a slot's own subtree renders through its own chain, never through
+ *  whatever folder happens to surround the slot. */
+function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
+  if (routeNode.segment.type !== 'slot')
+    return routeNode.parent
+}
+
+/** Visits routeNode and each ancestor routing inherits from, root-ward. */
+function forEachAncestor(routeNode: RouteNode, visit: (routeNode: RouteNode) => void) {
+  for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node))
+    visit(node)
+}
+
+/** Everything needed to render one accepted position: the complete wrapper
+ *  chain, outermost first, and the module at the bottom of it.
+ *
+ *  contentDepth is supplied by the caller for now rather than derived - it
+ *  needs a real position to read from, which doesn't exist until positions
+ *  and endpoints get wired together. */
+export type Endpoint = {
+  frames: Frame[]
+  content: string
+  contentDepth: number
+}
+
+/** The same frame without its own `default` - for an endpoint whose content
+ *  IS that default, so it isn't also a boundary around itself. */
+function stripOwnDefault(frame: Frame): Frame {
+  const { layout, loading, error } = frame
+  return { layout, loading, error }
+}
+
+/** Flattens a folder's ancestry into the chain that wraps it - the walk the
+ *  render stage would otherwise repeat on every navigation. */
+function createEndpoint(owner: RouteNode, content: string, contentDepth: number, isFallback: boolean): Endpoint {
+  const frames: Frame[] = []
+  forEachAncestor(owner, (routeNode) => {
+    const frame = createFrame(routeNode)
+    if (frame) frames.push(frame)
+  })
+  frames.reverse() // ancestry walks leafward-to-rootward; chains render outermost first
+
+  // A fallback's innermost frame always carries the very module the endpoint
+  // renders, so it would otherwise be a boundary around itself.
+  if (isFallback && frames.length) {
+    const last = frames.length - 1
+    frames[last] = stripOwnDefault(frames[last]!)
+  }
+  return { frames: frames.filter(wraps), content, contentDepth }
+}
+
 /** Gets the position a folder belongs to, creating it if it doesn't exist
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. Slots aren't handled yet -
@@ -154,6 +206,19 @@ forEach(routeTree, (routeNode) => {
   const frame = createFrame(routeNode)
   if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame), 'wraps:', wraps(frame))
 })
+
+console.log('\n--- endpoint chains (standalone, contentDepth faked as 0) ---')
+const chainFixture = createRouteTree([
+  'layout.tsx',
+  'blog/layout.tsx',
+  'blog/[id]/layout.tsx',
+  'blog/[id]/default.tsx',
+  'blog/[id]/page.tsx',
+])
+const idFolder = chainFixture.children[0]!.children[0]! // blog -> [id]
+console.log('page endpoint:', JSON.stringify(createEndpoint(idFolder, 'blog/[id]/page.tsx', 0, false), null, 2))
+console.log('fallback endpoint (innermost default stripped):',
+  JSON.stringify(createEndpoint(idFolder, 'blog/[id]/default.tsx', 0, true), null, 2))
 
 // if they have lots of hearts you exhaust your own hearts
 // play high early game but not too high
