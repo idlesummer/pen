@@ -34,13 +34,17 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode 
   return node
 }
 
-/** Opens the position a URL-consuming folder lands on, or returns the one
- *  already there - two folders at the same spot (eg through different
- *  groups) share a position. */
-function openPosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
+/** Gets the position a folder belongs to, creating it if it doesn't exist
+ *  yet - a group just returns the one already there (its parent's), while
+ *  everything else looks up or opens its own. Slots aren't handled yet -
+ *  their folders are excluded from the walk entirely, see expandChildren. */
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
   const segment = routeNode.segment
 
   switch (segment.type) {
+    case 'group':
+      return parent
+
     case 'static':
       parent.statics ??= dict<SearchNode>()
       return parent.statics[segment.value] ??= createSearchNode(routeNode, parent)
@@ -48,21 +52,9 @@ function openPosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent)
 
-    case 'catchall':
-      return parent.catchall ??= createSearchNode(routeNode, parent)
-
     default: // catchall
       return parent.catchall ??= createSearchNode(routeNode, parent)
   }
-}
-
-/** Which position a folder belongs to: a group stays in its parent's,
- *  everything else opens a URL position. Slots aren't handled yet - their
- *  folders are excluded from the walk entirely, see expandChildren. */
-function resolvePosition(routeNode: RouteNode, parentPosition: SearchNode): SearchNode {
-  if (routeNode.segment.type === 'group')
-    return parentPosition
-  return openPosition(routeNode, parentPosition)
 }
 
 /** The children worth walking, for now: a catch-all is terminal, and slots
@@ -83,7 +75,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
       const parentPosition = positionOf.get(parentRouteNode)!
-      positionOf.set(childRouteNode, resolvePosition(childRouteNode, parentPosition))
+      positionOf.set(childRouteNode, getOrCreatePosition(childRouteNode, parentPosition))
     },
   })
   return searchTree
