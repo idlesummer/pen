@@ -12,6 +12,7 @@ export type SearchNode = {
   staticness: number  // how static-preferring the path here is; higher wins
   depth: number        // this position's index in its own match path
   param?: string       // the name this position binds, for dynamic/catch-all
+  // Flags
   isCatchall?: true    // accepts even with url segments left over
   // Tree children
   statics?: Record<string, SearchNode>
@@ -84,25 +85,28 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   return searchTree
 }
 
-// app/
-// ├── page.tsx
-// ├── (marketing)/
-// │   └── blog/
-// │       └── page.tsx
-// ├── blog/
-// │   ├── page.tsx
-// │   ├── [id]/
-// │   │   └── page.tsx
-// │   ├── [slug]/
-// │   │   └── page.tsx
-// │   └── [...rest]/
-// │       ├── page.tsx
-// │       └── dead/
-// │           └── page.tsx
-// ├── [bad/
-// │   └── page.tsx
-// └── @modal/
-//     └── page.tsx
+console.log(`
+  app/
+  ├── page.tsx
+  ├── (marketing)/
+  │   └── blog/
+  │       └── page.tsx
+  ├── blog/
+  │   ├── page.tsx
+  │   ├── [id]/
+  │   │   └── page.tsx
+  │   ├── [slug]/
+  │   │   └── page.tsx
+  │   └── [...rest]/
+  │       ├── page.tsx
+  │       └── dead/
+  │           └── page.tsx
+  ├── [bad/
+  │   └── page.tsx
+  └── @modal/
+      └── page.tsx
+`)
+
 const routeTree = createRouteTree([
   'page.tsx',
   '(marketing)/blog/page.tsx',
