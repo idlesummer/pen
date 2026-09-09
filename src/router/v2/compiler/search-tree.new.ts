@@ -19,19 +19,34 @@ export type SearchNode = {
   statics?: Record<string, SearchNode>
   dynamic?: SearchNode
   catchall?: SearchNode
+  // Rendering
+  page?: Endpoint     // set when a folder in this position's territory owns a page
+  fallback: Endpoint  // always present - the default guarantee, resolved here
 }
 
-function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode {
+/** Build-time bookkeeping, dropped once createSearchTree returns. */
+type BuildContext = {
+  anchorOf: Map<SearchNode, RouteNode>   // position -> the folder that opened it
+  positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
+  pageOwnerOf: Map<SearchNode, RouteNode>
+  nodes: SearchNode[]                    // every position, for the final resolve pass
+}
+
+function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
   const segment = routeNode.segment
   const node: SearchNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(segment),
     staticness: parent.staticness - +isDynamicOrCatchall(segment),
     depth: parent.depth + 1,
+    fallback: undefined as never, // filled by resolveEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(segment))
     node.param = segment.value
   if (segment.type === 'catchall')
     node.isCatchall = true
+
+  ctx.anchorOf.set(node, routeNode)
+  ctx.nodes.push(node)
   return node
 }
 
@@ -82,15 +97,11 @@ function forEachAncestor(routeNode: RouteNode, visit: (routeNode: RouteNode) => 
 }
 
 /** Everything needed to render one accepted position: the complete wrapper
- *  chain, outermost first, and the module at the bottom of it.
- *
- *  contentDepth is supplied by the caller for now rather than derived - it
- *  needs a real position to read from, which doesn't exist until positions
- *  and endpoints get wired together. */
+ *  chain, outermost first, and the module at the bottom of it. */
 export type Endpoint = {
   frames: Frame[]
   content: string
-  contentDepth: number
+  contentDepth: number // which position's params `content` receives
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
@@ -102,7 +113,7 @@ function stripOwnDefault(frame: Frame): Frame {
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
-function createEndpoint(owner: RouteNode, content: string, contentDepth: number, isFallback: boolean): Endpoint {
+function createEndpoint(owner: RouteNode, content: string, isFallback: boolean, ctx: BuildContext): Endpoint {
   const frames: Frame[] = []
   forEachAncestor(owner, (routeNode) => {
     const frame = createFrame(routeNode)
@@ -116,14 +127,42 @@ function createEndpoint(owner: RouteNode, content: string, contentDepth: number,
     const last = frames.length - 1
     frames[last] = stripOwnDefault(frames[last]!)
   }
-  return { frames: frames.filter(wraps), content, contentDepth }
+  return { frames: frames.filter(wraps), content, contentDepth: ctx.positionOf.get(owner)!.depth }
+}
+
+/** The folder whose `default` covers this position - or, if nothing up the
+ *  chain declares one, the boundary itself (the root, or the enclosing slot).
+ *  That boundary is where the built-in fallback is used, which is how "every
+ *  position renders something" holds without injecting anything into the
+ *  route tree. */
+function findDefaultOwner(routeNode: RouteNode): RouteNode {
+  for (let node = routeNode; ; ) {
+    if (node.modulePaths.default) return node
+    const parent = inheritedParent(node)
+    if (!parent) return node
+    node = parent
+  }
+}
+
+/** Resolves every position's page (if it has one) and fallback (always) -
+ *  runs once every folder's frame and page ownership is known. */
+function resolveEndpoints(ctx: BuildContext) {
+  for (const node of ctx.nodes) {
+    const pageOwner = ctx.pageOwnerOf.get(node)
+    if (pageOwner)
+      node.page = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
+
+    const defaultOwner = findDefaultOwner(ctx.anchorOf.get(node)!)
+    const content = defaultOwner.modulePaths.default ?? DEFAULT_FALLBACK_PATH
+    node.fallback = createEndpoint(defaultOwner, content, true, ctx)
+  }
 }
 
 /** Gets the position a folder belongs to, creating it if it doesn't exist
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. Slots aren't handled yet -
  *  their folders are excluded from the walk entirely, see expandChildren. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
   const segment = routeNode.segment
 
   switch (segment.type) {
@@ -132,13 +171,13 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode): SearchNo
 
     case 'static':
       parent.statics ??= dict<SearchNode>()
-      return parent.statics[segment.value] ??= createSearchNode(routeNode, parent)
+      return parent.statics[segment.value] ??= createSearchNode(routeNode, parent, ctx)
 
     case 'dynamic':
-      return parent.dynamic ??= createSearchNode(routeNode, parent)
+      return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
 
     default: // catchall
-      return parent.catchall ??= createSearchNode(routeNode, parent)
+      return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
   }
 }
 
@@ -153,16 +192,29 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
 }
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {
-  const searchTree: SearchNode = { urlDepth: 0, staticness: 0, depth: 0 }
-  const positionOf = new Map([[routeTree, searchTree]])
+  const searchTree: SearchNode = { urlDepth: 0, staticness: 0, depth: 0, fallback: undefined as never }
+  const ctx: BuildContext = {
+    anchorOf: new Map([[searchTree, routeTree]]),
+    positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
+    pageOwnerOf: new Map(),
+    nodes: [searchTree],
+  }
 
   traverse(routeTree, {
+    visit: (routeNode) => { // the folder's own contribution: does it own this position's page?
+      if (!routeNode.modulePaths.page) return
+      const position = ctx.positionOf.get(routeNode)!
+      if (!ctx.pageOwnerOf.has(position))
+        ctx.pageOwnerOf.set(position, routeNode)
+    },
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
-      const parentPosition = positionOf.get(parentRouteNode)!
-      positionOf.set(childRouteNode, getOrCreatePosition(childRouteNode, parentPosition))
+      const parentPosition = ctx.positionOf.get(parentRouteNode)!
+      ctx.positionOf.set(childRouteNode, getOrCreatePosition(childRouteNode, parentPosition, ctx))
     },
   })
+
+  resolveEndpoints(ctx)
   return searchTree
 }
 
@@ -207,18 +259,23 @@ forEach(routeTree, (routeNode) => {
   if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame), 'wraps:', wraps(frame))
 })
 
-console.log('\n--- endpoint chains (standalone, contentDepth faked as 0) ---')
-const chainFixture = createRouteTree([
+console.log('\n--- step 4: page/fallback wired onto real positions ---')
+const wiredFixture = createRouteTree([
   'layout.tsx',
   'blog/layout.tsx',
+  'blog/page.tsx',
   'blog/[id]/layout.tsx',
-  'blog/[id]/default.tsx',
   'blog/[id]/page.tsx',
+  'blog/[id]/default.tsx',
 ])
-const idFolder = chainFixture.children[0]!.children[0]! // blog -> [id]
-console.log('page endpoint:', JSON.stringify(createEndpoint(idFolder, 'blog/[id]/page.tsx', 0, false), null, 2))
-console.log('fallback endpoint (innermost default stripped):',
-  JSON.stringify(createEndpoint(idFolder, 'blog/[id]/default.tsx', 0, true), null, 2))
+const wiredTree = createSearchTree(wiredFixture)
+console.log('root.fallback (built-in, wrapped by root layout):', JSON.stringify(wiredTree.fallback))
+console.log('blog.page (frames: root, blog):', JSON.stringify(wiredTree.statics!.blog!.page))
+console.log('blog.fallback (no own default - walks up to the root boundary):',
+  JSON.stringify(wiredTree.statics!.blog!.fallback))
+console.log('blog.[id].page (frames: root, blog, [id]):', JSON.stringify(wiredTree.statics!.blog!.dynamic!.page))
+console.log('blog.[id].fallback ([id]\'s own default, its frame stripped):',
+  JSON.stringify(wiredTree.statics!.blog!.dynamic!.fallback))
 
 // if they have lots of hearts you exhaust your own hearts
 // play high early game but not too high
