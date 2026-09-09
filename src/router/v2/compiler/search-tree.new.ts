@@ -204,8 +204,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page?
       if (!routeNode.modulePaths.page) return
       const position = ctx.positionOf.get(routeNode)!
-      if (!ctx.pageOwnerOf.has(position))
-        ctx.pageOwnerOf.set(position, routeNode)
+      ctx.pageOwnerOf.getOrInsert(position, routeNode)
     },
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
