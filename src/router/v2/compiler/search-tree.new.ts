@@ -48,6 +48,9 @@ function openPosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent)
 
+    case 'catchall':
+      return parent.catchall ??= createSearchNode(routeNode, parent)
+
     default: // catchall
       return parent.catchall ??= createSearchNode(routeNode, parent)
   }
