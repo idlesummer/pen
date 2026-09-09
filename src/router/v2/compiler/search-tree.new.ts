@@ -41,12 +41,13 @@ function openPosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
   const segment = routeNode.segment
 
   switch (segment.type) {
-    case 'static': {
-      const statics = parent.statics ??= dict<SearchNode>()
-      return statics[segment.value] ??= createSearchNode(routeNode, parent)
-    }
+    case 'static':
+      parent.statics ??= dict<SearchNode>()
+      return parent.statics[segment.value] ??= createSearchNode(routeNode, parent)
+
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent)
+
     default: // catchall
       return parent.catchall ??= createSearchNode(routeNode, parent)
   }
