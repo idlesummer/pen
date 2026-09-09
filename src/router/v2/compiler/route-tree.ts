@@ -1,6 +1,5 @@
 import type { Segment } from '@/router/compiling/segment'
 import type { RouteModulePaths } from '@/router/compiling/route-module'
-import { sep } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { filterRouteFiles, getRouteModuleType } from '@/router/compiling/route-module'
@@ -40,7 +39,9 @@ export function forEach(root: RouteNode, visit: (routeNode: RouteNode) => void) 
 export function createRouteTree(filePaths: string[]): RouteNode {
   const routeTree = createRouteNode('', '')
 
-  treeify(routeTree, filterRouteFiles(filePaths), sep, {
+  // Always '/', never node:path's sep - these are route paths, not OS file
+  // paths, and stay forward-slash on every platform regardless of host OS.
+  treeify(routeTree, filterRouteFiles(filePaths), '/', {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const moduleName = parts[index]! // always defined - create only yields existing indices
       if (index === parts.length-1) {  // the last part is the file itself
