@@ -147,14 +147,14 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
 /** Resolves every position's page (if it has one) and fallback (always) -
  *  runs once every folder's frame and page ownership is known. */
 function resolveEndpoints(ctx: BuildContext) {
-  for (const node of ctx.nodes) {
-    const pageOwner = ctx.pageOwnerOf.get(node)
+  for (const searchNode of ctx.nodes) {
+    const pageOwner = ctx.pageOwnerOf.get(searchNode)
     if (pageOwner)
-      node.page = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
+      searchNode.page = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
 
-    const defaultOwner = findDefaultOwner(ctx.anchorOf.get(node)!)
+    const defaultOwner = findDefaultOwner(ctx.anchorOf.get(searchNode)!)
     const content = defaultOwner.modulePaths.default ?? DEFAULT_FALLBACK_PATH
-    node.fallback = createEndpoint(defaultOwner, content, true, ctx)
+    searchNode.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
 }
 
