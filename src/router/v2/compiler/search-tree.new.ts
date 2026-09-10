@@ -165,14 +165,14 @@ function resolveEndpoints(ctx: BuildContext) {
 function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
   const segment = routeNode.segment
   switch (segment.type) {
-    case 'group':
+    default: // group
       return parent
     case 'static':
       parent.statics ??= dict<SearchNode>()
       return parent.statics[segment.value] ??= createSearchNode(routeNode, parent, ctx)
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
-    default: // catchall
+    case 'catchall':
       return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
   }
 }
