@@ -125,7 +125,9 @@ function createEndpoint(owner: RouteNode, content: string, isFallback: boolean, 
   // renders, so it would otherwise be a boundary around itself.
   if (isFallback && frames.length)
     frames[frames.length-1] = stripOwnDefault(frames[frames.length-1]!)
-  return { frames: frames.filter(wraps), content, contentDepth: ctx.positionOf.get(owner)!.depth }
+
+  const contentDepth = ctx.positionOf.get(owner)!.depth
+  return { frames: frames.filter(wraps), content, contentDepth }
 }
 
 /** The folder whose `default` covers this position - or, if nothing up the
