@@ -20,7 +20,7 @@ export type SearchNode = {
   dynamic?: SearchNode
   catchall?: SearchNode
   // Rendering
-  page?: Endpoint     // set when a folder in this position's territory owns a page
+  endpoint?: Endpoint // set when a folder in this position's territory owns a page
   fallback: Endpoint  // always present - the default guarantee, resolved here
 }
 
@@ -150,7 +150,7 @@ function resolveEndpoints(ctx: BuildContext) {
   for (const searchNode of ctx.nodes) {
     const pageOwner = ctx.pageOwnerOf.get(searchNode)
     if (pageOwner)
-      searchNode.page = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
+      searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
 
     const defaultOwner = findDefaultOwner(ctx.anchorOf.get(searchNode)!)
     const content = defaultOwner.modulePaths.default ?? DEFAULT_FALLBACK_PATH
@@ -266,10 +266,10 @@ const wiredFixture = createRouteTree([
 ])
 const wiredTree = createSearchTree(wiredFixture)
 console.log('root.fallback (built-in, wrapped by root layout):', JSON.stringify(wiredTree.fallback))
-console.log('blog.page (frames: root, blog):', JSON.stringify(wiredTree.statics!.blog!.page))
+console.log('blog.endpoint (frames: root, blog):', JSON.stringify(wiredTree.statics!.blog!.endpoint))
 console.log('blog.fallback (no own default - walks up to the root boundary):',
   JSON.stringify(wiredTree.statics!.blog!.fallback))
-console.log('blog.[id].page (frames: root, blog, [id]):', JSON.stringify(wiredTree.statics!.blog!.dynamic!.page))
+console.log('blog.[id].endpoint (frames: root, blog, [id]):', JSON.stringify(wiredTree.statics!.blog!.dynamic!.endpoint))
 console.log('blog.[id].fallback ([id]\'s own default, its frame stripped):',
   JSON.stringify(wiredTree.statics!.blog!.dynamic!.fallback))
 
