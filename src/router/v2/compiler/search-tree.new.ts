@@ -196,7 +196,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   const ctx: BuildContext = {
     anchorOf: new Map([[searchTree, routeTree]]),
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
-    pageOwnerOf: new Map(),
+    pageOwnerOf: new Map<SearchNode, RouteNode>(),
     nodes: [searchTree],
   }
 
