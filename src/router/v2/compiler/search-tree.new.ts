@@ -123,10 +123,8 @@ function createEndpoint(owner: RouteNode, content: string, isFallback: boolean, 
 
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself.
-  if (isFallback && frames.length) {
-    const last = frames.length - 1
-    frames[last] = stripOwnDefault(frames[last]!)
-  }
+  if (isFallback && frames.length)
+    frames[frames.length-1] = stripOwnDefault(frames[frames.length-1]!)
   return { frames: frames.filter(wraps), content, contentDepth: ctx.positionOf.get(owner)!.depth }
 }
 
