@@ -5,6 +5,23 @@ import { createRouteTree, forEach } from './route-tree'
 import { DEFAULT_FALLBACK_PATH } from '@/router/compiling/route-module'
 import { isDynamicOrCatchall, isUrlConsuming } from '@/router/compiling/segment'
 
+/** One folder's wrapping modules - everything it contributes AROUND a page,
+ *  never the page itself. A folder earns a Frame only if it wraps something. */
+export type Frame = {
+  layout?: string
+  loading?: string
+  error?: string
+  default?: string
+}
+
+/** Everything needed to render one accepted position: the complete wrapper
+ *  chain, outermost first, and the module at the bottom of it. */
+export type Endpoint = {
+  frames: Frame[]
+  content: string
+  contentDepth: number // which position's params `content` receives
+}
+
 /** One URL position: somewhere a URL segment can land. Groups fold
  *  transparently into the position around them, so this is never "a folder" -
  *  several RouteNodes can share one SearchNode. */
@@ -50,15 +67,6 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
   return node
 }
 
-/** One folder's wrapping modules - everything it contributes AROUND a page,
- *  never the page itself. A folder earns a Frame only if it wraps something. */
-export type Frame = {
-  layout?: string
-  loading?: string
-  error?: string
-  default?: string
-}
-
 /** Where routing stops inheriting: the app root, and each slot. Both must
  *  always be able to render "nothing claimed this", so both always carry a
  *  default - a real one if declared, the built-in otherwise. */
@@ -94,14 +102,6 @@ function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
 function forEachAncestor(routeNode: RouteNode, visit: (routeNode: RouteNode) => void) {
   for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node))
     visit(node)
-}
-
-/** Everything needed to render one accepted position: the complete wrapper
- *  chain, outermost first, and the module at the bottom of it. */
-export type Endpoint = {
-  frames: Frame[]
-  content: string
-  contentDepth: number // which position's params `content` receives
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
