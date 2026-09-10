@@ -98,10 +98,14 @@ function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
     return routeNode.parent
 }
 
-/** Visits routeNode and each ancestor routing inherits from, root-ward. */
-function forEachAncestor(routeNode: RouteNode, visit: (routeNode: RouteNode) => void) {
-  for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node))
-    visit(node)
+function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined) {
+  const result: T[] = []
+  for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node)) {
+    const value = fn(node)
+    if (value !== undefined)
+      result.push(value)
+  }
+  return result
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
@@ -114,12 +118,7 @@ function stripOwnDefault(frame: Frame): Frame {
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
 function createEndpoint(owner: RouteNode, content: string, isFallback: boolean, ctx: BuildContext): Endpoint {
-  const frames: Frame[] = []
-  forEachAncestor(owner, (routeNode) => {
-    const frame = createFrame(routeNode)
-    if (frame) frames.push(frame)
-  })
-  frames.reverse() // ancestry walks leafward-to-rootward; chains render outermost first
+  const frames = compactMapAncestors(owner, createFrame).reverse()
 
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself.
