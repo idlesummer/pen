@@ -164,18 +164,14 @@ function resolveEndpoints(ctx: BuildContext) {
  *  their folders are excluded from the walk entirely, see expandChildren. */
 function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
   const segment = routeNode.segment
-
   switch (segment.type) {
     case 'group':
       return parent
-
     case 'static':
       parent.statics ??= dict<SearchNode>()
       return parent.statics[segment.value] ??= createSearchNode(routeNode, parent, ctx)
-
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
-
     default: // catchall
       return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
   }
