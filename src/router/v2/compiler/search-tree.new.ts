@@ -209,7 +209,8 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
       const parentPosition = ctx.positionOf.get(parentRouteNode)!
-      ctx.positionOf.set(childRouteNode, getOrCreatePosition(childRouteNode, parentPosition, ctx))
+      const childPosition = getOrCreatePosition(childRouteNode, parentPosition, ctx)
+      ctx.positionOf.set(childRouteNode, childPosition)
     },
   })
 
