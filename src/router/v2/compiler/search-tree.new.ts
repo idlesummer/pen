@@ -168,21 +168,21 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
-function createEndpoint(owner: RouteNode, content: string, ctx: BuildContext): Endpoint {
-  const frames = compactMapAncestors(owner, createFrame).reverse()
-  const contentDepth = ctx.positionOf.get(owner)!.depth
+function createEndpoint(pageOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
+  const frames = compactMapAncestors(pageOwner, createFrame).reverse()
+  const contentDepth = ctx.positionOf.get(pageOwner)!.depth
   return { frames: frames.filter(wraps), content, contentDepth }
 }
 
-function createFallback(owner: RouteNode, content: string, ctx: BuildContext): Endpoint {
-  const frames = compactMapAncestors(owner, createFrame).reverse()
+function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
+  const frames = compactMapAncestors(defaultOwner, createFrame).reverse()
   const lastFrame = frames[frames.length-1]
 
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself.
   if (lastFrame)
     frames[frames.length-1] = stripOwnDefault(lastFrame)
-  const contentDepth = ctx.positionOf.get(owner)!.depth
+  const contentDepth = ctx.positionOf.get(defaultOwner)!.depth
   return { frames: frames.filter(wraps), content, contentDepth }
 }
 
