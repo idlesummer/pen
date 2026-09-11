@@ -63,3 +63,10 @@ export function isUrlConsuming(type: SegmentType): boolean {
 export function isDynamicOrCatchall(type: SegmentType): boolean {
   return type === 'dynamic' || type === 'catchall'
 }
+
+/** Where routing stops inheriting: the app root, and each slot. Both must
+ *  always be able to render "nothing claimed this", so both always carry a
+ *  default - a real one if declared, the built-in otherwise. */
+export function isBoundary(type: SegmentType): boolean {
+  return type === 'root' || type === 'slot'
+}
