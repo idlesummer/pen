@@ -32,7 +32,7 @@ export type SearchNode = {
   param?: string       // the name this position binds, for dynamic/catch-all
   // Flags
   isCatchall?: true    // accepts even with url segments left over
-  // Tree children
+  // Children
   statics?: Record<string, SearchNode>
   dynamic?: SearchNode
   catchall?: SearchNode
