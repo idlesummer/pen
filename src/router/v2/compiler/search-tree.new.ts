@@ -187,7 +187,12 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
 }
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {
-  const searchTree: SearchNode = { urlDepth: 0, staticness: 0, depth: 0, fallback: undefined as never }
+  const searchTree: SearchNode = {
+    urlDepth: 0,
+    staticness: 0,
+    depth: 0,
+    fallback: undefined as never,
+  }
   const ctx: BuildContext = {
     anchorOf: new Map([[searchTree, routeTree]]),
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
