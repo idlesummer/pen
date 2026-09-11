@@ -144,14 +144,20 @@ function stripOwnDefault(frame: Frame): Frame {
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
-function createEndpoint(owner: RouteNode, content: string, isFallback: boolean, ctx: BuildContext): Endpoint {
+function createEndpoint(owner: RouteNode, content: string, ctx: BuildContext): Endpoint {
   const frames = compactMapAncestors(owner, createFrame).reverse()
+  const contentDepth = ctx.positionOf.get(owner)!.depth
+  return { frames: frames.filter(wraps), content, contentDepth }
+}
+
+function createFallback(owner: RouteNode, content: string, ctx: BuildContext): Endpoint {
+  const frames = compactMapAncestors(owner, createFrame).reverse()
+  const lastFrame = frames[frames.length-1]
 
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself.
-  if (isFallback && frames.length)
-    frames[frames.length-1] = stripOwnDefault(frames[frames.length-1]!)
-
+  if (lastFrame)
+    frames[frames.length-1] = stripOwnDefault(lastFrame)
   const contentDepth = ctx.positionOf.get(owner)!.depth
   return { frames: frames.filter(wraps), content, contentDepth }
 }
@@ -176,11 +182,11 @@ function populateEndpoints(ctx: BuildContext) {
   for (const searchNode of ctx.nodes) {
     const pageOwner = ctx.pageOwnerOf.get(searchNode)
     if (pageOwner)
-      searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modules.page!, false, ctx)
+      searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modules.page!, ctx)
 
     const defaultOwner = findDefaultOwner(ctx.anchorOf.get(searchNode)!)
     const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
-    searchNode.fallback = createEndpoint(defaultOwner, content, true, ctx)
+    searchNode.fallback = createFallback(defaultOwner, content, ctx)
   }
 }
 
