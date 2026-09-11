@@ -201,7 +201,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page?
-      if (!routeNode.modules.page) return
+      if (!routeNode.modules.page) return // after this, routeNode is a page owner
       const searchNode = ctx.positionOf.get(routeNode)!
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
     },
