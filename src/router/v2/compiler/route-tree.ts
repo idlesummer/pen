@@ -1,9 +1,9 @@
-import type { Segment } from '@/router/compiling/segment'
 import type { RouteModulePaths } from '@/router/compiling/route-module'
+import type { SegmentType } from './segment'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { filterRouteFiles, getRouteModuleType } from '@/router/compiling/route-module'
-import { createSegment, isPrivate } from '@/router/compiling/segment'
+import { createSegment, isPrivate } from './segment'
 
 /** The parse: one node per folder, mirroring the app directory. It knows the
  *  filesystem and nothing about routing rules.
@@ -16,7 +16,8 @@ import { createSegment, isPrivate } from '@/router/compiling/segment'
  *  either order, or not at all, without changing the result. */
 export type RouteNode = {
   name: string
-  segment: Segment
+  type: SegmentType
+  segment: string
   path: string
   modulePaths: RouteModulePaths
   // Tree
@@ -25,7 +26,7 @@ export type RouteNode = {
 }
 
 function createRouteNode(name: string, path: string): RouteNode {
-  return { name, segment: createSegment(name), path, modulePaths: {}, children: [] }
+  return { name, ...createSegment(name), path, modulePaths: {}, children: [] }
 }
 
 /** Visits every route node. */
