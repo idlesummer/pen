@@ -61,7 +61,7 @@ function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
     return routeNode.parent
 }
 
-function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined) {
+function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
   const result: T[] = []
   for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node)) {
     const value = fn(node)
