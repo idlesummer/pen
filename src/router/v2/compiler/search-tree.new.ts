@@ -181,8 +181,7 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: Buil
 function expandChildren(routeNode: RouteNode): RouteNode[] {
   if (routeNode.type === 'catchall')
     return []
-  return routeNode.children.filter(child =>
-    child.type !== 'malformed' && child.type !== 'slot')
+  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
 }
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {
