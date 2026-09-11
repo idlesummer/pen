@@ -49,6 +49,51 @@ type BuildContext = {
   nodes: SearchNode[]                    // every position, for the final resolve pass
 }
 
+/** The children worth walking, for now: a catch-all is terminal, and slots
+ *  are out of scope until they get their own step. Malformed folders are
+ *  skipped too - they carry no route to open a position with. */
+function expandChildren(routeNode: RouteNode): RouteNode[] {
+  if (routeNode.type === 'catchall')
+    return []
+  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
+}
+
+function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
+  const type = routeNode.type
+  const node: SearchNode = {
+    urlDepth: parent.urlDepth + +isUrlConsuming(type),
+    staticness: parent.staticness - +isDynamicOrCatchall(type),
+    depth: parent.depth + 1,
+    fallback: undefined as never, // filled by populateEndpoints, once every position exists
+  }
+  if (isDynamicOrCatchall(type))
+    node.param = routeNode.segment
+  if (type === 'catchall')
+    node.isCatchall = true
+
+  ctx.anchorOf.set(node, routeNode)
+  ctx.nodes.push(node)
+  return node
+}
+
+/** Gets the position a folder belongs to, creating it if it doesn't exist
+ *  yet - a group just returns the one already there (its parent's), while
+ *  everything else looks up or opens its own. Slots aren't handled yet -
+ *  their folders are excluded from the walk entirely, see expandChildren. */
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
+  switch (routeNode.type) {
+    default: // group
+      return parent
+    case 'static':
+      parent.statics ??= dict<SearchNode>()
+      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, ctx)
+    case 'dynamic':
+      return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
+    case 'catchall':
+      return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
+  }
+}
+
 /** Where routing stops inheriting: the app root, and each slot. Both must
  *  always be able to render "nothing claimed this", so both always carry a
  *  default - a real one if declared, the built-in otherwise. */
@@ -137,51 +182,6 @@ function populateEndpoints(ctx: BuildContext) {
     const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
     searchNode.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
-}
-
-function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const type = routeNode.type
-  const node: SearchNode = {
-    urlDepth: parent.urlDepth + +isUrlConsuming(type),
-    staticness: parent.staticness - +isDynamicOrCatchall(type),
-    depth: parent.depth + 1,
-    fallback: undefined as never, // filled by populateEndpoints, once every position exists
-  }
-  if (isDynamicOrCatchall(type))
-    node.param = routeNode.segment
-  if (type === 'catchall')
-    node.isCatchall = true
-
-  ctx.anchorOf.set(node, routeNode)
-  ctx.nodes.push(node)
-  return node
-}
-
-/** Gets the position a folder belongs to, creating it if it doesn't exist
- *  yet - a group just returns the one already there (its parent's), while
- *  everything else looks up or opens its own. Slots aren't handled yet -
- *  their folders are excluded from the walk entirely, see expandChildren. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  switch (routeNode.type) {
-    default: // group
-      return parent
-    case 'static':
-      parent.statics ??= dict<SearchNode>()
-      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, ctx)
-    case 'dynamic':
-      return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
-    case 'catchall':
-      return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
-  }
-}
-
-/** The children worth walking, for now: a catch-all is terminal, and slots
- *  are out of scope until they get their own step. Malformed folders are
- *  skipped too - they carry no route to open a position with. */
-function expandChildren(routeNode: RouteNode): RouteNode[] {
-  if (routeNode.type === 'catchall')
-    return []
-  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
 }
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {
