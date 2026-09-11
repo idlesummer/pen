@@ -78,8 +78,8 @@ function isBoundary(routeNode: RouteNode): boolean {
  *  folder with no layout/loading/error/default contributes nothing to the
  *  chain, so there's no point giving it one. */
 function createFrame(routeNode: RouteNode): Frame | undefined {
-  const { layout, loading, error } = routeNode.modulePaths
-  const def = routeNode.modulePaths.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
+  const { layout, loading, error } = routeNode.modules
+  const def = routeNode.modules.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
   if (!layout && !loading && !error && !def)
     return
   return { layout, loading, error, default: def }
@@ -136,7 +136,7 @@ function createEndpoint(owner: RouteNode, content: string, isFallback: boolean, 
  *  route tree. */
 function findDefaultOwner(routeNode: RouteNode): RouteNode {
   for (let node = routeNode; ; ) {
-    if (node.modulePaths.default) return node
+    if (node.modules.default) return node
     const parent = inheritedParent(node)
     if (!parent) return node
     node = parent
@@ -149,10 +149,10 @@ function resolveEndpoints(ctx: BuildContext) {
   for (const searchNode of ctx.nodes) {
     const pageOwner = ctx.pageOwnerOf.get(searchNode)
     if (pageOwner)
-      searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
+      searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modules.page!, false, ctx)
 
     const defaultOwner = findDefaultOwner(ctx.anchorOf.get(searchNode)!)
-    const content = defaultOwner.modulePaths.default ?? DEFAULT_FALLBACK_PATH
+    const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
     searchNode.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
 }
@@ -201,7 +201,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page?
-      if (!routeNode.modulePaths.page) return
+      if (!routeNode.modules.page) return
       const searchNode = ctx.positionOf.get(routeNode)!
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
     },

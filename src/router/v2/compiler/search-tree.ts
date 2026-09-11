@@ -106,7 +106,7 @@ function forEachAncestor(routeNode: RouteNode, visit: (routeNode: RouteNode) => 
  *  route tree. */
 function findDefaultOwner(routeNode: RouteNode): RouteNode {
   for (let node = routeNode; ; ) {
-    if (node.modulePaths.default) return node
+    if (node.modules.default) return node
     const parent = inheritedParent(node)
     if (!parent) return node
     node = parent
@@ -125,8 +125,8 @@ function isBoundary(routeNode: RouteNode): boolean {
 }
 
 function createFrame(routeNode: RouteNode, position: SearchNode): Frame | undefined {
-  const { layout, loading, error } = routeNode.modulePaths
-  const def = routeNode.modulePaths.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
+  const { layout, loading, error } = routeNode.modules
+  const def = routeNode.modules.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
   if (!layout && !loading && !error && !def)
     return
   return { layout, loading, error, default: def, paramDepth: position.depth }
@@ -261,10 +261,10 @@ function resolveEndpoints(ctx: BuildContext) {
   for (const node of ctx.nodes) {
     const pageOwner = ctx.pageOwnerOf.get(node)
     if (pageOwner)
-      node.page = createEndpoint(pageOwner, pageOwner.modulePaths.page!, false, ctx)
+      node.page = createEndpoint(pageOwner, pageOwner.modules.page!, false, ctx)
 
     const defaultOwner = findDefaultOwner(ctx.anchorOf.get(node)!)
-    const content = defaultOwner.modulePaths.default ?? DEFAULT_FALLBACK_PATH
+    const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
     node.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
 }
@@ -297,7 +297,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
       const frame = createFrame(routeNode, position)
       if (frame) ctx.frameOf.set(routeNode, frame)
 
-      if (routeNode.modulePaths.page) {
+      if (routeNode.modules.page) {
         if (!ctx.pageOwnerOf.has(position)) ctx.pageOwnerOf.set(position, routeNode)
         conflictsFor(position, ctx).pages.push(routeNode)
       }

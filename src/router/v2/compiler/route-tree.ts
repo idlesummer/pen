@@ -19,14 +19,14 @@ export type RouteNode = {
   type: SegmentType
   segment: string
   path: string
-  modulePaths: RouteModulePaths
+  modules: RouteModulePaths
   // Tree
   parent?: RouteNode
   children: RouteNode[]
 }
 
 function createRouteNode(name: string, path: string): RouteNode {
-  return { name, ...createSegment(name), path, modulePaths: {}, children: [] }
+  return { name, ...createSegment(name), path, modules: {}, children: [] }
 }
 
 /** Visits every route node. */
@@ -46,7 +46,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const moduleName = parts[index]! // always defined - create only yields existing indices
       if (index === parts.length-1) {  // the last part is the file itself
-        parentRouteNode.modulePaths[getRouteModuleType(moduleName)] = filePath
+        parentRouteNode.modules[getRouteModuleType(moduleName)] = filePath
         return
       }
       if (isPrivate(moduleName)) return // prunes the rest of this path
@@ -65,5 +65,5 @@ export function createRouteTree(filePaths: string[]): RouteNode {
 /** The file a diagnostic should point at - a folder the user can go open.
  *  Falls back to the route path for a folder that owns no module of its own. */
 export function getRouteSource(routeNode: RouteNode): string {
-  return Object.values(routeNode.modulePaths)[0] ?? routeNode.path
+  return Object.values(routeNode.modules)[0] ?? routeNode.path
 }
