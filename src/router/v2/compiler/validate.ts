@@ -14,7 +14,7 @@ function pageSource(routeNode: RouteNode): string {
 /** The nearest ancestor that is itself a slot, if any. */
 function findSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
   for (let node = routeNode.parent; node; node = node.parent)
-    if (node.segment.type === 'slot') return node
+    if (node.type === 'slot') return node
 }
 
 /** A param name used twice on one path - the inner binding would shadow the
@@ -22,10 +22,10 @@ function findSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
 function findRepeatedParam(routeNode: RouteNode): string | undefined {
   const names = new Set<string>()
   for (let node: RouteNode | undefined = routeNode; node; node = node.parent) {
-    const segmentType = node.segment.type
+    const segmentType = node.type
     if (segmentType !== 'dynamic' && segmentType !== 'catchall') continue
 
-    const paramName = node.segment.value
+    const paramName = node.segment
     if (names.has(paramName)) return paramName
     names.add(paramName)
   }
@@ -38,13 +38,13 @@ export function validateRouteTree(routeTree: RouteNode): CompileDiagnostic[] {
   const diagnostics: CompileDiagnostic[] = []
 
   forEach(routeTree, (routeNode) => {
-    const segmentType = routeNode.segment.type
+    const segmentType = routeNode.type
 
     if (segmentType === 'malformed') {
       return void diagnostics.push({
         rule: 'malformed-segment',
         severity: 'error',
-        message: `"${routeNode.name}": ${routeNode.segment.value}`,
+        message: `"${routeNode.name}": ${routeNode.segment}`,
         files: [getRouteSource(routeNode)],
       })
     }

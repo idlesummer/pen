@@ -50,16 +50,16 @@ type BuildContext = {
 }
 
 function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const segment = routeNode.segment
+  const { type, segment } = routeNode
   const node: SearchNode = {
-    urlDepth: parent.urlDepth + +isUrlConsuming(segment.type),
-    staticness: parent.staticness - +isDynamicOrCatchall(segment.type),
+    urlDepth: parent.urlDepth + +isUrlConsuming(type),
+    staticness: parent.staticness - +isDynamicOrCatchall(type),
     depth: parent.depth + 1,
     fallback: undefined as never, // filled by resolveEndpoints, once every position exists
   }
-  if (isDynamicOrCatchall(segment.type))
-    node.param = segment.value
-  if (segment.type === 'catchall')
+  if (isDynamicOrCatchall(type))
+    node.param = segment
+  if (type === 'catchall')
     node.isCatchall = true
 
   ctx.anchorOf.set(node, routeNode)
@@ -71,7 +71,7 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
  *  always be able to render "nothing claimed this", so both always carry a
  *  default - a real one if declared, the built-in otherwise. */
 function isBoundary(routeNode: RouteNode): boolean {
-  return !routeNode.parent || routeNode.segment.type === 'slot'
+  return !routeNode.parent || routeNode.type === 'slot'
 }
 
 /** A folder's own Frame, or undefined if it wraps nothing at all - a plain
@@ -94,7 +94,7 @@ function wraps(frame: Frame): boolean {
  *  a slot's own subtree renders through its own chain, never through
  *  whatever folder happens to surround the slot. */
 function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
-  if (routeNode.segment.type !== 'slot')
+  if (routeNode.type !== 'slot')
     return routeNode.parent
 }
 
@@ -162,13 +162,13 @@ function resolveEndpoints(ctx: BuildContext) {
  *  everything else looks up or opens its own. Slots aren't handled yet -
  *  their folders are excluded from the walk entirely, see expandChildren. */
 function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const segment = routeNode.segment
-  switch (segment.type) {
+  const { type, segment } = routeNode
+  switch (type) {
     default: // group
       return parent
     case 'static':
       parent.statics ??= dict<SearchNode>()
-      return parent.statics[segment.value] ??= createSearchNode(routeNode, parent, ctx)
+      return parent.statics[segment] ??= createSearchNode(routeNode, parent, ctx)
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
     case 'catchall':
@@ -180,10 +180,10 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: Buil
  *  are out of scope until they get their own step. Malformed folders are
  *  skipped too - they carry no route to open a position with. */
 function expandChildren(routeNode: RouteNode): RouteNode[] {
-  if (routeNode.segment.type === 'catchall')
+  if (routeNode.type === 'catchall')
     return []
   return routeNode.children.filter(child =>
-    child.segment.type !== 'malformed' && child.segment.type !== 'slot')
+    child.type !== 'malformed' && child.type !== 'slot')
 }
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {

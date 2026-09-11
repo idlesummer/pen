@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH } from '@/router/compiling/route-module'
-import { isDynamicOrCatchall, isUrlConsuming } from '@/router/compiling/segment'
+import { isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.
@@ -89,7 +89,7 @@ type BuildContext = {
 
 /** The next ancestor routing inherits from, or nothing at a slot boundary. */
 function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
-  if (routeNode.segment.type !== 'slot')
+  if (routeNode.type !== 'slot')
     return routeNode.parent
 }
 
@@ -121,7 +121,7 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
  *  by mutating the route tree; putting it here keeps the guarantee without
  *  touching the parse. */
 function isBoundary(routeNode: RouteNode): boolean {
-  return !routeNode.parent || routeNode.segment.type === 'slot'
+  return !routeNode.parent || routeNode.type === 'slot'
 }
 
 function createFrame(routeNode: RouteNode, position: SearchNode): Frame | undefined {
@@ -152,16 +152,16 @@ function conflictsFor(position: SearchNode, ctx: BuildContext): PositionConflict
 }
 
 function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const segment = routeNode.segment
+  const { type, segment } = routeNode
   const node: SearchNode = {
-    urlDepth: parent.urlDepth + +isUrlConsuming(segment),
-    staticness: parent.staticness - +isDynamicOrCatchall(segment),
+    urlDepth: parent.urlDepth + +isUrlConsuming(type),
+    staticness: parent.staticness - +isDynamicOrCatchall(type),
     depth: parent.depth + 1,
     fallback: undefined as never, // filled by resolveEndpoints, once every position exists
   }
-  if (isDynamicOrCatchall(segment))
-    node.param = segment.value
-  if (segment.type === 'catchall')
+  if (isDynamicOrCatchall(type))
+    node.param = segment
+  if (type === 'catchall')
     node.isCatchall = true
 
   ctx.anchorOf.set(node, routeNode)
@@ -174,15 +174,15 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
  *  they share a position. Chains are unaffected either way, since each is
  *  built from its own content owner's ancestry rather than from the position. */
 function openPosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const segment = routeNode.segment
+  const { type, segment } = routeNode
 
-  switch (segment.type) {
+  switch (type) {
     case 'static': {
       const statics = parent.statics ??= dict<SearchNode>()
-      return statics[segment.value] ??= createSearchNode(routeNode, parent, ctx)
+      return statics[segment] ??= createSearchNode(routeNode, parent, ctx)
     }
     case 'dynamic': {
-      conflictsFor(parent, ctx).dynamics[segment.value] ??= routeNode
+      conflictsFor(parent, ctx).dynamics[segment] ??= routeNode
       return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
     }
     default: {
@@ -198,18 +198,18 @@ function openPosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContex
  *  own (hence `depth` 0) and consumes no URL, so `urlDepth` carries over. */
 function openSlot(routeNode: RouteNode, position: SearchNode, ctx: BuildContext): SearchNode {
   const slots = ctx.slotsOf.getOrInsertComputed(position, dict<SearchNode>)
-  const existing = slots[routeNode.segment.value]
+  const existing = slots[routeNode.segment]
   if (existing) return existing // two folders can declare the same slot name; they merge
 
   const slotNode = createSearchNode(routeNode, position, ctx)
   slotNode.depth = 0
-  return slots[routeNode.segment.value] = slotNode
+  return slots[routeNode.segment] = slotNode
 }
 
 /** Which position a folder belongs to: transparent folders stay in their
  *  parent's, a slot roots its own, everything else opens a URL position. */
 function resolvePosition(routeNode: RouteNode, parentPosition: SearchNode, ctx: BuildContext): SearchNode {
-  const segmentType = routeNode.segment.type
+  const segmentType = routeNode.type
   if (segmentType === 'group' || segmentType === 'malformed')
     return parentPosition
   if (segmentType === 'slot')
@@ -222,13 +222,13 @@ function resolvePosition(routeNode: RouteNode, parentPosition: SearchNode, ctx: 
  *  enter them. Diagnostics still see them, because validation reads the tree
  *  independently. */
 function expandChildren(routeNode: RouteNode, ctx: BuildContext): RouteNode[] {
-  if (routeNode.segment.type === 'catchall')
+  if (routeNode.type === 'catchall')
     return [] // a catch-all is terminal; nothing nested under it is reachable
 
-  const insideSlot = routeNode.segment.type === 'slot' || ctx.insideSlot.has(routeNode)
+  const insideSlot = routeNode.type === 'slot' || ctx.insideSlot.has(routeNode)
   return routeNode.children.filter(child =>
-    child.segment.type !== 'malformed'                    // an illegal name routes nowhere
-    && !(insideSlot && child.segment.type === 'slot'))    // slot subtrees are terminal
+    child.type !== 'malformed'                    // an illegal name routes nowhere
+    && !(insideSlot && child.type === 'slot'))    // slot subtrees are terminal
 }
 
 // ── endpoints ──────────────────────────────────────────────────────────────
@@ -304,7 +304,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     },
     expand: routeNode => expandChildren(routeNode, ctx),
     attach: (childRouteNode, parentRouteNode) => { // carries the position down, in place of a parameter
-      if (parentRouteNode.segment.type === 'slot' || ctx.insideSlot.has(parentRouteNode))
+      if (parentRouteNode.type === 'slot' || ctx.insideSlot.has(parentRouteNode))
         ctx.insideSlot.add(childRouteNode)
 
       const parentPosition = ctx.positionOf.get(parentRouteNode)!
