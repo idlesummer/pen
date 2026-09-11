@@ -49,24 +49,6 @@ type BuildContext = {
   nodes: SearchNode[]                    // every position, for the final resolve pass
 }
 
-function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const type = routeNode.type
-  const node: SearchNode = {
-    urlDepth: parent.urlDepth + +isUrlConsuming(type),
-    staticness: parent.staticness - +isDynamicOrCatchall(type),
-    depth: parent.depth + 1,
-    fallback: undefined as never, // filled by populateEndpoints, once every position exists
-  }
-  if (isDynamicOrCatchall(type))
-    node.param = routeNode.segment
-  if (type === 'catchall')
-    node.isCatchall = true
-
-  ctx.anchorOf.set(node, routeNode)
-  ctx.nodes.push(node)
-  return node
-}
-
 /** Where routing stops inheriting: the app root, and each slot. Both must
  *  always be able to render "nothing claimed this", so both always carry a
  *  default - a real one if declared, the built-in otherwise. */
@@ -155,6 +137,24 @@ function populateEndpoints(ctx: BuildContext) {
     const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
     searchNode.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
+}
+
+function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
+  const type = routeNode.type
+  const node: SearchNode = {
+    urlDepth: parent.urlDepth + +isUrlConsuming(type),
+    staticness: parent.staticness - +isDynamicOrCatchall(type),
+    depth: parent.depth + 1,
+    fallback: undefined as never, // filled by populateEndpoints, once every position exists
+  }
+  if (isDynamicOrCatchall(type))
+    node.param = routeNode.segment
+  if (type === 'catchall')
+    node.isCatchall = true
+
+  ctx.anchorOf.set(node, routeNode)
+  ctx.nodes.push(node)
+  return node
 }
 
 /** Gets the position a folder belongs to, creating it if it doesn't exist
