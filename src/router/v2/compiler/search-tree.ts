@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { DEFAULT_FALLBACK_PATH } from '@/router/compiling/route-module'
-import { isDynamicOrCatchall, isUrlConsuming } from './segment'
+import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.
@@ -115,18 +115,9 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
 
 // ── frames ─────────────────────────────────────────────────────────────────
 
-/** Where routing stops inheriting: the app root, and each slot. Both must
- *  always be able to render "nothing claimed this", so both always carry a
- *  default - a real one if declared, the built-in otherwise. v1 planted that
- *  by mutating the route tree; putting it here keeps the guarantee without
- *  touching the parse. */
-function isBoundary(routeNode: RouteNode): boolean {
-  return routeNode.type === 'root' || routeNode.type === 'slot'
-}
-
 function createFrame(routeNode: RouteNode, position: SearchNode): Frame | undefined {
   const { layout, loading, error } = routeNode.modules
-  const def = routeNode.modules.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
+  const def = routeNode.modules.default ?? (isBoundary(routeNode.type) ? DEFAULT_FALLBACK_PATH : undefined)
   if (!layout && !loading && !error && !def)
     return
   return { layout, loading, error, default: def, paramDepth: position.depth }
