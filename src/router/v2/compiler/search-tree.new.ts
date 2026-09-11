@@ -162,13 +162,12 @@ function resolveEndpoints(ctx: BuildContext) {
  *  everything else looks up or opens its own. Slots aren't handled yet -
  *  their folders are excluded from the walk entirely, see expandChildren. */
 function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const { type, segment } = routeNode
-  switch (type) {
+  switch (routeNode.type) {
     default: // group
       return parent
     case 'static':
       parent.statics ??= dict<SearchNode>()
-      return parent.statics[segment] ??= createSearchNode(routeNode, parent, ctx)
+      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, ctx)
     case 'dynamic':
       return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
     case 'catchall':
