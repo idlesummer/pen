@@ -4,6 +4,7 @@ export type SegmentType =
   | 'catchall'  // "[...slug]"   -> binds one-or-more, must be last
   | 'group'     // "(marketing)" -> invisible in URL, real in render tree
   | 'slot'      // "@modal"      -> parallel route pane
+  | 'root'      // the app root - its own type, so boundary checks are one field read
   | 'malformed' // anything illegal
 
 const IDENT = /^[A-Za-z_$][A-Za-z0-9_$]*$/  // A valid JavaScript identifier - used to validate param names like "id" in "[id]"
@@ -15,13 +16,12 @@ const STRAY_BRACKET_PATTERN = /[[\]()@]/    // A name containing stray brackets 
 /** Parses one folder name into RouteNode's own type/segment fields directly -
  *  flattened here rather than nested in a Segment object, since every caller
  *  just spreads the result straight into a RouteNode. '' is the app root's
- *  own case - real in the render tree, invisible in the URL, same as any
- *  other group. */
+ *  own case - it never gets a real folder name of its own to parse. */
 export function createSegment(name: string): { type: SegmentType; segment: string } {
   let match: RegExpMatchArray | null
 
   if (!name) // if name is empty string
-    return { type: 'group', segment: '' }
+    return { type: 'root', segment: '' }
 
   if ((match = name.match(CATCHALL_PATTERN)))
     return IDENT.test(match[1]!)

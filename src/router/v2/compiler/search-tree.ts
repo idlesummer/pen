@@ -121,7 +121,7 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
  *  by mutating the route tree; putting it here keeps the guarantee without
  *  touching the parse. */
 function isBoundary(routeNode: RouteNode): boolean {
-  return !routeNode.parent || routeNode.type === 'slot'
+  return routeNode.type === 'root' || routeNode.type === 'slot'
 }
 
 function createFrame(routeNode: RouteNode, position: SearchNode): Frame | undefined {
