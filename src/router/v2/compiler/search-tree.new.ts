@@ -3,7 +3,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree, forEach } from './route-tree'
 import { DEFAULT_FALLBACK_PATH } from '@/router/compiling/route-module'
-import { isDynamicOrCatchall, isUrlConsuming } from '@/router/compiling/segment'
+import { isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something. */
@@ -52,12 +52,12 @@ type BuildContext = {
 function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
   const segment = routeNode.segment
   const node: SearchNode = {
-    urlDepth: parent.urlDepth + +isUrlConsuming(segment),
-    staticness: parent.staticness - +isDynamicOrCatchall(segment),
+    urlDepth: parent.urlDepth + +isUrlConsuming(segment.type),
+    staticness: parent.staticness - +isDynamicOrCatchall(segment.type),
     depth: parent.depth + 1,
     fallback: undefined as never, // filled by resolveEndpoints, once every position exists
   }
-  if (isDynamicOrCatchall(segment))
+  if (isDynamicOrCatchall(segment.type))
     node.param = segment.value
   if (segment.type === 'catchall')
     node.isCatchall = true
