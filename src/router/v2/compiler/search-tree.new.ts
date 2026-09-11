@@ -91,7 +91,7 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
  *  always be able to render "nothing claimed this", so both always carry a
  *  default - a real one if declared, the built-in otherwise. */
 function isBoundary(routeNode: RouteNode): boolean {
-  return !routeNode.parent || routeNode.type === 'slot'
+  return routeNode.type === 'root' || routeNode.type === 'slot'
 }
 
 /** A folder's own Frame, or undefined if it wraps nothing at all - a plain
