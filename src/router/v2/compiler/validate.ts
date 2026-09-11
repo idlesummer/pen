@@ -8,7 +8,7 @@ import { forEach, getRouteSource } from './route-tree'
  *  is actually in conflict. A catch-all folder need not own a page, hence the
  *  fallback. */
 function pageSource(routeNode: RouteNode): string {
-  return routeNode.modulePaths.page ?? getRouteSource(routeNode)
+  return routeNode.modules.page ?? getRouteSource(routeNode)
 }
 
 /** The nearest ancestor that is itself a slot, if any. */
