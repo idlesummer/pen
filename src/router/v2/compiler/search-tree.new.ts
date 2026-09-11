@@ -49,14 +49,75 @@ type BuildContext = {
   nodes: SearchNode[]                    // every position, for the final resolve pass
 }
 
-/** The children worth walking, for now: a catch-all is terminal, and slots
- *  are out of scope until they get their own step. Malformed folders are
- *  skipped too - they carry no route to open a position with. */
-function expandChildren(routeNode: RouteNode): RouteNode[] {
-  if (routeNode.type === 'catchall')
-    return []
-  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
+// ── routing rules over the route tree ──────────────────────────────────────
+// These stop at slot boundaries, which is a statement about how routing
+// inherits rather than about folders - so they live here, not in route-tree.
+
+/** The next ancestor routing inherits from, or nothing at a slot boundary -
+ *  a slot's own subtree renders through its own chain, never through
+ *  whatever folder happens to surround the slot. */
+function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
+  if (routeNode.type !== 'slot')
+    return routeNode.parent
 }
+
+function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined) {
+  const result: T[] = []
+  for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node)) {
+    const value = fn(node)
+    if (value !== undefined)
+      result.push(value)
+  }
+  return result
+}
+
+/** The folder whose `default` covers this position - or, if nothing up the
+ *  chain declares one, the boundary itself (the root, or the enclosing slot).
+ *  That boundary is where the built-in fallback is used, which is how "every
+ *  position renders something" holds without injecting anything into the
+ *  route tree. */
+function findDefaultOwner(routeNode: RouteNode): RouteNode {
+  for (let node = routeNode; ; ) {
+    if (node.modules.default) return node
+    const parent = inheritedParent(node)
+    if (!parent) return node
+    node = parent
+  }
+}
+
+// ── frames ───────────────────────────────────────────────────────────────
+
+/** Where routing stops inheriting: the app root, and each slot. Both must
+ *  always be able to render "nothing claimed this", so both always carry a
+ *  default - a real one if declared, the built-in otherwise. */
+function isBoundary(routeNode: RouteNode): boolean {
+  return !routeNode.parent || routeNode.type === 'slot'
+}
+
+/** A folder's own Frame, or undefined if it wraps nothing at all - a plain
+ *  folder with no layout/loading/error/default contributes nothing to the
+ *  chain, so there's no point giving it one. */
+function createFrame(routeNode: RouteNode): Frame | undefined {
+  const { layout, loading, error } = routeNode.modules
+  const def = routeNode.modules.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
+  if (!layout && !loading && !error && !def)
+    return
+  return { layout, loading, error, default: def }
+}
+
+/** The same frame without its own `default` - for an endpoint whose content
+ *  IS that default, so it isn't also a boundary around itself. */
+function stripOwnDefault(frame: Frame): Frame {
+  const { layout, loading, error } = frame
+  return { layout, loading, error }
+}
+
+/** True if a frame still renders something once assembled. */
+function wraps(frame: Frame): boolean {
+  return !!(frame.layout || frame.loading || frame.error || frame.default)
+}
+
+// ── positions ───────────────────────────────────────────────────────────
 
 function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
   const type = routeNode.type
@@ -94,53 +155,16 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: Buil
   }
 }
 
-/** Where routing stops inheriting: the app root, and each slot. Both must
- *  always be able to render "nothing claimed this", so both always carry a
- *  default - a real one if declared, the built-in otherwise. */
-function isBoundary(routeNode: RouteNode): boolean {
-  return !routeNode.parent || routeNode.type === 'slot'
+/** The children worth walking, for now: a catch-all is terminal, and slots
+ *  are out of scope until they get their own step. Malformed folders are
+ *  skipped too - they carry no route to open a position with. */
+function expandChildren(routeNode: RouteNode): RouteNode[] {
+  if (routeNode.type === 'catchall')
+    return []
+  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
 }
 
-/** A folder's own Frame, or undefined if it wraps nothing at all - a plain
- *  folder with no layout/loading/error/default contributes nothing to the
- *  chain, so there's no point giving it one. */
-function createFrame(routeNode: RouteNode): Frame | undefined {
-  const { layout, loading, error } = routeNode.modules
-  const def = routeNode.modules.default ?? (isBoundary(routeNode) ? DEFAULT_FALLBACK_PATH : undefined)
-  if (!layout && !loading && !error && !def)
-    return
-  return { layout, loading, error, default: def }
-}
-
-/** True if a frame still renders something once assembled. */
-function wraps(frame: Frame): boolean {
-  return !!(frame.layout || frame.loading || frame.error || frame.default)
-}
-
-/** The next ancestor routing inherits from, or nothing at a slot boundary -
- *  a slot's own subtree renders through its own chain, never through
- *  whatever folder happens to surround the slot. */
-function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
-  if (routeNode.type !== 'slot')
-    return routeNode.parent
-}
-
-function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined) {
-  const result: T[] = []
-  for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node)) {
-    const value = fn(node)
-    if (value !== undefined)
-      result.push(value)
-  }
-  return result
-}
-
-/** The same frame without its own `default` - for an endpoint whose content
- *  IS that default, so it isn't also a boundary around itself. */
-function stripOwnDefault(frame: Frame): Frame {
-  const { layout, loading, error } = frame
-  return { layout, loading, error }
-}
+// ── endpoints ───────────────────────────────────────────────────────────
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
@@ -162,20 +186,6 @@ function createFallback(owner: RouteNode, content: string, ctx: BuildContext): E
   return { frames: frames.filter(wraps), content, contentDepth }
 }
 
-/** The folder whose `default` covers this position - or, if nothing up the
- *  chain declares one, the boundary itself (the root, or the enclosing slot).
- *  That boundary is where the built-in fallback is used, which is how "every
- *  position renders something" holds without injecting anything into the
- *  route tree. */
-function findDefaultOwner(routeNode: RouteNode): RouteNode {
-  for (let node = routeNode; ; ) {
-    if (node.modules.default) return node
-    const parent = inheritedParent(node)
-    if (!parent) return node
-    node = parent
-  }
-}
-
 /** Resolves every position's page (if it has one) and fallback (always) -
  *  runs once every folder's frame and page ownership is known. */
 function populateEndpoints(ctx: BuildContext) {
@@ -189,6 +199,8 @@ function populateEndpoints(ctx: BuildContext) {
     searchNode.fallback = createFallback(defaultOwner, content, ctx)
   }
 }
+
+// ── build ───────────────────────────────────────────────────────────────
 
 export function createSearchTree(routeTree: RouteNode): SearchNode {
   const searchTree: SearchNode = {
