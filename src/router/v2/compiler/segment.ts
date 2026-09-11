@@ -1,6 +1,10 @@
-import type { SegmentType } from '@/router/compiling/segment'
-
-export type { SegmentType }
+export type SegmentType =
+  | 'static'    // "blog"        -> literal URL segment
+  | 'dynamic'   // "[id]"        -> binds one URL segment
+  | 'catchall'  // "[...slug]"   -> binds one-or-more, must be last
+  | 'group'     // "(marketing)" -> invisible in URL, real in render tree
+  | 'slot'      // "@modal"      -> parallel route pane
+  | 'malformed' // anything illegal
 
 /** True if the segment consumes a url segment. */
 export function isUrlConsuming(type: SegmentType): boolean {
