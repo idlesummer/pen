@@ -50,7 +50,7 @@ type BuildContext = {
 }
 
 function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
-  const { type, segment } = routeNode
+  const type = routeNode.type
   const node: SearchNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
@@ -58,7 +58,7 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
     fallback: undefined as never, // filled by resolveEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
-    node.param = segment
+    node.param = routeNode.segment
   if (type === 'catchall')
     node.isCatchall = true
 
