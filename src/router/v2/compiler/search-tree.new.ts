@@ -55,7 +55,7 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
     depth: parent.depth + 1,
-    fallback: undefined as never, // filled by resolveEndpoints, once every position exists
+    fallback: undefined as never, // filled by populateEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
     node.param = routeNode.segment
@@ -145,7 +145,7 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
 
 /** Resolves every position's page (if it has one) and fallback (always) -
  *  runs once every folder's frame and page ownership is known. */
-function resolveEndpoints(ctx: BuildContext) {
+function populateEndpoints(ctx: BuildContext) {
   for (const searchNode of ctx.nodes) {
     const pageOwner = ctx.pageOwnerOf.get(searchNode)
     if (pageOwner)
@@ -213,7 +213,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     },
   })
 
-  resolveEndpoints(ctx)
+  populateEndpoints(ctx)
   return searchTree
 }
 
