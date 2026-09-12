@@ -107,7 +107,7 @@ function hasModule(frame: Frame): boolean {
 function createEndpoint(pageOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, createFrame).reverse()
   const contentDepth = ctx.positionOf.get(pageOwner)!.depth
-  return { frames: frames.filter(hasModule), content, contentDepth }
+  return { frames, content, contentDepth }
 }
 
 function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
