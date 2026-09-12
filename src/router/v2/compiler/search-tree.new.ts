@@ -90,7 +90,7 @@ function createFrame(routeNode: RouteNode): Frame | undefined {
 
 /** The same frame without its own `default` - for an endpoint whose content
  *  IS that default, so it isn't also a boundary around itself. */
-function stripOwnDefault(frame: Frame): Frame {
+function removeDefault(frame: Frame): Frame {
   const { layout, loading, error } = frame
   return { layout, loading, error }
 }
@@ -117,7 +117,7 @@ function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildCont
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself.
   if (lastFrame)
-    frames[frames.length-1] = stripOwnDefault(lastFrame)
+    frames[frames.length-1] = removeDefault(lastFrame)
   const contentDepth = ctx.positionOf.get(defaultOwner)!.depth
   return { frames: frames.filter(hasModule), content, contentDepth }
 }
