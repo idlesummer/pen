@@ -54,14 +54,14 @@ type BuildContext = {
 // inherits rather than about folders - so they live here, not in route-tree.
 
 function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
-  const result: T[] = []
+  const values: T[] = []
   // No condition needed since we always stop at a default or boundary
   for (let node = routeNode; ; node = node.parent!) {
     const value = fn(node)
-    if (value !== undefined)   result.push(value)
+    if (value !== undefined)   values.push(value)
     if (isBoundary(node.type)) break
   }
-  return result
+  return values
 }
 
 /** The folder whose `default` covers this position - or, if nothing up the
