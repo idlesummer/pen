@@ -77,11 +77,9 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
  *  position renders something" holds without injecting anything into the
  *  route tree. */
 function findDefaultOwner(routeNode: RouteNode): RouteNode {
-  for (let node = routeNode; ; ) {
-    if (node.modules.default) return node
-    const parent = inheritedParent(node)
-    if (!parent) return node
-    node = parent
+  for (let node = routeNode; ; node = node.parent!) {
+    if (node.modules.default || isBoundary(node.type))
+      return node
   }
 }
 
