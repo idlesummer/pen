@@ -58,11 +58,8 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
   // No condition needed since we always stop at a default or boundary
   for (let node = routeNode; ; node = node.parent!) {
     const value = fn(node)
-    if (value !== undefined)
-      result.push(value)
-
-    if (isBoundary(node.type))
-      break
+    if (value !== undefined)   result.push(value)
+    if (isBoundary(node.type)) break
   }
   return result
 }
