@@ -96,7 +96,7 @@ function stripOwnDefault(frame: Frame): Frame {
 }
 
 /** True if a frame still renders something once assembled. */
-function wraps(frame: Frame): boolean {
+function hasModule(frame: Frame): boolean {
   return !!(frame.layout || frame.loading || frame.error || frame.default)
 }
 
@@ -107,7 +107,7 @@ function wraps(frame: Frame): boolean {
 function createEndpoint(pageOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, createFrame).reverse()
   const contentDepth = ctx.positionOf.get(pageOwner)!.depth
-  return { frames: frames.filter(wraps), content, contentDepth }
+  return { frames: frames.filter(hasModule), content, contentDepth }
 }
 
 function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
@@ -119,7 +119,7 @@ function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildCont
   if (lastFrame)
     frames[frames.length-1] = stripOwnDefault(lastFrame)
   const contentDepth = ctx.positionOf.get(defaultOwner)!.depth
-  return { frames: frames.filter(wraps), content, contentDepth }
+  return { frames: frames.filter(hasModule), content, contentDepth }
 }
 
 /** Resolves every position's page (if it has one) and fallback (always) -
@@ -255,7 +255,7 @@ console.log(JSON.stringify(createSearchTree(routeTree), null, 2))
 console.log('\n--- frames (standalone, no positions involved) ---')
 forEach(routeTree, (routeNode) => {
   const frame = createFrame(routeNode)
-  if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame), 'wraps:', wraps(frame))
+  if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame), 'wraps:', hasModule(frame))
 })
 
 console.log('\n--- step 4: page/fallback wired onto real positions ---')
