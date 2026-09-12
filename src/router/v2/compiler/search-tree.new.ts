@@ -115,11 +115,15 @@ function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildCont
   const lastFrame = frames[frames.length-1] // if undefined then frames is empty
 
   // A fallback's innermost frame always carries the very module the endpoint
-  // renders, so it would otherwise be a boundary around itself.
-  if (lastFrame)
-    frames[frames.length-1] = removeDefault(lastFrame)
+  // renders, so it would otherwise be a boundary around itself - stripping it
+  // can leave nothing behind, in which case the frame drops out entirely.
+  if (lastFrame) {
+    const stripped = removeDefault(lastFrame)
+    if (hasModule(stripped)) frames[frames.length-1] = stripped
+    else frames.pop()
+  }
   const contentDepth = ctx.positionOf.get(defaultOwner)!.depth
-  return { frames: frames.filter(hasModule), content, contentDepth }
+  return { frames, content, contentDepth }
 }
 
 /** Resolves every position's page (if it has one) and fallback (always) -
