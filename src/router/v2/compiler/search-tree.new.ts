@@ -112,7 +112,7 @@ function createEndpoint(pageOwner: RouteNode, content: string, ctx: BuildContext
 
 function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
   const frames = compactMapAncestors(defaultOwner, createFrame).reverse()
-  const lastFrame = frames[frames.length-1]
+  const lastFrame = frames[frames.length-1] // if undefined then frames is empty
 
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself.
