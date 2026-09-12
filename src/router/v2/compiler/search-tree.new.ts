@@ -91,11 +91,11 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
  *  folder with no layout/loading/error/default contributes nothing to the
  *  chain, so there's no point giving it one. */
 function createFrame(routeNode: RouteNode): Frame | undefined {
-  const { layout, loading, error } = routeNode.modules
-  const def = routeNode.modules.default ?? (isBoundary(routeNode.type) ? DEFAULT_FALLBACK_PATH : undefined)
-  if (!layout && !loading && !error && !def)
+  const { layout, loading, error, default: def } = routeNode.modules
+  const defaultPath = def ?? (isBoundary(routeNode.type) ? DEFAULT_FALLBACK_PATH : undefined)
+  if (!layout && !loading && !error && !defaultPath)
     return
-  return { layout, loading, error, default: def }
+  return { layout, loading, error, default: defaultPath }
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
