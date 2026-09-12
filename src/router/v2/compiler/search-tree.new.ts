@@ -55,6 +55,7 @@ type BuildContext = {
 
 function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
   const result: T[] = []
+  // No condition needed since we always stop at a default or boundary
   for (let node = routeNode; ; node = node.parent!) {
     const value = fn(node)
     if (value !== undefined)
@@ -72,7 +73,6 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
  *  position renders something" holds without injecting anything into the
  *  route tree. */
 function findDefaultOwner(routeNode: RouteNode): RouteNode {
-  // No condition needed since we always stop at a default or boundary
   for (let node = routeNode; ; node = node.parent!) {
     if (node.modules.default || isBoundary(node.type))
       return node
