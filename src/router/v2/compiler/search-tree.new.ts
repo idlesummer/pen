@@ -53,14 +53,6 @@ type BuildContext = {
 // These stop at slot boundaries, which is a statement about how routing
 // inherits rather than about folders - so they live here, not in route-tree.
 
-/** The next ancestor routing inherits from, or nothing at a slot boundary -
- *  a slot's own subtree renders through its own chain, never through
- *  whatever folder happens to surround the slot. */
-function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
-  if (routeNode.type !== 'slot')
-    return routeNode.parent
-}
-
 function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
   const result: T[] = []
   for (let node: RouteNode | undefined = routeNode; node; node = inheritedParent(node)) {
@@ -69,6 +61,14 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
       result.push(value)
   }
   return result
+}
+
+/** The next ancestor routing inherits from, or nothing at a slot boundary -
+ *  a slot's own subtree renders through its own chain, never through
+ *  whatever folder happens to surround the slot. */
+function inheritedParent(routeNode: RouteNode): RouteNode | undefined {
+  if (routeNode.type !== 'slot')
+    return routeNode.parent
 }
 
 /** The folder whose `default` covers this position - or, if nothing up the
@@ -93,9 +93,8 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
 function createFrame(routeNode: RouteNode): Frame | undefined {
   const { layout, loading, error, default: def } = routeNode.modules
   const defaultPath = def ?? (isBoundary(routeNode.type) ? DEFAULT_FALLBACK_PATH : undefined)
-  if (!layout && !loading && !error && !defaultPath)
-    return
-  return { layout, loading, error, default: defaultPath }
+  if (layout || loading || error || defaultPath)
+    return { layout, loading, error, default: defaultPath }
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
