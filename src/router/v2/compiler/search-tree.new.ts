@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { createRouteTree, forEach } from './route-tree'
+import { createRouteTree } from './route-tree'
 import { DEFAULT_FALLBACK_PATH } from '@/router/compiling/route-module'
 import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
 
@@ -249,33 +249,3 @@ const routeTree = createRouteTree([
   '@modal/page.tsx',
 ])
 console.log(JSON.stringify(createSearchTree(routeTree), null, 2))
-
-console.log('\n--- frames (standalone, no positions involved) ---')
-forEach(routeTree, (routeNode) => {
-  const frame = createFrame(routeNode)
-  if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame))
-})
-
-console.log('\n--- step 4: page/fallback wired onto real positions ---')
-const wiredFixture = createRouteTree([
-  'layout.tsx',
-  'blog/layout.tsx',
-  'blog/page.tsx',
-  'blog/[id]/layout.tsx',
-  'blog/[id]/page.tsx',
-  'blog/[id]/default.tsx',
-])
-const wiredTree = createSearchTree(wiredFixture)
-console.log('root.fallback (built-in, wrapped by root layout):', JSON.stringify(wiredTree.fallback))
-console.log('blog.endpoint (frames: root, blog):', JSON.stringify(wiredTree.statics!.blog!.endpoint))
-console.log('blog.fallback (no own default - walks up to the root boundary):',
-  JSON.stringify(wiredTree.statics!.blog!.fallback))
-console.log('blog.[id].endpoint (frames: root, blog, [id]):', JSON.stringify(wiredTree.statics!.blog!.dynamic!.endpoint))
-console.log('blog.[id].fallback ([id]\'s own default, its frame stripped):',
-  JSON.stringify(wiredTree.statics!.blog!.dynamic!.fallback))
-
-// if they have lots of hearts you exhaust your own hearts
-// play high early game but not too high
-// dont play trump card early game
-// when they put down high cards, put down high cards next game
-//
