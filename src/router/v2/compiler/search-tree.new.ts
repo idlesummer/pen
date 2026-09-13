@@ -111,19 +111,18 @@ function createEndpoint(pageOwner: RouteNode, content: string, ctx: BuildContext
 }
 
 function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
-  const frames = compactMapAncestors(defaultOwner, createFrame).reverse()
-  const lastFrame = frames[frames.length-1] // if undefined then frames is empty
+  const endpoint = createEndpoint(defaultOwner, content, ctx)
+  const lastFrame = endpoint.frames.at(-1)
+  if (!lastFrame) return endpoint
 
   // A fallback's innermost frame always carries the very module the endpoint
   // renders, so it would otherwise be a boundary around itself - stripping it
   // can leave nothing behind, in which case the frame drops out entirely.
-  if (lastFrame) {
-    const stripped = removeDefault(lastFrame)
-    if (hasModule(stripped)) frames[frames.length-1] = stripped
-    else frames.pop()
-  }
-  const contentDepth = ctx.positionOf.get(defaultOwner)!.depth
-  return { frames, content, contentDepth }
+  const stripped = removeDefault(lastFrame)
+  if (hasModule(stripped)) endpoint.frames[endpoint.frames.length-1] = stripped
+  else endpoint.frames.pop()
+
+  return endpoint
 }
 
 /** Resolves every position's page (if it has one) and fallback (always) -
