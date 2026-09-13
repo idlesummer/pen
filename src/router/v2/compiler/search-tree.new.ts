@@ -250,4 +250,6 @@ const routeTree = createRouteTree([
   '[bad/page.tsx',
   '@modal/page.tsx',
 ])
-console.log(JSON.stringify(createSearchTree(routeTree), null, 2))
+const searchTree = createSearchTree(routeTree)
+console.log('Done!')
+console.log(JSON.stringify(searchTree, null, 2))
