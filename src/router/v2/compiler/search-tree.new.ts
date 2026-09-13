@@ -193,7 +193,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     urlDepth: 0,
     staticness: 0,
     depth: 0,
-    fallback: undefined as never,
+    fallback: undefined as never, //* Must be populated later
   }
   const ctx: BuildContext = {
     anchorOf: new Map([[searchTree, routeTree]]),
