@@ -217,6 +217,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
 
 console.log(`
   app/
+  ├── layout.tsx
   ├── page.tsx
   ├── (marketing)/
   │   └── blog/
@@ -239,6 +240,7 @@ console.log(`
 `)
 
 const routeTree = createRouteTree([
+  'layout.tsx',
   'page.tsx',
   '(marketing)/blog/page.tsx',
   'blog/page.tsx',
