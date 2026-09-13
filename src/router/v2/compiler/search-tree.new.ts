@@ -117,9 +117,7 @@ function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildCont
   if (!lastFrame)
     return endpoint
 
-  // The innermost frame renders the fallback itself, so its default has to
-  // go - stripping never touches layout/loading/error, so checking them
-  // first tells us whether anything would be left, with nothing to build.
+  // The innermost frame renders the fallback itself, so remove its default.
   if (lastFrame.layout || lastFrame.loading || lastFrame.error)
     frames[frames.length-1] = removeDefault(lastFrame)
   else
