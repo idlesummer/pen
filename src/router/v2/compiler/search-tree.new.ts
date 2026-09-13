@@ -113,15 +113,15 @@ function createEndpoint(pageOwner: RouteNode, content: string, ctx: BuildContext
 function createFallback(defaultOwner: RouteNode, content: string, ctx: BuildContext): Endpoint {
   const endpoint = createEndpoint(defaultOwner, content, ctx)
   const frames = endpoint.frames
-  const lastFrame = frames[endpoint.frames.length-1]
+  const lastFrame = frames[frames.length-1]
   if (!lastFrame)
     return endpoint
 
-  // The innermost frame renders the fallback itself, so strip its default.
-  // If nothing remains, drop the frame entirely.
-  const strippedLastFrame = removeDefault(lastFrame)
-  if (hasModule(strippedLastFrame))
-    frames[frames.length-1] = strippedLastFrame
+  // The innermost frame renders the fallback itself, so its default has to
+  // go - stripping never touches layout/loading/error, so checking them
+  // first tells us whether anything would be left, with nothing to build.
+  if (lastFrame.layout || lastFrame.loading || lastFrame.error)
+    frames[frames.length-1] = removeDefault(lastFrame)
   else
     frames.pop()
   return endpoint
