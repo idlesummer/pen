@@ -95,11 +95,6 @@ function removeDefault(frame: Frame): Frame {
   return { layout, loading, error }
 }
 
-/** True if a frame still renders something once assembled. */
-function hasModule(frame: Frame): boolean {
-  return !!(frame.layout || frame.loading || frame.error || frame.default)
-}
-
 // ── endpoints ───────────────────────────────────────────────────────────
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
@@ -258,7 +253,7 @@ console.log(JSON.stringify(createSearchTree(routeTree), null, 2))
 console.log('\n--- frames (standalone, no positions involved) ---')
 forEach(routeTree, (routeNode) => {
   const frame = createFrame(routeNode)
-  if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame), 'wraps:', hasModule(frame))
+  if (frame) console.log(routeNode.path || '(root)', '->', JSON.stringify(frame))
 })
 
 console.log('\n--- step 4: page/fallback wired onto real positions ---')
