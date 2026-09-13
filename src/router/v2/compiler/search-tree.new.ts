@@ -224,7 +224,8 @@ console.log(`
   ├── blog/
   │   ├── page.tsx
   │   ├── [id]/
-  │   │   └── page.tsx
+  │   │   ├── page.tsx
+  │   │   └── default.tsx
   │   ├── [slug]/
   │   │   └── page.tsx
   │   └── [...rest]/
@@ -242,6 +243,7 @@ const routeTree = createRouteTree([
   '(marketing)/blog/page.tsx',
   'blog/page.tsx',
   'blog/[id]/page.tsx',
+  'blog/[id]/default.tsx',
   'blog/[slug]/page.tsx',
   'blog/[...rest]/page.tsx',
   'blog/[...rest]/dead/page.tsx',
