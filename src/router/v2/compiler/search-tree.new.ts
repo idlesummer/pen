@@ -45,7 +45,6 @@ export type SearchNode = {
 type BuildContext = {
   positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
   pageOwnerOf: Map<SearchNode, RouteNode>
-  defaultOf: Map<RouteNode, RouteNode>      // folder -> its own nearest real default
   defaultOwnerOf: Map<SearchNode, RouteNode>
   nodes: SearchNode[]                    // every position, for the final resolve pass
 }
@@ -66,14 +65,12 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
 }
 
 /** This folder's own nearest real default - itself, if it declares one or is
- *  a boundary, otherwise whatever its parent already resolved to. Parents are
- *  always visited first, so this is one map lookup, never a fresh walk. */
-function resolveDefault(routeNode: RouteNode, ctx: BuildContext): RouteNode {
-  const owner = routeNode.modules.default || isBoundary(routeNode.type)
-    ? routeNode
-    : ctx.defaultOf.get(routeNode.parent!)!
-  ctx.defaultOf.set(routeNode, owner)
-  return owner
+ *  a boundary, otherwise the nearest ancestor that does. */
+function resolveDefault(routeNode: RouteNode): RouteNode {
+  for (let node = routeNode; ; node = node.parent!) {
+    if (node.modules.default || isBoundary(node.type))
+      return node
+  }
 }
 
 /** Lets a folder's resolved default stake a claim on its position - a real
@@ -202,7 +199,6 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   const ctx: BuildContext = {
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
-    defaultOf: new Map<RouteNode, RouteNode>(),
     defaultOwnerOf: new Map<SearchNode, RouteNode>(),
     nodes: [searchTree],
   }
@@ -210,7 +206,7 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const searchNode = ctx.positionOf.get(routeNode)!
-      claimDefault(searchNode, resolveDefault(routeNode, ctx), ctx)
+      claimDefault(searchNode, resolveDefault(routeNode), ctx)
 
       if (!routeNode.modules.page) return // after this, routeNode is a page owner
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
