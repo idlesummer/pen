@@ -77,7 +77,7 @@ export function populateEndpoints(positions: ResolvedPositions) {
     if (pageContent)
       searchNode.endpoint = createEndpoint(pageOwner, pageContent, positions)
 
-    const defaultOwner = positions.defaultOwnerOf.get(searchNode)!
+    const defaultOwner = positions.defaultOwnerOf.get(searchNode)!  // always set; worst case, a boundary
     const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
     searchNode.fallback = createFallback(defaultOwner, defaultContent, positions)
   }
