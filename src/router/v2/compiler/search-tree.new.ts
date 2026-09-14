@@ -221,9 +221,9 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const searchNode = ctx.positionOf.get(routeNode)!
 
-      // A real default always beats an implicit one - a later real claim
-      // colliding with an earlier one is invalid, which is exactly what
-      // conflicts.defaults (below) exists to catch.
+      // A real default always beats an implicit one at the boundary - a later
+      // real claim colliding with an earlier one is invalid, which is exactly
+      // what conflicts.defaults (below) exists to catch.
       const defaultOwner = findDefaultOwner(routeNode)
       const currDefaultOwner = ctx.defaultOwnerOf.get(searchNode)
       if (!currDefaultOwner || defaultOwner.modules.default)
