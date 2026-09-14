@@ -71,7 +71,7 @@ function createFallback(defaultOwner: RouteNode, content: string, positions: Res
 /** Resolves every position's page (if it has one) and fallback (always) -
  *  runs once every folder's frame and page ownership is known. */
 export function populateEndpoints(positions: ResolvedPositions) {
-  for (const searchNode of positions.nodes) {
+  for (const searchNode of positions.searchNodes) {
     const pageOwner = positions.pageOwnerOf.get(searchNode)
     if (pageOwner)
       searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modules.page!, positions)
