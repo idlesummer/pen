@@ -73,16 +73,6 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
   }
 }
 
-/** Lets a folder's own default owner stake a claim on its position - a real
- *  default always beats an implicit one. Two different real defaults sharing
- *  a position is invalid (not yet diagnosed), so which one wins there is
- *  arbitrary and doesn't matter. */
-function claimDefault(searchNode: SearchNode, defaultOwner: RouteNode, ctx: BuildContext) {
-  const currDefaultOwner = ctx.defaultOwnerOf.get(searchNode)
-  if (!currDefaultOwner || defaultOwner.modules.default)
-    ctx.defaultOwnerOf.set(searchNode, defaultOwner)
-}
-
 // ── frames ───────────────────────────────────────────────────────────────
 
 /** A folder's own Frame, or undefined if it wraps nothing at all - a plain
@@ -206,7 +196,14 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const searchNode = ctx.positionOf.get(routeNode)!
-      claimDefault(searchNode, findDefaultOwner(routeNode), ctx)
+
+      // A real default always beats an implicit one - a later real claim
+      // colliding with an earlier one is invalid (not yet diagnosed), so
+      // which one wins there is arbitrary and doesn't matter.
+      const defaultOwner = findDefaultOwner(routeNode)
+      const currDefaultOwner = ctx.defaultOwnerOf.get(searchNode)
+      if (!currDefaultOwner || defaultOwner.modules.default)
+        ctx.defaultOwnerOf.set(searchNode, defaultOwner)
 
       if (!routeNode.modules.page) return // after this, routeNode is a page owner
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
