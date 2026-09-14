@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { GLOBAL_DEFAULT } from '@/router/compiling/route-module'
+import { GLOBAL_DEFAULT } from './route-module'
 import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,

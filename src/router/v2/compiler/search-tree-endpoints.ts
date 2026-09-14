@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { Endpoint, Frame, SearchNode } from './search-node'
-import { GLOBAL_DEFAULT } from '@/router/compiling/route-module'
+import { GLOBAL_DEFAULT } from './route-module'
 import { isBoundary } from './segment'
 
 /** What resolving endpoints actually needs from a finished traversal - not
