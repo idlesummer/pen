@@ -4,7 +4,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree } from './route-tree'
 import { populateEndpoints } from './search-tree-endpoints'
-import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
+import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
 // ── routing rules over the route tree ──────────────────────────────────────
 // This stops at slot boundaries, which is a statement about how routing

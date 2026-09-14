@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import type { Endpoint, Frame, SearchNode } from './search-node'
 import { GLOBAL_DEFAULT } from './route-module'
-import { isBoundary } from './segment'
+import { isBoundary } from './route-segment'
 
 /** What resolving endpoints actually needs from a finished traversal - not
  *  the whole BuildContext, which also carries conflict-tracking this stage
