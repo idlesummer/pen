@@ -168,7 +168,12 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
 
 /** This position's conflict-tracking record, creating it on first touch. */
 function conflictsFor(position: SearchNode, ctx: BuildContext): PositionConflicts {
-  return ctx.conflictsOf.getOrInsertComputed(position, () => ({ pages: [], catchalls: [], dynamics: dict(), defaults: [] }))
+  return ctx.conflictsOf.getOrInsertComputed(position, () => ({
+    pages: [],
+    catchalls: [],
+    dynamics: dict(),
+    defaults: [],
+  }))
 }
 
 /** Gets the position a folder belongs to, creating it if it doesn't exist
