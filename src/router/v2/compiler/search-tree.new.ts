@@ -3,7 +3,7 @@ import type { CompiledSearchTree, PositionConflicts, SearchNode } from './search
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree } from './route-tree'
-import { populateEndpoints } from './endpoints'
+import { populateEndpoints } from './search-tree-endpoints'
 import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 // ── routing rules over the route tree ──────────────────────────────────────
