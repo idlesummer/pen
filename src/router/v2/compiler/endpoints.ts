@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { Endpoint, Frame, SearchNode } from './search-tree.new'
+import type { Endpoint, Frame, SearchNode } from './search-node'
 import { GLOBAL_DEFAULT } from '@/router/compiling/route-module'
 import { isBoundary } from './segment'
 
