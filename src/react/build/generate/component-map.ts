@@ -1,6 +1,6 @@
 import { join, relative, sep } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { DEFAULT_FALLBACK_PATH } from '@/router'
+import { GLOBAL_DEFAULT } from '@/router'
 import { GENERATED_HEADER } from './header'
 
 type ComponentMapOptions = {
@@ -19,7 +19,7 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
 /** Emits the import statement for one module path - pen's own built-in
  *  fallback for the sentinel `default` path, otherwise a real app file. */
 function toImportStatement(appDir: string, outDir: string, modulePath: string, index: number): string {
-  if (modulePath === DEFAULT_FALLBACK_PATH)
+  if (modulePath === GLOBAL_DEFAULT)
     return `import { DefaultFallback as Component${index} } from "${PACKAGE_NAME}"`
 
   return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
