@@ -2,7 +2,7 @@ import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { GLOBAL_DEFAULT } from './route-module'
-import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
+import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.

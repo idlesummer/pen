@@ -1,9 +1,9 @@
 import type { RouteModulePaths } from './route-module'
-import type { SegmentType } from './segment'
+import type { SegmentType } from './route-segment'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { filterRouteFiles, getRouteModuleType } from './route-module'
-import { createSegment, isPrivate } from './segment'
+import { createSegment, isPrivate } from './route-segment'
 
 /** The parse: one node per folder, mirroring the app directory. It knows the
  *  filesystem and nothing about routing rules.
