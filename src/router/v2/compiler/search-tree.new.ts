@@ -43,9 +43,10 @@ export type SearchNode = {
 
 /** Build-time bookkeeping, dropped once createSearchTree returns. */
 type BuildContext = {
-  anchorOf: Map<SearchNode, RouteNode>   // position -> the folder that opened it
   positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
   pageOwnerOf: Map<SearchNode, RouteNode>
+  defaultOf: Map<RouteNode, RouteNode>      // folder -> its own nearest real default
+  defaultOwnerOf: Map<SearchNode, RouteNode>
   nodes: SearchNode[]                    // every position, for the final resolve pass
 }
 
@@ -64,16 +65,25 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
   return values
 }
 
-/** The folder whose `default` covers this position - or, if nothing up the
- *  chain declares one, the boundary itself (the root, or the enclosing slot).
- *  That boundary is where the built-in fallback is used, which is how "every
- *  position renders something" holds without injecting anything into the
- *  route tree. */
-function findDefaultOwner(routeNode: RouteNode): RouteNode {
-  for (let node = routeNode; ; node = node.parent!) {
-    if (node.modules.default || isBoundary(node.type))
-      return node
-  }
+/** This folder's own nearest real default - itself, if it declares one or is
+ *  a boundary, otherwise whatever its parent already resolved to. Parents are
+ *  always visited first, so this is one map lookup, never a fresh walk. */
+function resolveDefault(routeNode: RouteNode, ctx: BuildContext): RouteNode {
+  const owner = routeNode.modules.default || isBoundary(routeNode.type)
+    ? routeNode
+    : ctx.defaultOf.get(routeNode.parent!)!
+  ctx.defaultOf.set(routeNode, owner)
+  return owner
+}
+
+/** Lets a folder's resolved default stake a claim on its position - a real
+ *  default always beats an implicit one, but the first real claim wins over
+ *  a later one. Groups mean a position can have several contributors with
+ *  genuinely different real defaults; that collision isn't caught here yet. */
+function claimDefault(searchNode: SearchNode, owner: RouteNode, ctx: BuildContext) {
+  const existing = ctx.defaultOwnerOf.get(searchNode)
+  if (!existing || (!existing.modules.default && owner.modules.default))
+    ctx.defaultOwnerOf.set(searchNode, owner)
 }
 
 // ── frames ───────────────────────────────────────────────────────────────
@@ -128,7 +138,7 @@ function populateEndpoints(ctx: BuildContext) {
     if (pageOwner)
       searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modules.page!, ctx)
 
-    const defaultOwner = findDefaultOwner(ctx.anchorOf.get(searchNode)!)
+    const defaultOwner = ctx.defaultOwnerOf.get(searchNode)!
     const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
     searchNode.fallback = createFallback(defaultOwner, content, ctx)
   }
@@ -149,7 +159,6 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildCo
   if (type === 'catchall')
     node.isCatchall = true
 
-  ctx.anchorOf.set(node, routeNode)
   ctx.nodes.push(node)
   return node
 }
@@ -191,16 +200,19 @@ export function createSearchTree(routeTree: RouteNode): SearchNode {
     fallback: undefined as never, //* Must be populated later
   }
   const ctx: BuildContext = {
-    anchorOf: new Map([[searchTree, routeTree]]),
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
+    defaultOf: new Map<RouteNode, RouteNode>(),
+    defaultOwnerOf: new Map<SearchNode, RouteNode>(),
     nodes: [searchTree],
   }
 
   traverse(routeTree, {
-    visit: (routeNode) => { // the folder's own contribution: does it own this position's page?
-      if (!routeNode.modules.page) return // after this, routeNode is a page owner
+    visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const searchNode = ctx.positionOf.get(routeNode)!
+      claimDefault(searchNode, resolveDefault(routeNode, ctx), ctx)
+
+      if (!routeNode.modules.page) return // after this, routeNode is a page owner
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
     },
     expand: expandChildren,
@@ -221,7 +233,8 @@ console.log(`
   ├── page.tsx
   ├── (marketing)/
   │   └── blog/
-  │       └── page.tsx
+  │       ├── page.tsx
+  │       └── default.tsx
   ├── blog/
   │   ├── page.tsx
   │   ├── [id]/
@@ -243,6 +256,7 @@ const routeTree = createRouteTree([
   'layout.tsx',
   'page.tsx',
   '(marketing)/blog/page.tsx',
+  '(marketing)/blog/default.tsx',
   'blog/page.tsx',
   'blog/[id]/page.tsx',
   'blog/[id]/default.tsx',
