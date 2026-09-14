@@ -73,11 +73,12 @@ function createFallback(defaultOwner: RouteNode, content: string, positions: Res
 export function populateEndpoints(positions: ResolvedPositions) {
   for (const searchNode of positions.searchNodes) {
     const pageOwner = positions.pageOwnerOf.get(searchNode)
-    if (pageOwner)
-      searchNode.endpoint = createEndpoint(pageOwner, pageOwner.modules.page!, positions)
+    const pageContent = pageOwner?.modules.page
+    if (pageContent)
+      searchNode.endpoint = createEndpoint(pageOwner, pageContent, positions)
 
     const defaultOwner = positions.defaultOwnerOf.get(searchNode)!
-    const content = defaultOwner.modules.default ?? GLOBAL_DEFAULT
-    searchNode.fallback = createFallback(defaultOwner, content, positions)
+    const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
+    searchNode.fallback = createFallback(defaultOwner, defaultContent, positions)
   }
 }
