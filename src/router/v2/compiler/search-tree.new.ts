@@ -224,8 +224,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
       // A real default always beats an implicit one at the boundary
       // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(routeNode)
-      const currDefaultOwner = ctx.defaultOwnerOf.get(searchNode)
-      if (!currDefaultOwner || defaultOwner.modules.default)
+      if (!ctx.defaultOwnerOf.has(searchNode) || defaultOwner.modules.default)
         ctx.defaultOwnerOf.set(searchNode, defaultOwner)
 
       // Several folders can climb to the same real default without
