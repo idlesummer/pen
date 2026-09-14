@@ -6,7 +6,7 @@ import { isBoundary } from './route-segment'
 /** What resolving endpoints actually needs from a finished traversal - not
  *  the whole BuildContext, which also carries conflict-tracking this stage
  *  never touches. */
-export type ResolvedPositions = {
+export type SearchContext = {
   searchNodes: SearchNode[]
   positionOf: Map<RouteNode, SearchNode>
   pageOwnerOf: Map<SearchNode, RouteNode>
@@ -47,14 +47,14 @@ function removeDefault(frame: Frame): Frame {
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
-function createEndpoint(pageOwner: RouteNode, content: string, positions: ResolvedPositions): Endpoint {
+function createEndpoint(pageOwner: RouteNode, content: string, ctx: SearchContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, createFrame).reverse()
-  const contentDepth = positions.positionOf.get(pageOwner)!.depth
+  const contentDepth = ctx.positionOf.get(pageOwner)!.depth
   return { frames, content, contentDepth }
 }
 
-function createFallback(defaultOwner: RouteNode, content: string, positions: ResolvedPositions): Endpoint {
-  const endpoint = createEndpoint(defaultOwner, content, positions)
+function createFallback(defaultOwner: RouteNode, content: string, ctx: SearchContext): Endpoint {
+  const endpoint = createEndpoint(defaultOwner, content, ctx)
   const frames = endpoint.frames
   const lastFrame = frames[frames.length-1]
   if (!lastFrame)
@@ -70,15 +70,15 @@ function createFallback(defaultOwner: RouteNode, content: string, positions: Res
 
 /** Resolves every position's page (if it has one) and fallback (always) -
  *  runs once every folder's frame and page ownership is known. */
-export function populateEndpoints(positions: ResolvedPositions) {
-  for (const searchNode of positions.searchNodes) {
-    const pageOwner = positions.pageOwnerOf.get(searchNode)
+export function populateEndpoints(ctx: SearchContext) {
+  for (const searchNode of ctx.searchNodes) {
+    const pageOwner = ctx.pageOwnerOf.get(searchNode)
     const pageContent = pageOwner?.modules.page
     if (pageContent)
-      searchNode.endpoint = createEndpoint(pageOwner, pageContent, positions)
+      searchNode.endpoint = createEndpoint(pageOwner, pageContent, ctx)
 
-    const defaultOwner = positions.defaultOwnerOf.get(searchNode)!  // always set; worst case, a boundary
+    const defaultOwner = ctx.defaultOwnerOf.get(searchNode)!  // always set; worst case, a boundary
     const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
-    searchNode.fallback = createFallback(defaultOwner, defaultContent, positions)
+    searchNode.fallback = createFallback(defaultOwner, defaultContent, ctx)
   }
 }
