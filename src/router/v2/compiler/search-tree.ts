@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { DEFAULT_FALLBACK_PATH } from '@/router/compiling/route-module'
+import { GLOBAL_DEFAULT } from '@/router/compiling/route-module'
 import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './segment'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
@@ -115,7 +115,7 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
 
 function createFrame(routeNode: RouteNode, position: SearchNode): Frame | undefined {
   const { layout, loading, error } = routeNode.modules
-  const def = routeNode.modules.default ?? (isBoundary(routeNode.type) ? DEFAULT_FALLBACK_PATH : undefined)
+  const def = routeNode.modules.default ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
   if (!layout && !loading && !error && !def)
     return
   return { layout, loading, error, default: def, paramDepth: position.depth }
@@ -253,7 +253,7 @@ function resolveEndpoints(ctx: BuildContext) {
       node.page = createEndpoint(pageOwner, pageOwner.modules.page!, false, ctx)
 
     const defaultOwner = findDefaultOwner(ctx.anchorOf.get(node)!)
-    const content = defaultOwner.modules.default ?? DEFAULT_FALLBACK_PATH
+    const content = defaultOwner.modules.default ?? GLOBAL_DEFAULT
     node.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
 }

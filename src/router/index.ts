@@ -4,7 +4,7 @@ export type { CompileDiagnostic } from './compiling/compile-diagnostic'
 export type { RenderNode } from './matching/render-tree'
 
 export { getRouteModulePaths } from './compiling/route-tree'
-export { DEFAULT_FALLBACK_PATH } from './compiling/route-module'
+export { GLOBAL_DEFAULT } from './compiling/route-module'
 export { reportDiagnostics } from './compiling/compile-diagnostic'
 export { compile } from './compiler'
 export { createRouter } from './router'

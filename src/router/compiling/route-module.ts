@@ -10,7 +10,7 @@ const ROUTE_MODULE_TYPES =
   new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
 
 /** Sentinel path for the root route when no `default.tsx` exists. */
-export const DEFAULT_FALLBACK_PATH = '\0default'
+export const GLOBAL_DEFAULT = '\0default'
 
 export function getRouteModuleType(fileName: string): RouteModuleType {
   return basename(fileName, '.tsx') as RouteModuleType

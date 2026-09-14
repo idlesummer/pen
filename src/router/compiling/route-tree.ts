@@ -3,7 +3,7 @@
   import { sep } from 'node:path'
   import { treeify } from '@/lib/treeify'
   import { traverse } from '@/lib/traverse'
-  import { DEFAULT_FALLBACK_PATH, filterRouteFiles, getRouteModuleType } from './route-module'
+  import { GLOBAL_DEFAULT, filterRouteFiles, getRouteModuleType } from './route-module'
   import { createSegment, isPrivate } from './segment'
 
   export type RouteNode = {
@@ -69,7 +69,7 @@
     })
     forEach(routeTree, (node) => {
       if (!node.parent || node.segment.type === 'slot') // ensures a default fallback in each tree
-        node.modulePaths.default ??= DEFAULT_FALLBACK_PATH
+        node.modulePaths.default ??= GLOBAL_DEFAULT
     })
     return routeTree
   }
