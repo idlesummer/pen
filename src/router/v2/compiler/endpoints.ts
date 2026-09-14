@@ -7,7 +7,7 @@ import { isBoundary } from './segment'
  *  the whole BuildContext, which also carries conflict-tracking this stage
  *  never touches. */
 export type ResolvedPositions = {
-  nodes: SearchNode[]
+  searchNodes: SearchNode[]
   positionOf: Map<RouteNode, SearchNode>
   pageOwnerOf: Map<SearchNode, RouteNode>
   defaultOwnerOf: Map<SearchNode, RouteNode>

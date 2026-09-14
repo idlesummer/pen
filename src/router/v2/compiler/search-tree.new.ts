@@ -41,7 +41,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
   const pageOwnerOf = new Map<SearchNode, RouteNode>()
   const defaultOwnerOf = new Map<SearchNode, RouteNode>()
   const conflictsOf = new Map<SearchNode, PositionConflicts>()
-  const nodes: SearchNode[] = [searchTree] // every position, for the final resolve pass
+  const searchNodes = [searchTree] // every position, for the final resolve pass
 
   function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode {
     const type = routeNode.type
@@ -55,8 +55,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
       node.param = routeNode.segment
     if (type === 'catchall')
       node.isCatchall = true
-
-    nodes.push(node)
+    searchNodes.push(node)
     return node
   }
 
@@ -117,7 +116,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     },
   })
 
-  populateEndpoints({ nodes, positionOf, pageOwnerOf, defaultOwnerOf })
+  populateEndpoints({ searchNodes, positionOf, pageOwnerOf, defaultOwnerOf })
   return { root: searchTree, conflicts: [...conflictsOf.values()] }
 }
 
