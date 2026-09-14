@@ -77,10 +77,10 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
  *  default always beats an implicit one. Two different real defaults sharing
  *  a position is invalid (not yet diagnosed), so which one wins there is
  *  arbitrary and doesn't matter. */
-function claimDefault(searchNode: SearchNode, owner: RouteNode, ctx: BuildContext) {
-  const existing = ctx.defaultOwnerOf.get(searchNode)
-  if (!existing || owner.modules.default)
-    ctx.defaultOwnerOf.set(searchNode, owner)
+function claimDefault(searchNode: SearchNode, defaultOwner: RouteNode, ctx: BuildContext) {
+  const currDefaultOwner = ctx.defaultOwnerOf.get(searchNode)
+  if (!currDefaultOwner || defaultOwner.modules.default)
+    ctx.defaultOwnerOf.set(searchNode, defaultOwner)
 }
 
 // ── frames ───────────────────────────────────────────────────────────────
