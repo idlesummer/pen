@@ -48,7 +48,7 @@ export type PositionConflicts = {
   pages: RouteNode[]                  // every folder claiming a page at this position
   catchalls: RouteNode[]              // every catch-all opened here
   dynamics: Record<string, RouteNode> // param name -> the folder that claimed it
-  defaults: RouteNode[]               // every distinct folder whose real default reaches here
+  defaults: Set<RouteNode>            // every distinct folder whose real default reaches here
 }
 
 export type CompiledSearchTree = {
@@ -172,7 +172,7 @@ function conflictsFor(position: SearchNode, ctx: BuildContext): PositionConflict
     pages: [],
     catchalls: [],
     dynamics: dict(),
-    defaults: [],
+    defaults: new Set(),
   }))
 }
 
@@ -234,11 +234,8 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
-      if (defaultOwner.modules.default) {
-        const conflicts = conflictsFor(searchNode, ctx)
-        if (!conflicts.defaults.includes(defaultOwner))
-          conflicts.defaults.push(defaultOwner)
-      }
+      if (defaultOwner.modules.default)
+        conflictsFor(searchNode, ctx).defaults.add(defaultOwner)
 
       if (!routeNode.modules.page) return // after this, routeNode is a page owner
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
@@ -299,11 +296,11 @@ const { root, conflicts } = createSearchTree(routeTree)
 console.log(JSON.stringify(root, null, 2))
 
 const realConflicts = conflicts
-  .filter(c => c.pages.length > 1 || c.catchalls.length > 1 || c.defaults.length > 1 || Object.keys(c.dynamics).length > 1)
+  .filter(c => c.pages.length > 1 || c.catchalls.length > 1 || c.defaults.size > 1 || Object.keys(c.dynamics).length > 1)
   .map(c => ({
     pages: c.pages.map(n => n.path),
     catchalls: c.catchalls.map(n => n.path),
-    defaults: c.defaults.map(n => n.path),
+    defaults: [...c.defaults].map(n => n.path),
     dynamics: Object.fromEntries(Object.entries(c.dynamics).map(([param, n]) => [param, n.path])),
   }))
 console.log('conflicts:', JSON.stringify(realConflicts, null, 2))
