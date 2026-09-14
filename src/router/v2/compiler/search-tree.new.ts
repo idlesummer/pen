@@ -74,12 +74,12 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
 }
 
 /** Lets a folder's own default owner stake a claim on its position - a real
- *  default always beats an implicit one, but the first real claim wins over
- *  a later one. Groups mean a position can have several contributors with
- *  genuinely different real defaults; that collision isn't caught here yet. */
+ *  default always beats an implicit one. Two different real defaults sharing
+ *  a position is invalid (not yet diagnosed), so which one wins there is
+ *  arbitrary and doesn't matter. */
 function claimDefault(searchNode: SearchNode, owner: RouteNode, ctx: BuildContext) {
   const existing = ctx.defaultOwnerOf.get(searchNode)
-  if (!existing || (!existing.modules.default && owner.modules.default))
+  if (!existing || owner.modules.default)
     ctx.defaultOwnerOf.set(searchNode, owner)
 }
 
