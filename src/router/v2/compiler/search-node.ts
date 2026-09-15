@@ -48,12 +48,13 @@ export type PositionConflicts = {
 
 /** Build-time bookkeeping, dropped once createSearchTree returns. Shared
  *  between the compiler's two halves - traversal writes all of it, endpoint
- *  resolution only ever reads from it afterward. The list of every position
- *  isn't here - that's what drives the resolve pass's own loop, not
- *  something a single position's resolution needs to see. */
+ *  resolution only ever reads from it afterward. conflictsOf isn't here: only
+ *  the traversal side ever touches it, so it's kept as its own local instead
+ *  of bundled into a type the resolve side would carry around unused. The
+ *  list of every position isn't here either - that's what drives the resolve
+ *  pass's own loop, not something a single position's resolution needs. */
 export type SearchContext = {
   positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
   pageOwnerOf: Map<SearchNode, RouteNode>
   defaultOwnerOf: Map<SearchNode, RouteNode>
-  conflictsOf: Map<SearchNode, PositionConflicts>
 }
