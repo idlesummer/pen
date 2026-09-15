@@ -10,6 +10,17 @@ import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment
 // This stops at slot boundaries, which is a statement about how routing
 // inherits rather than about folders - so it lives here, not in route-tree.
 
+/** Traversal-only bookkeeping - never read by endpoint resolution, so it
+ *  stays local to this file instead of joining SearchContext, the type that
+ *  actually crosses into search-tree-endpoints.ts. Bundled together rather
+ *  than passed as separate params purely to cut down on names to thread
+ *  through getOrCreatePosition/expandChildren/conflictsFor - both fields are
+ *  dropped the moment createSearchTree returns either way. */
+type TraversalState = {
+  conflictsOf: Map<SearchNode, PositionConflicts>
+  insideSlot: Set<RouteNode> // folders sitting within a slot subtree
+}
+
 /** This folder's own nearest real default - itself, if it declares one or is
  *  a boundary, otherwise the nearest ancestor that does. */
 function findDefaultOwner(routeNode: RouteNode): RouteNode {
@@ -24,10 +35,10 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
  *  further slot-nesting, which is what makes it safe to enter one at all.
  *  Malformed folders are skipped too - they carry no route to open a
  *  position with. */
-function expandChildren(routeNode: RouteNode, insideSlot: Set<RouteNode>): RouteNode[] {
+function expandChildren(routeNode: RouteNode, state: TraversalState): RouteNode[] {
   if (routeNode.type === 'catchall')
     return []
-  const nested = routeNode.type === 'slot' || insideSlot.has(routeNode)
+  const nested = routeNode.type === 'slot' || state.insideSlot.has(routeNode)
   return routeNode.children.filter(child => child.type !== 'malformed' && !(nested && child.type === 'slot'))
 }
 
@@ -49,8 +60,8 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, depth?: numb
 }
 
 /** This position's conflict-tracking record, creating it on first touch. */
-function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, PositionConflicts>): PositionConflicts {
-  return conflictsOf.getOrInsertComputed(position, () => ({
+function conflictsFor(position: SearchNode, state: TraversalState): PositionConflicts {
+  return state.conflictsOf.getOrInsertComputed(position, () => ({
     pages: [],
     defaults: new Set<RouteNode>(),
     dynamics: dict<RouteNode>(),
@@ -60,8 +71,10 @@ function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, Positio
 
 /** Gets the position a folder belongs to, creating it if it doesn't exist
  *  yet - a group just returns the one already there (its parent's), while
- *  everything else looks up or opens its own. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, conflictsOf: Map<SearchNode, PositionConflicts>, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
+ *  everything else looks up or opens its own. slotsOf stays a separate param
+ *  rather than joining TraversalState - it's SearchContext's, shared with
+ *  search-tree-endpoints.ts, not traversal-only like state is. */
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, state: TraversalState, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
   switch (routeNode.type) {
     default: // group
       return parent
@@ -69,10 +82,10 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, conflicts
       parent.statics ??= dict<SearchNode>()
       return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent)
     case 'dynamic':
-      conflictsFor(parent, conflictsOf).dynamics[routeNode.segment] ??= routeNode
+      conflictsFor(parent, state).dynamics[routeNode.segment] ??= routeNode
       return parent.dynamic ??= createSearchNode(routeNode, parent)
     case 'catchall':
-      conflictsFor(parent, conflictsOf).catchalls.push(routeNode)
+      conflictsFor(parent, state).catchalls.push(routeNode)
       return parent.catchall ??= createSearchNode(routeNode, parent)
     case 'slot': {
       const slotDict = slotsOf.getOrInsertComputed(parent, dict<SearchNode>)
@@ -92,8 +105,7 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
     fallback: undefined as never, //* Must be populated later
   }
   const searchNodes = new Set([searchTree]) // every search node position in depth-first order
-  const conflictsOf = new Map<SearchNode, PositionConflicts>() // traversal-only; setEndpoints never reads it
-  const insideSlot = new Set<RouteNode>() // folders sitting within a slot subtree; traversal-only too
+  const state: TraversalState = { conflictsOf: new Map(), insideSlot: new Set() }
   const ctx: SearchContext = {
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
@@ -112,26 +124,26 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
       if (defaultOwner.modules.default)
-        conflictsFor(searchNode, conflictsOf).defaults.add(defaultOwner)
+        conflictsFor(searchNode, state).defaults.add(defaultOwner)
 
       if (!routeNode.modules.page) return // after this, routeNode is a page owner
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
-      conflictsFor(searchNode, conflictsOf).pages.push(routeNode)
+      conflictsFor(searchNode, state).pages.push(routeNode)
     },
-    expand: routeNode => expandChildren(routeNode, insideSlot),
+    expand: routeNode => expandChildren(routeNode, state),
     attach: (childRouteNode, parentRouteNode) => {
-      if (parentRouteNode.type === 'slot' || insideSlot.has(parentRouteNode))
-        insideSlot.add(childRouteNode)
+      if (parentRouteNode.type === 'slot' || state.insideSlot.has(parentRouteNode))
+        state.insideSlot.add(childRouteNode)
 
       const parentSearchNode = ctx.positionOf.get(parentRouteNode)!
-      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, conflictsOf, ctx.slotsOf)
+      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, state, ctx.slotsOf)
       ctx.positionOf.set(childRouteNode, childSearchNode)
       searchNodes.add(childSearchNode)
     },
   })
   for (const searchNode of searchNodes)
     setEndpoints(searchNode, ctx)
-  return [searchTree, [...conflictsOf.values()]]
+  return [searchTree, [...state.conflictsOf.values()]]
 }
 
 console.log(`
