@@ -1,12 +1,15 @@
 import type { RouteNode } from './route-tree'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
- *  never the page itself. A folder earns a Frame only if it wraps something. */
+ *  never the page itself. A folder earns a Frame only if it wraps something -
+ *  slots alone don't count, since without a layout there's nothing to pass
+ *  them to. */
 export type Frame = {
   layout?: string
   loading?: string
   error?: string
   default?: string
+  slots?: Record<string, SearchNode> // this position's named slots
 }
 
 /** Everything needed to render one accepted position: the complete wrapper

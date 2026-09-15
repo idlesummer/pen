@@ -116,7 +116,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     },
   })
 
-  populateEndpoints({ searchNodes, positionOf, pageOwnerOf, defaultOwnerOf })
+  populateEndpoints({ searchNodes, positionOf, pageOwnerOf, defaultOwnerOf, slotsOf: new Map() }) // this snapshot doesn't track slots
   return { root: searchTree, conflicts: [...conflictsOf.values()] }
 }
 
