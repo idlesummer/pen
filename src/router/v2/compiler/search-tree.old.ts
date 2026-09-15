@@ -28,6 +28,63 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
   return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
 }
 
+// ── positions ───────────────────────────────────────────────────────────
+
+/** Build-time bookkeeping, dropped once createSearchTree returns. */
+type BuildContext = {
+  positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
+  pageOwnerOf: Map<SearchNode, RouteNode>
+  defaultOwnerOf: Map<SearchNode, RouteNode>
+  conflictsOf: Map<SearchNode, PositionConflicts>
+  searchNodes: SearchNode[]              // every position, for the final resolve pass
+}
+
+function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
+  const type = routeNode.type
+  const node: SearchNode = {
+    urlDepth: parent.urlDepth + +isUrlConsuming(type),
+    staticness: parent.staticness - +isDynamicOrCatchall(type),
+    depth: parent.depth + 1,
+    fallback: undefined as never, // filled by populateEndpoints, once every position exists
+  }
+  if (isDynamicOrCatchall(type))
+    node.param = routeNode.segment
+  if (type === 'catchall')
+    node.isCatchall = true
+  ctx.searchNodes.push(node)
+  return node
+}
+
+/** This position's conflict-tracking record, creating it on first touch. */
+function conflictsFor(position: SearchNode, ctx: BuildContext): PositionConflicts {
+  return ctx.conflictsOf.getOrInsertComputed(position, () => ({
+    pages: [],
+    catchalls: [],
+    dynamics: dict(),
+    defaults: new Set(),
+  }))
+}
+
+/** Gets the position a folder belongs to, creating it if it doesn't exist
+ *  yet - a group just returns the one already there (its parent's), while
+ *  everything else looks up or opens its own. Slots aren't handled yet -
+ *  their folders are excluded from the walk entirely, see expandChildren. */
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
+  switch (routeNode.type) {
+    default: // group
+      return parent
+    case 'static':
+      parent.statics ??= dict<SearchNode>()
+      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, ctx)
+    case 'dynamic':
+      conflictsFor(parent, ctx).dynamics[routeNode.segment] ??= routeNode
+      return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
+    case 'catchall':
+      conflictsFor(parent, ctx).catchalls.push(routeNode)
+      return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
+  }
+}
+
 // ── build ───────────────────────────────────────────────────────────────
 
 export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
@@ -37,87 +94,43 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     depth: 0,
     fallback: undefined as never, //* Must be populated later
   }
-  const positionOf = new Map([[routeTree, searchTree]]) // folder -> the position it belongs to, seeded so every child can read its parent's
-  const pageOwnerOf = new Map<SearchNode, RouteNode>()
-  const defaultOwnerOf = new Map<SearchNode, RouteNode>()
-  const conflictsOf = new Map<SearchNode, PositionConflicts>()
-  const searchNodes = [searchTree] // every position, for the final resolve pass
-
-  function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode {
-    const type = routeNode.type
-    const node: SearchNode = {
-      urlDepth: parent.urlDepth + +isUrlConsuming(type),
-      staticness: parent.staticness - +isDynamicOrCatchall(type),
-      depth: parent.depth + 1,
-      fallback: undefined as never, // filled by populateEndpoints, once every position exists
-    }
-    if (isDynamicOrCatchall(type))
-      node.param = routeNode.segment
-    if (type === 'catchall')
-      node.isCatchall = true
-    searchNodes.push(node)
-    return node
-  }
-
-  /** This position's conflict-tracking record, creating it on first touch. */
-  function conflictsFor(position: SearchNode): PositionConflicts {
-    return conflictsOf.getOrInsertComputed(position, () => ({
-      pages: [],
-      catchalls: [],
-      dynamics: dict(),
-      defaults: new Set(),
-    }))
-  }
-
-  /** Gets the position a folder belongs to, creating it if it doesn't exist
-   *  yet - a group just returns the one already there (its parent's), while
-   *  everything else looks up or opens its own. Slots aren't handled yet -
-   *  their folders are excluded from the walk entirely, see expandChildren. */
-  function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
-    switch (routeNode.type) {
-      default: // group
-        return parent
-      case 'static':
-        parent.statics ??= dict<SearchNode>()
-        return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent)
-      case 'dynamic':
-        conflictsFor(parent).dynamics[routeNode.segment] ??= routeNode
-        return parent.dynamic ??= createSearchNode(routeNode, parent)
-      case 'catchall':
-        conflictsFor(parent).catchalls.push(routeNode)
-        return parent.catchall ??= createSearchNode(routeNode, parent)
-    }
+  const ctx: BuildContext = {
+    positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
+    pageOwnerOf: new Map<SearchNode, RouteNode>(),
+    defaultOwnerOf: new Map<SearchNode, RouteNode>(),
+    conflictsOf: new Map<SearchNode, PositionConflicts>(),
+    searchNodes: [searchTree],
   }
 
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
-      const searchNode = positionOf.get(routeNode)!
+      const searchNode = ctx.positionOf.get(routeNode)!
 
       // A real default always beats an implicit one at the boundary
       // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(routeNode)
-      if (!defaultOwnerOf.has(searchNode) || defaultOwner.modules.default)
-        defaultOwnerOf.set(searchNode, defaultOwner)
+      if (!ctx.defaultOwnerOf.has(searchNode) || defaultOwner.modules.default)
+        ctx.defaultOwnerOf.set(searchNode, defaultOwner)
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
       if (defaultOwner.modules.default)
-        conflictsFor(searchNode).defaults.add(defaultOwner)
+        conflictsFor(searchNode, ctx).defaults.add(defaultOwner)
 
       if (!routeNode.modules.page) return // after this, routeNode is a page owner
-      pageOwnerOf.getOrInsert(searchNode, routeNode)
-      conflictsFor(searchNode).pages.push(routeNode)
+      ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
+      conflictsFor(searchNode, ctx).pages.push(routeNode)
     },
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
-      const parentSearchNode = positionOf.get(parentRouteNode)!
-      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode)
-      positionOf.set(childRouteNode, childSearchNode)
+      const parentSearchNode = ctx.positionOf.get(parentRouteNode)!
+      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, ctx)
+      ctx.positionOf.set(childRouteNode, childSearchNode)
     },
   })
 
-  populateEndpoints({ searchNodes, positionOf, pageOwnerOf, defaultOwnerOf })
-  return { root: searchTree, conflicts: [...conflictsOf.values()] }
+  populateEndpoints(ctx)
+  return { root: searchTree, conflicts: [...ctx.conflictsOf.values()] }
 }
 
 console.log(`
