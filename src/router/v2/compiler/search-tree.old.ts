@@ -50,8 +50,8 @@ function conflictsFor(position: SearchNode, ctx: SearchContext): PositionConflic
   return ctx.conflictsOf.getOrInsertComputed(position, () => ({
     pages: [],
     catchalls: [],
-    dynamics: dict(),
-    defaults: new Set(),
+    dynamics: dict<RouteNode>(),
+    defaults: new Set<RouteNode>(),
   }))
 }
 
