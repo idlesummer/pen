@@ -107,7 +107,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   }
   const positionNodes = new Set([positionTree]) // every position node, in depth-first order
   const state: TraversalState = { conflictsOf: new Map(), slotDescendants: new Set() }
-  const ctx: PositionContext = {
+  const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
     defaultOwnerOf: new Map<PositionNode, RouteNode>(),
@@ -115,12 +115,12 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   }
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
-      const positionNode = ctx.positionOf.get(route)!
+      const positionNode = context.positionOf.get(route)!
       // A real default always beats an implicit one at the boundary
       // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(route)
-      if (!ctx.defaultOwnerOf.has(positionNode) || defaultOwner.modules.default)
-        ctx.defaultOwnerOf.set(positionNode, defaultOwner)
+      if (!context.defaultOwnerOf.has(positionNode) || defaultOwner.modules.default)
+        context.defaultOwnerOf.set(positionNode, defaultOwner)
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
@@ -128,7 +128,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
         conflictsFor(positionNode, state).defaults.add(defaultOwner)
 
       if (!route.modules.page) return // after this, route is a page owner
-      ctx.pageOwnerOf.getOrInsert(positionNode, route)
+      context.pageOwnerOf.getOrInsert(positionNode, route)
       conflictsFor(positionNode, state).pages.push(route)
     },
     expand: route => expandChildren(route, state),
@@ -136,14 +136,14 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       if (parentRouteNode.type === 'slot' || state.slotDescendants.has(parentRouteNode))
         state.slotDescendants.add(childRouteNode)
 
-      const parentPositionNode = ctx.positionOf.get(parentRouteNode)!
-      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, state, ctx.slotsOf)
-      ctx.positionOf.set(childRouteNode, childPositionNode)
+      const parentPositionNode = context.positionOf.get(parentRouteNode)!
+      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, state, context.slotsOf)
+      context.positionOf.set(childRouteNode, childPositionNode)
       positionNodes.add(childPositionNode)
     },
   })
   for (const positionNode of positionNodes)
-    setEndpoints(positionNode, ctx)
+    setEndpoints(positionNode, context)
   return [positionTree, [...state.conflictsOf.values()]]
 }
 
