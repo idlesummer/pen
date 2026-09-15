@@ -94,7 +94,6 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const searchNode = ctx.positionOf.get(routeNode)!
-
       // A real default always beats an implicit one at the boundary
       // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(routeNode)
