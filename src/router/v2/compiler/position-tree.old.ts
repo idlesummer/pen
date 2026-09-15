@@ -60,26 +60,14 @@ function createPositionNode(route: RouteNode, parent: PositionNode, depth?: numb
   return node
 }
 
-function createPositionConflicts(): PositionConflicts {
+function createConflicts(): PositionConflicts {
   return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
 }
 
-/** This position's conflict-tracking record, creating it on first touch. */
-function conflictsFor(position: PositionNode, state: TraversalState): PositionConflicts {
-  return state.conflictsOf.getOrInsertComputed(position, () => ({
-    pages: [],
-    defaults: new Set<RouteNode>(),
-    dynamics: dict<RouteNode>(),
-    catchalls: [],
-  }))
-}
-
-/** Gets the position a folder belongs to, creating it if it doesn't exist
- *  yet - a group just returns the one already there (its parent's), while
- *  everything else looks up or opens its own. slotsOf stays a separate param
- *  rather than joining TraversalState - it's PositionContext's, shared with
- *  position-tree-endpoints.ts, not traversal-only like state is. */
+/** Gets or creates the position for a route folder.
+ *  Groups reuse their parent's position; other folders create their own. */
 function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: TraversalState, context: PositionContext): PositionNode {
+  const conflicts = state.conflictsOf
   switch (route.type) {
     default: // group
       return parent
@@ -87,10 +75,10 @@ function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: Trav
       parent.statics ??= dict<PositionNode>()
       return parent.statics[route.segment] ??= createPositionNode(route, parent)
     case 'dynamic':
-      conflictsFor(parent, state).dynamics[route.segment] ??= route
+      conflicts.getOrInsertComputed(parent, createConflicts).dynamics[route.segment] ??= route
       return parent.dynamic ??= createPositionNode(route, parent)
     case 'catchall':
-      conflictsFor(parent, state).catchalls.push(route)
+      conflicts.getOrInsertComputed(parent, createConflicts).catchalls.push(route)
       return parent.catchall ??= createPositionNode(route, parent)
     case 'slot': {
       const slotDict = context.slotsOf.getOrInsertComputed(parent, dict<PositionNode>)
@@ -131,13 +119,13 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
-      const conflicts = state.conflictsOf.getOrInsertComputed(position, createPositionConflicts)
+      const conflicts = state.conflictsOf
       if (defaultOwner.modules.default)
-        conflicts.defaults.add(defaultOwner)
+        conflicts.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
 
       if (!route.modules.page) return // after this, route is a page owner
       context.pageOwnerOf.getOrInsert(position, route)
-      conflicts.pages.push(route)
+      conflicts.getOrInsertComputed(position, createConflicts).pages.push(route)
     },
     expand: route => expandChildren(route, state),
     attach: (childRouteNode, parentRouteNode) => {
