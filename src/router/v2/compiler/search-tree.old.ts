@@ -36,7 +36,7 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode 
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
     depth: parent.depth + 1,
-    fallback: undefined as never, // filled by resolveEndpoints, once every position exists
+    fallback: undefined as never, // filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
     node.param = routeNode.segment
