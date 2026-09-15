@@ -3,7 +3,7 @@ import type { SegmentType } from './route-segment'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { filterRouteFiles, getRouteModuleType } from './route-module'
-import { createSegment, isPrivate } from './route-segment'
+import { createSegment, isBoundary, isPrivate } from './route-segment'
 
 /** The parse: one node per folder, mirroring the app directory. It knows the
  *  filesystem and nothing about routing rules.
@@ -66,4 +66,13 @@ export function createRouteTree(filePaths: string[]): RouteNode {
  *  Falls back to the route path for a folder that owns no module of its own. */
 export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modules)[0] ?? routeNode.path
+}
+
+/** This folder's own nearest real default - itself, if it declares one or is
+ *  a boundary, otherwise the nearest ancestor that does. */
+export function findDefaultOwner(route: RouteNode): RouteNode {
+  for (let node = route; ; node = node.parent!) {
+    if (node.modules.default || isBoundary(node.type))
+      return node
+  }
 }
