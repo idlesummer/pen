@@ -58,20 +58,6 @@ function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, Positio
   }))
 }
 
-/** Opens a declared slot, registering it on the POSITION rather than the
- *  folder - a slot inside a group belongs to the position the group folds
- *  into, so two folders that collapse onto the same position and both
- *  declare the same slot name merge into one rather than conflicting. Roots
- *  its own match path (depth 0), but shares the position's urlDepth since a
- *  slot consumes no URL segment of its own. */
-function openSlot(routeNode: RouteNode, position: SearchNode, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
-  const slotDict = slotsOf.getOrInsertComputed(position, dict<SearchNode>)
-  const slot = slotDict[routeNode.segment]
-  return !slot
-    ? slotDict[routeNode.segment] = createSearchNode(routeNode, position, 0)
-    : slot
-}
-
 /** Gets the position a folder belongs to, creating it if it doesn't exist
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. */
@@ -93,8 +79,11 @@ function getOrCreatePosition(
     case 'catchall':
       conflictsFor(parent, conflictsOf).catchalls.push(routeNode)
       return parent.catchall ??= createSearchNode(routeNode, parent)
-    case 'slot':
-      return openSlot(routeNode, parent, slotsOf)
+    case 'slot': {
+      const slotDict = slotsOf.getOrInsertComputed(parent, dict<SearchNode>)
+      const slotName = routeNode.segment
+      return slotDict[slotName] ??= createSearchNode(routeNode, parent, 0)
+    }
   }
 }
 
