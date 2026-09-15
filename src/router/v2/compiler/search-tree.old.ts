@@ -61,12 +61,7 @@ function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, Positio
 /** Gets the position a folder belongs to, creating it if it doesn't exist
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. */
-function getOrCreatePosition(
-  routeNode: RouteNode,
-  parent: SearchNode,
-  conflictsOf: Map<SearchNode, PositionConflicts>,
-  slotsOf: Map<SearchNode, Record<string, SearchNode>>,
-): SearchNode {
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, conflictsOf: Map<SearchNode, PositionConflicts>, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
   switch (routeNode.type) {
     default: // group
       return parent
