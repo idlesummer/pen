@@ -18,27 +18,46 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
 
 /** A folder's own Frame, or undefined if it wraps nothing at all - a plain
  *  folder with no layout/loading/error/default contributes nothing to the
- *  chain, so there's no point giving it one. */
-function createFrame(routeNode: RouteNode): Frame | undefined {
+ *  chain, so there's no point giving it one.
+ *
+ *  Slots are looked up by POSITION, not by a fixed anchor folder - any folder
+ *  whose position has slots can carry them, so a sibling that never shares
+ *  ancestry with whichever folder first opened the position still sees them.
+ *  seenSlotPositions dedupes within one walk (stacked groups can share a
+ *  position without duplicating its slots), and only gets marked once a
+ *  frame is actually about to be returned - a folder that wraps nothing of
+ *  its own never consumes the one chance to attach them. */
+function createFrame(routeNode: RouteNode, ctx: SearchContext, seenSlotPositions: Set<SearchNode>): Frame | undefined {
   const { layout, loading, error, default: def } = routeNode.modules
   const defaultPath = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
-  if (layout || loading || error || defaultPath)
-    return { layout, loading, error, default: defaultPath }
+  if (!layout && !loading && !error && !defaultPath)
+    return
+
+  const position = ctx.positionOf.get(routeNode)!
+  let slots: Record<string, SearchNode> | undefined
+  if (!seenSlotPositions.has(position)) {
+    seenSlotPositions.add(position)
+    slots = ctx.slotsOf.get(position)
+  }
+  return { layout, loading, error, default: defaultPath, slots, paramDepth: position.depth }
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
  *  IS that default, so it isn't also a boundary around itself. */
 function removeDefault(frame: Frame): Frame {
-  const { layout, loading, error } = frame
-  return { layout, loading, error }
+  const { layout, loading, error, slots, paramDepth } = frame
+  return { layout, loading, error, slots, paramDepth }
 }
 
 // ── endpoints ───────────────────────────────────────────────────────────
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
- *  render stage would otherwise repeat on every navigation. */
+ *  render stage would otherwise repeat on every navigation. A fresh
+ *  seenSlotPositions per call: each endpoint is its own independent walk, so
+ *  a position's slots are eligible to attach again in the next one. */
 function createEndpoint(pageOwner: RouteNode, content: string, ctx: SearchContext): Endpoint {
-  const frames = compactMapAncestors(pageOwner, createFrame).reverse()
+  const seenSlotPositions = new Set<SearchNode>()
+  const frames = compactMapAncestors(pageOwner, node => createFrame(node, ctx, seenSlotPositions)).reverse()
   const contentDepth = ctx.positionOf.get(pageOwner)!.depth
   return { frames, content, contentDepth }
 }

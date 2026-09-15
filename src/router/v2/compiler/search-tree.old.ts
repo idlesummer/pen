@@ -19,13 +19,16 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
   }
 }
 
-/** The children worth walking, for now: a catch-all is terminal, and slots
- *  are out of scope until they get their own step. Malformed folders are
- *  skipped too - they carry no route to open a position with. */
-function expandChildren(routeNode: RouteNode): RouteNode[] {
+/** The children worth walking: a catch-all is terminal, and once inside a
+ *  slot, a further nested slot is excluded - slot subtrees are terminal for
+ *  further slot-nesting, which is what makes it safe to enter one at all.
+ *  Malformed folders are skipped too - they carry no route to open a
+ *  position with. */
+function expandChildren(routeNode: RouteNode, insideSlot: Set<RouteNode>): RouteNode[] {
   if (routeNode.type === 'catchall')
     return []
-  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
+  const nested = routeNode.type === 'slot' || insideSlot.has(routeNode)
+  return routeNode.children.filter(child => child.type !== 'malformed' && !(nested && child.type === 'slot'))
 }
 
 // ── positions ───────────────────────────────────────────────────────────
@@ -55,11 +58,31 @@ function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, Positio
   }))
 }
 
+/** Opens a declared slot, registering it on the POSITION rather than the
+ *  folder - a slot inside a group belongs to the position the group folds
+ *  into, so two folders that collapse onto the same position and both
+ *  declare the same slot name merge into one rather than conflicting. Roots
+ *  its own match path (depth 0), but shares the position's urlDepth since a
+ *  slot consumes no URL segment of its own. */
+function openSlot(routeNode: RouteNode, position: SearchNode, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
+  const slots = slotsOf.getOrInsertComputed(position, dict<SearchNode>)
+  const existing = slots[routeNode.segment]
+  if (existing) return existing
+
+  const slotNode = createSearchNode(routeNode, position)
+  slotNode.depth = 0
+  return slots[routeNode.segment] = slotNode
+}
+
 /** Gets the position a folder belongs to, creating it if it doesn't exist
  *  yet - a group just returns the one already there (its parent's), while
- *  everything else looks up or opens its own. Slots aren't handled yet -
- *  their folders are excluded from the walk entirely, see expandChildren. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, conflictsOf: Map<SearchNode, PositionConflicts>): SearchNode {
+ *  everything else looks up or opens its own. */
+function getOrCreatePosition(
+  routeNode: RouteNode,
+  parent: SearchNode,
+  conflictsOf: Map<SearchNode, PositionConflicts>,
+  slotsOf: Map<SearchNode, Record<string, SearchNode>>,
+): SearchNode {
   switch (routeNode.type) {
     default: // group
       return parent
@@ -72,6 +95,8 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, conflicts
     case 'catchall':
       conflictsFor(parent, conflictsOf).catchalls.push(routeNode)
       return parent.catchall ??= createSearchNode(routeNode, parent)
+    case 'slot':
+      return openSlot(routeNode, parent, slotsOf)
   }
 }
 
@@ -86,10 +111,12 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
   }
   const searchNodes = new Set([searchTree]) // every search node position in depth-first order
   const conflictsOf = new Map<SearchNode, PositionConflicts>() // traversal-only; setEndpoints never reads it
+  const insideSlot = new Set<RouteNode>() // folders sitting within a slot subtree; traversal-only too
   const ctx: SearchContext = {
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
     defaultOwnerOf: new Map<SearchNode, RouteNode>(),
+    slotsOf: new Map<SearchNode, Record<string, SearchNode>>(),
   }
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
@@ -109,10 +136,13 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
       conflictsFor(searchNode, conflictsOf).pages.push(routeNode)
     },
-    expand: expandChildren,
+    expand: routeNode => expandChildren(routeNode, insideSlot),
     attach: (childRouteNode, parentRouteNode) => {
+      if (parentRouteNode.type === 'slot' || insideSlot.has(parentRouteNode))
+        insideSlot.add(childRouteNode)
+
       const parentSearchNode = ctx.positionOf.get(parentRouteNode)!
-      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, conflictsOf)
+      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, conflictsOf, ctx.slotsOf)
       ctx.positionOf.set(childRouteNode, childSearchNode)
       searchNodes.add(childSearchNode)
     },

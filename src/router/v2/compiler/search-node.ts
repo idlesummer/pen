@@ -1,12 +1,20 @@
 import type { RouteNode } from './route-tree'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
- *  never the page itself. A folder earns a Frame only if it wraps something. */
+ *  never the page itself. A folder earns a Frame only if it wraps something.
+ *
+ *  paramDepth is which position's params this frame renders with. Without
+ *  slots every frame in a chain shares the content's own contentDepth, but a
+ *  slot roots its own match path (depth resets to 0 there), so a chain that
+ *  passes through one can mix frames from two different depths - each frame
+ *  has to say which one it belongs to instead of inheriting one shared value. */
 export type Frame = {
   layout?: string
   loading?: string
   error?: string
   default?: string
+  slots?: Record<string, SearchNode> // this position's slots, carried on whichever frame claims them
+  paramDepth: number
 }
 
 /** Everything needed to render one accepted position: the complete wrapper
@@ -50,11 +58,14 @@ export type PositionConflicts = {
  *  between the compiler's two halves - traversal writes all of it, endpoint
  *  resolution only ever reads from it afterward. conflictsOf isn't here: only
  *  the traversal side ever touches it, so it's kept as its own local instead
- *  of bundled into a type the resolve side would carry around unused. The
+ *  of bundled into a type the resolve side would carry around unused.
+ *  slotsOf IS here, unlike conflictsOf - endpoint resolution reads it when
+ *  deciding whether a folder's frame carries this position's slots. The
  *  list of every position isn't here either - that's what drives the resolve
  *  pass's own loop, not something a single position's resolution needs. */
 export type SearchContext = {
   positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
   pageOwnerOf: Map<SearchNode, RouteNode>
   defaultOwnerOf: Map<SearchNode, RouteNode>
+  slotsOf: Map<SearchNode, Record<string, SearchNode>> // position -> its declared slots, by name
 }
