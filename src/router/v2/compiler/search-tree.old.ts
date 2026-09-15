@@ -30,7 +30,7 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
 
 // ── positions ───────────────────────────────────────────────────────────
 
-function createSearchNode(routeNode: RouteNode, parent: SearchNode, searchNodes: SearchNode[]): SearchNode {
+function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode {
   const type = routeNode.type
   const node: SearchNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
@@ -42,7 +42,6 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode, searchNodes:
     node.param = routeNode.segment
   if (type === 'catchall')
     node.isCatchall = true
-  searchNodes.push(node)
   return node
 }
 
@@ -60,19 +59,19 @@ function conflictsFor(position: SearchNode, ctx: SearchContext): PositionConflic
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. Slots aren't handled yet -
  *  their folders are excluded from the walk entirely, see expandChildren. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, searchNodes: SearchNode[], ctx: SearchContext): SearchNode {
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: SearchContext): SearchNode {
   switch (routeNode.type) {
     default: // group
       return parent
     case 'static':
       parent.statics ??= dict<SearchNode>()
-      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, searchNodes)
+      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent)
     case 'dynamic':
       conflictsFor(parent, ctx).dynamics[routeNode.segment] ??= routeNode
-      return parent.dynamic ??= createSearchNode(routeNode, parent, searchNodes)
+      return parent.dynamic ??= createSearchNode(routeNode, parent)
     case 'catchall':
       conflictsFor(parent, ctx).catchalls.push(routeNode)
-      return parent.catchall ??= createSearchNode(routeNode, parent, searchNodes)
+      return parent.catchall ??= createSearchNode(routeNode, parent)
   }
 }
 
@@ -85,7 +84,7 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
     depth: 0,
     fallback: undefined as never, //* Must be populated later
   }
-  const searchNodes = [searchTree] // every position, for the final resolve pass
+  const searchNodes = new Set([searchTree]) // every position, for the final resolve pass - a Set since a shared position is reached via attach once per contributing folder
   const ctx: SearchContext = {
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
@@ -115,8 +114,9 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
       const parentSearchNode = ctx.positionOf.get(parentRouteNode)!
-      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, searchNodes, ctx)
+      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, ctx)
       ctx.positionOf.set(childRouteNode, childSearchNode)
+      searchNodes.add(childSearchNode)
     },
   })
   for (const searchNode of searchNodes)
