@@ -25,11 +25,7 @@ function findDefaultOwner(route: RouteNode): RouteNode {
   }
 }
 
-/** The children worth walking: a catch-all is terminal, and once inside a
- *  slot, a further nested slot is excluded - slot subtrees are terminal for
- *  further slot-nesting, which is what makes it safe to enter one at all.
- *  Malformed folders are skipped too - they carry no route to open a
- *  position with. */
+/** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
 function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
   if (route.type === 'catchall')
     return []
