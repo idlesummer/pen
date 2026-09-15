@@ -3,7 +3,7 @@ import type { CompiledSearchTree, PositionConflicts, SearchContext, SearchNode }
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree } from './route-tree'
-import { resolveEndpoints } from './search-tree-endpoints'
+import { setEndpoints } from './search-tree-endpoints'
 import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
 // ── routing rules over the route tree ──────────────────────────────────────
@@ -119,9 +119,8 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
       ctx.positionOf.set(childRouteNode, childSearchNode)
     },
   })
-
   for (const searchNode of searchNodes)
-    resolveEndpoints(searchNode, ctx)
+    setEndpoints(searchNode, ctx)
   return { root: searchTree, conflicts: [...ctx.conflictsOf.values()] }
 }
 
