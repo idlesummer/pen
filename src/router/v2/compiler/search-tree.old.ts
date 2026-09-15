@@ -33,12 +33,12 @@ function expandChildren(routeNode: RouteNode, insideSlot: Set<RouteNode>): Route
 
 // ── positions ───────────────────────────────────────────────────────────
 
-function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode {
+function createSearchNode(routeNode: RouteNode, parent: SearchNode, depth?: number): SearchNode {
   const type = routeNode.type
   const node: SearchNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
-    depth: parent.depth + 1,
+    depth: depth ?? parent.depth + 1,
     fallback: undefined as never, // filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
@@ -67,11 +67,9 @@ function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, Positio
 function openSlot(routeNode: RouteNode, position: SearchNode, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
   const slots = slotsOf.getOrInsertComputed(position, dict<SearchNode>)
   const existing = slots[routeNode.segment]
-  if (existing) return existing
-
-  const slotNode = createSearchNode(routeNode, position)
-  slotNode.depth = 0
-  return slots[routeNode.segment] = slotNode
+  return !existing
+    ? slots[routeNode.segment] = createSearchNode(routeNode, position, 0)
+    : existing
 }
 
 /** Gets the position a folder belongs to, creating it if it doesn't exist
