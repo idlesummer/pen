@@ -11,7 +11,6 @@ export type SearchContext = {
   positionOf: Map<RouteNode, SearchNode>
   pageOwnerOf: Map<SearchNode, RouteNode>
   defaultOwnerOf: Map<SearchNode, RouteNode>
-  slotsOf: Map<SearchNode, Record<string, SearchNode>>
 }
 
 function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
@@ -29,26 +28,19 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
 
 /** A folder's own Frame, or undefined if it wraps nothing at all - a plain
  *  folder with no layout/loading/error/default contributes nothing to the
- *  chain, so there's no point giving it one. Slots ride along on whatever
- *  frame this folder's own position already earns; slots alone never earn
- *  one on their own, since without a layout there's nothing to pass them to.
- *  Looked up by position, not by "the anchor" - so it can't miss a slot
- *  declared on a sibling folder sharing this same position. */
-function createFrame(routeNode: RouteNode, ctx: SearchContext): Frame | undefined {
+ *  chain, so there's no point giving it one. */
+function createFrame(routeNode: RouteNode): Frame | undefined {
   const { layout, loading, error, default: def } = routeNode.modules
   const defaultPath = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
-  if (!layout && !loading && !error && !defaultPath)
-    return
-
-  const slots = ctx.slotsOf.get(ctx.positionOf.get(routeNode)!)
-  return { layout, loading, error, default: defaultPath, slots }
+  if (layout || loading || error || defaultPath)
+    return { layout, loading, error, default: defaultPath }
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
  *  IS that default, so it isn't also a boundary around itself. */
 function removeDefault(frame: Frame): Frame {
-  const { layout, loading, error, slots } = frame
-  return { layout, loading, error, slots }
+  const { layout, loading, error } = frame
+  return { layout, loading, error }
 }
 
 // ── endpoints ───────────────────────────────────────────────────────────
@@ -56,7 +48,7 @@ function removeDefault(frame: Frame): Frame {
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
 function createEndpoint(pageOwner: RouteNode, content: string, ctx: SearchContext): Endpoint {
-  const frames = compactMapAncestors(pageOwner, node => createFrame(node, ctx)).reverse()
+  const frames = compactMapAncestors(pageOwner, createFrame).reverse()
   const contentDepth = ctx.positionOf.get(pageOwner)!.depth
   return { frames, content, contentDepth }
 }
