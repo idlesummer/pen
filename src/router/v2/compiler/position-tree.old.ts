@@ -67,7 +67,7 @@ function createConflicts(): PositionConflicts {
 /** Gets or creates the position for a route folder.
  *  Groups reuse their parent's position; other folders create their own. */
 function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: TraversalState, context: PositionContext): PositionNode {
-  const conflicts = state.conflictsOf
+  const conflictsOf = state.conflictsOf
   switch (route.type) {
     default: // group
       return parent
@@ -75,10 +75,10 @@ function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: Trav
       parent.statics ??= dict<PositionNode>()
       return parent.statics[route.segment] ??= createPositionNode(route, parent)
     case 'dynamic':
-      conflicts.getOrInsertComputed(parent, createConflicts).dynamics[route.segment] ??= route
+      conflictsOf.getOrInsertComputed(parent, createConflicts).dynamics[route.segment] ??= route
       return parent.dynamic ??= createPositionNode(route, parent)
     case 'catchall':
-      conflicts.getOrInsertComputed(parent, createConflicts).catchalls.push(route)
+      conflictsOf.getOrInsertComputed(parent, createConflicts).catchalls.push(route)
       return parent.catchall ??= createPositionNode(route, parent)
     case 'slot': {
       const slotDict = context.slotsOf.getOrInsertComputed(parent, dict<PositionNode>)
@@ -119,13 +119,13 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
-      const conflicts = state.conflictsOf
+      const conflictsOf = state.conflictsOf
       if (defaultOwner.modules.default)
-        conflicts.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
+        conflictsOf.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
 
       if (!route.modules.page) return // after this, route is a page owner
       context.pageOwnerOf.getOrInsert(position, route)
-      conflicts.getOrInsertComputed(position, createConflicts).pages.push(route)
+      conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
     },
     expand: route => expandChildren(route, state),
     attach: (childRouteNode, parentRouteNode) => {
