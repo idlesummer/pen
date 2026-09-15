@@ -46,8 +46,8 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode 
 }
 
 /** This position's conflict-tracking record, creating it on first touch. */
-function conflictsFor(position: SearchNode, ctx: SearchContext): PositionConflicts {
-  return ctx.conflictsOf.getOrInsertComputed(position, () => ({
+function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, PositionConflicts>): PositionConflicts {
+  return conflictsOf.getOrInsertComputed(position, () => ({
     pages: [],
     defaults: new Set<RouteNode>(),
     dynamics: dict<RouteNode>(),
@@ -59,7 +59,7 @@ function conflictsFor(position: SearchNode, ctx: SearchContext): PositionConflic
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. Slots aren't handled yet -
  *  their folders are excluded from the walk entirely, see expandChildren. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: SearchContext): SearchNode {
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, conflictsOf: Map<SearchNode, PositionConflicts>): SearchNode {
   switch (routeNode.type) {
     default: // group
       return parent
@@ -67,10 +67,10 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: Sear
       parent.statics ??= dict<SearchNode>()
       return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent)
     case 'dynamic':
-      conflictsFor(parent, ctx).dynamics[routeNode.segment] ??= routeNode
+      conflictsFor(parent, conflictsOf).dynamics[routeNode.segment] ??= routeNode
       return parent.dynamic ??= createSearchNode(routeNode, parent)
     case 'catchall':
-      conflictsFor(parent, ctx).catchalls.push(routeNode)
+      conflictsFor(parent, conflictsOf).catchalls.push(routeNode)
       return parent.catchall ??= createSearchNode(routeNode, parent)
   }
 }
@@ -85,11 +85,11 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
     fallback: undefined as never, //* Must be populated later
   }
   const searchNodes = new Set([searchTree]) // every search node position in depth-first order
+  const conflictsOf = new Map<SearchNode, PositionConflicts>() // traversal-only; setEndpoints never reads it
   const ctx: SearchContext = {
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
     defaultOwnerOf: new Map<SearchNode, RouteNode>(),
-    conflictsOf: new Map<SearchNode, PositionConflicts>(),
   }
 
   traverse(routeTree, {
@@ -105,23 +105,23 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
       if (defaultOwner.modules.default)
-        conflictsFor(searchNode, ctx).defaults.add(defaultOwner)
+        conflictsFor(searchNode, conflictsOf).defaults.add(defaultOwner)
 
       if (!routeNode.modules.page) return // after this, routeNode is a page owner
       ctx.pageOwnerOf.getOrInsert(searchNode, routeNode)
-      conflictsFor(searchNode, ctx).pages.push(routeNode)
+      conflictsFor(searchNode, conflictsOf).pages.push(routeNode)
     },
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
       const parentSearchNode = ctx.positionOf.get(parentRouteNode)!
-      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, ctx)
+      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, conflictsOf)
       ctx.positionOf.set(childRouteNode, childSearchNode)
       searchNodes.add(childSearchNode)
     },
   })
   for (const searchNode of searchNodes)
     setEndpoints(searchNode, ctx)
-  return [searchTree, [...ctx.conflictsOf.values()]]
+  return [searchTree, [...conflictsOf.values()]]
 }
 
 console.log(`
