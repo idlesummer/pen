@@ -34,17 +34,17 @@ function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
 
 function createPositionNode(route: RouteNode, parent: PositionNode, depth?: number): PositionNode {
   const type = route.type
-  const node: PositionNode = {
+  const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
     depth: depth ?? parent.depth + 1,
     fallback: undefined as never, // filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
-    node.param = route.segment
+    position.param = route.segment
   if (type === 'catchall')
-    node.isCatchall = true
-  return node
+    position.isCatchall = true
+  return position
 }
 
 function createConflicts(): PositionConflicts {
