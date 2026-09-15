@@ -119,7 +119,6 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
       ctx.positionOf.set(childRouteNode, childSearchNode)
     },
   })
-
   populateEndpoints(ctx)
   return { root: searchTree, conflicts: [...ctx.conflictsOf.values()] }
 }
