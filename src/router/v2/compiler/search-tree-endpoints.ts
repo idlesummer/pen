@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { Endpoint, Frame, SearchContext } from './search-node'
+import type { Endpoint, Frame, SearchContext, SearchNode } from './search-node'
 import { GLOBAL_DEFAULT } from './route-module'
 import { isBoundary } from './route-segment'
 
@@ -58,17 +58,15 @@ function createFallback(defaultOwner: RouteNode, content: string, ctx: SearchCon
   return endpoint
 }
 
-/** Resolves every position's page (if it has one) and fallback (always) -
- *  runs once every folder's frame and page ownership is known. */
-export function populateEndpoints(ctx: SearchContext) {
-  for (const searchNode of ctx.searchNodes) {
-    const pageOwner = ctx.pageOwnerOf.get(searchNode)
-    const pageContent = pageOwner?.modules.page
-    if (pageContent)
-      searchNode.endpoint = createEndpoint(pageOwner, pageContent, ctx)
+/** Resolves one position's page (if it has one) and fallback (always) - safe
+ *  to call once every folder's frame and page ownership is known. */
+export function resolveEndpoints(searchNode: SearchNode, ctx: SearchContext) {
+  const pageOwner = ctx.pageOwnerOf.get(searchNode)
+  const pageContent = pageOwner?.modules.page
+  if (pageContent)
+    searchNode.endpoint = createEndpoint(pageOwner, pageContent, ctx)
 
-    const defaultOwner = ctx.defaultOwnerOf.get(searchNode)!  // always set; worst case, a boundary
-    const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
-    searchNode.fallback = createFallback(defaultOwner, defaultContent, ctx)
-  }
+  const defaultOwner = ctx.defaultOwnerOf.get(searchNode)!  // always set; worst case, a boundary
+  const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
+  searchNode.fallback = createFallback(defaultOwner, defaultContent, ctx)
 }

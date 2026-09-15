@@ -3,7 +3,7 @@ import type { CompiledSearchTree, PositionConflicts, SearchContext, SearchNode }
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree } from './route-tree'
-import { populateEndpoints } from './search-tree-endpoints'
+import { resolveEndpoints } from './search-tree-endpoints'
 import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
 // ── routing rules over the route tree ──────────────────────────────────────
@@ -30,19 +30,19 @@ function expandChildren(routeNode: RouteNode): RouteNode[] {
 
 // ── positions ───────────────────────────────────────────────────────────
 
-function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: SearchContext): SearchNode {
+function createSearchNode(routeNode: RouteNode, parent: SearchNode, searchNodes: SearchNode[]): SearchNode {
   const type = routeNode.type
   const node: SearchNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
     depth: parent.depth + 1,
-    fallback: undefined as never, // filled by populateEndpoints, once every position exists
+    fallback: undefined as never, // filled by resolveEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
     node.param = routeNode.segment
   if (type === 'catchall')
     node.isCatchall = true
-  ctx.searchNodes.push(node)
+  searchNodes.push(node)
   return node
 }
 
@@ -60,19 +60,19 @@ function conflictsFor(position: SearchNode, ctx: SearchContext): PositionConflic
  *  yet - a group just returns the one already there (its parent's), while
  *  everything else looks up or opens its own. Slots aren't handled yet -
  *  their folders are excluded from the walk entirely, see expandChildren. */
-function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, ctx: SearchContext): SearchNode {
+function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, searchNodes: SearchNode[], ctx: SearchContext): SearchNode {
   switch (routeNode.type) {
     default: // group
       return parent
     case 'static':
       parent.statics ??= dict<SearchNode>()
-      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, ctx)
+      return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent, searchNodes)
     case 'dynamic':
       conflictsFor(parent, ctx).dynamics[routeNode.segment] ??= routeNode
-      return parent.dynamic ??= createSearchNode(routeNode, parent, ctx)
+      return parent.dynamic ??= createSearchNode(routeNode, parent, searchNodes)
     case 'catchall':
       conflictsFor(parent, ctx).catchalls.push(routeNode)
-      return parent.catchall ??= createSearchNode(routeNode, parent, ctx)
+      return parent.catchall ??= createSearchNode(routeNode, parent, searchNodes)
   }
 }
 
@@ -85,8 +85,8 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     depth: 0,
     fallback: undefined as never, //* Must be populated later
   }
+  const searchNodes = [searchTree] // every position, for the final resolve pass
   const ctx: SearchContext = {
-    searchNodes: [searchTree],
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
     defaultOwnerOf: new Map<SearchNode, RouteNode>(),
@@ -115,11 +115,13 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     expand: expandChildren,
     attach: (childRouteNode, parentRouteNode) => {
       const parentSearchNode = ctx.positionOf.get(parentRouteNode)!
-      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, ctx)
+      const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode, searchNodes, ctx)
       ctx.positionOf.set(childRouteNode, childSearchNode)
     },
   })
-  populateEndpoints(ctx)
+
+  for (const searchNode of searchNodes)
+    resolveEndpoints(searchNode, ctx)
   return { root: searchTree, conflicts: [...ctx.conflictsOf.values()] }
 }
 
