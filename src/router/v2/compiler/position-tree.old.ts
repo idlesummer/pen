@@ -60,6 +60,10 @@ function createPositionNode(route: RouteNode, parent: PositionNode, depth?: numb
   return node
 }
 
+function createPositionConflicts(): PositionConflicts {
+  return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
+}
+
 /** This position's conflict-tracking record, creating it on first touch. */
 function conflictsFor(position: PositionNode, state: TraversalState): PositionConflicts {
   return state.conflictsOf.getOrInsertComputed(position, () => ({
@@ -106,7 +110,10 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     fallback: undefined as never, //* Must be populated later
   }
   const positionNodes = new Set([positionTree]) // every position node, in depth-first order
-  const state: TraversalState = { conflictsOf: new Map(), slotDescendants: new Set() }
+  const state: TraversalState = {
+    conflictsOf: new Map<PositionNode, PositionConflicts>(),
+    slotDescendants: new Set<RouteNode>(),
+  }
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
@@ -124,12 +131,13 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
+      const conflicts = state.conflictsOf.getOrInsertComputed(position, createPositionConflicts)
       if (defaultOwner.modules.default)
-        conflictsFor(position, state).defaults.add(defaultOwner)
+        conflicts.defaults.add(defaultOwner)
 
       if (!route.modules.page) return // after this, route is a page owner
       context.pageOwnerOf.getOrInsert(position, route)
-      conflictsFor(position, state).pages.push(route)
+      conflicts.pages.push(route)
     },
     expand: route => expandChildren(route, state),
     attach: (childRouteNode, parentRouteNode) => {
