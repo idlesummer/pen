@@ -49,9 +49,9 @@ function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode 
 function conflictsFor(position: SearchNode, ctx: SearchContext): PositionConflicts {
   return ctx.conflictsOf.getOrInsertComputed(position, () => ({
     pages: [],
-    catchalls: [],
-    dynamics: dict<RouteNode>(),
     defaults: new Set<RouteNode>(),
+    dynamics: dict<RouteNode>(),
+    catchalls: [],
   }))
 }
 
