@@ -60,7 +60,7 @@ function createFallback(defaultOwner: RouteNode, content: string, ctx: SearchCon
 
 /** Resolves one position's page (if it has one) and fallback (always) - safe
  *  to call once every folder's frame and page ownership is known. */
-export function resolveEndpoints(searchNode: SearchNode, ctx: SearchContext) {
+export function setEndpoints(searchNode: SearchNode, ctx: SearchContext) {
   const pageOwner = ctx.pageOwnerOf.get(searchNode)
   const pageContent = pageOwner?.modules.page
   if (pageContent)
