@@ -2,9 +2,9 @@ import type { RouteNode } from './route-tree'
 import type { PositionConflicts, PositionContext, PositionNode } from './position-node'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { createRouteTree } from './route-tree'
+import { createRouteTree, findDefaultOwner } from './route-tree'
 import { setEndpoints } from './position-tree-endpoints'
-import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment'
+import { isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
 // ── routing rules over the route tree ──────────────────────────────────────
 // This stops at slot boundaries, which is a statement about how routing
@@ -14,15 +14,6 @@ import { isBoundary, isDynamicOrCatchall, isUrlConsuming } from './route-segment
 type TraversalState = {
   conflictsOf: Map<PositionNode, PositionConflicts>
   slotDescendants: Set<RouteNode> // folders sitting within a slot subtree
-}
-
-/** This folder's own nearest real default - itself, if it declares one or is
- *  a boundary, otherwise the nearest ancestor that does. */
-function findDefaultOwner(route: RouteNode): RouteNode {
-  for (let node = route; ; node = node.parent!) {
-    if (node.modules.default || isBoundary(node.type))
-      return node
-  }
 }
 
 /** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
