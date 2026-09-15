@@ -173,6 +173,14 @@ console.log(`
   │           └── page.tsx
   ├── [bad/
   │   └── page.tsx
+  ├── (a)/
+  │   └── dashboard/
+  │       ├── layout.tsx
+  │       └── @panel/
+  │           └── page.tsx
+  ├── dashboard/
+  │   ├── layout.tsx
+  │   └── page.tsx
   └── @modal/
       └── page.tsx
 `)
@@ -189,6 +197,14 @@ const routeTree = createRouteTree([
   'blog/[...rest]/page.tsx',
   'blog/[...rest]/dead/page.tsx',
   '[bad/page.tsx',
+  // (a)/dashboard and dashboard collapse onto one position, disjoint in the
+  // real tree - dashboard/page.tsx's own ancestry never visits (a)/dashboard,
+  // so this only comes out right if @panel is looked up by position rather
+  // than attached to whichever of the two folders happened to open it first.
+  '(a)/dashboard/layout.tsx',
+  '(a)/dashboard/@panel/page.tsx',
+  'dashboard/layout.tsx',
+  'dashboard/page.tsx',
   '@modal/page.tsx',
 ])
 const [root, conflicts] = createSearchTree(routeTree)
