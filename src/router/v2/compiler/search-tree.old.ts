@@ -65,11 +65,11 @@ function conflictsFor(position: SearchNode, conflictsOf: Map<SearchNode, Positio
  *  its own match path (depth 0), but shares the position's urlDepth since a
  *  slot consumes no URL segment of its own. */
 function openSlot(routeNode: RouteNode, position: SearchNode, slotsOf: Map<SearchNode, Record<string, SearchNode>>): SearchNode {
-  const slots = slotsOf.getOrInsertComputed(position, dict<SearchNode>)
-  const existing = slots[routeNode.segment]
-  return !existing
-    ? slots[routeNode.segment] = createSearchNode(routeNode, position, 0)
-    : existing
+  const slotDictOf = slotsOf.getOrInsertComputed(position, dict<SearchNode>)
+  const slot = slotDictOf[routeNode.segment]
+  return !slot
+    ? slotDictOf[routeNode.segment] = createSearchNode(routeNode, position, 0)
+    : slot
 }
 
 /** Gets the position a folder belongs to, creating it if it doesn't exist
