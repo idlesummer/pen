@@ -91,7 +91,6 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
     defaultOwnerOf: new Map<SearchNode, RouteNode>(),
   }
-
   traverse(routeTree, {
     visit: (routeNode) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const searchNode = ctx.positionOf.get(routeNode)!
