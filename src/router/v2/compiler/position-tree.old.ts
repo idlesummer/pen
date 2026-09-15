@@ -75,7 +75,7 @@ function conflictsFor(position: PositionNode, state: TraversalState): PositionCo
  *  everything else looks up or opens its own. slotsOf stays a separate param
  *  rather than joining TraversalState - it's PositionContext's, shared with
  *  position-tree-endpoints.ts, not traversal-only like state is. */
-function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: TraversalState, slotsOf: Map<PositionNode, Record<string, PositionNode>>): PositionNode {
+function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: TraversalState, context: PositionContext): PositionNode {
   switch (route.type) {
     default: // group
       return parent
@@ -89,7 +89,7 @@ function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: Trav
       conflictsFor(parent, state).catchalls.push(route)
       return parent.catchall ??= createPositionNode(route, parent)
     case 'slot': {
-      const slotDict = slotsOf.getOrInsertComputed(parent, dict<PositionNode>)
+      const slotDict = context.slotsOf.getOrInsertComputed(parent, dict<PositionNode>)
       const slotName = route.segment
       return slotDict[slotName] ??= createPositionNode(route, parent, 0)
     }
@@ -137,7 +137,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
         state.slotDescendants.add(childRouteNode)
 
       const parentPositionNode = context.positionOf.get(parentRouteNode)!
-      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, state, context.slotsOf)
+      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, state, context)
       context.positionOf.set(childRouteNode, childPositionNode)
       positionNodes.add(childPositionNode)
     },
