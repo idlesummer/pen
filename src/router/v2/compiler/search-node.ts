@@ -46,11 +46,6 @@ export type PositionConflicts = {
   defaults: Set<RouteNode>            // every distinct folder whose real default reaches here
 }
 
-export type CompiledSearchTree = {
-  root: SearchNode
-  conflicts: PositionConflicts[]
-}
-
 /** Build-time bookkeeping, dropped once createSearchTree returns. Shared
  *  between the compiler's two halves - traversal writes all of it, endpoint
  *  resolution only ever reads from it afterward. The list of every position
