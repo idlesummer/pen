@@ -53,9 +53,10 @@ export type CompiledSearchTree = {
 
 /** Build-time bookkeeping, dropped once createSearchTree returns. Shared
  *  between the compiler's two halves - traversal writes all of it, endpoint
- *  resolution only ever reads from it afterward. */
+ *  resolution only ever reads from it afterward. The list of every position
+ *  isn't here - that's what drives the resolve pass's own loop, not
+ *  something a single position's resolution needs to see. */
 export type SearchContext = {
-  searchNodes: SearchNode[]              // every position, for the final resolve pass
   positionOf: Map<RouteNode, SearchNode> // folder -> the position it belongs to
   pageOwnerOf: Map<SearchNode, RouteNode>
   defaultOwnerOf: Map<SearchNode, RouteNode>
