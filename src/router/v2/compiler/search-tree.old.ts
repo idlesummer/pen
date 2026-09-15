@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { CompiledSearchTree, PositionConflicts, SearchContext, SearchNode } from './search-node'
+import type { PositionConflicts, SearchContext, SearchNode } from './search-node'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree } from './route-tree'
@@ -78,7 +78,7 @@ function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode, searchNod
 
 // ── build ───────────────────────────────────────────────────────────────
 
-export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
+export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionConflicts[]] {
   const searchTree: SearchNode = {
     urlDepth: 0,
     staticness: 0,
@@ -121,7 +121,7 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
   })
   for (const searchNode of searchNodes)
     setEndpoints(searchNode, ctx)
-  return { root: searchTree, conflicts: [...ctx.conflictsOf.values()] }
+  return [searchTree, [...ctx.conflictsOf.values()]]
 }
 
 console.log(`
@@ -163,7 +163,7 @@ const routeTree = createRouteTree([
   '[bad/page.tsx',
   '@modal/page.tsx',
 ])
-const { root, conflicts } = createSearchTree(routeTree)
+const [root, conflicts] = createSearchTree(routeTree)
 console.log(JSON.stringify(root, null, 2))
 
 const realConflicts = conflicts
