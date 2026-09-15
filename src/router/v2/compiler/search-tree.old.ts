@@ -84,7 +84,7 @@ export function createSearchTree(routeTree: RouteNode): [SearchNode, PositionCon
     depth: 0,
     fallback: undefined as never, //* Must be populated later
   }
-  const searchNodes = new Set([searchTree]) // every position, for the final resolve pass - a Set since a shared position is reached via attach once per contributing folder
+  const searchNodes = new Set([searchTree]) // every search node position in depth-first order
   const ctx: SearchContext = {
     positionOf: new Map([[routeTree, searchTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<SearchNode, RouteNode>(),
