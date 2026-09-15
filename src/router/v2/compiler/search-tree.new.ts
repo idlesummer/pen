@@ -19,13 +19,16 @@ function findDefaultOwner(routeNode: RouteNode): RouteNode {
   }
 }
 
-/** The children worth walking, for now: a catch-all is terminal, and slots
- *  are out of scope until they get their own step. Malformed folders are
- *  skipped too - they carry no route to open a position with. */
-function expandChildren(routeNode: RouteNode): RouteNode[] {
+/** The children worth walking: a catch-all is terminal, malformed folders
+ *  carry no route to open a position with, and a slot subtree is terminal
+ *  too - nested slots aren't allowed, so one found inside a slot is skipped
+ *  here rather than opened. */
+function expandChildren(routeNode: RouteNode, insideSlot: Set<RouteNode>): RouteNode[] {
   if (routeNode.type === 'catchall')
     return []
-  return routeNode.children.filter(child => child.type !== 'malformed' && child.type !== 'slot')
+  const terminal = routeNode.type === 'slot' || insideSlot.has(routeNode)
+  return routeNode.children.filter(child =>
+    child.type !== 'malformed' && !(terminal && child.type === 'slot'))
 }
 
 // ── build ───────────────────────────────────────────────────────────────
@@ -41,6 +44,8 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
   const pageOwnerOf = new Map<SearchNode, RouteNode>()
   const defaultOwnerOf = new Map<SearchNode, RouteNode>()
   const conflictsOf = new Map<SearchNode, PositionConflicts>()
+  const slotsOf = new Map<SearchNode, Record<string, SearchNode>>() // position -> its named slots
+  const insideSlot = new Set<RouteNode>() // folders sitting within a slot subtree
   const searchNodes = [searchTree] // every position, for the final resolve pass
 
   function createSearchNode(routeNode: RouteNode, parent: SearchNode): SearchNode {
@@ -69,14 +74,28 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     }))
   }
 
+  /** Opens a declared slot on its parent position - two folders can declare
+   *  the same slot name (a group and a sibling both collapsing here), so
+   *  they merge onto one node. A slot roots a match path of its own (hence
+   *  depth 0), and consumes no URL, so urlDepth carries over the same way
+   *  it already does for any other non-url-consuming type. */
+  function openSlot(routeNode: RouteNode, parent: SearchNode): SearchNode {
+    const slots = slotsOf.getOrInsertComputed(parent, dict<SearchNode>)
+    const slotNode = slots[routeNode.segment] ??= createSearchNode(routeNode, parent)
+    slotNode.depth = 0
+    return slotNode
+  }
+
   /** Gets the position a folder belongs to, creating it if it doesn't exist
-   *  yet - a group just returns the one already there (its parent's), while
-   *  everything else looks up or opens its own. Slots aren't handled yet -
-   *  their folders are excluded from the walk entirely, see expandChildren. */
+   *  yet - a group just returns the one already there (its parent's), a slot
+   *  opens its own independent match path, and everything else looks up or
+   *  opens its own. */
   function getOrCreatePosition(routeNode: RouteNode, parent: SearchNode): SearchNode {
     switch (routeNode.type) {
       default: // group
         return parent
+      case 'slot':
+        return openSlot(routeNode, parent)
       case 'static':
         parent.statics ??= dict<SearchNode>()
         return parent.statics[routeNode.segment] ??= createSearchNode(routeNode, parent)
@@ -108,15 +127,18 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
       pageOwnerOf.getOrInsert(searchNode, routeNode)
       conflictsFor(searchNode).pages.push(routeNode)
     },
-    expand: expandChildren,
+    expand: routeNode => expandChildren(routeNode, insideSlot),
     attach: (childRouteNode, parentRouteNode) => {
+      if (parentRouteNode.type === 'slot' || insideSlot.has(parentRouteNode))
+        insideSlot.add(childRouteNode)
+
       const parentSearchNode = positionOf.get(parentRouteNode)!
       const childSearchNode = getOrCreatePosition(childRouteNode, parentSearchNode)
       positionOf.set(childRouteNode, childSearchNode)
     },
   })
 
-  populateEndpoints({ searchNodes, positionOf, pageOwnerOf, defaultOwnerOf, slotsOf: new Map() }) // this snapshot doesn't track slots
+  populateEndpoints({ searchNodes, positionOf, pageOwnerOf, defaultOwnerOf, slotsOf })
   return { root: searchTree, conflicts: [...conflictsOf.values()] }
 }
 
@@ -142,7 +164,9 @@ console.log(`
   ├── [bad/
   │   └── page.tsx
   └── @modal/
-      └── page.tsx
+      ├── page.tsx
+      └── settings/
+          └── page.tsx
 `)
 
 const routeTree = createRouteTree([
@@ -158,6 +182,7 @@ const routeTree = createRouteTree([
   'blog/[...rest]/dead/page.tsx',
   '[bad/page.tsx',
   '@modal/page.tsx',
+  '@modal/settings/page.tsx',
 ])
 const { root, conflicts } = createSearchTree(routeTree)
 console.log(JSON.stringify(root, null, 2))
