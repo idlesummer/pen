@@ -115,21 +115,21 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   }
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
-      const positionNode = context.positionOf.get(route)!
+      const position = context.positionOf.get(route)!
       // A real default always beats an implicit one at the boundary
       // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(route)
-      if (!context.defaultOwnerOf.has(positionNode) || defaultOwner.modules.default)
-        context.defaultOwnerOf.set(positionNode, defaultOwner)
+      if (!context.defaultOwnerOf.has(position) || defaultOwner.modules.default)
+        context.defaultOwnerOf.set(position, defaultOwner)
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
       if (defaultOwner.modules.default)
-        conflictsFor(positionNode, state).defaults.add(defaultOwner)
+        conflictsFor(position, state).defaults.add(defaultOwner)
 
       if (!route.modules.page) return // after this, route is a page owner
-      context.pageOwnerOf.getOrInsert(positionNode, route)
-      conflictsFor(positionNode, state).pages.push(route)
+      context.pageOwnerOf.getOrInsert(position, route)
+      conflictsFor(position, state).pages.push(route)
     },
     expand: route => expandChildren(route, state),
     attach: (childRouteNode, parentRouteNode) => {
