@@ -98,11 +98,12 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
       const position = context.positionOf.get(route)!
+      const defaultOwnerOf = context.defaultOwnerOf
       // A real default always beats an implicit one at the boundary
       // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(route)
-      if (!context.defaultOwnerOf.has(position) || defaultOwner.modules.default)
-        context.defaultOwnerOf.set(position, defaultOwner)
+      if (!defaultOwnerOf.has(position) || defaultOwner.modules.default)
+        defaultOwnerOf.set(position, defaultOwner)
 
       // Several folders can climb to the same real default without
       // conflicting - only distinct owners count as competing claims.
