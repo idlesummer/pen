@@ -91,13 +91,21 @@ export function validateRouteTree(routeTree: RouteNode): CompileDiagnostic[] {
 export function validateConflicts(conflicts: PositionConflicts[]): CompileDiagnostic[] {
   const diagnostics: CompileDiagnostic[] = []
 
-  for (const { pages, catchalls, dynamics } of conflicts) {
+  for (const { pages, defaults, catchalls, dynamics } of conflicts) {
     if (pages.length > 1) {
       diagnostics.push({
         rule: 'duplicate-page-route',
         severity: 'error',
         message: 'multiple pages resolve to the same URL pattern',
         files: pages.map(pageSource),
+      })
+    }
+    if (defaults.size > 1) {
+      diagnostics.push({
+        rule: 'duplicate-default-route',
+        severity: 'error',
+        message: 'multiple defaults resolve to the same URL pattern',
+        files: [...defaults].map(getRouteSource),
       })
     }
     if (catchalls.length > 1) {
