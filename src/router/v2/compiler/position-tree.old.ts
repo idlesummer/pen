@@ -53,10 +53,13 @@ function createConflicts(): PositionConflicts {
 
 /** Gets or creates the position for a route folder.
  *  Groups reuse their parent's position; other folders create their own.
- *  parentRoute (as opposed to parent, its position) is only for the slot
- *  case: slots register against the real folder that declares them, not
- *  against whatever position that folder happens to collapse onto. */
-function getOrCreatePosition(route: RouteNode, parent: PositionNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
+ *  Takes parentRoute rather than the parent position itself, and looks the
+ *  position up via context.positionOf - the slot case needs parentRoute
+ *  anyway (slots register against the real folder that declares them, not
+ *  whatever position it collapses onto), so deriving parent from it here
+ *  means the caller doesn't have to look it up just to hand it over. */
+function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
+  const parent = context.positionOf.get(parentRoute)!
   const conflictsOf = state.conflictsOf
   switch (route.type) {
     default: // group
@@ -123,8 +126,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       if (parentRoute.type === 'slot' || state.slotDescendants.has(parentRoute))
         state.slotDescendants.add(childRoute)
 
-      const parentPosition = context.positionOf.get(parentRoute)!
-      const childPosition = getOrCreatePosition(childRoute, parentPosition, parentRoute, state, context)
+      const childPosition = getOrCreatePosition(childRoute, parentRoute, state, context)
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
     },
