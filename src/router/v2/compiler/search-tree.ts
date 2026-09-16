@@ -60,6 +60,7 @@ export type SearchNode = {
  *  state, and SearchNode is meant to be exactly the runtime contract. */
 export type PositionConflicts = {
   pages: RouteNode[]                  // every folder claiming a page at this position
+  defaults: Set<RouteNode>            // every distinct folder whose real default reaches here
   catchalls: RouteNode[]              // every catch-all opened here
   dynamics: Record<string, RouteNode> // param name -> the folder that claimed it
 }
@@ -78,6 +79,7 @@ type BuildContext = {
   strippedOf: Map<Frame, Frame>                     // frame -> the same frame minus its own default
   slotsOf: Map<SearchNode, Record<string, SearchNode>>
   pageOwnerOf: Map<SearchNode, RouteNode>
+  defaultOwnerOf: Map<SearchNode, RouteNode>        // position -> the folder whose real default wins here
   conflictsOf: Map<SearchNode, PositionConflicts>
   insideSlot: Set<RouteNode>                        // folders sitting within a slot subtree
   nodes: SearchNode[]
@@ -137,7 +139,7 @@ function wraps(frame: Frame): boolean {
 // ── positions ──────────────────────────────────────────────────────────────
 
 function conflictsFor(position: SearchNode, ctx: BuildContext): PositionConflicts {
-  return ctx.conflictsOf.getOrInsertComputed(position, () => ({ pages: [], catchalls: [], dynamics: dict() }))
+  return ctx.conflictsOf.getOrInsertComputed(position, () => ({ pages: [], defaults: new Set(), catchalls: [], dynamics: dict() }))
 }
 
 function createSearchNode(routeNode: RouteNode, parent: SearchNode, ctx: BuildContext): SearchNode {
@@ -252,7 +254,7 @@ function resolveEndpoints(ctx: BuildContext) {
     if (pageOwner)
       node.page = createEndpoint(pageOwner, pageOwner.modules.page!, false, ctx)
 
-    const defaultOwner = findDefaultOwner(ctx.anchorOf.get(node)!)
+    const defaultOwner = ctx.defaultOwnerOf.get(node)!
     const content = defaultOwner.modules.default ?? GLOBAL_DEFAULT
     node.fallback = createEndpoint(defaultOwner, content, true, ctx)
   }
@@ -275,16 +277,30 @@ export function createSearchTree(routeTree: RouteNode): CompiledSearchTree {
     strippedOf: new Map(),
     slotsOf: new Map(),
     pageOwnerOf: new Map(),
+    defaultOwnerOf: new Map(),
     conflictsOf: new Map(),
     insideSlot: new Set(),
     nodes: [root],
   }
 
   traverse(routeTree, {
-    visit: (routeNode) => { // the folder's own contribution: its frame, and any page it owns
+    visit: (routeNode) => { // the folder's own contribution: its frame, its default, and any page it owns
       const position = ctx.positionOf.get(routeNode)!
       const frame = createFrame(routeNode, position)
       if (frame) ctx.frameOf.set(routeNode, frame)
+
+      // A real default always beats an implicit one at the boundary. Every
+      // folder reaching this position is checked, not just the anchor - a
+      // non-anchor group sibling's own default.tsx would otherwise never be
+      // seen at all, since only the anchor's ancestry used to be climbed.
+      const defaultOwner = findDefaultOwner(routeNode)
+      if (!ctx.defaultOwnerOf.has(position) || defaultOwner.modules.default)
+        ctx.defaultOwnerOf.set(position, defaultOwner)
+
+      // Several folders can climb to the same real default without
+      // conflicting - only distinct owners count as competing claims.
+      if (defaultOwner.modules.default)
+        conflictsFor(position, ctx).defaults.add(defaultOwner)
 
       if (routeNode.modules.page) {
         if (!ctx.pageOwnerOf.has(position)) ctx.pageOwnerOf.set(position, routeNode)
