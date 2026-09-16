@@ -121,22 +121,26 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   return [positionTree, [...state.conflictsOf.values()]]
 }
 
-// Smallest tree that can show it: one dynamic segment, one slot beneath it.
+// Smallest tree that can show it: one static ancestor, one dynamic segment,
+// one slot beneath it. blog wraps nothing of its own (no layout/default), so
+// it earns no Frame at all - it only exists to push urlDepth and staticness
+// apart (urlDepth 2, staticness -1 at [id]) instead of leaving them equal.
 // [id] needs its own layout.tsx so it earns a Frame at all - otherwise there'd
 // be nowhere for its `slots` field to attach to.
 console.log(`
   app/
-  └── [id]/
-      ├── layout.tsx
-      ├── page.tsx
-      └── @related/
-          └── page.tsx
+  └── blog/
+      └── [id]/
+          ├── layout.tsx
+          ├── page.tsx
+          └── @related/
+              └── page.tsx
 `)
 
 const routeTree = createRouteTree([
-  '[id]/layout.tsx',
-  '[id]/page.tsx',
-  '[id]/@related/page.tsx',
+  'blog/[id]/layout.tsx',
+  'blog/[id]/page.tsx',
+  'blog/[id]/@related/page.tsx',
 ])
 const [root] = createPositionTree(routeTree)
 console.log(JSON.stringify(root, null, 2))
@@ -146,7 +150,7 @@ console.log(JSON.stringify(root, null, 2))
 // reset the count - if it did (the old, wrong boundaryDepth-based behavior),
 // @related's own paramDepth/contentDepth would read 0 below instead of 1.
 // Verified against a real Next.js build: params flow straight through a slot.
-const idPosition = root.dynamic!
+const idPosition = root.statics!.blog!.dynamic!
 const idFrame = idPosition.endpoint!.frames[1]!  // [id]'s own frame, wrapping page.tsx (frames[0] is root's implicit default)
 const related = idFrame.slots!.related!
 console.log('\nparamDepth/contentDepth through the @related slot:')
