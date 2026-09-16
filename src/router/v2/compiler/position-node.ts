@@ -33,19 +33,10 @@ export type Endpoint = {
  *  several RouteNodes can share one PositionNode. */
 export type PositionNode = {
   urlDepth: number    // url segments consumed to reach this position
-  // How static-preferring the path here is; higher wins. Negated, it's also
-  // how many params have been bound by the time you reach here - nothing
-  // ever resets it, not even at a slot, which is exactly right: verified
-  // against a real Next.js build, params flow straight through a slot
-  // boundary instead of restarting there. A separate boundaryDepth field
-  // (distance from the nearest root/slot, resetting at each) used to back
-  // Frame.paramDepth/Endpoint.contentDepth instead - it was wrong, since it
-  // reset at slots when params don't, and was removed once staticness took
-  // over that job.
-  staticness: number
-  param?: string       // the name this position binds, for dynamic/catch-all
+  staticness: number  // higher means more static. Negated, it also counts bound params.
+  param?: string      // the name this position binds, for dynamic/catch-all
   // Flags
-  isCatchall?: true    // accepts even with url segments left over
+  isCatchall?: true   // accepts even with url segments left over
   // Children
   statics?: Record<string, PositionNode>
   dynamic?: PositionNode
@@ -65,19 +56,7 @@ export type PositionConflicts = {
   catchalls: RouteNode[]              // every catch-all opened here
 }
 
-/** Build-time bookkeeping, dropped once createPositionTree returns. Shared
- *  between the compiler's two halves - traversal writes all of it, endpoint
- *  resolution only ever reads from it afterward. conflictsOf isn't here: only
- *  the traversal side ever touches it, so it's kept as its own local instead
- *  of bundled into a type the resolve side would carry around unused.
- *  slotsOf IS here, unlike conflictsOf - endpoint resolution reads it when
- *  deciding whether a folder's frame carries slots. Keyed by RouteNode, not
- *  PositionNode: a slot only ever reaches its own real ancestors/descendants
- *  in the route tree, never a sibling that merely shares its position -
- *  confirmed against real Next.js, where a route-group sibling that loses
- *  page ownership for a URL never gets its slots either. The list of every
- *  position isn't here either - that's what drives the resolve pass's own
- *  loop, not something a single position's resolution needs. */
+/** Build-time bookkeeping shared by traversal and endpoint resolution. */
 export type PositionContext = {
   positionOf: Map<RouteNode, PositionNode> // folder -> the position it belongs to
   pageOwnerOf: Map<PositionNode, RouteNode>
