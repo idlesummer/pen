@@ -119,14 +119,14 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
     },
     expand: route => expandChildren(route, state),
-    attach: (childRouteNode, parentRouteNode) => {
-      if (parentRouteNode.type === 'slot' || state.slotDescendants.has(parentRouteNode))
-        state.slotDescendants.add(childRouteNode)
+    attach: (childRoute, parentRoute) => {
+      if (parentRoute.type === 'slot' || state.slotDescendants.has(parentRoute))
+        state.slotDescendants.add(childRoute)
 
-      const parentPositionNode = context.positionOf.get(parentRouteNode)!
-      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, parentRouteNode, state, context)
-      context.positionOf.set(childRouteNode, childPositionNode)
-      positions.add(childPositionNode)
+      const parentPosition = context.positionOf.get(parentRoute)!
+      const childPosition = getOrCreatePosition(childRoute, parentPosition, parentRoute, state, context)
+      context.positionOf.set(childRoute, childPosition)
+      positions.add(childPosition)
     },
   })
   for (const position of positions)
