@@ -7,10 +7,6 @@ import { setEndpoints } from './position-tree-endpoints'
 import { validateDefaultConflicts } from './position-tree-validate'
 import { isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
-// ── routing rules over the route tree ──────────────────────────────────────
-// This stops at slot boundaries, which is a statement about how routing
-// inherits rather than about folders - so it lives here, not in route-tree.
-
 /** Traversal-only bookkeeping */
 type TraversalState = {
   conflictsOf: Map<PositionNode, PositionConflicts>
@@ -31,8 +27,6 @@ function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
   return children
 }
 
-// ── positions ───────────────────────────────────────────────────────────
-
 function createPositionNode(route: RouteNode, parent: PositionNode): PositionNode {
   const type = route.type
   const position: PositionNode = {
@@ -52,12 +46,7 @@ function createConflicts(): PositionConflicts {
 }
 
 /** Gets or creates the position for a route folder.
- *  Groups reuse their parent's position; other folders create their own.
- *  Takes parentRoute rather than the parent position itself, and looks the
- *  position up via context.positionOf - the slot case needs parentRoute
- *  anyway (slots register against the real folder that declares them, not
- *  whatever position it collapses onto), so deriving parent from it here
- *  means the caller doesn't have to look it up just to hand it over. */
+ *  Groups reuse their parent's position; other folders create their own. */
 function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
   const parent = context.positionOf.get(parentRoute)!
   const conflictsOf = state.conflictsOf
@@ -80,8 +69,6 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
     }
   }
 }
-
-// ── build ───────────────────────────────────────────────────────────────
 
 export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[]] {
   const positionTree: PositionNode = {
