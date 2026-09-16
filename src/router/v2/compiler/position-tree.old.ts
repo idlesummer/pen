@@ -32,12 +32,12 @@ function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
 
 // ── positions ───────────────────────────────────────────────────────────
 
-function createPositionNode(route: RouteNode, parent: PositionNode, depth?: number): PositionNode {
+function createPositionNode(route: RouteNode, parent: PositionNode, boundaryDepth?: number): PositionNode {
   const type = route.type
   const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
-    depth: depth ?? parent.depth + 1,
+    boundaryDepth: boundaryDepth ?? parent.boundaryDepth + 1,
     fallback: undefined as never, // filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
@@ -87,7 +87,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   const positionTree: PositionNode = {
     urlDepth: 0,
     staticness: 0,
-    depth: 0,
+    boundaryDepth: 0,
     fallback: undefined as never, //* Must be populated later
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order

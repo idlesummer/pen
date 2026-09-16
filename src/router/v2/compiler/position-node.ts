@@ -5,9 +5,10 @@ import type { RouteNode } from './route-tree'
  *
  *  paramDepth is which position's params this frame renders with. Without
  *  slots every frame in a chain shares the content's own contentDepth, but a
- *  slot roots its own match path (depth resets to 0 there), so a chain that
- *  passes through one can mix frames from two different depths - each frame
- *  has to say which one it belongs to instead of inheriting one shared value. */
+ *  slot is itself a boundary - it roots its own match path, so its
+ *  boundaryDepth restarts at 0 - and a chain that passes through one can mix
+ *  frames from two different depths, so each frame has to say which one it
+ *  belongs to instead of inheriting one shared value. */
 export type Frame = {
   layout?: string
   loading?: string
@@ -31,7 +32,7 @@ export type Endpoint = {
 export type PositionNode = {
   urlDepth: number    // url segments consumed to reach this position
   staticness: number  // how static-preferring the path here is; higher wins
-  depth: number        // this position's index in its own match path
+  boundaryDepth: number // distance from the nearest boundary (root or slot) - each one restarts its own match path at 0
   param?: string       // the name this position binds, for dynamic/catch-all
   // Flags
   isCatchall?: true    // accepts even with url segments left over

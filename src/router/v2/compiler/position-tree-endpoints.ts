@@ -34,7 +34,7 @@ function createFrame(routeNode: RouteNode, ctx: PositionContext): Frame | undefi
 
   const position = ctx.positionOf.get(routeNode)!
   const slots = ctx.slotsOf.get(routeNode)
-  return { layout, loading, error, default: defaultPath, slots, paramDepth: position.depth }
+  return { layout, loading, error, default: defaultPath, slots, paramDepth: position.boundaryDepth }
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
@@ -50,7 +50,7 @@ function removeDefault(frame: Frame): Frame {
  *  render stage would otherwise repeat on every navigation. */
 function createEndpoint(pageOwner: RouteNode, content: string, ctx: PositionContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, ctx)).reverse()
-  const contentDepth = ctx.positionOf.get(pageOwner)!.depth
+  const contentDepth = ctx.positionOf.get(pageOwner)!.boundaryDepth
   return { frames, content, contentDepth }
 }
 
