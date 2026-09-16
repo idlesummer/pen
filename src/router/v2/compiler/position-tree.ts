@@ -47,7 +47,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 function createConflicts(): PositionConflicts {
-  return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
+  return { pages: [], dynamics: dict(), catchalls: [] }
 }
 
 /** Gets or creates the position for a route folder.
@@ -104,20 +104,13 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       const position = context.positionOf.get(route)!
       const defaultOwnerOf = context.defaultOwnerOf
       // A real default always beats an implicit one at the boundary
-      // There also can't be multiple defaults in the same position
       const defaultOwner = findDefaultOwner(route)
       if (!defaultOwnerOf.has(position) || defaultOwner.modules.default)
         defaultOwnerOf.set(position, defaultOwner)
 
-      // Several folders can climb to the same real default without
-      // conflicting - only distinct owners count as competing claims.
-      const conflictsOf = state.conflictsOf
-      if (defaultOwner.modules.default)
-        conflictsOf.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
-
       if (!route.modules.page) return // after this, route is a page owner
       context.pageOwnerOf.getOrInsert(position, route)
-      conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
+      state.conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
     },
     expand: route => expandChildren(route, state),
     attach: (childRoute, parentRoute) => {
