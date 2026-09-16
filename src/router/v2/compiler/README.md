@@ -32,12 +32,12 @@ a separate structure is what lets `PositionNode` be exactly the runtime
 contract, with nothing transient in it - and route nodes live there, not on
 the node, because only a folder has a file path a diagnostic can name.
 
-**Not yet true: frame sharing.** The real v2 design shared a `Frame` by
-reference across every endpoint that wraps the same folder, memoised in a
-`Map<RouteNode, Frame>` so a chain of five wrappers was five pointers, not
-five copies. This rebuild's `createFrame` (`position-tree-endpoints.ts`)
-rebuilds a fresh object on every call instead - correct values, but no sharing.
-Not a data-shape problem for a matcher, just a known follow-up.
+**4. A `Frame` is shared by reference everywhere it's used.** `createFrame`
+memoises in `PositionContext.frameOf`, keyed by folder, including the
+undefined case; `removeDefault`'s stripped variant is memoised the same way
+in `strippedOf`, keyed by the frame it strips. A chain of five wrappers
+appearing in both a page endpoint and several positions' fallbacks is five
+pointers repeated, not five fresh copies each time.
 
 ## The acceptance test
 
