@@ -32,12 +32,11 @@ function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
 
 // ── positions ───────────────────────────────────────────────────────────
 
-function createPositionNode(route: RouteNode, parent: PositionNode, boundaryDepth?: number): PositionNode {
+function createPositionNode(route: RouteNode, parent: PositionNode): PositionNode {
   const type = route.type
   const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
-    boundaryDepth: boundaryDepth ?? parent.boundaryDepth + 1,
     fallback: undefined as never, // filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
@@ -76,7 +75,7 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
     case 'slot': {
       const slotDict = context.slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
       const slotName = route.segment
-      return slotDict[slotName] ??= createPositionNode(route, parent, 0)
+      return slotDict[slotName] ??= createPositionNode(route, parent)
     }
   }
 }
@@ -87,7 +86,6 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   const positionTree: PositionNode = {
     urlDepth: 0,
     staticness: 0,
-    boundaryDepth: 0,
     fallback: undefined as never, //* Must be populated later
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order
@@ -148,7 +146,9 @@ console.log(`
   │   ├── page.tsx
   │   ├── [id]/
   │   │   ├── page.tsx
-  │   │   └── default.tsx
+  │   │   ├── default.tsx
+  │   │   └── @related/
+  │   │       └── page.tsx
   │   ├── [slug]/
   │   │   └── page.tsx
   │   └── [...rest]/
@@ -177,6 +177,10 @@ const routeTree = createRouteTree([
   'blog/page.tsx',
   'blog/[id]/page.tsx',
   'blog/[id]/default.tsx',
+  // @related sits below one dynamic ancestor ([id]). Its own params should
+  // include id, continuing straight through the slot boundary rather than
+  // restarting at 0 there - verified against a real Next.js build.
+  'blog/[id]/@related/page.tsx',
   'blog/[slug]/page.tsx',
   'blog/[...rest]/page.tsx',
   'blog/[...rest]/dead/page.tsx',
