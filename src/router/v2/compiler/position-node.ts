@@ -13,7 +13,7 @@ export type Frame = {
   loading?: string
   error?: string
   default?: string
-  slots?: Record<string, PositionNode> // this position's slots, carried on whichever frame claims them
+  slots?: Record<string, PositionNode> // this folder's own declared slots, by name
   paramDepth: number
 }
 
@@ -60,12 +60,16 @@ export type PositionConflicts = {
  *  the traversal side ever touches it, so it's kept as its own local instead
  *  of bundled into a type the resolve side would carry around unused.
  *  slotsOf IS here, unlike conflictsOf - endpoint resolution reads it when
- *  deciding whether a folder's frame carries this position's slots. The
- *  list of every position isn't here either - that's what drives the resolve
- *  pass's own loop, not something a single position's resolution needs. */
+ *  deciding whether a folder's frame carries slots. Keyed by RouteNode, not
+ *  PositionNode: a slot only ever reaches its own real ancestors/descendants
+ *  in the route tree, never a sibling that merely shares its position -
+ *  confirmed against real Next.js, where a route-group sibling that loses
+ *  page ownership for a URL never gets its slots either. The list of every
+ *  position isn't here either - that's what drives the resolve pass's own
+ *  loop, not something a single position's resolution needs. */
 export type PositionContext = {
   positionOf: Map<RouteNode, PositionNode> // folder -> the position it belongs to
   pageOwnerOf: Map<PositionNode, RouteNode>
   defaultOwnerOf: Map<PositionNode, RouteNode>
-  slotsOf: Map<PositionNode, Record<string, PositionNode>> // position -> its declared slots, by name
+  slotsOf: Map<RouteNode, Record<string, PositionNode>> // folder -> its declared slots, by name
 }

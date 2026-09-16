@@ -20,25 +20,20 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
  *  folder with no layout/loading/error/default contributes nothing to the
  *  chain, so there's no point giving it one.
  *
- *  Slots are looked up by POSITION, not by a fixed anchor folder - any folder
- *  whose position has slots can carry them, so a sibling that never shares
- *  ancestry with whichever folder first opened the position still sees them.
- *  seenSlotPositions dedupes within one walk (stacked groups can share a
- *  position without duplicating its slots), and only gets marked once a
- *  frame is actually about to be returned - a folder that wraps nothing of
- *  its own never consumes the one chance to attach them. */
-function createFrame(routeNode: RouteNode, ctx: PositionContext, seenSlotPositions: Set<PositionNode>): Frame | undefined {
+ *  Slots are looked up by the folder's own identity (routeNode), not by
+ *  position - a slot only reaches its real ancestors/descendants in the
+ *  route tree. Two folders that merely collapse onto the same position via
+ *  a group do NOT share slots: verified against a real Next.js build, where
+ *  a route-group sibling that loses page ownership for a URL never gets its
+ *  slots passed anywhere either, regardless of sharing that URL. */
+function createFrame(routeNode: RouteNode, ctx: PositionContext): Frame | undefined {
   const { layout, loading, error, default: def } = routeNode.modules
   const defaultPath = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
   if (!layout && !loading && !error && !defaultPath)
     return
 
   const position = ctx.positionOf.get(routeNode)!
-  let slots: Record<string, PositionNode> | undefined
-  if (!seenSlotPositions.has(position)) {
-    seenSlotPositions.add(position)
-    slots = ctx.slotsOf.get(position)
-  }
+  const slots = ctx.slotsOf.get(routeNode)
   return { layout, loading, error, default: defaultPath, slots, paramDepth: position.depth }
 }
 
@@ -52,12 +47,9 @@ function removeDefault(frame: Frame): Frame {
 // ── endpoints ───────────────────────────────────────────────────────────
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
- *  render stage would otherwise repeat on every navigation. A fresh
- *  seenSlotPositions per call: each endpoint is its own independent walk, so
- *  a position's slots are eligible to attach again in the next one. */
+ *  render stage would otherwise repeat on every navigation. */
 function createEndpoint(pageOwner: RouteNode, content: string, ctx: PositionContext): Endpoint {
-  const seenSlotPositions = new Set<PositionNode>()
-  const frames = compactMapAncestors(pageOwner, node => createFrame(node, ctx, seenSlotPositions)).reverse()
+  const frames = compactMapAncestors(pageOwner, node => createFrame(node, ctx)).reverse()
   const contentDepth = ctx.positionOf.get(pageOwner)!.depth
   return { frames, content, contentDepth }
 }
