@@ -52,8 +52,11 @@ function createConflicts(): PositionConflicts {
 }
 
 /** Gets or creates the position for a route folder.
- *  Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: TraversalState, context: PositionContext): PositionNode {
+ *  Groups reuse their parent's position; other folders create their own.
+ *  parentRoute (as opposed to parent, its position) is only for the slot
+ *  case: slots register against the real folder that declares them, not
+ *  against whatever position that folder happens to collapse onto. */
+function getOrCreatePosition(route: RouteNode, parent: PositionNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
   const conflictsOf = state.conflictsOf
   switch (route.type) {
     default: // group
@@ -68,7 +71,7 @@ function getOrCreatePosition(route: RouteNode, parent: PositionNode, state: Trav
       conflictsOf.getOrInsertComputed(parent, createConflicts).catchalls.push(route)
       return parent.catchall ??= createPositionNode(route, parent)
     case 'slot': {
-      const slotDict = context.slotsOf.getOrInsertComputed(parent, dict<PositionNode>)
+      const slotDict = context.slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
       const slotName = route.segment
       return slotDict[slotName] ??= createPositionNode(route, parent, 0)
     }
@@ -93,7 +96,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
     defaultOwnerOf: new Map<PositionNode, RouteNode>(),
-    slotsOf: new Map<PositionNode, Record<string, PositionNode>>(),
+    slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
   }
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
@@ -121,7 +124,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
         state.slotDescendants.add(childRouteNode)
 
       const parentPositionNode = context.positionOf.get(parentRouteNode)!
-      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, state, context)
+      const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, parentRouteNode, state, context)
       context.positionOf.set(childRouteNode, childPositionNode)
       positions.add(childPositionNode)
     },
@@ -176,10 +179,11 @@ const routeTree = createRouteTree([
   'blog/[...rest]/page.tsx',
   'blog/[...rest]/dead/page.tsx',
   '[bad/page.tsx',
-  // (a)/dashboard and dashboard collapse onto one position, disjoint in the
-  // real tree - dashboard/page.tsx's own ancestry never visits (a)/dashboard,
-  // so this only comes out right if @panel is looked up by position rather
-  // than attached to whichever of the two folders happened to open it first.
+  // (a)/dashboard and dashboard collapse onto one position but are disjoint
+  // in the real tree. @panel here should NEVER reach dashboard/layout.tsx,
+  // even though they share a URL - confirmed against a real Next.js build:
+  // a route-group sibling that never wins page ownership for a position
+  // doesn't get its slots passed anywhere either. Kept as a negative case.
   '(a)/dashboard/layout.tsx',
   '(a)/dashboard/@panel/page.tsx',
   'dashboard/layout.tsx',
