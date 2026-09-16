@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { PositionConflicts } from './search-tree'
+import type { PositionConflicts } from './position-node'
 import type { CompileDiagnostic } from '@/router/compiling/compile-diagnostic'
 import { forEach, getRouteSource } from './route-tree'
 

@@ -11,7 +11,7 @@ import { createSegment, isBoundary, isPrivate } from './route-segment'
  *  Built once and never mutated. Two passes that used to run here are gone:
  *  the `default` fallback injection, which is a routing guarantee and now lives
  *  next to the fallback that needs it, and the pruning of invalid routes, which
- *  is now a skip rule in the search-tree walk. Immutability is what removes the
+ *  is now a skip rule in the position-tree walk. Immutability is what removes the
  *  ordering constraint between validating and compiling - they can run in
  *  either order, or not at all, without changing the result. */
 export type RouteNode = {
