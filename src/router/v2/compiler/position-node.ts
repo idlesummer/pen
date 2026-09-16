@@ -3,12 +3,14 @@ import type { RouteNode } from './route-tree'
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.
  *
- *  paramDepth is which position's params this frame renders with. Without
- *  slots every frame in a chain shares the content's own contentDepth, but a
- *  slot is itself a boundary - it roots its own match path, so its
- *  boundaryDepth restarts at 0 - and a chain that passes through one can mix
- *  frames from two different depths, so each frame has to say which one it
- *  belongs to instead of inheriting one shared value. */
+ *  paramDepth is how many params have been bound by the time this frame
+ *  renders - it's -staticness, not a position's own depth (see staticness's
+ *  comment on PositionNode for why). Without slots every frame in a chain
+ *  would share the content's own contentDepth, but a slot can sit between
+ *  two dynamic ancestors in the same chain without breaking the param count
+ *  that flows through it, so a chain that passes through one can still mix
+ *  frames bound at different counts - each frame has to say which one it's
+ *  at instead of inheriting one shared value. */
 export type Frame = {
   layout?: string
   loading?: string
@@ -31,8 +33,16 @@ export type Endpoint = {
  *  several RouteNodes can share one PositionNode. */
 export type PositionNode = {
   urlDepth: number    // url segments consumed to reach this position
-  staticness: number  // how static-preferring the path here is; higher wins
-  boundaryDepth: number // distance from the nearest boundary (root or slot) - each one restarts its own match path at 0
+  // How static-preferring the path here is; higher wins. Negated, it's also
+  // how many params have been bound by the time you reach here - nothing
+  // ever resets it, not even at a slot, which is exactly right: verified
+  // against a real Next.js build, params flow straight through a slot
+  // boundary instead of restarting there. A separate boundaryDepth field
+  // (distance from the nearest root/slot, resetting at each) used to back
+  // Frame.paramDepth/Endpoint.contentDepth instead - it was wrong, since it
+  // reset at slots when params don't, and was removed once staticness took
+  // over that job.
+  staticness: number
   param?: string       // the name this position binds, for dynamic/catch-all
   // Flags
   isCatchall?: true    // accepts even with url segments left over
