@@ -208,3 +208,16 @@ const realConflicts = conflicts
     dynamics: Object.fromEntries(Object.entries(c.dynamics).map(([param, n]) => [param, n.path])),
   }))
 console.log('conflicts:', JSON.stringify(realConflicts, null, 2))
+
+// paramDepth/contentDepth continuity through a slot boundary: blog/[id] binds
+// one param, and @related sits in a slot directly beneath it. A slot must NOT
+// reset the count - if it did (the old, wrong boundaryDepth-based behavior),
+// @related's own paramDepth/contentDepth would read 0 below instead of 1.
+// Verified against a real Next.js build: params flow straight through a slot.
+const idPosition = root.statics!.blog!.dynamic!
+const idFrame = idPosition.endpoint!.frames[1]!  // blog/[id]'s own frame, wrapping page.tsx
+const related = idFrame.slots!.related!
+console.log('\nparamDepth/contentDepth through the @related slot:')
+console.log('  blog/[id] frame paramDepth:         ', idFrame.paramDepth)
+console.log('  blog/[id]/@related frame paramDepth: ', related.endpoint!.frames[0]!.paramDepth)
+console.log('  blog/[id]/@related contentDepth:     ', related.endpoint!.contentDepth)
