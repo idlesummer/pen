@@ -84,7 +84,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     depth: 0,
     fallback: undefined as never, //* Must be populated later
   }
-  const positionNodes = new Set([positionTree]) // every position node, in depth-first order
+  const positions = new Set([positionTree]) // every position node, in depth-first order
   const state: TraversalState = {
     conflictsOf: new Map<PositionNode, PositionConflicts>(),
     slotDescendants: new Set<RouteNode>(),
@@ -122,11 +122,11 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       const parentPositionNode = context.positionOf.get(parentRouteNode)!
       const childPositionNode = getOrCreatePosition(childRouteNode, parentPositionNode, state, context)
       context.positionOf.set(childRouteNode, childPositionNode)
-      positionNodes.add(childPositionNode)
+      positions.add(childPositionNode)
     },
   })
-  for (const positionNode of positionNodes)
-    setEndpoints(positionNode, context)
+  for (const position of positions)
+    setEndpoints(position, context)
   return [positionTree, [...state.conflictsOf.values()]]
 }
 
