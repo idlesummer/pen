@@ -29,12 +29,11 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
 function createFrame(routeNode: RouteNode, context: PositionContext): Frame | undefined {
   const { layout, loading, error, default: def } = routeNode.modules
   const defaultPath = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
-  if (!layout && !loading && !error && !defaultPath)
+  const slots = context.slotsOf.get(routeNode)
+  if (!layout && !loading && !error && !defaultPath && !slots)
     return
 
-  const { positionOf, slotsOf } = context
-  const position = positionOf.get(routeNode)!
-  const slots = slotsOf.get(routeNode)
+  const position = context.positionOf.get(routeNode)!
   return { layout, loading, error, default: defaultPath, slots, paramDepth: -position.staticness }
 }
 
@@ -62,8 +61,11 @@ function createFallback(defaultOwner: RouteNode, content: string, context: Posit
   if (!lastFrame)
     return endpoint
 
-  // The innermost frame renders the fallback itself, so remove its default.
-  if (lastFrame.layout || lastFrame.loading || lastFrame.error)
+  // The innermost frame renders the fallback itself, so remove its default -
+  // unless that default was the only thing keeping the frame alive, in which
+  // case drop the frame entirely. Slots count as keeping it alive too: a
+  // frame that exists only to carry them must survive losing its default.
+  if (lastFrame.layout || lastFrame.loading || lastFrame.error || lastFrame.slots)
     frames[frames.length-1] = removeDefault(lastFrame)
   else
     frames.pop()
