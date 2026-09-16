@@ -35,8 +35,6 @@ export type PositionNode = {
   urlDepth: number    // url segments consumed to reach this position
   staticness: number  // higher means more static. Negated, it also counts bound params.
   param?: string      // the name this position binds, for dynamic/catch-all
-  // Flags
-  isCatchall?: true   // accepts even with url segments left over
   // Children
   statics?: Record<string, PositionNode>
   dynamic?: PositionNode

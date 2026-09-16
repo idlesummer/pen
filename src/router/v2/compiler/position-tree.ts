@@ -35,8 +35,6 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
   }
   if (isDynamicOrCatchall(type))
     position.param = route.segment
-  if (type === 'catchall')
-    position.isCatchall = true
   return position
 }
 
