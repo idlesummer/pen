@@ -17,8 +17,14 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
 // ── frames ───────────────────────────────────────────────────────────────
 
 /** A folder's own Frame, or undefined if it wraps nothing at all - a plain
- *  folder with no layout/loading/error/default contributes nothing to the
- *  chain, so there's no point giving it one.
+ *  folder with no layout/loading/error/default/slots contributes nothing to
+ *  the chain, so there's no point giving it one.
+ *
+ *  Memoised in context.frameOf, including the undefined case - the same
+ *  folder is reached by createEndpoint once per position that shares it as
+ *  an ancestor (its own page, and every descendant's fallback), and should
+ *  hand back the exact same Frame reference every time rather than a fresh
+ *  equal-but-distinct copy per call.
  *
  *  Slots are looked up by the folder's own identity (routeNode), not by
  *  position - a slot only reaches its real ancestors/descendants in the
@@ -27,21 +33,30 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
  *  a route-group sibling that loses page ownership for a URL never gets its
  *  slots passed anywhere either, regardless of sharing that URL. */
 function createFrame(routeNode: RouteNode, context: PositionContext): Frame | undefined {
+  const { frameOf } = context
+  if (frameOf.has(routeNode))
+    return frameOf.get(routeNode)
+
   const { layout, loading, error, default: def } = routeNode.modules
   const defaultPath = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
   const slots = context.slotsOf.get(routeNode)
-  if (!layout && !loading && !error && !defaultPath && !slots)
-    return
+  const frame = (!layout && !loading && !error && !defaultPath && !slots)
+    ? undefined
+    : { layout, loading, error, default: defaultPath, slots, paramDepth: -context.positionOf.get(routeNode)!.staticness }
 
-  const position = context.positionOf.get(routeNode)!
-  return { layout, loading, error, default: defaultPath, slots, paramDepth: -position.staticness }
+  frameOf.set(routeNode, frame)
+  return frame
 }
 
 /** The same frame without its own `default` - for an endpoint whose content
- *  IS that default, so it isn't also a boundary around itself. */
-function removeDefault(frame: Frame): Frame {
-  const { layout, loading, error, slots, paramDepth } = frame
-  return { layout, loading, error, slots, paramDepth }
+ *  IS that default, so it isn't also a boundary around itself. Memoised for
+ *  the same reason createFrame is: every position resolving to the same
+ *  owner wants the same stripped frame, not a fresh copy each time. */
+function removeDefault(frame: Frame, context: PositionContext): Frame {
+  return context.strippedOf.getOrInsertComputed(frame, () => {
+    const { layout, loading, error, slots, paramDepth } = frame
+    return { layout, loading, error, slots, paramDepth }
+  })
 }
 
 // ── endpoints ───────────────────────────────────────────────────────────
@@ -66,7 +81,7 @@ function createFallback(defaultOwner: RouteNode, content: string, context: Posit
   // case drop the frame entirely. Slots count as keeping it alive too: a
   // frame that exists only to carry them must survive losing its default.
   if (lastFrame.layout || lastFrame.loading || lastFrame.error || lastFrame.slots)
-    frames[frames.length-1] = removeDefault(lastFrame)
+    frames[frames.length-1] = removeDefault(lastFrame, context)
   else
     frames.pop()
   return endpoint
