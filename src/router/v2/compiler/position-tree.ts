@@ -134,90 +134,35 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   return [positionTree, [...state.conflictsOf.values()]]
 }
 
+// Smallest tree that can show it: one dynamic segment, one slot beneath it.
+// [id] needs its own layout.tsx so it earns a Frame at all - otherwise there'd
+// be nowhere for its `slots` field to attach to.
 console.log(`
   app/
-  ├── layout.tsx
-  ├── page.tsx
-  ├── (marketing)/
-  │   └── blog/
-  │       ├── page.tsx
-  │       └── default.tsx
-  ├── blog/
-  │   ├── page.tsx
-  │   ├── [id]/
-  │   │   ├── page.tsx
-  │   │   ├── default.tsx
-  │   │   └── @related/
-  │   │       └── page.tsx
-  │   ├── [slug]/
-  │   │   └── page.tsx
-  │   └── [...rest]/
-  │       ├── page.tsx
-  │       └── dead/
-  │           └── page.tsx
-  ├── [bad/
-  │   └── page.tsx
-  ├── (a)/
-  │   └── dashboard/
-  │       ├── layout.tsx
-  │       └── @panel/
-  │           └── page.tsx
-  ├── dashboard/
-  │   ├── layout.tsx
-  │   └── page.tsx
-  └── @modal/
-      └── page.tsx
+  └── [id]/
+      ├── layout.tsx
+      ├── page.tsx
+      └── @related/
+          └── page.tsx
 `)
 
 const routeTree = createRouteTree([
-  'layout.tsx',
-  'page.tsx',
-  '(marketing)/blog/page.tsx',
-  '(marketing)/blog/default.tsx',
-  'blog/page.tsx',
-  'blog/[id]/page.tsx',
-  'blog/[id]/default.tsx',
-  // @related sits below one dynamic ancestor ([id]). Its own params should
-  // include id, continuing straight through the slot boundary rather than
-  // restarting at 0 there - verified against a real Next.js build.
-  'blog/[id]/@related/page.tsx',
-  'blog/[slug]/page.tsx',
-  'blog/[...rest]/page.tsx',
-  'blog/[...rest]/dead/page.tsx',
-  '[bad/page.tsx',
-  // (a)/dashboard and dashboard collapse onto one position but are disjoint
-  // in the real tree. @panel here should NEVER reach dashboard/layout.tsx,
-  // even though they share a URL - confirmed against a real Next.js build:
-  // a route-group sibling that never wins page ownership for a position
-  // doesn't get its slots passed anywhere either. Kept as a negative case.
-  '(a)/dashboard/layout.tsx',
-  '(a)/dashboard/@panel/page.tsx',
-  'dashboard/layout.tsx',
-  'dashboard/page.tsx',
-  '@modal/page.tsx',
+  '[id]/layout.tsx',
+  '[id]/page.tsx',
+  '[id]/@related/page.tsx',
 ])
-const [root, conflicts] = createPositionTree(routeTree)
+const [root] = createPositionTree(routeTree)
 console.log(JSON.stringify(root, null, 2))
 
-const realConflicts = conflicts
-  .filter(c => c.pages.length > 1 || c.catchalls.length > 1 || c.defaults.size > 1 || Object.keys(c.dynamics).length > 1)
-  .map(c => ({
-    pages: c.pages.map(n => n.path),
-    catchalls: c.catchalls.map(n => n.path),
-    defaults: [...c.defaults].map(n => n.path),
-    dynamics: Object.fromEntries(Object.entries(c.dynamics).map(([param, n]) => [param, n.path])),
-  }))
-console.log('conflicts:', JSON.stringify(realConflicts, null, 2))
-
-// paramDepth/contentDepth continuity through a slot boundary: blog/[id] binds
-// one param, and @related sits in a slot directly beneath it. A slot must NOT
+// paramDepth/contentDepth continuity through a slot boundary: [id] binds one
+// param, and @related sits in a slot directly beneath it. A slot must NOT
 // reset the count - if it did (the old, wrong boundaryDepth-based behavior),
 // @related's own paramDepth/contentDepth would read 0 below instead of 1.
 // Verified against a real Next.js build: params flow straight through a slot.
-const idPosition = root.statics!.blog!.dynamic!
-const idFrame = idPosition.endpoint!.frames[1]!  // blog/[id]'s own frame, wrapping page.tsx
+const idPosition = root.dynamic!
+const idFrame = idPosition.endpoint!.frames[1]!  // [id]'s own frame, wrapping page.tsx (frames[0] is root's implicit default)
 const related = idFrame.slots!.related!
 console.log('\nparamDepth/contentDepth through the @related slot:')
-console.log('  blog/[id] frame paramDepth:         ', idFrame.paramDepth)
-console.log('  blog/[id]/@related frame paramDepth: ', related.endpoint!.frames[0]!.paramDepth)
-console.log('  blog/[id]/@related contentDepth:     ', related.endpoint!.contentDepth)
+console.log('  [id] frame paramDepth:          ', idFrame.paramDepth)
+console.log('  [id]/@related frame paramDepth: ', related.endpoint!.frames[0]!.paramDepth)
+console.log('  [id]/@related contentDepth:     ', related.endpoint!.contentDepth)
