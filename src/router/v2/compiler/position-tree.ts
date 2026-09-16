@@ -4,6 +4,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createRouteTree, findDefaultOwner } from './route-tree'
 import { setEndpoints } from './position-tree-endpoints'
+import { validateDefaultConflicts } from './position-tree-validate'
 import { isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
 // ── routing rules over the route tree ──────────────────────────────────────
@@ -47,7 +48,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 function createConflicts(): PositionConflicts {
-  return { pages: [], dynamics: dict(), catchalls: [] }
+  return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
 }
 
 /** Gets or creates the position for a route folder.
@@ -108,9 +109,15 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       if (!defaultOwnerOf.has(position) || defaultOwner.modules.default)
         defaultOwnerOf.set(position, defaultOwner)
 
+      // Several folders can climb to the same real default without
+      // conflicting - only distinct owners count as competing claims.
+      const conflictsOf = state.conflictsOf
+      if (defaultOwner.modules.default)
+        conflictsOf.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
+
       if (!route.modules.page) return // after this, route is a page owner
       context.pageOwnerOf.getOrInsert(position, route)
-      state.conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
+      conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
     },
     expand: route => expandChildren(route, state),
     attach: (childRoute, parentRoute) => {
@@ -159,3 +166,23 @@ console.log('\nparamDepth/contentDepth through the @related slot:')
 console.log('  [id] frame paramDepth:          ', idFrame.paramDepth)
 console.log('  [id]/@related frame paramDepth: ', related.endpoint!.frames[0]!.paramDepth)
 console.log('  [id]/@related contentDepth:     ', related.endpoint!.contentDepth)
+
+// duplicate-default-route: (a)/dashboard and (b)/dashboard are group siblings,
+// so they collapse onto the same position - but each declares its own real
+// default.tsx, and nothing says which one should win. That used to be settled
+// silently by traversal order; it should be a diagnostic instead.
+console.log(`
+  app/
+  ├── (a)/
+  │   └── dashboard/
+  │       └── default.tsx
+  └── (b)/
+      └── dashboard/
+          └── default.tsx
+`)
+const conflictTree = createRouteTree([
+  '(a)/dashboard/default.tsx',
+  '(b)/dashboard/default.tsx',
+])
+const [, conflicts] = createPositionTree(conflictTree)
+console.log('diagnostics:', JSON.stringify(validateDefaultConflicts(conflicts), null, 2))

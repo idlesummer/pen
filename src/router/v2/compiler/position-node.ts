@@ -51,6 +51,7 @@ export type PositionNode = {
  *  build state, and PositionNode is meant to be exactly the runtime contract. */
 export type PositionConflicts = {
   pages: RouteNode[]                  // every folder claiming a page at this position
+  defaults: Set<RouteNode>            // every distinct folder whose real default reaches here
   dynamics: Record<string, RouteNode> // param name -> the folder that claimed it
   catchalls: RouteNode[]              // every catch-all opened here
 }
