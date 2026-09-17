@@ -3,10 +3,10 @@ import { traverse } from '@/lib/traverse'
 
 export type ParamTable = Record<string, string | string[]>
 
-export type MatchResult = {
-  endpoint: Endpoint                   // the winning endpoint - page or fallback, same type either way
-  params: ParamTable                   // every param bound reaching this position, in bind order
-  slots?: Record<string, MatchResult>  // one recursive match per slot this endpoint's frames declare
+export type MatchNode = {
+  endpoint: Endpoint                 // the winning endpoint - page or fallback, same type either way
+  params: ParamTable                 // every param bound reaching this position, in bind order
+  slots?: Record<string, MatchNode>  // one recursive match per slot this endpoint's frames declare
 }
 
 /** Search-only bookkeeping. Doesn't need a parent pointer the way a live
@@ -47,8 +47,8 @@ function expandMatchSteps(step: MatchStep, url: string[]): MatchStep[] {
  *  against the same full URL, not a remaining suffix - parallel routes, not
  *  nested ones. Seeded with the params already bound reaching this chain,
  *  since paramDepth/contentDepth are continuous through a slot boundary. */
-function matchSlots(endpoint: Endpoint, url: string[], params: ParamTable): Record<string, MatchResult> | undefined {
-  let slots: Record<string, MatchResult> | undefined
+function matchSlots(endpoint: Endpoint, url: string[], params: ParamTable): Record<string, MatchNode> | undefined {
+  let slots: Record<string, MatchNode> | undefined
   for (const frame of endpoint.frames) {
     if (!frame.slots) continue
     slots ??= {}
@@ -64,7 +64,7 @@ function matchSlots(endpoint: Endpoint, url: string[], params: ParamTable): Reco
  *  since nothing deeper down a different branch could be more specific. If
  *  nothing ever accepts, falls back to the most static-preferring dead end
  *  instead - the same guarantee `PositionNode.fallback` exists to make. */
-export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchResult {
+export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
   const rootStep: MatchStep = { position: root, params: seedParams }
   let winner: MatchStep | undefined
   let bestStatic: MatchStep | undefined
