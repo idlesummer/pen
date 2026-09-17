@@ -73,7 +73,7 @@ function createFallback(defaultOwner: RouteNode, content: string, context: Posit
   const endpoint = createEndpoint(defaultOwner, content, context)
   const frames = endpoint.frames
   const lastFrame = frames[frames.length-1]
-  if (!lastFrame)
+  if (!lastFrame) // undefined last frame means list is empty
     return endpoint
 
   // The innermost frame renders the fallback itself, so remove its default -
