@@ -51,21 +51,6 @@ function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchC
   return candidates
 }
 
-/** Every slot a winning chain's frames declare gets matched independently
- *  against the same full URL, not a remaining suffix - parallel routes, not
- *  nested ones. Seeded with the params already bound reaching this chain,
- *  since paramDepth/contentDepth are continuous through a slot boundary. */
-function matchSlots(endpoint: Endpoint, url: string[], params: ParamTable): Record<string, MatchNode> | undefined {
-  let slots: Record<string, MatchNode> | undefined
-  for (const frame of endpoint.frames) {
-    if (!frame.slots) continue
-    slots ??= {}
-    for (const [name, slotRoot] of Object.entries(frame.slots))
-      slots[name] = matchPosition(slotRoot, url, params)
-  }
-  return slots
-}
-
 /** Depth-first, static-preferring search over one position tree for one URL.
  *  Accepts the first position reached with nothing left to consume (or a
  *  catchall, which always accepts) that also owns a page - stopping there,
@@ -99,6 +84,17 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
   })
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
   const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
-  const slots = matchSlots(endpoint, url, params)
+
+  // Every slot the winning chain's frames declare gets matched independently
+  // against the same full URL, not a remaining suffix - parallel routes, not
+  // nested ones. Seeded with the params already bound reaching this chain,
+  // since paramDepth/contentDepth are continuous through a slot boundary.
+  let slots: Record<string, MatchNode> | undefined
+  for (const frame of endpoint.frames) {
+    if (!frame.slots) continue
+    slots ??= {}
+    for (const [name, slotRoot] of Object.entries(frame.slots))
+      slots[name] = matchPosition(slotRoot, url, params)
+  }
   return { endpoint, params, slots }
 }
