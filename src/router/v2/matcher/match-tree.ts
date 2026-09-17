@@ -78,7 +78,8 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
   traverse(rootCandidate, {
     expand: (candidate) => {
       const children = expandMatchCandidates(candidate, url)
-      if (!children.length) candidate.isTerminal = true
+      if (!children.length)
+        candidate.isTerminal = true
       return children
     },
     leave: (candidate) => {
