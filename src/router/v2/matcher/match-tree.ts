@@ -51,13 +51,14 @@ function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchC
   return candidates
 }
 
-/** Depth-first, static-preferring search over one position tree for one URL.
- *  Accepts the first position reached with nothing left to consume (or a
- *  catchall, which always accepts) that also owns a page - stopping there,
- *  since nothing deeper down a different branch could be more specific. If
- *  nothing ever accepts, falls back to the most static-preferring dead end
- *  instead - the same guarantee `PositionNode.fallback` exists to make. */
-export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
+/** Depth-first, static-preferring search over one position tree for one URL -
+ *  no slots, just the winning endpoint and params at `root` itself. Accepts
+ *  the first position reached with nothing left to consume (or a catchall,
+ *  which always accepts) that also owns a page - stopping there, since
+ *  nothing deeper down a different branch could be more specific. If nothing
+ *  ever accepts, falls back to the most static-preferring dead end instead -
+ *  the same guarantee `PositionNode.fallback` exists to make. */
+function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
   const rootCandidate: MatchCandidate = { position: root, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -72,7 +73,7 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
     leave: (candidate) => {
       const position = candidate.position
       const isExhausted = !url[position.urlDepth]
-      const isAccepting = isExhausted || candidate.isCatchall // url is exhauste or position is catchcall
+      const isAccepting = isExhausted || candidate.isCatchall // url is exhausted or position is catchall
 
       if (isAccepting && position.endpoint)
         return (winner = candidate, true)
@@ -84,17 +85,47 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
   })
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
   const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
+  return { endpoint, params }
+}
 
-  // Every slot the winning chain's frames declare gets matched independently
-  // against the same full URL, not a remaining suffix - parallel routes, not
-  // nested ones. Seeded with the params already bound reaching this chain,
-  // since paramDepth/contentDepth are continuous through a slot boundary.
-  let slots: Record<string, MatchNode> | undefined
-  for (const frame of endpoint.frames) {
+/** One slot still waiting to be matched, and where to attach the result once
+ *  it is - the explicit worklist that replaces matchPosition calling itself. */
+type PendingSlot = {
+  into: Record<string, MatchNode>
+  name: string
+  position: PositionNode
+  params: ParamTable
+}
+
+/** Queues every slot a node's own frames declare, to be matched
+ *  independently against the same full URL later - parallel routes, not a
+ *  remaining suffix or a nested match. Seeded with the params already bound
+ *  on this node, since paramDepth/contentDepth are continuous through a
+ *  slot boundary. */
+function enqueueSlots(node: MatchNode, queue: PendingSlot[]): void {
+  for (const frame of node.endpoint.frames) {
     if (!frame.slots) continue
-    slots ??= {}
-    for (const [name, slotRoot] of Object.entries(frame.slots))
-      slots[name] = matchPosition(slotRoot, url, params)
+    node.slots ??= {}
+    for (const [name, position] of Object.entries(frame.slots))
+      queue.push({ into: node.slots, name, position, params: node.params })
   }
-  return { endpoint, params, slots }
+}
+
+/** Resolves a full match tree for one URL: matchOne's winning result at
+ *  `root`, plus every slot its frames (and their frames, and so on) declare.
+ *  Slots are drained from an explicit queue instead of recursing - each
+ *  match is fully independent, so processing order never affects the
+ *  result, only the order results get attached in. */
+export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
+  const result = matchOne(root, url, seedParams)
+  const queue: PendingSlot[] = []
+  enqueueSlots(result, queue)
+
+  while (queue.length) {
+    const job = queue.shift()!
+    const node = matchOne(job.position, url, job.params)
+    job.into[job.name] = node
+    enqueueSlots(node, queue)
+  }
+  return result
 }
