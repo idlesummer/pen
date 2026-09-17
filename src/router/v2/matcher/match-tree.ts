@@ -1,7 +1,7 @@
 import type { Endpoint, PositionNode } from '../compiler/position-node'
 import { traverse } from '@/lib/traverse'
 
-export type ParamTable = Record<string, string | string[]>
+export type ParamTable = Readonly<Record<string, string | string[]>>
 
 export type MatchNode = {
   endpoint: Endpoint                 // the winning endpoint - page or fallback, same type either way
