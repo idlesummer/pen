@@ -1,6 +1,6 @@
 import { createRouteTree } from '../compiler/route-tree'
 import { createPositionTree } from '../compiler/position-tree'
-import { matchPosition } from './index'
+import { matchPosition } from './match-tree'
 import { indent } from '@/lib/json-indent'
 
 console.log(`
