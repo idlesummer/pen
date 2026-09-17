@@ -5,8 +5,7 @@ import { traverse } from '@/lib/traverse'
 import { filterRouteFiles, getRouteModuleType } from './route-module'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
-/** The parse: one node per folder, mirroring the app directory. It knows the
- *  filesystem and nothing about routing rules.
+/** The parse: one node per folder, mirroring the app directory.
  *
  *  Built once and never mutated. Two passes that used to run here are gone:
  *  the `default` fallback injection, which is a routing guarantee and now lives
@@ -75,4 +74,18 @@ export function findDefaultOwner(route: RouteNode): RouteNode {
     if (node.modules.default || isBoundary(node.type))
       return node
   }
+}
+
+/** Maps a folder and each ancestor routing inherits from, root-ward, keeping
+ *  only the defined results - the walk an endpoint's frame chain is built
+ *  from, and the render stage would otherwise repeat on every navigation. */
+export function compactMapAncestors<T>(route: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
+  const values: T[] = []
+  // No condition needed since we always stop at a default or boundary
+  for (let node = route; ; node = node.parent!) {
+    const value = fn(node)
+    if (value !== undefined)   values.push(value)
+    if (isBoundary(node.type)) break
+  }
+  return values
 }
