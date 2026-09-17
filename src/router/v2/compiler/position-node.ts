@@ -3,14 +3,10 @@ import type { RouteNode } from './route-tree'
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.
  *
- *  paramDepth is how many params have been bound by the time this frame
- *  renders - it's -staticness, not a position's own depth (see staticness's
- *  comment on PositionNode for why). Without slots every frame in a chain
- *  would share the content's own contentDepth, but a slot can sit between
- *  two dynamic ancestors in the same chain without breaking the param count
- *  that flows through it, so a chain that passes through one can still mix
- *  frames bound at different counts - each frame has to say which one it's
- *  at instead of inheriting one shared value. */
+ *  paramDepth is -staticness (see PositionNode), not one shared value per
+ *  chain: a slot can sit between two dynamic ancestors without resetting the
+ *  param count, so frames on either side of it can be bound at different
+ *  counts within the same chain. */
 export type Frame = {
   layout?: string
   loading?: string
@@ -55,11 +51,8 @@ export type PositionConflicts = {
 }
 
 /** Build-time bookkeeping shared by traversal and endpoint resolution.
- *
- *  frameOf and fallbackFrameOf exist so a Frame is built once per folder and
- *  shared by reference everywhere it's used - a chain of five wrappers
- *  appearing in both a page endpoint and several positions' fallbacks is
- *  five pointers repeated, not five copies each time. */
+ *  frameOf/fallbackFrameOf share a Frame by reference wherever it repeats,
+ *  instead of rebuilding an equal-but-distinct copy on every use. */
 export type PositionContext = {
   positionOf: Map<RouteNode, PositionNode> // folder -> the position it belongs to
   pageOwnerOf: Map<PositionNode, RouteNode>
