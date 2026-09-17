@@ -49,24 +49,23 @@ function createConflicts(): PositionConflicts {
 /** Gets or creates the position for a route folder.
  *  Groups reuse their parent's position; other folders create their own. */
 function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
-  const parent = context.positionOf.get(parentRoute)!
+  const parentPosition = context.positionOf.get(parentRoute)!
   const conflictsOf = state.conflictsOf
   switch (route.type) {
     default: // group
-      return parent
+      return parentPosition
     case 'static':
-      parent.statics ??= dict<PositionNode>()
-      return parent.statics[route.segment] ??= createPositionNode(route, parent)
+      parentPosition.statics ??= dict<PositionNode>()
+      return parentPosition.statics[route.segment] ??= createPositionNode(route, parentPosition)
     case 'dynamic':
-      conflictsOf.getOrInsertComputed(parent, createConflicts).dynamics[route.segment] ??= route
-      return parent.dynamic ??= createPositionNode(route, parent)
+      conflictsOf.getOrInsertComputed(parentPosition, createConflicts).dynamics[route.segment] ??= route
+      return parentPosition.dynamic ??= createPositionNode(route, parentPosition)
     case 'catchall':
-      conflictsOf.getOrInsertComputed(parent, createConflicts).catchalls.push(route)
-      return parent.catchall ??= createPositionNode(route, parent)
+      conflictsOf.getOrInsertComputed(parentPosition, createConflicts).catchalls.push(route)
+      return parentPosition.catchall ??= createPositionNode(route, parentPosition)
     case 'slot': {
       const slotDict = context.slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
-      const slotName = route.segment
-      return slotDict[slotName] ??= createPositionNode(route, parent)
+      return slotDict[route.segment] ??= createPositionNode(route, parentPosition)
     }
   }
 }
