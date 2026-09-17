@@ -86,18 +86,18 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
     },
     leave: (candidate) => {
       const position = candidate.position
-      const isExhausted = url[position.urlDepth] === undefined
-      const isAccepting = isExhausted || candidate.isCatchall
+      const isExhausted = !url[position.urlDepth]
+      const isAccepting = isExhausted || candidate.isCatchall // url is exhauste or position is catchcall
 
-      if (isAccepting && position.endpoint) {
-        winner = candidate
-        return true
-      }
-      if (candidate.isTerminal && (!bestStatic || position.staticness > bestStatic.position.staticness))
+      if (isAccepting && position.endpoint)
+        return (winner = candidate, true)
+
+      const isBetterStatic = !bestStatic || position.staticness > bestStatic.position.staticness
+      if (candidate.isTerminal && isBetterStatic)
         bestStatic = candidate
     },
   })
-  const chosen = winner ?? bestStatic! // guaranteed: the url or the tree always exhausts eventually
+  const match = winner ?? bestStatic! // guaranteed: the url or the tree always exhausts eventually
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
-  return { endpoint, params: chosen.params, slots: matchSlots(endpoint, url, chosen.params) }
+  return { endpoint, params: match.params, slots: matchSlots(endpoint, url, match.params) }
 }
