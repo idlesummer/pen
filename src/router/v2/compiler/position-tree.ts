@@ -120,24 +120,40 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   return [positionTree, [...state.conflictsOf.values()]]
 }
 
+/** Every position a folder's frames point traversal at: its structural
+ *  children, plus every slot subtree its resolved endpoint/fallback frames
+ *  declare - slots aren't reachable via statics/dynamic/catchall, only
+ *  through the frames that carry them. */
+function expandModulePathChildren(position: PositionNode): PositionNode[] {
+  const children: PositionNode[] = [...Object.values(position.statics ?? {})]
+  if (position.dynamic) children.push(position.dynamic)
+  if (position.catchall) children.push(position.catchall)
+  for (const endpoint of [position.endpoint, position.fallback]) {
+    if (!endpoint) continue
+    for (const frame of endpoint.frames)
+      for (const slot of Object.values(frame.slots ?? {}))
+        children.push(slot)
+  }
+  return children
+}
+
 /** Every module the compiled tree can actually render, for the component map.
  *  Sourced from the position tree rather than the route tree, so a module in a
  *  branch nothing can reach is not emitted as a dead import. */
 export function getModulePaths(root: PositionNode): string[] {
   const modules = new Set<string>()
-  const collect = (position: PositionNode) => {
-    for (const endpoint of [position.endpoint, position.fallback]) {
-      if (!endpoint) continue
-      modules.add(endpoint.content)
-      for (const frame of endpoint.frames) {
-        for (const module of [frame.layout, frame.loading, frame.error, frame.default])
-          if (module) modules.add(module)
-        for (const slot of Object.values(frame.slots ?? {})) collect(slot)
+  traverse(root, {
+    visit: (position) => {
+      for (const endpoint of [position.endpoint, position.fallback]) {
+        if (!endpoint) continue
+        modules.add(endpoint.content)
+        for (const frame of endpoint.frames) {
+          for (const module of [frame.layout, frame.loading, frame.error, frame.default])
+            if (module) modules.add(module)
+        }
       }
-    }
-    for (const child of [...Object.values(position.statics ?? {}), position.dynamic, position.catchall])
-      if (child) collect(child)
-  }
-  collect(root)
+    },
+    expand: expandModulePathChildren,
+  })
   return [...modules].sort()
 }
