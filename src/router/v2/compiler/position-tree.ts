@@ -117,6 +117,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   })
   for (const position of positions)
     setEndpoints(position, context)
+
   return [positionTree, [...state.conflictsOf.values()], [...positions]]
 }
 
