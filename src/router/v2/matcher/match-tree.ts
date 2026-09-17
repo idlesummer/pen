@@ -39,12 +39,14 @@ function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchC
 
   if (dynamic) {
     const paramName = dynamic.param!
-    candidates.push({ position: dynamic, params: { ...params, [paramName]: segment } })
+    const newParams = { ...params, [paramName]: segment }
+    candidates.push({ position: dynamic, params: newParams })
   }
   if (catchall) {
     const paramName = catchall.param!
     const segments = url.slice(position.urlDepth)
-    candidates.push({ position: catchall, params: { ...params, [paramName]: segments }, viaCatchall: true })
+    const newParams = { ...params, [paramName]: segments }
+    candidates.push({ position: catchall, params: newParams, viaCatchall: true })
   }
   return candidates
 }
