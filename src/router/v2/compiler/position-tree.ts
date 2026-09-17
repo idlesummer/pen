@@ -84,7 +84,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     defaultOwnerOf: new Map<PositionNode, RouteNode>(),
     slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
     frameOf: new Map<RouteNode, Frame | undefined>(),
-    strippedOf: new Map<Frame, Frame>(),
+    fallbackFrameOf: new Map<Frame, Frame>(),
   }
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?

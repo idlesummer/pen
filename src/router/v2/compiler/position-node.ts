@@ -56,7 +56,7 @@ export type PositionConflicts = {
 
 /** Build-time bookkeeping shared by traversal and endpoint resolution.
  *
- *  frameOf and strippedOf exist so a Frame is built once per folder and
+ *  frameOf and fallbackFrameOf exist so a Frame is built once per folder and
  *  shared by reference everywhere it's used - a chain of five wrappers
  *  appearing in both a page endpoint and several positions' fallbacks is
  *  five pointers repeated, not five copies each time. */
@@ -66,5 +66,5 @@ export type PositionContext = {
   defaultOwnerOf: Map<PositionNode, RouteNode>
   slotsOf: Map<RouteNode, Record<string, PositionNode>> // folder -> its declared slots, by name
   frameOf: Map<RouteNode, Frame | undefined>            // folder -> its frame, memoised even when it has none
-  strippedOf: Map<Frame, Frame>                         // frame -> the same frame minus its own default
+  fallbackFrameOf: Map<Frame, Frame>                    // frame -> the variant used as a fallback's innermost frame
 }

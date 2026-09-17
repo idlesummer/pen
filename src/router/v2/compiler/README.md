@@ -35,7 +35,7 @@ the node, because only a folder has a file path a diagnostic can name.
 **4. A `Frame` is shared by reference everywhere it's used.** `createFrame`
 memoises in `PositionContext.frameOf`, keyed by folder, including the
 undefined case; `removeDefault`'s stripped variant is memoised the same way
-in `strippedOf`, keyed by the frame it strips. A chain of five wrappers
+in `fallbackFrameOf`, keyed by the frame it strips. A chain of five wrappers
 appearing in both a page endpoint and several positions' fallbacks is five
 pointers repeated, not five fresh copies each time.
 
