@@ -35,7 +35,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
   const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     staticness: parent.staticness - +isDynamicOrCatchall(type),
-    fallback: undefined as never, // filled by setEndpoints, once every position exists
+    fallback: undefined as never, //* filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
     position.param = route.segment
