@@ -1,18 +1,8 @@
 import type { RouteNode } from './route-tree'
 import type { Endpoint, Frame, PositionContext, PositionNode } from './position-node'
+import { compactMapAncestors } from './route-tree'
 import { GLOBAL_DEFAULT } from './route-module'
 import { isBoundary } from './route-segment'
-
-function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
-  const values: T[] = []
-  // No condition needed since we always stop at a default or boundary
-  for (let node = routeNode; ; node = node.parent!) {
-    const value = fn(node)
-    if (value !== undefined)   values.push(value)
-    if (isBoundary(node.type)) break
-  }
-  return values
-}
 
 // ── frames ───────────────────────────────────────────────────────────────
 
