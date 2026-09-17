@@ -67,7 +67,7 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
   }
 }
 
-export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[]] {
+export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], PositionNode[]] {
   const positionTree: PositionNode = {
     urlDepth: 0,
     staticness: 0,
@@ -117,42 +117,28 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   })
   for (const position of positions)
     setEndpoints(position, context)
-  return [positionTree, [...state.conflictsOf.values()]]
+  return [positionTree, [...state.conflictsOf.values()], [...positions]]
 }
 
-/** Every position a folder's frames point traversal at: its structural
- *  children, plus every slot subtree its resolved endpoint/fallback frames
- *  declare - slots aren't reachable via statics/dynamic/catchall, only
- *  through the frames that carry them. */
-export function getModulePaths(root: PositionNode): string[] {
+/** Every module the compiled tree can actually render, for the component map.
+ *  Takes createPositionTree's own flat positions list rather than re-walking
+ *  from the root: that list already includes every slot subtree (their route
+ *  nodes get attached during the same traversal that built it), which the
+ *  structural statics/dynamic/catchall shape alone can't reach - a module in
+ *  a branch nothing can reach is not emitted as a dead import either way. */
+export function getModulePaths(positions: Iterable<PositionNode>): string[] {
   const modules = new Set<string>()
-  traverse(root, {
-    visit: (position) => {
-      for (const endpoint of [position.endpoint, position.fallback]) {
-        if (!endpoint) continue
-        modules.add(endpoint.content)
-        for (const { layout, loading, error, default: _default } of endpoint.frames) {
-          if (layout)   modules.add(layout)
-          if (loading)  modules.add(loading)
-          if (error)    modules.add(error)
-          if (_default) modules.add(_default)
-        }
+  for (const position of positions) {
+    for (const endpoint of [position.endpoint, position.fallback]) {
+      if (!endpoint) continue
+      modules.add(endpoint.content)
+      for (const { layout, loading, error, default: _default } of endpoint.frames) {
+        if (layout)   modules.add(layout)
+        if (loading)  modules.add(loading)
+        if (error)    modules.add(error)
+        if (_default) modules.add(_default)
       }
-    },
-    expand: (position) => {
-      const children: PositionNode[] = position.statics ? [...Object.values(position.statics)] : []
-      if (position.dynamic)
-        children.push(position.dynamic)
-      if (position.catchall)
-        children.push(position.catchall)
-      if (position.endpoint)
-        for (const frame of position.endpoint.frames)
-          children.push(...Object.values(frame.slots ?? {}))
-      if (position.fallback)
-        for (const frame of position.fallback.frames)
-          children.push(...Object.values(frame.slots ?? {}))
-      return children
-    },
-  })
+    }
+  }
   return [...modules].sort()
 }
