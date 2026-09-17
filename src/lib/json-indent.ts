@@ -5,5 +5,5 @@
  * @returns Arguments for JSON.stringify with guided indentation.
  */
 export function indent<T>(value: T): [T, null, string] {
-  return [value, null, '│  ']
+  return [value, null, '│ ']
 }
