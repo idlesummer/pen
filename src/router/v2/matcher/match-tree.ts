@@ -97,7 +97,8 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
         bestStatic = candidate
     },
   })
-  const match = winner ?? bestStatic! // guaranteed: the url or the tree always exhausts eventually
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
-  return { endpoint, params: match.params, slots: matchSlots(endpoint, url, match.params) }
+  const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
+  const slots = matchSlots(endpoint, url, params)
+  return { endpoint, params, slots }
 }
