@@ -18,7 +18,7 @@ export type MatchNode = {
 type MatchCandidate = {
   position: PositionNode
   params: ParamTable
-  viaCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
+  isCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
   isTerminal?: true
 }
 
@@ -46,7 +46,7 @@ function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchC
     const paramName = catchall.param!
     const segments = url.slice(position.urlDepth)
     const newParams = { ...params, [paramName]: segments }
-    candidates.push({ position: catchall, params: newParams, viaCatchall: true })
+    candidates.push({ position: catchall, params: newParams, isCatchall: true })
   }
   return candidates
 }
@@ -87,7 +87,7 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
     leave: (candidate) => {
       const position = candidate.position
       const isExhausted = url[position.urlDepth] === undefined
-      const isAccepting = isExhausted || candidate.viaCatchall
+      const isAccepting = isExhausted || candidate.isCatchall
 
       if (isAccepting && position.endpoint) {
         winner = candidate
