@@ -53,7 +53,7 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
  *  the same reason createFrame is: every position resolving to the same
  *  owner wants the same stripped frame, not a fresh copy each time. */
 function removeDefault(frame: Frame, context: PositionContext): Frame {
-  return context.strippedOf.getOrInsertComputed(frame, () => {
+  return context.fallbackFrameOf.getOrInsertComputed(frame, () => {
     const { layout, loading, error, slots, paramDepth } = frame
     return { layout, loading, error, slots, paramDepth }
   })
