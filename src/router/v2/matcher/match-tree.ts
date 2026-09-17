@@ -28,19 +28,23 @@ type MatchCandidate = {
 function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
   const { position, params } = candidate
   const segment = url[position.urlDepth]
-  if (segment === undefined) return []
+  if (segment === undefined)
+    return []
 
+  const { statics, dynamic, catchall } = position
   const candidates: MatchCandidate[] = []
-  const staticChild = position.statics?.[segment]
-  if (staticChild)
-    candidates.push({ position: staticChild, params })
 
-  if (position.dynamic)
-    candidates.push({ position: position.dynamic, params: { ...params, [position.dynamic.param!]: segment } })
+  if (statics?.[segment])
+    candidates.push({ position: statics[segment], params })
 
-  if (position.catchall) {
-    const rest = url.slice(position.urlDepth)
-    candidates.push({ position: position.catchall, params: { ...params, [position.catchall.param!]: rest }, viaCatchall: true })
+  if (dynamic) {
+    const paramName = dynamic.param!
+    candidates.push({ position: dynamic, params: { ...params, [paramName]: segment } })
+  }
+  if (catchall) {
+    const paramName = catchall.param!
+    const segments = url.slice(position.urlDepth)
+    candidates.push({ position: catchall, params: { ...params, [paramName]: segments }, viaCatchall: true })
   }
   return candidates
 }
