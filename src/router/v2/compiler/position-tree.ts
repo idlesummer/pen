@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { PositionConflicts, PositionContext, PositionNode } from './position-node'
+import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position-node'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner } from './route-tree'
@@ -83,8 +83,8 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
     defaultOwnerOf: new Map<PositionNode, RouteNode>(),
     slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
-    frameOf: new Map(),
-    strippedOf: new Map(),
+    frameOf: new Map<RouteNode, Frame | undefined>(),
+    strippedOf: new Map<Frame, Frame>(),
   }
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
