@@ -6,6 +6,8 @@ import { findDefaultOwner } from './route-tree'
 import { setEndpoints } from './position-tree-endpoints'
 import { isDynamicOrCatchall, isUrlConsuming } from './route-segment'
 
+// ── traversal ────────────────────────────────────────────────────────────
+
 /** Traversal-only bookkeeping */
 type TraversalState = {
   conflictsOf: Map<PositionNode, PositionConflicts>
@@ -25,6 +27,8 @@ function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
   }
   return children
 }
+
+// ── positions ────────────────────────────────────────────────────────────
 
 function createPositionNode(route: RouteNode, parent: PositionNode): PositionNode {
   const type = route.type
@@ -66,6 +70,8 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
     }
   }
 }
+
+// ── build ────────────────────────────────────────────────────────────────
 
 export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], PositionNode[]] {
   const positionTree: PositionNode = {
@@ -120,6 +126,8 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
 
   return [positionTree, [...state.conflictsOf.values()], [...positions]]
 }
+
+// ── modules ──────────────────────────────────────────────────────────────
 
 /** Every module the compiled tree can actually render, for the component map.
  *  Takes createPositionTree's own flat positions list rather than re-walking
