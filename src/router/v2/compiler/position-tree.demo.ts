@@ -1,6 +1,7 @@
 import { createRouteTree } from './route-tree'
 import { createPositionTree } from './position-tree'
 import { validateConflicts } from './validate'
+import { indent } from '@/lib/json-indent'
 
 // Smallest tree that can show it: one static ancestor, one dynamic segment,
 // one slot beneath it. blog wraps nothing of its own (no layout/default), so
@@ -24,7 +25,7 @@ const routeTree = createRouteTree([
   'blog/[id]/@related/page.tsx',
 ])
 const [root] = createPositionTree(routeTree)
-console.log(JSON.stringify(root, null, 2))
+console.log(JSON.stringify(...indent(root)))
 
 // paramDepth/contentDepth continuity through a slot boundary: [id] binds one
 // param, and @related sits in a slot directly beneath it. A slot must NOT
