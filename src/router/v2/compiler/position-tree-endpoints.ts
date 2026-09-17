@@ -33,7 +33,7 @@ function compactMapAncestors<T>(routeNode: RouteNode, fn: (node: RouteNode) => T
  *  a route-group sibling that loses page ownership for a URL never gets its
  *  slots passed anywhere either, regardless of sharing that URL. */
 function createFrame(routeNode: RouteNode, context: PositionContext): Frame | undefined {
-  const { frameOf } = context
+  const frameOf = context.frameOf
   if (frameOf.has(routeNode))
     return frameOf.get(routeNode)
 
