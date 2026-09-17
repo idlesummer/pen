@@ -1,7 +1,7 @@
 import type { CompileDiagnostic } from '@/router/compiling/compile-diagnostic'
 import type { PositionNode } from './position-node'
 import { createRouteTree } from './route-tree'
-import { createPositionTree, getModulePaths } from './position-tree'
+import { createPositionTree } from './position-tree'
 import { validateConflicts, validateRouteTree } from './validate'
 
 export type { RouteNode } from './route-tree'
@@ -25,11 +25,11 @@ export type Compiled = {
  *  later even by accident. */
 export function compile(filePaths: string[]): Compiled {
   const routeTree = createRouteTree(filePaths)
-  const [positionTree, conflicts, positions] = createPositionTree(routeTree)
+  const [positionTree, conflicts, modulePaths] = createPositionTree(routeTree)
 
   return {
     positionTree,
-    modulePaths: getModulePaths(positions),
+    modulePaths,
     diagnostics: [...validateRouteTree(routeTree), ...validateConflicts(conflicts)],
   }
 }
