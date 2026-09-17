@@ -9,11 +9,13 @@ export type MatchNode = {
   slots?: Record<string, MatchNode>  // one recursive match per slot this endpoint's frames declare
 }
 
-/** Search-only bookkeeping. Doesn't need a parent pointer the way a live
- *  ancestor walk would - by the time a position has an endpoint/fallback,
- *  compile time already flattened its whole wrapper chain into `frames`,
- *  slots included, so nothing here ever needs to walk back up. */
-type MatchStep = {
+/** Search-only bookkeeping: one competing attempt in the backtracking search,
+ *  not a committed step - most of these lose to another candidate and get
+ *  discarded. Doesn't need a parent pointer the way a live ancestor walk
+ *  would - by the time a position has an endpoint/fallback, compile time
+ *  already flattened its whole wrapper chain into `frames`, slots included,
+ *  so nothing here ever needs to walk back up. */
+type MatchCandidate = {
   position: PositionNode
   params: ParamTable
   viaCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
@@ -23,24 +25,24 @@ type MatchStep = {
 /** Which children to try next, in preference order: exact literal match,
  *  then a bound param, then everything remaining. None are offered once the
  *  URL runs out - a position with no segment left to try has no children. */
-function expandMatchSteps(step: MatchStep, url: string[]): MatchStep[] {
-  const { position, params } = step
+function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
+  const { position, params } = candidate
   const segment = url[position.urlDepth]
   if (segment === undefined) return []
 
-  const steps: MatchStep[] = []
+  const candidates: MatchCandidate[] = []
   const staticChild = position.statics?.[segment]
   if (staticChild)
-    steps.push({ position: staticChild, params })
+    candidates.push({ position: staticChild, params })
 
   if (position.dynamic)
-    steps.push({ position: position.dynamic, params: { ...params, [position.dynamic.param!]: segment } })
+    candidates.push({ position: position.dynamic, params: { ...params, [position.dynamic.param!]: segment } })
 
   if (position.catchall) {
     const rest = url.slice(position.urlDepth)
-    steps.push({ position: position.catchall, params: { ...params, [position.catchall.param!]: rest }, viaCatchall: true })
+    candidates.push({ position: position.catchall, params: { ...params, [position.catchall.param!]: rest }, viaCatchall: true })
   }
-  return steps
+  return candidates
 }
 
 /** Every slot a winning chain's frames declare gets matched independently
@@ -65,27 +67,27 @@ function matchSlots(endpoint: Endpoint, url: string[], params: ParamTable): Reco
  *  nothing ever accepts, falls back to the most static-preferring dead end
  *  instead - the same guarantee `PositionNode.fallback` exists to make. */
 export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
-  const rootStep: MatchStep = { position: root, params: seedParams }
-  let winner: MatchStep | undefined
-  let bestStatic: MatchStep | undefined
+  const rootCandidate: MatchCandidate = { position: root, params: seedParams }
+  let winner: MatchCandidate | undefined
+  let bestStatic: MatchCandidate | undefined
 
-  traverse(rootStep, {
-    expand: (step) => {
-      const children = expandMatchSteps(step, url)
-      if (!children.length) step.isTerminal = true
+  traverse(rootCandidate, {
+    expand: (candidate) => {
+      const children = expandMatchCandidates(candidate, url)
+      if (!children.length) candidate.isTerminal = true
       return children
     },
-    leave: (step) => {
-      const { position } = step
+    leave: (candidate) => {
+      const { position } = candidate
       const isExhausted = url[position.urlDepth] === undefined
-      const isAccepting = isExhausted || step.viaCatchall
+      const isAccepting = isExhausted || candidate.viaCatchall
 
       if (isAccepting && position.endpoint) {
-        winner = step
+        winner = candidate
         return true
       }
-      if (step.isTerminal && (!bestStatic || position.staticness > bestStatic.position.staticness))
-        bestStatic = step
+      if (candidate.isTerminal && (!bestStatic || position.staticness > bestStatic.position.staticness))
+        bestStatic = candidate
     },
   })
 
