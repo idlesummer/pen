@@ -25,11 +25,11 @@ export type Compiled = {
  *  later even by accident. */
 export function compile(filePaths: string[]): Compiled {
   const routeTree = createRouteTree(filePaths)
-  const [positionTree, conflicts] = createPositionTree(routeTree)
+  const [positionTree, conflicts, positions] = createPositionTree(routeTree)
 
   return {
     positionTree,
-    modulePaths: getModulePaths(positionTree),
+    modulePaths: getModulePaths(positions),
     diagnostics: [...validateRouteTree(routeTree), ...validateConflicts(conflicts)],
   }
 }
