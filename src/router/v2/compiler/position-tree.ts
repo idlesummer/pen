@@ -128,12 +128,8 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
 
 // ── modules ──────────────────────────────────────────────────────────────
 
-/** Every module the compiled tree can actually render, for the component map.
- *  Takes createPositionTree's own flat positions list rather than re-walking
- *  from the root: that list already includes every slot subtree (their route
- *  nodes get attached during the same traversal that built it), which the
- *  structural statics/dynamic/catchall shape alone can't reach - a module in
- *  a branch nothing can reach is not emitted as a dead import either way. */
+/** Every module reachable from the compiled tree.
+ *  Uses the flat positions list so slot subtrees are included. */
 export function getModulePaths(positions: Iterable<PositionNode>): string[] {
   const modules = new Set<string>()
   for (const position of positions) {
