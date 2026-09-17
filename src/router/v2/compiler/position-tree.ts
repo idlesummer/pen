@@ -70,6 +70,27 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
   }
 }
 
+// ── modules ──────────────────────────────────────────────────────────────
+
+/** Every module reachable from the compiled tree.
+ *  Uses the flat positions list so slot subtrees are included. */
+function getModulePaths(positions: Iterable<PositionNode>): string[] {
+  const modules = new Set<string>()
+  for (const position of positions) {
+    for (const endpoint of [position.endpoint, position.fallback]) {
+      if (!endpoint) continue
+      modules.add(endpoint.content)
+      for (const { layout, loading, error, default: _default } of endpoint.frames) {
+        if (layout)   modules.add(layout)
+        if (loading)  modules.add(loading)
+        if (error)    modules.add(error)
+        if (_default) modules.add(_default)
+      }
+    }
+  }
+  return [...modules].sort()
+}
+
 // ── build ────────────────────────────────────────────────────────────────
 
 export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], string[]] {
@@ -124,25 +145,4 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     setEndpoints(position, context)
 
   return [positionTree, [...state.conflictsOf.values()], getModulePaths(positions)]
-}
-
-// ── modules ──────────────────────────────────────────────────────────────
-
-/** Every module reachable from the compiled tree.
- *  Uses the flat positions list so slot subtrees are included. */
-function getModulePaths(positions: Iterable<PositionNode>): string[] {
-  const modules = new Set<string>()
-  for (const position of positions) {
-    for (const endpoint of [position.endpoint, position.fallback]) {
-      if (!endpoint) continue
-      modules.add(endpoint.content)
-      for (const { layout, loading, error, default: _default } of endpoint.frames) {
-        if (layout)   modules.add(layout)
-        if (loading)  modules.add(loading)
-        if (error)    modules.add(error)
-        if (_default) modules.add(_default)
-      }
-    }
-  }
-  return [...modules].sort()
 }
