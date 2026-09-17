@@ -72,7 +72,7 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
 
 // ── build ────────────────────────────────────────────────────────────────
 
-export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], PositionNode[]] {
+export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], string[]] {
   const positionTree: PositionNode = {
     urlDepth: 0,
     staticness: 0,
@@ -123,14 +123,14 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   for (const position of positions)
     setEndpoints(position, context)
 
-  return [positionTree, [...state.conflictsOf.values()], [...positions]]
+  return [positionTree, [...state.conflictsOf.values()], getModulePaths(positions)]
 }
 
 // ── modules ──────────────────────────────────────────────────────────────
 
 /** Every module reachable from the compiled tree.
  *  Uses the flat positions list so slot subtrees are included. */
-export function getModulePaths(positions: Iterable<PositionNode>): string[] {
+function getModulePaths(positions: Iterable<PositionNode>): string[] {
   const modules = new Set<string>()
   for (const position of positions) {
     for (const endpoint of [position.endpoint, position.fallback]) {
