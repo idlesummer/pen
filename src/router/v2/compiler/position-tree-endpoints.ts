@@ -38,12 +38,12 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
     return frameOf.get(routeNode)
 
   const { layout, loading, error, default: def } = routeNode.modules
-  const defaultPath = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  const _default = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  const paramDepth = -context.positionOf.get(routeNode)!.staticness
   const slots = context.slotsOf.get(routeNode)
-  const frame = (!layout && !loading && !error && !defaultPath && !slots)
-    ? undefined
-    : { layout, loading, error, default: defaultPath, slots, paramDepth: -context.positionOf.get(routeNode)!.staticness }
-
+  const frame = (layout || loading || error || _default || slots)
+    ? { layout, loading, error, default: _default, slots, paramDepth }
+    : undefined
   frameOf.set(routeNode, frame)
   return frame
 }
