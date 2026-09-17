@@ -69,13 +69,13 @@ function createFallback(defaultOwner: RouteNode, content: string, context: Posit
 
 /** Resolves one position's page (if it has one) and fallback (always) - safe
  *  to call once every folder's frame and page ownership is known. */
-export function setEndpoints(positionNode: PositionNode, context: PositionContext) {
-  const pageOwner = context.pageOwnerOf.get(positionNode)
+export function setEndpoints(position: PositionNode, context: PositionContext) {
+  const pageOwner = context.pageOwnerOf.get(position)
   const pageContent = pageOwner?.modules.page
   if (pageContent)
-    positionNode.endpoint = createEndpoint(pageOwner, pageContent, context)
+    position.endpoint = createEndpoint(pageOwner, pageContent, context)
 
-  const defaultOwner = context.defaultOwnerOf.get(positionNode)!  // always set; worst case, a boundary
+  const defaultOwner = context.defaultOwnerOf.get(position)!  // always set; worst case, a boundary
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
-  positionNode.fallback = createFallback(defaultOwner, defaultContent, context)
+  position.fallback = createFallback(defaultOwner, defaultContent, context)
 }
