@@ -1,4 +1,4 @@
-import type { Matcher } from '@/router/matcher'
+import type { Matcher } from '@/router/runtime'
 import type { ComponentMap } from './renderer/component-map'
 import { usePathname } from './navigation/hooks/use-pathname'
 import { renderMatch } from './renderer/render'
