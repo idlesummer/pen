@@ -1,9 +1,15 @@
 import type { ComponentType, ReactNode } from 'react'
+import type { ParamTable } from '../params'
 import { Component } from 'react'
 import { DefaultSignal } from './notFound'
 
+/** default.tsx is used two ways - direct content (gets params) or here, as
+ *  DefaultBoundary's fallback (no props, see render() below) - so params
+ *  must be optional to be valid for both. */
+export type DefaultComponent = ComponentType<{ params?: ParamTable }>
+
 type Props = {
-  fallback: ComponentType
+  fallback: DefaultComponent
   children: ReactNode
 }
 

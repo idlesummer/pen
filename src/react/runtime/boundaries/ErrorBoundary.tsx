@@ -6,9 +6,10 @@ export type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
+export type ErrorComponent = ComponentType<ErrorFallbackProps>
 
 type Props = {
-  fallback: ComponentType<ErrorFallbackProps>
+  fallback: ErrorComponent
   children: ReactNode
 }
 
