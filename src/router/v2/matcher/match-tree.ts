@@ -58,8 +58,8 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
  *  nothing deeper down a different branch could be more specific. If nothing
  *  ever accepts, falls back to the most static-preferring dead end instead -
  *  the same guarantee `PositionNode.fallback` exists to make. */
-function createMatch(root: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
-  const rootCandidate: MatchCandidate = { position: root, params: seedParams }
+function createMatch(position: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
+  const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
 
