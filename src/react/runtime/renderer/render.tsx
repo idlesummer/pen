@@ -60,7 +60,7 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotEleme
  *  its frames declare first - each fully independent, no further slots
  *  possible - then folds the main chain around them. */
 export function renderNode(node: MatchNode, componentMap: ComponentMap): ReactNode {
-  const slotElements: Record<string, ReactNode> = {}
+  const slotElements: SlotElements = {}
   for (const frame of node.endpoint.frames) {
     if (!frame.slots) continue
     for (const name in frame.slots) {
