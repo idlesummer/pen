@@ -3,6 +3,10 @@ import type { ComponentMap } from './renderer/component-map'
 import { usePathname } from './navigation/hooks/use-pathname'
 import { renderNode } from './renderer/render'
 
+/** @deprecated Built against the old router's Matcher (url) => RenderNode.
+ *  The router now returns MatchNode, and there is no RenderNode/render step
+ *  to feed it - needs a rewrite against the new pipeline. */
+
 type RouterProps = {
   matcher: Matcher
   componentMap: ComponentMap

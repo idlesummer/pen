@@ -1,4 +1,4 @@
-import type { CompileDiagnostic } from '@/router/compiling/compile-diagnostic'
+import type { CompileDiagnostic } from '@/router/compile-diagnostic'
 import type { PositionNode } from './position-node'
 import { createRouteTree } from './route-tree'
 import { createPositionTree } from './position-tree'

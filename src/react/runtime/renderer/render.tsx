@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+// @deprecated RenderNode no longer exists - the new router returns MatchNode
+// (endpoint.frames is already the flattened wrapper chain; no separate
+// render-tree step). This whole file needs a rewrite against that shape.
 import type { RenderNode } from '@/router'
 import type { ComponentMap } from './component-map'
 import type { ErrorFallbackProps } from '../boundaries/ErrorBoundary'
