@@ -64,16 +64,14 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotEleme
 }
 
 /** Turns a router `MatchNode` into a React element tree: renders every slot
- *  its frames declare first - each fully independent, no further slots
+ *  match() already resolved first - each fully independent, no further slots
  *  possible - then folds the main chain around them. */
 export function renderMatch(match: MatchNode, componentMap: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
-  for (const frame of match.endpoint.frames) {
-    for (const name in frame.slots ?? []) {
-      const { endpoint, params } = match.slots![name]!
-      slotElements[name] = renderChain(endpoint, params, {}, componentMap)
-    }
+  for (const name in match.slots) {
+    const { endpoint, params } = match.slots[name]!
+    slotElements[name] = renderChain(endpoint, params, {}, componentMap)
   }
-  const { endpoint,params } = match
+  const { endpoint, params } = match
   return renderChain(endpoint, params, slotElements, componentMap)
 }
