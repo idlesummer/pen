@@ -47,11 +47,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   return content
 }
 
-/** Folds one endpoint's frame chain (outermost first) around its content,
- *  given every slot its frames declare already rendered. Never calls
- *  itself - a slot's own frames can never declare a further slot, so
- *  `renderChain` called on a slot's endpoint passes an empty `slotElements`
- *  and that's the end of it. */
+/** Wraps endpoint content with its frame chain, from inner to outer. */
 function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const Content = resolveContent(endpoint.content, components)
   let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
