@@ -1,6 +1,6 @@
 import type { PositionNode } from '../compiler/position-node'
-import type { Match } from './match-tree'
-import { match } from './match-tree'
+import type { Match } from './match'
+import { match } from './match'
 import { normalizeUrl } from './url-path'
 
 export type Matcher =
