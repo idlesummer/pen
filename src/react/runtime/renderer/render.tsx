@@ -67,7 +67,7 @@ export function renderNode(node: MatchNode, componentMap: ComponentMap): ReactNo
   const slotElements: Record<string, ReactNode> = {}
   for (const frame of node.endpoint.frames) {
     if (!frame.slots) continue
-    for (const name of Object.keys(frame.slots)) {
+    for (const name in frame.slots) {
       const slotNode = node.slots![name]!
       slotElements[name] = renderChain(slotNode.endpoint, slotNode.params, {}, componentMap)
     }
