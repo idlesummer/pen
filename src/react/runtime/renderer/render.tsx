@@ -2,10 +2,10 @@ import type { ReactNode } from 'react'
 import type { Endpoint, Frame, MatchNode, Params } from '@/router'
 import type { ParamTable } from '../params'
 import type { ComponentMap } from './component-map'
-import { Suspense } from 'react'
 import { resolveComponent, resolveContent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
+import { LoadingBoundary } from '../boundaries/LoadingBoundary'
 
 /** Returns params up to the given depth as an object. */
 function sliceParams(params: Params, depth: number): ParamTable {
@@ -26,7 +26,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   }
   if (loading) {
     const Loading = resolveComponent('loading', loading, componentMap)
-    content = <Suspense fallback={<Loading />}>{content}</Suspense>
+    content = <LoadingBoundary fallback={Loading}>{content}</LoadingBoundary>
   }
   if (layout) {
     const Layout = resolveComponent('layout', layout, componentMap)
