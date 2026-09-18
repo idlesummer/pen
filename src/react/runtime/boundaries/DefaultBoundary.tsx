@@ -56,9 +56,8 @@ export class DefaultBoundary extends Component<Props, State> {
   }
 
   render() {
-    const { triggered } = this.state
     const { fallback: Fallback, children } = this.props
-    if (!triggered) return children
+    if (!this.state.triggered) return children
     return <Fallback />
   }
 }
