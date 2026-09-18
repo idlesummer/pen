@@ -3,6 +3,8 @@ import type { ParamTable } from '../params'
 import { Component } from 'react'
 import { Text } from 'ink'
 
+// ── signal ───────────────────────────────────────────────────────────────
+
 /** Thrown by notFound() and caught only by DefaultBoundary - ErrorBoundary
  *  re-throws it unrecognized so it keeps climbing past any error.tsx that
  *  doesn't also own a default.tsx, until it reaches one that does. */
@@ -16,11 +18,15 @@ export function notFound() {
   throw new DefaultSignal()
 }
 
+// ── fallback ─────────────────────────────────────────────────────────────
+
 /** Built-in fallback rendered when an app defines no root `default.tsx` -
  *  guarantees every URL resolves to something instead of a blank screen. */
 export function DefaultFallback() {
   return <Text>404 - Not Found</Text>
 }
+
+// ── boundary ─────────────────────────────────────────────────────────────
 
 /** default.tsx is used two ways - direct content (gets params) or here, as
  *  DefaultBoundary's fallback (no props, see render() below) - so params
