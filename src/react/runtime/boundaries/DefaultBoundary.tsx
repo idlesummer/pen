@@ -1,7 +1,14 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { ParamTable } from '../params'
 import { Component } from 'react'
+import { Text } from 'ink'
 import { DefaultSignal } from './notFound'
+
+/** Built-in fallback rendered when an app defines no root `default.tsx` -
+ *  guarantees every URL resolves to something instead of a blank screen. */
+export function DefaultFallback() {
+  return <Text>404 - Not Found</Text>
+}
 
 /** default.tsx is used two ways - direct content (gets params) or here, as
  *  DefaultBoundary's fallback (no props, see render() below) - so params

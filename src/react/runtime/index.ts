@@ -1,5 +1,5 @@
 export { App } from './App'
-export { DefaultFallback } from './boundaries/DefaultFallback'
+export { DefaultFallback } from './boundaries/DefaultBoundary'
 export { renderNode } from './renderer/render'
 export type { ComponentMap, PageComponent, LayoutComponent, LoadingComponent } from './renderer/component-map'
 export type { ParamTable } from './params'
