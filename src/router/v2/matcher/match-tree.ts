@@ -117,9 +117,9 @@ function enqueueSlots(node: MatchNode, queue: PendingSlot[]): void {
  *  match is fully independent, so processing order never affects the
  *  result, only the order results get attached in. */
 export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
-  const result = matchOne(root, url, seedParams)
+  const matchTree = matchOne(root, url, seedParams)
   const queue: PendingSlot[] = []
-  enqueueSlots(result, queue)
+  enqueueSlots(matchTree, queue)
 
   while (queue.length) {
     const job = queue.shift()!
@@ -127,5 +127,5 @@ export function matchPosition(root: PositionNode, url: string[], seedParams: Par
     job.into[job.name] = node
     enqueueSlots(node, queue)
   }
-  return result
+  return matchTree
 }
