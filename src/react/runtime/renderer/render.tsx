@@ -23,23 +23,23 @@ function getSlotProps(slotElements: SlotElements, slots?: Frame['slots']): SlotE
 }
 
 /** Wraps content with a frame's boundaries, layout, and slots. */
-function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, componentMap: ComponentMap): ReactNode {
+function renderFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
   if (_default) {
-    const Fallback = resolveComponent('default', _default, componentMap)
+    const Fallback = resolveComponent('default', _default, components)
     content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
   }
   if (error) {
-    const Fallback = resolveComponent('error', error, componentMap)
+    const Fallback = resolveComponent('error', error, components)
     content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
   }
   if (loading) {
-    const Loading = resolveComponent('loading', loading, componentMap)
+    const Loading = resolveComponent('loading', loading, components)
     content = <LoadingBoundary fallback={Loading}>{content}</LoadingBoundary>
   }
   if (layout) {
-    const Layout = resolveComponent('layout', layout, componentMap)
+    const Layout = resolveComponent('layout', layout, components)
     const slotProps = getSlotProps(slotElements, slots)
     const paramTable = sliceParams(params, paramDepth)
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
@@ -55,7 +55,7 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
 
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
     const frame = endpoint.frames[i]!
-    element = wrapFrame(frame, element, params, slotElements, components)
+    element = renderFrame(frame, element, params, slotElements, components)
   }
   return element
 }
@@ -63,10 +63,10 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
 /** Turns a router `Match` into a React element tree: renders every slot
  *  match() already resolved first - each fully independent, no further slots
  *  possible - then folds the main chain around them. */
-export function renderMatch(mainMatch: Match, componentMap: ComponentMap): ReactNode {
+export function renderMatch(mainMatch: Match, components: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotElements[slotName] = renderChain(slotMatch, {}, componentMap)
+    slotElements[slotName] = renderChain(slotMatch, {}, components)
 
-  return renderChain(mainMatch, slotElements, componentMap)
+  return renderChain(mainMatch, slotElements, components)
 }
