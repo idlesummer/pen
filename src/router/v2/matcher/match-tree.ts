@@ -90,8 +90,8 @@ function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): Ma
 
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
-export function matchPosition(root: PositionNode, url: string[]): MatchNode {
-  const matchTree = matchOne(root, url, {})
+export function matchPosition(positionTree: PositionNode, url: string[]): MatchNode {
+  const matchTree = matchOne(positionTree, url, {})
 
   for (const frame of matchTree.endpoint.frames) {
     if (!frame.slots) continue
