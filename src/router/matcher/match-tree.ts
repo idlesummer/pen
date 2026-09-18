@@ -3,10 +3,10 @@ import { traverse } from '@/lib/traverse'
 
 export type Params = ReadonlyArray<readonly [name: string, value: string | string[]]>
 
-export type MatchNode = {
-  endpoint: Endpoint                 // the winning endpoint - page or fallback, same type either way
-  params: Params                     // every param bound reaching this position, in bind order
-  slots?: Record<string, MatchNode>  // one recursive match per slot this endpoint's frames declare
+export type Match = {
+  endpoint: Endpoint              // the winning endpoint - page or fallback, same type either way
+  params: Params                  // every param bound reaching this position, in bind order
+  slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
 
 /** A competing search attempt. No parent pointer is needed because
@@ -50,7 +50,7 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 /** Depth-first, static-preferring search over one position tree.
  *  Returns the first accepting endpoint, or the most static terminal
  *  position's fallback if no endpoint accepts. */
-function createMatch(position: PositionNode, url: string[], seedParams: Params): MatchNode {
+function createMatch(position: PositionNode, url: string[], seedParams: Params): Match {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -82,7 +82,7 @@ function createMatch(position: PositionNode, url: string[], seedParams: Params):
 
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
-export function match(positionTree: PositionNode, url: string[]): MatchNode {
+export function match(positionTree: PositionNode, url: string[]): Match {
   const matchTree = createMatch(positionTree, url, [])
 
   for (const frame of matchTree.endpoint.frames) {

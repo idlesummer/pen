@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Endpoint, Frame, MatchNode, Params } from '@/router'
+import type { Endpoint, Frame, Match, Params } from '@/router'
 import type { ParamTable } from '../module-components/ParamTable'
 import type { ComponentMap } from './component-map'
 import { resolveComponent, resolveContent } from './component-map'
@@ -59,10 +59,10 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotEleme
   return element
 }
 
-/** Turns a router `MatchNode` into a React element tree: renders every slot
+/** Turns a router `Match` into a React element tree: renders every slot
  *  match() already resolved first - each fully independent, no further slots
  *  possible - then folds the main chain around them. */
-export function renderMatch(match: MatchNode, componentMap: ComponentMap): ReactNode {
+export function renderMatch(match: Match, componentMap: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
   for (const name in match.slots) {
     const { endpoint, params } = match.slots[name]!
