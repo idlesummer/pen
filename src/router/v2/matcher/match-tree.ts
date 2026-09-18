@@ -25,7 +25,7 @@ type MatchCandidate = {
 /** Which children to try next, in preference order: exact literal match,
  *  then a bound param, then everything remaining. None are offered once the
  *  URL runs out - a position with no segment left to try has no children. */
-function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
+function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
   const { position, params } = candidate
   const segment = url[position.urlDepth]
   if (segment === undefined)
@@ -58,14 +58,14 @@ function expandMatchCandidates(candidate: MatchCandidate, url: string[]): MatchC
  *  nothing deeper down a different branch could be more specific. If nothing
  *  ever accepts, falls back to the most static-preferring dead end instead -
  *  the same guarantee `PositionNode.fallback` exists to make. */
-function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
+function createMatch(root: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
   const rootCandidate: MatchCandidate = { position: root, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
 
   traverse(rootCandidate, {
     expand: (candidate) => {
-      const children = expandMatchCandidates(candidate, url)
+      const children = expandChildren(candidate, url)
       if (!children.length)
         candidate.isTerminal = true
       return children
@@ -91,13 +91,13 @@ function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): Ma
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
 export function matchPosition(positionTree: PositionNode, url: string[]): MatchNode {
-  const matchTree = matchOne(positionTree, url, {})
+  const matchTree = createMatch(positionTree, url, {})
 
   for (const frame of matchTree.endpoint.frames) {
     if (!frame.slots) continue
     matchTree.slots ??= {}
     for (const [name, position] of Object.entries(frame.slots))
-      matchTree.slots[name] = matchOne(position, url, matchTree.params)
+      matchTree.slots[name] = createMatch(position, url, matchTree.params)
   }
   return matchTree
 }
