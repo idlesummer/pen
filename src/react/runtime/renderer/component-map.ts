@@ -1,6 +1,6 @@
-import type { ErrorComponent } from '../boundaries/ErrorBoundary'
-import type { DefaultComponent } from '../boundaries/DefaultBoundary'
-import type { LoadingComponent } from '../boundaries/LoadingBoundary'
+import type { ErrorComponent } from '../module-components/ErrorBoundary'
+import type { DefaultComponent } from '../module-components/DefaultBoundary'
+import type { LoadingComponent } from '../module-components/LoadingBoundary'
 import type { PageComponent } from '../module-components/page'
 import type { LayoutComponent } from '../module-components/layout'
 
