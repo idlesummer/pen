@@ -5,8 +5,8 @@ import { createMatcher } from './matcher'
 
 export type Router = {
   matcher: Matcher
-  diagnostics: CompileDiagnostic[]
   modulePaths: string[] // for the generated component map
+  diagnostics: CompileDiagnostic[]
 }
 
 /** Creates a router from route file paths: a matcher, diagnostics, and every
@@ -14,5 +14,5 @@ export type Router = {
 export function createRouter(filePaths: string[]): Router {
   const { positionTree, modulePaths, diagnostics } = compile(filePaths)
   const matcher = createMatcher(positionTree)
-  return { matcher, diagnostics, modulePaths }
+  return { matcher, modulePaths, diagnostics }
 }
