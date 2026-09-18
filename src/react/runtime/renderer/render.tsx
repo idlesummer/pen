@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Endpoint, Frame, Match, Params } from '@/router'
+import type { Frame, Match, Params } from '@/router'
 import type { ParamTable } from './module-components/ParamTable'
 import type { ComponentMap } from './component-map'
 import { resolveComponent, resolveContent } from './component-map'
@@ -48,7 +48,8 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotElements, components: ComponentMap): ReactNode {
+function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
+  const { endpoint, params } = match
   const Content = resolveContent(endpoint.content, components)
   let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
 
@@ -64,11 +65,8 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotEleme
  *  possible - then folds the main chain around them. */
 export function renderMatch(mainMatch: Match, componentMap: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
+  for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
+    slotElements[slotName] = renderChain(slotMatch, {}, componentMap)
 
-  for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {})) {
-    const { endpoint, params } = slotMatch
-    slotElements[slotName] = renderChain(endpoint, params, {}, componentMap)
-  }
-  const { endpoint, params } = mainMatch
-  return renderChain(endpoint, params, slotElements, componentMap)
+  return renderChain(mainMatch, slotElements, componentMap)
 }
