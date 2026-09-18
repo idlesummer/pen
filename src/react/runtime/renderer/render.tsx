@@ -53,7 +53,6 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: Record<st
 
   for (let i = endpoint.frames.length-1; i >= 0; i--)
     element = wrapFrame(endpoint.frames[i]!, element, params, slotElements, componentMap)
-
   return element
 }
 
