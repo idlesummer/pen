@@ -13,11 +13,13 @@ export type ComponentMap = {
   error: Record<string, ErrorComponent>
   default: Record<string, DefaultComponent>
 }
+type ComponentRole = keyof ComponentMap
+type ComponentFor<Role extends ComponentRole> = ComponentMap[Role][string]
 
 /** Looks up a component by role and path - role determines the return type,
  *  no assertion needed. */
-export function resolveComponent<Role extends keyof ComponentMap>(role: Role, path: string, componentMap: ComponentMap): ComponentMap[Role][string] {
-  const Component = componentMap[role][path] as ComponentMap[Role][string] | undefined
+export function resolveComponent<Role extends ComponentRole>(role: Role, path: string, components: ComponentMap): ComponentFor<Role> {
+  const Component = components[role][path] as ComponentFor<Role> | undefined
   if (!Component)
     throw new Error(`No ${role} component registered for route module "${path}". Regenerate the route builder output.`)
   return Component
