@@ -7,13 +7,15 @@ import { ErrorBoundary } from '../module-components/ErrorBoundary'
 import { DefaultBoundary } from '../module-components/DefaultBoundary'
 import { LoadingBoundary } from '../module-components/LoadingBoundary'
 
+type SlotElements = Record<string, ReactNode>
+
 /** Returns params up to the given depth as an object. */
 function sliceParams(params: Params, depth: number): ParamTable {
   return Object.fromEntries(params.slice(0, depth))
 }
 
 /** Wraps content with a frame's boundaries, layout, and slots. */
-function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
+function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, componentMap: ComponentMap): ReactNode {
   const { layout, loading, error, default: defaultPath, slots, paramDepth } = frame
 
   if (defaultPath) {
@@ -31,7 +33,6 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   if (layout) {
     const Layout = resolveComponent('layout', layout, componentMap)
     const slotProps: Record<string, ReactNode> = {}
-
     for (const name in slots) // doesn't run if slots is undefined
       slotProps[name] = slotElements[name]
 
@@ -46,7 +47,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
  *  itself - a slot's own frames can never declare a further slot, so
  *  `renderChain` called on a slot's endpoint passes an empty `slotElements`
  *  and that's the end of it. */
-function renderChain(endpoint: Endpoint, params: Params, slotElements: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
+function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotElements, componentMap: ComponentMap): ReactNode {
   const Content = resolveContent(endpoint.content, componentMap)
   let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
 
