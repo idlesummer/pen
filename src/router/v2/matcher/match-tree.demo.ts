@@ -1,6 +1,6 @@
 import { createRouteTree } from '../compiler/route-tree'
 import { createPositionTree } from '../compiler/position-tree'
-import { matchPosition } from './match-tree'
+import { match } from './match-tree'
 import { indent } from '@/lib/json-indent'
 
 console.log(`
@@ -33,11 +33,11 @@ const [root] = createPositionTree(routeTree)
 
 function run(label: string, url: string[]) {
   console.log(`\n=== ${label}: /${url.join('/')} ===`)
-  const match = matchPosition(root, url)
-  console.log('content:', match.endpoint.content)
-  console.log('params:', JSON.stringify(match.params))
-  if (match.slots?.modal)
-    console.log('modal slot content:', match.slots.modal.endpoint.content, 'params:', JSON.stringify(match.slots.modal.params))
+  const result = match(root, url)
+  console.log('content:', result.endpoint.content)
+  console.log('params:', JSON.stringify(result.params))
+  if (result.slots?.modal)
+    console.log('modal slot content:', result.slots.modal.endpoint.content, 'params:', JSON.stringify(result.slots.modal.params))
 }
 
 run('root', [])
@@ -51,7 +51,7 @@ run('nothing matches anywhere, falls back to root', ['totally', 'unknown'])
 // fresh. This is the same fixture/claim verified structurally in
 // position-tree.demo.ts, now checked end to end through actual matching.
 console.log('\n=== slot param inheritance: /blog/42 ===')
-const blogMatch = matchPosition(root, ['blog', '42'])
+const blogMatch = match(root, ['blog', '42'])
 console.log('page params:', JSON.stringify(blogMatch.params))
 console.log('related slot params:', JSON.stringify(blogMatch.slots?.related?.params))
 console.log('related slot content:', blogMatch.slots?.related?.endpoint.content)
