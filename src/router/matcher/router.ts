@@ -1,4 +1,4 @@
-import type { CompileDiagnostic } from '@/router/compile-diagnostic'
+import type { CompileDiagnostic } from '../compiler'
 import type { Matcher } from './matcher'
 import { compile } from '../compiler'
 import { createMatcher } from './matcher'
