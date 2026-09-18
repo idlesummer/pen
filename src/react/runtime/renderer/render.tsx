@@ -69,10 +69,9 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotEleme
 export function renderNode(node: MatchNode, componentMap: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
   for (const frame of node.endpoint.frames) {
-    if (!frame.slots) continue
-    for (const name in frame.slots) {
-      const slotNode = node.slots![name]!
-      slotElements[name] = renderChain(slotNode.endpoint, slotNode.params, {}, componentMap)
+    for (const name in frame.slots ?? []) {
+      const { endpoint, params } = node.slots![name]!
+      slotElements[name] = renderChain(endpoint, params, {}, componentMap)
     }
   }
   return renderChain(node.endpoint, node.params, slotElements, componentMap)
