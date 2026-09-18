@@ -7,11 +7,13 @@ import { resolveComponent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
-/** Slices a param table down to the first `depth` bindings. Relies on
- *  ParamTable's own guarantee that its keys are in bind order, so "the
- *  first `depth` entries" is exactly "params as of this depth". */
-function paramsUpTo(params: ParamTable, depth: number): ParamTable {
-  return Object.fromEntries(Object.entries(params).slice(0, depth))
+/** Slices a param table down to the first `depth` bindings - ParamTable is
+ *  already in bind order, so that's just the first `depth` entries - and
+ *  builds the keyed object a component actually reads `params.id` off of.
+ *  The only place that object gets built: everywhere upstream just appends
+ *  and slices entries, never needing a key lookup. */
+function paramsUpTo(params: ParamTable, depth: number): Record<string, string | string[]> {
+  return Object.fromEntries(params.slice(0, depth))
 }
 
 /** Wraps already-resolved `content` in whichever of a frame's default/error/
