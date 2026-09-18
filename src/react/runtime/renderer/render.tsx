@@ -33,7 +33,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   if (layout) {
     const Layout = resolveComponent('layout', layout, componentMap)
     const slotProps: Record<string, ReactNode> = {}
-    for (const name in slots) // doesn't run if slots is undefined
+    for (const name in slots)
       slotProps[name] = slotElements[name]
 
     const paramTable = sliceParams(params, paramDepth)
