@@ -56,7 +56,7 @@ function renderChain(endpoint: Endpoint, params: ParamTable, slotElements: Recor
   const Content = resolveComponent(endpoint.content, componentMap)
   let element: ReactNode = <Content params={paramsUpTo(params, endpoint.contentDepth)} />
 
-  for (let i = endpoint.frames.length - 1; i >= 0; i--)
+  for (let i = endpoint.frames.length-1; i >= 0; i--)
     element = wrapFrame(endpoint.frames[i]!, element, params, slotElements, componentMap)
 
   return element
