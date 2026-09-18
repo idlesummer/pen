@@ -9,5 +9,5 @@ export type Matcher =
 /** Given a compiled position tree, returns a matcher for that tree - the
  *  runtime half, no filesystem/compile-time dependency at all. */
 export function createMatcher(positionTree: PositionNode): Matcher {
-  return url => match(positionTree, normalizeUrl(url))
+  return (url) => match(positionTree, normalizeUrl(url))
 }
