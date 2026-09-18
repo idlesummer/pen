@@ -2,7 +2,19 @@ import type { ComponentType, ReactNode } from 'react'
 import type { ParamTable } from '../params'
 import { Component } from 'react'
 import { Text } from 'ink'
-import { DefaultSignal } from './notFound'
+
+/** Thrown by notFound() and caught only by DefaultBoundary - ErrorBoundary
+ *  re-throws it unrecognized so it keeps climbing past any error.tsx that
+ *  doesn't also own a default.tsx, until it reaches one that does. */
+export class DefaultSignal extends Error {}
+
+/** Call from anywhere in a page's render to show that position's default
+ *  module instead of the page. Whether the underlying data exists is only
+ *  knowable once this code actually runs, unlike route matching itself -
+ *  so unlike a plain unmatched URL, this genuinely needs a runtime catch. */
+export function notFound(): never {
+  throw new DefaultSignal()
+}
 
 /** Built-in fallback rendered when an app defines no root `default.tsx` -
  *  guarantees every URL resolves to something instead of a blank screen. */

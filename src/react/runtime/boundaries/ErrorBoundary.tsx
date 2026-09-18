@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import { Component } from 'react'
-import { DefaultSignal } from './notFound'
+import { DefaultSignal } from './DefaultBoundary'
 
 export type ErrorFallbackProps = {
   error: Error
