@@ -33,7 +33,7 @@ export function resolveComponent<Role extends ComponentRole>(role: Role, path: s
   return Component
 }
 
- /**
+/**
   * Resolves the component for endpoint content, which may be either a page
   * or a default module.
   *
