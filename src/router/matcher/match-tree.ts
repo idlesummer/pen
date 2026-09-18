@@ -1,7 +1,7 @@
 import type { Endpoint, PositionNode } from '../compiler/position-node'
 import { traverse } from '@/lib/traverse'
 
-export type ParamTable = Readonly<Record<string, string | string[]>>
+export type ParamTable = ReadonlyArray<readonly [name: string, value: string | string[]]>
 export type MatchNode = {
   endpoint: Endpoint                 // the winning endpoint - page or fallback, same type either way
   params: ParamTable                 // every param bound reaching this position, in bind order
@@ -34,13 +34,13 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 
   if (dynamic) {
     const paramName = dynamic.param!
-    const newParams = { ...params, [paramName]: segment }
+    const newParams: ParamTable = [...params, [paramName, segment]]
     candidates.push({ position: dynamic, params: newParams })
   }
   if (catchall) {
     const paramName = catchall.param!
     const segments = url.slice(position.urlDepth)
-    const newParams = { ...params, [paramName]: segments }
+    const newParams: ParamTable = [...params, [paramName, segments]]
     candidates.push({ position: catchall, params: newParams, isCatchall: true })
   }
   return candidates
@@ -82,7 +82,7 @@ function createMatch(position: PositionNode, url: string[], seedParams: ParamTab
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
 export function match(positionTree: PositionNode, url: string[]): MatchNode {
-  const matchTree = createMatch(positionTree, url, {})
+  const matchTree = createMatch(positionTree, url, [])
 
   for (const frame of matchTree.endpoint.frames) {
     if (!frame.slots) continue
