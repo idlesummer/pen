@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { PositionConflicts } from './position-node'
-import type { CompileDiagnostic } from '@/router/compile-diagnostic'
+import type { CompileDiagnostic } from './compile-diagnostic'
 import { forEach, getRouteSource } from './route-tree'
 
 /** The file a page-conflict diagnostic should name. A folder can own several
