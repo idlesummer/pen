@@ -12,7 +12,7 @@ export class DefaultSignal extends Error {}
  *  module instead of the page. Whether the underlying data exists is only
  *  knowable once this code actually runs, unlike route matching itself -
  *  so unlike a plain unmatched URL, this genuinely needs a runtime catch. */
-export function notFound(): never {
+export function notFound() {
   throw new DefaultSignal()
 }
 
