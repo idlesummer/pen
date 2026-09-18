@@ -1,29 +1,22 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { ErrorFallbackProps } from '../boundaries/ErrorBoundary'
 
-/** The keyed shape a page/layout component reads params.id off of - built
- *  once, wherever the router's ordered Params gets handed to a component as
- *  a prop. */
+/** The keyed params shape a component reads (params.id), built from the
+ *  router's ordered Params. */
 export type ParamTable = Record<string, string | string[]>
 
 export type PageComponent = ComponentType<{ params: ParamTable }>
-/** The index signature has to include ParamTable, not just ReactNode - a
- *  plain `& Record<string, ReactNode>` would force `params` itself to also
- *  satisfy the index signature, and ParamTable isn't a ReactNode. Slot props
- *  are still ReactNode in practice; this just widens what TS will accept. */
+/** Index signature must include ParamTable, not just ReactNode, or `params`
+ *  itself fails to satisfy its own index signature. */
 export type LayoutComponent = ComponentType<{ params: ParamTable } & Record<string, ReactNode | ParamTable>>
 export type LoadingComponent = ComponentType<Record<string, never>>
 export type ErrorComponent = ComponentType<ErrorFallbackProps>
-/** default.tsx plays two roles: rendered directly as content (gets params,
- *  like a page) when nothing more specific matched, or invoked by
- *  DefaultBoundary with no props at all when notFound() fires deeper in the
- *  tree - params has to be optional to be valid in both. */
+/** default.tsx is used two ways - direct content (gets params) or
+ *  DefaultBoundary's fallback (no props) - so params must be optional. */
 export type DefaultComponent = ComponentType<{ params?: ParamTable }>
 
-/** One bucket per route module role - the thing that actually varies
- *  between modules is which of these five roles a file plays, not the
- *  individual file, so every module in a bucket genuinely shares that
- *  bucket's real prop shape. */
+/** One bucket per route module role; every module in a bucket shares that
+ *  role's real prop shape. */
 export type ComponentMap = {
   page: Record<string, PageComponent>
   layout: Record<string, LayoutComponent>
@@ -32,9 +25,8 @@ export type ComponentMap = {
   default: Record<string, DefaultComponent>
 }
 
-/** Looks up a route module's component by role and path. The role fixes the
- *  return type - no assertion needed, since each bucket only ever holds
- *  components with that bucket's own real shape. */
+/** Looks up a component by role and path - role determines the return type,
+ *  no assertion needed. */
 export function resolveComponent<Role extends keyof ComponentMap>(role: Role, path: string, componentMap: ComponentMap): ComponentMap[Role][string] {
   const Component = componentMap[role][path] as ComponentMap[Role][string] | undefined
   if (!Component)
@@ -42,9 +34,8 @@ export function resolveComponent<Role extends keyof ComponentMap>(role: Role, pa
   return Component
 }
 
-/** endpoint.content can be either a real page or the fallback default -
- *  which one won isn't known until match time, so this checks both buckets
- *  instead of the caller having to know which role won. */
+/** endpoint.content can be a page or the fallback default, decided at match
+ *  time, so this checks both buckets. */
 export function resolveContent(path: string, componentMap: ComponentMap): PageComponent | DefaultComponent {
   const Component = componentMap.page[path] ?? componentMap.default[path]
   if (!Component)
