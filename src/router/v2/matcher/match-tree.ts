@@ -88,41 +88,22 @@ function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): Ma
   return { endpoint, params }
 }
 
-/** One slot still waiting to be matched, and where to attach the result once
- *  it is. */
-type PendingSlot = {
-  into: Record<string, MatchNode>
-  name: string
-  position: PositionNode
-  params: ParamTable
-}
-
-/** Collects every slot a node's own frames declare, to be matched
- *  independently against the same full URL - parallel routes, not a
- *  remaining suffix or a nested match. Seeded with the params already bound
- *  on this node, since paramDepth/contentDepth are continuous through a
- *  slot boundary. */
-function collectSlots(node: MatchNode, jobs: PendingSlot[]): void {
-  for (const frame of node.endpoint.frames) {
-    if (!frame.slots) continue
-    node.slots ??= {}
-    for (const [name, position] of Object.entries(frame.slots))
-      jobs.push({ into: node.slots, name, position, params: node.params })
-  }
-}
-
 /** Resolves a full match tree for one URL: matchOne's winning result at
- *  `root`, plus every slot its frames declare. One pass is enough - a slot
- *  folder can never declare another slot (route-segment.ts's isBoundary
- *  treats `slot` like `root`, a place inheritance stops), so a slot's own
- *  match never has further slots to collect. */
+ *  `root`, plus one independent match per slot its frames declare - parallel
+ *  routes, not a remaining suffix or a nested match, so each is matched
+ *  against the same full URL. Seeded with the params already bound on
+ *  `matchTree`, since paramDepth/contentDepth are continuous through a slot
+ *  boundary. A slot folder can never declare another slot (route-segment.ts's
+ *  isBoundary treats `slot` like `root`, a place inheritance stops), so this
+ *  single pass over `matchTree`'s own frames is guaranteed to find them all. */
 export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
   const matchTree = matchOne(root, url, seedParams)
-  const jobs: PendingSlot[] = []
-  collectSlots(matchTree, jobs)
 
-  for (const job of jobs)
-    job.into[job.name] = matchOne(job.position, url, job.params)
-
+  for (const frame of matchTree.endpoint.frames) {
+    if (!frame.slots) continue
+    matchTree.slots ??= {}
+    for (const [name, position] of Object.entries(frame.slots))
+      matchTree.slots[name] = matchOne(position, url, matchTree.params)
+  }
   return matchTree
 }
