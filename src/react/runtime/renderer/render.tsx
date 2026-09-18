@@ -7,20 +7,12 @@ import { resolveComponent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
-/** Slices a param table down to the first `depth` bindings - ParamTable is
- *  already in bind order, so that's just the first `depth` entries - and
- *  builds the keyed object a component actually reads `params.id` off of.
- *  The only place that object gets built: everywhere upstream just appends
- *  and slices entries, never needing a key lookup. */
-function paramsUpTo(params: ParamTable, depth: number): Record<string, string | string[]> {
+/** Returns params up to the given depth as an object. */
+function sliceParams(params: ParamTable, depth: number): Record<string, string | string[]> {
   return Object.fromEntries(params.slice(0, depth))
 }
 
-/** Wraps already-resolved `content` in whichever of a frame's default/error/
- *  loading/layout modules are present, injecting this frame's own declared
- *  slots - already rendered, looked up by name - into its layout. The one
- *  place this composition happens, shared by the main chain and every slot's
- *  own chain alike. */
+/** Wraps content with a frame's boundaries, layout, and slots. */
 function wrapFrame(frame: Frame, content: ReactNode, params: ParamTable, slotElements: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
   const { layout, loading, error, default: defaultPath, slots, paramDepth } = frame
 
@@ -38,11 +30,14 @@ function wrapFrame(frame: Frame, content: ReactNode, params: ParamTable, slotEle
   }
   if (layout) {
     const Layout = resolveComponent(layout, componentMap)
-    const namedSlots: Record<string, ReactNode> = {}
-    if (slots)
-      for (const name of Object.keys(slots))
-        namedSlots[name] = slotElements[name]
-    content = <Layout params={paramsUpTo(params, paramDepth)} {...namedSlots}>{content}</Layout>
+    const slotProps: Record<string, ReactNode> = {}
+
+    // doesn't run if slots is undefined
+    for (const name in slots)
+      slotProps[name] = slotElements[name]
+
+    const paramTable = sliceParams(params, paramDepth)
+    content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
   return content
 }
@@ -54,7 +49,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: ParamTable, slotEle
  *  and that's the end of it. */
 function renderChain(endpoint: Endpoint, params: ParamTable, slotElements: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
   const Content = resolveComponent(endpoint.content, componentMap)
-  let element: ReactNode = <Content params={paramsUpTo(params, endpoint.contentDepth)} />
+  let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
 
   for (let i = endpoint.frames.length-1; i >= 0; i--)
     element = wrapFrame(endpoint.frames[i]!, element, params, slotElements, componentMap)
