@@ -51,13 +51,9 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
   return candidates
 }
 
-/** Depth-first, static-preferring search over one position tree for one URL -
- *  no slots, just the winning endpoint and params at `root` itself. Accepts
- *  the first position reached with nothing left to consume (or a catchall,
- *  which always accepts) that also owns a page - stopping there, since
- *  nothing deeper down a different branch could be more specific. If nothing
- *  ever accepts, falls back to the most static-preferring dead end instead -
- *  the same guarantee `PositionNode.fallback` exists to make. */
+/** Depth-first, static-preferring search over one position tree.
+ *  Returns the first accepting endpoint, or the most static terminal
+ *  position's fallback if no endpoint accepts. */
 function createMatch(position: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
