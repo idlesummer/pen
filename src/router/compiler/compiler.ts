@@ -4,7 +4,7 @@ import { createRouteTree } from './route-tree'
 import { createPositionTree } from './position-tree'
 import { validateConflicts, validateRouteTree } from './validate'
 
-export type Compiled = {
+export type CompiledRoutes = {
   /** The compiled artifact - the only thing that outlives this call. */
   positionTree: PositionNode
   /** Every module the tree can render, for the generated component map. */
@@ -20,7 +20,7 @@ export type Compiled = {
  *  is all anything downstream needs. `RouteNode` is reachable from neither
  *  the position tree nor this return type, so nothing can consult the parse
  *  later even by accident. */
-export function compile(filePaths: string[]): Compiled {
+export function compile(filePaths: string[]): CompiledRoutes {
   const routeTree = createRouteTree(filePaths)
   const [positionTree, conflicts, modulePaths] = createPositionTree(routeTree)
   const diagnostics = validateRouteTree(routeTree)
