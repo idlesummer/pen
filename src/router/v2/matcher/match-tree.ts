@@ -89,7 +89,7 @@ function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): Ma
 }
 
 /** One slot still waiting to be matched, and where to attach the result once
- *  it is - the explicit worklist that replaces matchPosition calling itself. */
+ *  it is. */
 type PendingSlot = {
   into: Record<string, MatchNode>
   name: string
@@ -97,35 +97,32 @@ type PendingSlot = {
   params: ParamTable
 }
 
-/** Queues every slot a node's own frames declare, to be matched
- *  independently against the same full URL later - parallel routes, not a
+/** Collects every slot a node's own frames declare, to be matched
+ *  independently against the same full URL - parallel routes, not a
  *  remaining suffix or a nested match. Seeded with the params already bound
  *  on this node, since paramDepth/contentDepth are continuous through a
  *  slot boundary. */
-function enqueueSlots(node: MatchNode, queue: PendingSlot[]): void {
+function collectSlots(node: MatchNode, jobs: PendingSlot[]): void {
   for (const frame of node.endpoint.frames) {
     if (!frame.slots) continue
     node.slots ??= {}
     for (const [name, position] of Object.entries(frame.slots))
-      queue.push({ into: node.slots, name, position, params: node.params })
+      jobs.push({ into: node.slots, name, position, params: node.params })
   }
 }
 
 /** Resolves a full match tree for one URL: matchOne's winning result at
- *  `root`, plus every slot its frames (and their frames, and so on) declare.
- *  Slots are drained from an explicit queue instead of recursing - each
- *  match is fully independent, so processing order never affects the
- *  result, only the order results get attached in. */
+ *  `root`, plus every slot its frames declare. One pass is enough - a slot
+ *  folder can never declare another slot (route-segment.ts's isBoundary
+ *  treats `slot` like `root`, a place inheritance stops), so a slot's own
+ *  match never has further slots to collect. */
 export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
   const matchTree = matchOne(root, url, seedParams)
-  const queue: PendingSlot[] = []
-  enqueueSlots(matchTree, queue)
+  const jobs: PendingSlot[] = []
+  collectSlots(matchTree, jobs)
 
-  while (queue.length) {
-    const job = queue.shift()!
-    const node = matchOne(job.position, url, job.params)
-    job.into[job.name] = node
-    enqueueSlots(node, queue)
-  }
+  for (const job of jobs)
+    job.into[job.name] = matchOne(job.position, url, job.params)
+
   return matchTree
 }
