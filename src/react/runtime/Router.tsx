@@ -1,7 +1,7 @@
 import type { Matcher } from '@/router/matcher'
 import type { ComponentMap } from './renderer/component-map'
 import { usePathname } from './navigation/hooks/use-pathname'
-import { renderNode } from './renderer/render'
+import { renderMatch } from './renderer/render'
 
 type RouterProps = {
   matcher: Matcher
@@ -14,5 +14,5 @@ type RouterProps = {
 export function Router({ matcher, componentMap }: RouterProps) {
   const pathname = usePathname()
   const renderTree = matcher(pathname)
-  return renderNode(renderTree, componentMap)
+  return renderMatch(renderTree, componentMap)
 }

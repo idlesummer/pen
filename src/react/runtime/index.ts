@@ -1,5 +1,5 @@
 export { App } from './App'
-export { renderNode } from './renderer/render'
+export { renderMatch } from './renderer/render'
 export type { ComponentMap } from './renderer/component-map'
 export type { ParamTable } from './module-components/ParamTable'
 export type { PageComponent } from './module-components/PageComponent'
