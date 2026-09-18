@@ -82,7 +82,7 @@ function createMatch(position: PositionNode, url: string[], seedParams: ParamTab
 
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
-export function matchPosition(positionTree: PositionNode, url: string[]): MatchNode {
+export function match(positionTree: PositionNode, url: string[]): MatchNode {
   const matchTree = createMatch(positionTree, url, {})
 
   for (const frame of matchTree.endpoint.frames) {
