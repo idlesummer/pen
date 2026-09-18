@@ -3,9 +3,9 @@ import type { Endpoint, Frame, MatchNode, Params } from '@/router'
 import type { ParamTable } from '../params'
 import type { ComponentMap } from './component-map'
 import { resolveComponent, resolveContent } from './component-map'
-import { ErrorBoundary } from '../boundaries/ErrorBoundary'
-import { DefaultBoundary } from '../boundaries/DefaultBoundary'
-import { LoadingBoundary } from '../boundaries/LoadingBoundary'
+import { ErrorBoundary } from '../module-components/ErrorBoundary'
+import { DefaultBoundary } from '../module-components/DefaultBoundary'
+import { LoadingBoundary } from '../module-components/LoadingBoundary'
 
 /** Returns params up to the given depth as an object. */
 function sliceParams(params: Params, depth: number): ParamTable {
