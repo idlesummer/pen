@@ -14,12 +14,20 @@ function sliceParams(params: Params, depth: number): ParamTable {
   return Object.fromEntries(params.slice(0, depth))
 }
 
+/** Returns the rendered elements for the slots declared by a frame. */
+function getSlotProps(slotElements: SlotElements, slots?: Frame['slots']): SlotElements {
+  const slotProps: SlotElements = {}
+  for (const name in slots)
+    slotProps[name] = slotElements[name]
+  return slotProps
+}
+
 /** Wraps content with a frame's boundaries, layout, and slots. */
 function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, componentMap: ComponentMap): ReactNode {
-  const { layout, loading, error, default: defaultPath, slots, paramDepth } = frame
+  const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
-  if (defaultPath) {
-    const Fallback = resolveComponent('default', defaultPath, componentMap)
+  if (_default) {
+    const Fallback = resolveComponent('default', _default, componentMap)
     content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
   }
   if (error) {
@@ -32,10 +40,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   }
   if (layout) {
     const Layout = resolveComponent('layout', layout, componentMap)
-    const slotProps: Record<string, ReactNode> = {}
-    for (const name in slots)
-      slotProps[name] = slotElements[name]
-
+    const slotProps = getSlotProps(slotElements, slots)
     const paramTable = sliceParams(params, paramDepth)
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
