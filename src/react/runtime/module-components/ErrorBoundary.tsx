@@ -6,6 +6,7 @@ export type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
+
 export type ErrorComponent = ComponentType<ErrorFallbackProps>
 
 type Props = {
@@ -30,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
   reset = () => this.setState({ error: null })
 
   render() {
-    const { error } = this.state
+    const error = this.state.error
     const { fallback: Fallback, children } = this.props
     if (!error) return children
     return <Fallback error={error} reset={this.reset} />
