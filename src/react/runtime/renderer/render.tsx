@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import type { Endpoint, Frame, MatchNode, ParamTable, Params } from '@/router'
-import type { ComponentMap } from './component-map'
+import type { Endpoint, Frame, MatchNode, Params } from '@/router'
+import type { ComponentMap, ParamTable } from './component-map'
 import type { ErrorFallbackProps } from '../boundaries/ErrorBoundary'
 import { Suspense } from 'react'
 import { resolveComponent } from './component-map'

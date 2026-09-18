@@ -3,9 +3,6 @@ import { traverse } from '@/lib/traverse'
 
 export type Params = ReadonlyArray<readonly [name: string, value: string | string[]]>
 
-/** The keyed shape a page/layout component actually reads params.id off of -
- *  built once, only where Params gets handed to a component as a prop. */
-export type ParamTable = Record<string, string | string[]>
 export type MatchNode = {
   endpoint: Endpoint                 // the winning endpoint - page or fallback, same type either way
   params: Params                     // every param bound reaching this position, in bind order
