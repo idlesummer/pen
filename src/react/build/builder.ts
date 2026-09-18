@@ -6,6 +6,10 @@ import { compile, getRouteModulePaths } from '@/router'
 import { generateComponentMap } from './generate/component-map'
 import { generateEntry } from './generate/entry'
 
+/** @deprecated Built against the old router's compile() - a
+ *  [diagnostics, routeTree] tuple, with modulePaths fetched separately via
+ *  getRouteModulePaths(routeTree). The new compile() returns one object
+ *  { positionTree, modulePaths, diagnostics } instead - needs a rewrite. */
 /** Discovers route modules under `appDir` and emits the generated
  *  `component-map` and `entry` files into `outDir`. */
 export function build(appDir: string, outDir: string): CompileDiagnostic[] {
