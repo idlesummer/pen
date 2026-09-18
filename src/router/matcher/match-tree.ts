@@ -1,10 +1,14 @@
 import type { Endpoint, PositionNode } from '../compiler/position-node'
 import { traverse } from '@/lib/traverse'
 
-export type ParamTable = ReadonlyArray<readonly [name: string, value: string | string[]]>
+export type Params = ReadonlyArray<readonly [name: string, value: string | string[]]>
+
+/** The keyed shape a page/layout component actually reads params.id off of -
+ *  built once, only where Params gets handed to a component as a prop. */
+export type ParamTable = Record<string, string | string[]>
 export type MatchNode = {
   endpoint: Endpoint                 // the winning endpoint - page or fallback, same type either way
-  params: ParamTable                 // every param bound reaching this position, in bind order
+  params: Params                     // every param bound reaching this position, in bind order
   slots?: Record<string, MatchNode>  // one recursive match per slot this endpoint's frames declare
 }
 
@@ -12,7 +16,7 @@ export type MatchNode = {
  *  endpoints already flatten their wrapper chain into frames. */
 type MatchCandidate = {
   position: PositionNode
-  params: ParamTable
+  params: Params
   isCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
   isTerminal?: true
 }
@@ -34,13 +38,13 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 
   if (dynamic) {
     const paramName = dynamic.param!
-    const newParams: ParamTable = [...params, [paramName, segment]]
+    const newParams: Params = [...params, [paramName, segment]]
     candidates.push({ position: dynamic, params: newParams })
   }
   if (catchall) {
     const paramName = catchall.param!
     const segments = url.slice(position.urlDepth)
-    const newParams: ParamTable = [...params, [paramName, segments]]
+    const newParams: Params = [...params, [paramName, segments]]
     candidates.push({ position: catchall, params: newParams, isCatchall: true })
   }
   return candidates
@@ -49,7 +53,7 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 /** Depth-first, static-preferring search over one position tree.
  *  Returns the first accepting endpoint, or the most static terminal
  *  position's fallback if no endpoint accepts. */
-function createMatch(position: PositionNode, url: string[], seedParams: ParamTable): MatchNode {
+function createMatch(position: PositionNode, url: string[], seedParams: Params): MatchNode {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
