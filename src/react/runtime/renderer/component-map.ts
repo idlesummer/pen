@@ -1,5 +1,10 @@
 import type { ComponentType } from 'react'
 
+/** The keyed shape a page/layout component reads params.id off of - built
+ *  once, wherever the router's ordered Params gets handed to a component as
+ *  a prop. */
+export type ParamTable = Record<string, string | string[]>
+
 export type RouteComponent = ComponentType<Record<string, unknown>>
 export type ComponentMap = Record<string, RouteComponent>
 

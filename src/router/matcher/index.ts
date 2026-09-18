@@ -1,4 +1,4 @@
-export type { MatchNode, Params, ParamTable } from './match-tree'
+export type { MatchNode, Params } from './match-tree'
 export type { Matcher } from './matcher'
 export type { Router } from './router'
 
