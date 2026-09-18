@@ -2,12 +2,12 @@ import type { ComponentType, ReactNode } from 'react'
 import type { ParamTable } from '../params'
 import type { ErrorComponent } from '../boundaries/ErrorBoundary'
 import type { DefaultComponent } from '../boundaries/DefaultBoundary'
+import type { LoadingComponent } from '../boundaries/LoadingBoundary'
 
 export type PageComponent = ComponentType<{ params: ParamTable }>
 /** Index signature must include ParamTable, not just ReactNode, or `params`
  *  itself fails to satisfy its own index signature. */
 export type LayoutComponent = ComponentType<{ params: ParamTable } & Record<string, ReactNode | ParamTable>>
-export type LoadingComponent = ComponentType<Record<string, never>>
 
 /** One bucket per route module role; every module in a bucket shares that
  *  role's real prop shape. */
