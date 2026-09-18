@@ -13,13 +13,11 @@ export type CompiledRoutes = {
   diagnostics: CompileDiagnostic[]
 }
 
-/** Compiles a route file list into the position tree.
+/**
+ * Compiles route file paths into the representation consumed downstream.
  *
- *  Three steps, no mutation, no sanitize passes. The route tree is the parse
- *  and never leaves this function; the position tree is the compilation and
- *  is all anything downstream needs. `RouteNode` is reachable from neither
- *  the position tree nor this return type, so nothing can consult the parse
- *  later even by accident. */
+ * @param filePaths Route file paths to compile.
+ */
 export function compile(filePaths: string[]): CompiledRoutes {
   const routeTree = createRouteTree(filePaths)
   const [positionTree, conflicts, modulePaths] = createPositionTree(routeTree)
