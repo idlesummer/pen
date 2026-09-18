@@ -64,9 +64,9 @@ function renderChain(endpoint: Endpoint, params: Params, slotElements: SlotEleme
  *  possible - then folds the main chain around them. */
 export function renderMatch(match: Match, componentMap: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
-  for (const name in match.slots) {
-    const { endpoint, params } = match.slots[name]!
-    slotElements[name] = renderChain(endpoint, params, {}, componentMap)
+  for (const slotName in match.slots) {
+    const { endpoint, params } = match.slots[slotName]!
+    slotElements[slotName] = renderChain(endpoint, params, {}, componentMap)
   }
   const { endpoint, params } = match
   return renderChain(endpoint, params, slotElements, componentMap)
