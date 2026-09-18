@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react'
 import type { Endpoint, Frame, MatchNode, Params } from '@/router'
 import type { ComponentMap, ParamTable } from './component-map'
-import type { ErrorFallbackProps } from '../boundaries/ErrorBoundary'
 import { Suspense } from 'react'
-import { resolveComponent } from './component-map'
+import { resolveComponent, resolveContent } from './component-map'
 import { ErrorBoundary } from '../boundaries/ErrorBoundary'
 import { DefaultBoundary } from '../boundaries/DefaultBoundary'
 
@@ -17,19 +16,19 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   const { layout, loading, error, default: defaultPath, slots, paramDepth } = frame
 
   if (defaultPath) {
-    const Fallback = resolveComponent(defaultPath, componentMap)
+    const Fallback = resolveComponent('default', defaultPath, componentMap)
     content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
   }
   if (error) {
-    const Fallback = resolveComponent<ErrorFallbackProps>(error, componentMap)
+    const Fallback = resolveComponent('error', error, componentMap)
     content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
   }
   if (loading) {
-    const Loading = resolveComponent(loading, componentMap)
+    const Loading = resolveComponent('loading', loading, componentMap)
     content = <Suspense fallback={<Loading />}>{content}</Suspense>
   }
   if (layout) {
-    const Layout = resolveComponent(layout, componentMap)
+    const Layout = resolveComponent('layout', layout, componentMap)
     const slotProps: Record<string, ReactNode> = {}
 
     // doesn't run if slots is undefined
@@ -48,7 +47,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
  *  `renderChain` called on a slot's endpoint passes an empty `slotElements`
  *  and that's the end of it. */
 function renderChain(endpoint: Endpoint, params: Params, slotElements: Record<string, ReactNode>, componentMap: ComponentMap): ReactNode {
-  const Content = resolveComponent(endpoint.content, componentMap)
+  const Content = resolveContent(endpoint.content, componentMap)
   let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
 
   for (let i = endpoint.frames.length-1; i >= 0; i--)

@@ -1,6 +1,6 @@
 import { join, relative, sep } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { GLOBAL_DEFAULT } from '@/router'
+import { GLOBAL_DEFAULT, getRouteModuleType } from '@/router'
 import { GENERATED_HEADER } from './header'
 
 type ComponentMapOptions = {
@@ -25,17 +25,27 @@ function toImportStatement(appDir: string, outDir: string, modulePath: string, i
   return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
 }
 
+/** Which ComponentMap bucket a module path belongs to. GLOBAL_DEFAULT is a
+ *  synthetic sentinel, not a real file, so it can't be classified by its
+ *  (nonexistent) basename the way every other module path can. */
+function toRole(modulePath: string): string {
+  return modulePath === GLOBAL_DEFAULT ? 'default' : getRouteModuleType(modulePath)
+}
+
 /** Emits the generated `component-map.ts`, statically importing each route
- *  module and mapping its path to the imported component. Assumes `outDir`
- *  is outside `appDir`. */
+ *  module and bucketing it by role (page/layout/loading/error/default) into
+ *  the generated ComponentMap. Assumes `outDir` is outside `appDir`. */
 export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentMapOptions): string {
   const imports: string[] = []
-  const entries: string[] = []
+  const entriesByRole: Record<string, string[]> = { page: [], layout: [], loading: [], error: [], default: [] }
 
   for (const [index, modulePath] of modulePaths.entries()) {
     imports.push(toImportStatement(appDir, outDir, modulePath, index))
-    entries.push(`  ${JSON.stringify(modulePath)}: Component${index},`)
+    entriesByRole[toRole(modulePath)]!.push(`    ${JSON.stringify(modulePath)}: Component${index},`)
   }
+
+  const roleBlocks = Object.entries(entriesByRole).flatMap(([role, entries]) =>
+    [`  ${role}: {`, ...entries, '  },'])
 
   return [
     GENERATED_HEADER,
@@ -44,7 +54,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
     ...imports,
     '',
     'export const componentMap: ComponentMap = {',
-    ...entries,
+    ...roleBlocks,
     '}',
     '',
   ].join('\n')
