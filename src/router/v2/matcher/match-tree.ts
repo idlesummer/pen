@@ -88,14 +88,8 @@ function matchOne(root: PositionNode, url: string[], seedParams: ParamTable): Ma
   return { endpoint, params }
 }
 
-/** Resolves a full match tree for one URL: matchOne's winning result at
- *  `root`, plus one independent match per slot its frames declare - parallel
- *  routes, not a remaining suffix or a nested match, so each is matched
- *  against the same full URL. Seeded with the params already bound on
- *  `matchTree`, since paramDepth/contentDepth are continuous through a slot
- *  boundary. A slot folder can never declare another slot (route-segment.ts's
- *  isBoundary treats `slot` like `root`, a place inheritance stops), so this
- *  single pass over `matchTree`'s own frames is guaranteed to find them all. */
+/** Resolves the match tree for one URL, then matches each declared slot
+ *  independently against the same full URL with the inherited params. */
 export function matchPosition(root: PositionNode, url: string[], seedParams: ParamTable = {}): MatchNode {
   const matchTree = matchOne(root, url, seedParams)
 
