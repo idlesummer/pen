@@ -9,12 +9,8 @@ export type MatchNode = {
   slots?: Record<string, MatchNode>  // one recursive match per slot this endpoint's frames declare
 }
 
-/** Search-only bookkeeping: one competing attempt in the backtracking search,
- *  not a committed step - most of these lose to another candidate and get
- *  discarded. Doesn't need a parent pointer the way a live ancestor walk
- *  would - by the time a position has an endpoint/fallback, compile time
- *  already flattened its whole wrapper chain into `frames`, slots included,
- *  so nothing here ever needs to walk back up. */
+/** A competing search attempt. No parent pointer is needed because
+ *  endpoints already flatten their wrapper chain into frames. */
 type MatchCandidate = {
   position: PositionNode
   params: ParamTable
