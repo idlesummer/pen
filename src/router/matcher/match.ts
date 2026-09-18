@@ -50,7 +50,7 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 /** Depth-first, static-preferring search over one position tree.
  *  Returns the first accepting endpoint, or the most static terminal
  *  position's fallback if no endpoint accepts. */
-function createMatch(position: PositionNode, url: string[], seedParams: Params): Match {
+function findMatch(position: PositionNode, url: string[], seedParams: Params): Match {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -83,13 +83,16 @@ function createMatch(position: PositionNode, url: string[], seedParams: Params):
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
 export function match(positionTree: PositionNode, url: string[]): Match {
-  const matchTree = createMatch(positionTree, url, [])
+  const mainMatch = findMatch(positionTree, url, [])
 
-  for (const frame of matchTree.endpoint.frames) {
+  for (const frame of mainMatch.endpoint.frames) {
     if (!frame.slots) continue
-    matchTree.slots ??= {}
-    for (const [name, position] of Object.entries(frame.slots))
-      matchTree.slots[name] = createMatch(position, url, matchTree.params)
+    mainMatch.slots ??= {}
+
+    for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
+      const slotMatch = findMatch(slotPosition, url, mainMatch.params)
+      mainMatch.slots[slotName] = slotMatch
+    }
   }
-  return matchTree
+  return mainMatch
 }
