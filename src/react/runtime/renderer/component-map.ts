@@ -1,19 +1,13 @@
 import type { ComponentType, ReactNode } from 'react'
-import type { ErrorFallbackProps } from '../boundaries/ErrorBoundary'
-
-/** The keyed params shape a component reads (params.id), built from the
- *  router's ordered Params. */
-export type ParamTable = Record<string, string | string[]>
+import type { ParamTable } from '../params'
+import type { ErrorComponent } from '../boundaries/ErrorBoundary'
+import type { DefaultComponent } from '../boundaries/DefaultBoundary'
 
 export type PageComponent = ComponentType<{ params: ParamTable }>
 /** Index signature must include ParamTable, not just ReactNode, or `params`
  *  itself fails to satisfy its own index signature. */
 export type LayoutComponent = ComponentType<{ params: ParamTable } & Record<string, ReactNode | ParamTable>>
 export type LoadingComponent = ComponentType<Record<string, never>>
-export type ErrorComponent = ComponentType<ErrorFallbackProps>
-/** default.tsx is used two ways - direct content (gets params) or
- *  DefaultBoundary's fallback (no props) - so params must be optional. */
-export type DefaultComponent = ComponentType<{ params?: ParamTable }>
 
 /** One bucket per route module role; every module in a bucket shares that
  *  role's real prop shape. */
