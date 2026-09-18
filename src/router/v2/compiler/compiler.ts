@@ -23,10 +23,8 @@ export type Compiled = {
 export function compile(filePaths: string[]): Compiled {
   const routeTree = createRouteTree(filePaths)
   const [positionTree, conflicts, modulePaths] = createPositionTree(routeTree)
+  const diagnostics = validateRouteTree(routeTree)
+  diagnostics.push(...validateConflicts(conflicts))
 
-  return {
-    positionTree,
-    modulePaths,
-    diagnostics: [...validateRouteTree(routeTree), ...validateConflicts(conflicts)],
-  }
+  return { positionTree, modulePaths, diagnostics }
 }
