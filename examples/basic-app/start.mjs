@@ -12,7 +12,7 @@ function buildTree(paths) {
 }
 
 function printTree(node, prefix = '') {
-  const segments = Object.keys(node)
+  const segments = Object.keys(node).sort()
   segments.forEach((segment, i) => {
     const isLast = i === segments.length - 1
     console.log(prefix + (isLast ? '└── ' : '├── ') + segment)
@@ -20,9 +20,16 @@ function printTree(node, prefix = '') {
   })
 }
 
+// Every real module across every role - layout.tsx, default.tsx, etc, not
+// just pages. Sentinel paths (pen's built-in fallbacks) start with \0 and
+// aren't real files, so they're excluded from what's meant to be a file tree.
+const modulePaths = Object.values(componentMap)
+  .flatMap(Object.keys)
+  .filter(path => !path.startsWith('\0'))
+
 console.log('Routes:')
 console.log('/')
-printTree(buildTree(Object.keys(componentMap.page).map(path => path.replace(/(^|\/)page\.tsx$/, ''))))
+printTree(buildTree(modulePaths))
 
 const { waitUntilExit } = mount()
 await waitUntilExit()
