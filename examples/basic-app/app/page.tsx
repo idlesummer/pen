@@ -1,5 +1,10 @@
 import { Text } from 'ink'
 
 export default function RootPage() {
-  return <Text>Welcome - type a path above and press Enter to navigate</Text>
+  return (
+    <>
+      <Text>Hello World from </Text>
+      <Text color="green" bold>RootPage</Text>
+    </>
+  )
 }
