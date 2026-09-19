@@ -2,7 +2,6 @@ import type { Endpoint, PositionNode } from '../compiler/position-node'
 import { traverse } from '@/lib/traverse'
 
 export type Params = ReadonlyArray<readonly [name: string, value: string | string[]]>
-
 export type Match = {
   endpoint: Endpoint              // the winning endpoint - page or fallback, same type either way
   params: Params                  // every param bound reaching this position, in bind order
@@ -80,11 +79,8 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params, pa
   return { endpoint, params, pathname }
 }
 
-/** Splits a URL into segments for matching: drops every empty piece, so a
- *  leading slash, a trailing slash, and repeated slashes all collapse away
- *  on their own. The root URL becomes `[]` - no leading blank segment,
- *  matching `PositionNode.urlDepth`, which indexes straight into this array
- *  with no offset. */
+/** Splits a URL into non-empty segments, discarding empty segments from
+ *  leading, trailing, or repeated slashes. The root URL is `[]`. */
 function normalizeUrl(pathname: string): string[] {
   return pathname.split('/').filter(Boolean)
 }
