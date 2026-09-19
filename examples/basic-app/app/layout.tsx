@@ -21,9 +21,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <Box flexDirection="column">
-      <Text>Current path: {pathname}</Text>
-      <Text>Type a path and press Enter: {value}</Text>
-      <Box marginTop={1}>{children}</Box>
+      <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
+        <Text>Current path: {pathname}</Text>
+        <Text>Type a path and press Enter: {value}</Text>
+      </Box>
+      <Box borderStyle="round" borderColor="green" paddingX={1} marginTop={1}>
+        {children}
+      </Box>
     </Box>
   )
 }
