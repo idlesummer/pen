@@ -16,14 +16,14 @@ type Props = {
 }
 
 type State = {
-  error: Error | null
+  error?: Error
   pathname: string
 }
 
 /** Catches render errors in its subtree and swaps in the route's `error`
  *  module, since only class components can catch errors. */
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { error: null, pathname: this.props.pathname }
+  state: State = { pathname: this.props.pathname }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     if (error instanceof DefaultSignal) throw error // let it climb to a DefaultBoundary instead
@@ -33,15 +33,18 @@ export class ErrorBoundary extends Component<Props, State> {
   /** Clears a caught error once navigation moves past the route that threw
    *  it, so a stale error doesn't keep blocking content the user has since
    *  navigated away from - matches Next.js's own auto-reset on segment
-   *  change, since nothing else here ever clears state on its own. */
+   *  change, since nothing else here ever clears state on its own. Explicitly
+   *  sets `error: undefined` rather than omitting it - the return value is
+   *  merged into state like setState, so a missing key would leave a stale
+   *  error in place instead of clearing it. */
   static getDerivedStateFromProps(props: Props, state: State): State {
     return props.pathname !== state.pathname
-      ? { error: null, pathname: props.pathname }
+      ? { error: undefined, pathname: props.pathname }
       : state
   }
 
   reset() {
-    this.setState({ error: null })
+    this.setState({ error: undefined })
   }
 
   render() {
