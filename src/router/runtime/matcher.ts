@@ -80,9 +80,19 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params, pa
   return { endpoint, params, pathname }
 }
 
+/** Splits a URL into segments for matching: drops every empty piece, so a
+ *  leading slash, a trailing slash, and repeated slashes all collapse away
+ *  on their own. The root URL becomes `[]` - no leading blank segment,
+ *  matching `PositionNode.urlDepth`, which indexes straight into this array
+ *  with no offset. */
+function normalizeUrl(pathname: string): string[] {
+  return pathname.split('/').filter(Boolean)
+}
+
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
-export function match(positionTree: PositionNode, url: string[], pathname: string): Match {
+export function match(positionTree: PositionNode, pathname: string): Match {
+  const url = normalizeUrl(pathname)
   const mainMatch = findMatch(positionTree, url, [], pathname)
 
   for (const frame of mainMatch.endpoint.frames) {
