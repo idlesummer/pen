@@ -35,8 +35,8 @@ function renderFrame(frame: Frame, content: ReactNode, params: Params, slotEleme
     content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
   }
   if (loading) {
-    const Loading = resolveComponent('loading', loading, components)
-    content = <LoadingBoundary fallback={Loading}>{content}</LoadingBoundary>
+    const Fallback = resolveComponent('loading', loading, components)
+    content = <LoadingBoundary fallback={Fallback}>{content}</LoadingBoundary>
   }
   if (layout) {
     const Layout = resolveComponent('layout', layout, components)
