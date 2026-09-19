@@ -1,15 +1,27 @@
 import { useState } from 'react'
-import { Text, useInput } from 'ink'
+import { Box, Text, useInput } from 'ink'
+import { useRouter, usePathname } from '@idlesummer/pen'
 
 export default function HomePage() {
   const [value, setValue] = useState('')
+  const { push } = useRouter()
+  const pathname = usePathname()
 
   useInput((input, key) => {
-    if (key.backspace || key.delete)
+    if (key.return) {
+      push(value)
+      setValue('')
+    }
+    else if (key.backspace || key.delete)
       setValue(current => current.slice(0, -1))
-    else if (!key.return && !key.ctrl && !key.meta)
+    else if (!key.ctrl && !key.meta)
       setValue(current => current + input)
   })
 
-  return <Text>Type something: {value}</Text>
+  return (
+    <Box flexDirection="column">
+      <Text>Current path: {pathname}</Text>
+      <Text>Type a path and press Enter: {value}</Text>
+    </Box>
+  )
 }
