@@ -6,6 +6,7 @@ export type Params = ReadonlyArray<readonly [name: string, value: string | strin
 export type Match = {
   endpoint: Endpoint              // the winning endpoint - page or fallback, same type either way
   params: Params                  // every param bound reaching this position, in bind order
+  pathname: string                // the url this match was resolved against, unchanged across slots
   slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
 
@@ -49,7 +50,7 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 /** Depth-first, static-preferring search over one position tree.
  *  Returns the first accepting endpoint, or the most static terminal
  *  position's fallback if no endpoint accepts. */
-function findMatch(position: PositionNode, url: string[], seedParams: Params): Match {
+function findMatch(position: PositionNode, url: string[], seedParams: Params, pathname: string): Match {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -76,20 +77,20 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params): M
   })
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
   const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
-  return { endpoint, params }
+  return { endpoint, params, pathname }
 }
 
 /** Resolves the match tree for one URL, then matches each declared slot
  *  independently against the same full URL with the inherited params. */
-export function match(positionTree: PositionNode, url: string[]): Match {
-  const mainMatch = findMatch(positionTree, url, [])
+export function match(positionTree: PositionNode, url: string[], pathname: string): Match {
+  const mainMatch = findMatch(positionTree, url, [], pathname)
 
   for (const frame of mainMatch.endpoint.frames) {
     if (!frame.slots) continue
     mainMatch.slots ??= {}
 
     for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
-      const slotMatch = findMatch(slotPosition, url, mainMatch.params)
+      const slotMatch = findMatch(slotPosition, url, mainMatch.params, pathname)
       mainMatch.slots[slotName] = slotMatch
     }
   }

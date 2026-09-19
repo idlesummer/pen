@@ -25,6 +25,6 @@ function normalizeUrl(urlString: string): string[] {
  *  module path the compiled tree can render. */
 export function createRouter(filePaths: string[]): Router {
   const { positionTree, modulePaths, diagnostics } = compile(filePaths)
-  const matcher: Matcher = (url) => match(positionTree, normalizeUrl(url))
+  const matcher: Matcher = (url) => match(positionTree, normalizeUrl(url), url)
   return { matcher, modulePaths, diagnostics }
 }
