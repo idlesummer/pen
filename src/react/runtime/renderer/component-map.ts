@@ -1,8 +1,8 @@
-import type { ErrorComponent } from './module-components/ErrorBoundary'
-import type { DefaultComponent } from './module-components/DefaultBoundary'
-import type { LoadingComponent } from './module-components/LoadingBoundary'
-import type { PageComponent } from './module-components/PageComponent'
-import type { LayoutComponent } from './module-components/LayoutComponent'
+import type { ErrorComponent } from './route-modules/ErrorBoundary'
+import type { DefaultComponent } from './route-modules/DefaultBoundary'
+import type { LoadingComponent } from './route-modules/LoadingBoundary'
+import type { PageComponent } from './route-modules/PageComponent'
+import type { LayoutComponent } from './route-modules/LayoutComponent'
 
 /** One bucket per route module role; every module in a bucket shares that
  *  role's real prop shape. */

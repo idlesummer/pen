@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import type { Frame, Match, Params } from '@/router'
-import type { ParamTable } from './module-components/ParamTable'
+import type { ParamTable } from './route-modules/ParamTable'
 import type { ComponentMap } from './component-map'
 import { resolveComponent, resolveContent } from './component-map'
-import { ErrorBoundary } from './module-components/ErrorBoundary'
-import { DefaultBoundary } from './module-components/DefaultBoundary'
-import { LoadingBoundary } from './module-components/LoadingBoundary'
+import { ErrorBoundary } from './route-modules/ErrorBoundary'
+import { DefaultBoundary } from './route-modules/DefaultBoundary'
+import { LoadingBoundary } from './route-modules/LoadingBoundary'
 
 type SlotElements = Record<string, ReactNode>
 
