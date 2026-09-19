@@ -3,17 +3,19 @@ import { useEffect, useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useRouter, usePathname } from '@idlesummer/pen'
 
-const FILE_TREE = `Routes:
-/
-├─ default.tsx
-├─ home
-│  ├─ [id]
-│  │  └─ page.tsx
-│  ├─ about
-│  │  └─ page.tsx
-│  └─ page.tsx
-├─ layout.tsx
-└─ page.tsx`
+const FILE_TREE = `
+Routes:
+  /
+  ├─ default
+  ├─ home/
+  │  ├─ [id]/
+  │  │  └─ page
+  │  ├─ about/
+  │  │  └─ page
+  │  └─ page
+  ├─ layout
+  └─ page
+`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [value, setValue] = useState('')
