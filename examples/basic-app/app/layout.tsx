@@ -1,12 +1,28 @@
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useRouter, usePathname } from '@idlesummer/pen'
+
+const FILE_TREE = `Routes:
+/
+├─ default.tsx
+├─ home
+│  ├─ [id]
+│  │  └─ page.tsx
+│  ├─ about
+│  │  └─ page.tsx
+│  └─ page.tsx
+├─ layout.tsx
+└─ page.tsx`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [value, setValue] = useState('')
   const { push } = useRouter()
   const pathname = usePathname()
+
+  useEffect(() => {
+    console.log(FILE_TREE)
+  }, [])
 
   useInput((input, key) => {
     if (key.return) {
