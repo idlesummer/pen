@@ -15,7 +15,7 @@ function printTree(node, prefix = '') {
   const segments = Object.keys(node).sort()
   segments.forEach((segment, i) => {
     const isLast = i === segments.length - 1
-    console.log(prefix + (isLast ? '└── ' : '├── ') + segment)
+    console.log(prefix + (isLast ? '└─ ' : '├─ ') + segment)
     printTree(node[segment], prefix + (isLast ? '    ' : '│   '))
   })
 }
