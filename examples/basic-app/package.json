@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pen build",
-    "start": "tsx start.mjs",
-    "inspect": "node inspect-router.mjs"
+    "start": "tsx start.mjs"
   },
   "dependencies": {
     "@idlesummer/pen": "file:../..",
