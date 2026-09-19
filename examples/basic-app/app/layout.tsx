@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Text>Current path: {pathname}</Text>
         <Text>Type a path and press Enter: {value}</Text>
       </Box>
-      <Box borderStyle="round" borderColor="green" paddingX={1} marginTop={1}>
+      <Box borderStyle="round" borderColor="green" paddingX={1}>
         {children}
       </Box>
     </Box>
