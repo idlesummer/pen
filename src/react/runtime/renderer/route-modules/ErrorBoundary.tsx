@@ -35,8 +35,9 @@ export class ErrorBoundary extends Component<Props, State> {
    *  navigated away from - matches Next.js's own auto-reset on segment
    *  change, since nothing else here ever clears state on its own. */
   static getDerivedStateFromProps(props: Props, state: State): State {
-    if (props.pathname === state.pathname) return state
-    return { error: null, pathname: props.pathname }
+    return props.pathname !== state.pathname
+      ? { error: null, pathname: props.pathname }
+      : state
   }
 
   reset() {
