@@ -1,7 +1,7 @@
 import type { RouteNode } from './route-tree'
 import type { Endpoint, Frame, PositionContext, PositionNode } from './position-node'
 import { compactMapAncestors } from './route-tree'
-import { GLOBAL_DEFAULT } from './route-module'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './route-module'
 import { isBoundary } from './route-segment'
 
 // ── frames ───────────────────────────────────────────────────────────────
@@ -15,10 +15,14 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
 
   const { layout, loading, error, default: def } = routeNode.modules
   const _default = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  // Only the true root, never a slot - unlike default, an error boundary
+  // composes through the render tree regardless of which chain constructed
+  // it, so a slot's content is already covered by whatever wraps the root.
+  const _error = error ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)
   const paramDepth = -context.positionOf.get(routeNode)!.staticness
   const slots = context.slotsOf.get(routeNode)
-  const frame = (layout || loading || error || _default || slots)
-    ? { layout, loading, error, default: _default, slots, paramDepth }
+  const frame = (layout || loading || _error || _default || slots)
+    ? { layout, loading, error: _error, default: _default, slots, paramDepth }
     : undefined
   frameOf.set(routeNode, frame)
   return frame

@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import { Component } from 'react'
+import { Text } from 'ink'
 import { DefaultSignal } from './DefaultBoundary'
 
 export type ErrorFallbackProps = {
@@ -8,6 +9,12 @@ export type ErrorFallbackProps = {
 }
 
 export type ErrorComponent = ComponentType<ErrorFallbackProps>
+
+/** Built-in fallback rendered when an app defines no root `error.tsx` -
+ *  guarantees an uncaught throw never crashes the whole process. */
+export function ErrorFallback({ error }: ErrorFallbackProps) {
+  return <Text>Something went wrong: {error.message}</Text>
+}
 
 type Props = {
   fallback: ErrorComponent

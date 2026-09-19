@@ -1,6 +1,6 @@
 import { join, relative, sep } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { GLOBAL_DEFAULT, getRouteModuleType } from '@/router'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleType } from '@/router'
 import { GENERATED_HEADER } from './header'
 
 type ComponentMapOptions = {
@@ -17,19 +17,24 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
 }
 
 /** Emits the import statement for one module path - pen's own built-in
- *  fallback for the sentinel `default` path, otherwise a real app file. */
+ *  fallback for a sentinel path, otherwise a real app file. */
 function toImportStatement(appDir: string, outDir: string, modulePath: string, index: number): string {
   if (modulePath === GLOBAL_DEFAULT)
     return `import { DefaultFallback as Component${index} } from "${PACKAGE_NAME}"`
+  if (modulePath === GLOBAL_ERROR)
+    return `import { ErrorFallback as Component${index} } from "${PACKAGE_NAME}"`
 
   return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
 }
 
-/** Which ComponentMap bucket a module path belongs to. GLOBAL_DEFAULT is a
- *  synthetic sentinel, not a real file, so it can't be classified by its
- *  (nonexistent) basename the way every other module path can. */
+/** Which ComponentMap bucket a module path belongs to. GLOBAL_DEFAULT and
+ *  GLOBAL_ERROR are synthetic sentinels, not real files, so they can't be
+ *  classified by their (nonexistent) basename the way every other module
+ *  path can. */
 function toRole(modulePath: string): string {
-  return modulePath === GLOBAL_DEFAULT ? 'default' : getRouteModuleType(modulePath)
+  if (modulePath === GLOBAL_DEFAULT) return 'default'
+  if (modulePath === GLOBAL_ERROR) return 'error'
+  return getRouteModuleType(modulePath)
 }
 
 /** Emits the generated `component-map.ts`, statically importing each route
