@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <Box flexDirection="column">
       <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
         <Text>Current path: {pathname}</Text>
-        <Text>Type a path and press Enter: {value}</Text>
+        <Text>Browser url: {value}</Text>
       </Box>
       <Box borderStyle="round" borderColor="green" paddingX={1}>
         {children}
