@@ -52,8 +52,8 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
-  const { endpoint, params } = match
+function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
+  const { endpoint, params, pathname } = match
   const Content = resolveContent(endpoint.content, components)
   let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
 
@@ -70,14 +70,12 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
  *
  * @param mainMatch - The resolved route match to render.
  * @param components - The component map used to resolve route modules.
- * @param pathname - The current pathname, so error boundaries can tell when
- *   navigation has moved past the route that threw and reset on their own.
  * @returns The rendered React element tree.
  */
-export function renderMatch(mainMatch: Match, components: ComponentMap, pathname: string): ReactNode {
+export function renderMatch(mainMatch: Match, components: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotElements[slotName] = renderChain(slotMatch, {}, components, pathname)
+    slotElements[slotName] = renderChain(slotMatch, {}, components)
 
-  return renderChain(mainMatch, slotElements, components, pathname)
+  return renderChain(mainMatch, slotElements, components)
 }

@@ -14,5 +14,5 @@ type RouterProps = {
 export function Router({ matcher, componentMap }: RouterProps) {
   const pathname = usePathname()
   const renderTree = matcher(pathname)
-  return renderMatch(renderTree, componentMap, pathname)
+  return renderMatch(renderTree, componentMap)
 }
