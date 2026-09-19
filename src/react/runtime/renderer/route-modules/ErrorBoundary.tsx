@@ -39,14 +39,15 @@ export class ErrorBoundary extends Component<Props, State> {
     return { error: null, pathname: props.pathname }
   }
 
-  reset = () =>
+  reset() {
     this.setState({ error: null })
+  }
 
   render() {
     const { fallback: Fallback, children } = this.props
     const error = this.state.error
     return error
-      ? <Fallback error={error} reset={this.reset} />
+      ? <Fallback error={error} reset={this.reset.bind(this)} />
       : children
   }
 }
