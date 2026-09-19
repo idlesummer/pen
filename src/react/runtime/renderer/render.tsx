@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import type { Frame, Match, Params } from '@/router'
-import type { ParamTable } from './route-modules/ParamTable'
 import type { ComponentMap } from './component-map'
+import type { ParamTable } from './route-modules/ParamTable'
 import { resolveComponent, resolveContent } from './component-map'
-import { ErrorBoundary } from './route-modules/ErrorBoundary'
 import { DefaultBoundary } from './route-modules/DefaultBoundary'
 import { LoadingBoundary } from './route-modules/LoadingBoundary'
+import { ErrorBoundary } from './route-modules/ErrorBoundary'
 
 type SlotElements = Record<string, ReactNode>
 
@@ -22,7 +22,11 @@ function getSlotProps(slotElements: SlotElements, slots?: Frame['slots']): SlotE
   return slotProps
 }
 
-/** Wraps content with a frame's boundaries, layout, and slots. */
+/** Wraps content with a frame's boundaries, layout, and slots. Boundary
+ *  order matches Next.js's own hierarchy: layout, then error, then loading,
+ *  then the not-found/default fallback closest to the content - so error
+ *  stays the outermost net, able to catch a throw from loading's own
+ *  fallback, not just from the content it wraps. */
 function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
@@ -30,13 +34,13 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
     const Fallback = resolveComponent('default', _default, components)
     content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
   }
-  if (error) {
-    const Fallback = resolveComponent('error', error, components)
-    content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
-  }
   if (loading) {
     const Fallback = resolveComponent('loading', loading, components)
     content = <LoadingBoundary fallback={Fallback}>{content}</LoadingBoundary>
+  }
+  if (error) {
+    const Fallback = resolveComponent('error', error, components)
+    content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
   }
   if (layout) {
     const Layout = resolveComponent('layout', layout, components)
