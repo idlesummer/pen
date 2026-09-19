@@ -8,7 +8,7 @@ export default function HomeItemsPage({ params }: { params: ParamTable }) {
         <Text>Hello World from </Text>
         <Text color="green" bold>HomeItemsPage</Text>
       </Box>
-      <Text color="yellow">param.ids: {params.ids}</Text>
+      <Text color="yellow">param.ids: {JSON.stringify(params.ids)}</Text>
     </Box>
   )
 }
