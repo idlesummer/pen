@@ -29,7 +29,6 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 
   const { statics, dynamic, catchall } = position
   const candidates: MatchCandidate[] = []
-
   if (statics?.[segment])
     candidates.push({ position: statics[segment], params })
 
