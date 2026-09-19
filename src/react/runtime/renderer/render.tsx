@@ -27,7 +27,7 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
  *  then the not-found/default fallback closest to the content - so error
  *  stays the outermost net, able to catch a throw from loading's own
  *  fallback, not just from the content it wraps. */
-function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap): ReactNode {
+function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
   if (_default) {
@@ -40,7 +40,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   }
   if (error) {
     const Fallback = resolveComponent('error', error, components)
-    content = <ErrorBoundary fallback={Fallback}>{content}</ErrorBoundary>
+    content = <ErrorBoundary fallback={Fallback} pathname={pathname}>{content}</ErrorBoundary>
   }
   if (layout) {
     const Layout = resolveComponent('layout', layout, components)
@@ -52,14 +52,14 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
+function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { endpoint, params } = match
   const Content = resolveContent(endpoint.content, components)
   let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
 
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
     const frame = endpoint.frames[i]!
-    element = wrapFrame(frame, element, params, slotElements, components)
+    element = wrapFrame(frame, element, params, slotElements, components, pathname)
   }
   return element
 }
@@ -70,12 +70,14 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
  *
  * @param mainMatch - The resolved route match to render.
  * @param components - The component map used to resolve route modules.
+ * @param pathname - The current pathname, so error boundaries can tell when
+ *   navigation has moved past the route that threw and reset on their own.
  * @returns The rendered React element tree.
  */
-export function renderMatch(mainMatch: Match, components: ComponentMap): ReactNode {
+export function renderMatch(mainMatch: Match, components: ComponentMap, pathname: string): ReactNode {
   const slotElements: SlotElements = {}
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotElements[slotName] = renderChain(slotMatch, {}, components)
+    slotElements[slotName] = renderChain(slotMatch, {}, components, pathname)
 
-  return renderChain(mainMatch, slotElements, components)
+  return renderChain(mainMatch, slotElements, components, pathname)
 }
