@@ -15,7 +15,7 @@ function sliceParams(params: Params, depth: number): ParamTable {
 }
 
 /** Returns the rendered elements for the slots declared by a frame. */
-function getSlotProps(slotElements: SlotElements, slots?: Frame['slots']): SlotElements {
+function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotElements {
   const slotProps: SlotElements = {}
   for (const name in slots)
     slotProps[name] = slotElements[name]
@@ -44,7 +44,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   }
   if (layout) {
     const Layout = resolveComponent('layout', layout, components)
-    const slotProps = getSlotProps(slotElements, slots)
+    const slotProps = slots ? getSlotProps(slots, slotElements) : {}
     const paramTable = sliceParams(params, paramDepth)
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
