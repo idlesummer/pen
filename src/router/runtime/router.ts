@@ -1,7 +1,7 @@
 import type { CompileDiagnostic } from '../compiler'
-import type { Match } from './match'
+import type { Match } from './matcher'
 import { compile } from '../compiler'
-import { match } from './match'
+import { match } from './matcher'
 
 export type Matcher =
   (url: string) => Match
