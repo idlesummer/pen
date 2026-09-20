@@ -15,6 +15,9 @@ Routes:
   ├─ slow/
   │  ├─ loading
   │  └─ page
+  ├─ broken/
+  │  ├─ error
+  │  └─ page
   ├─ layout
   ├─ default
   └─ page
