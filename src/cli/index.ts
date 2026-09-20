@@ -1,6 +1,6 @@
 import { defineCommand, runMain } from 'citty'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/lib/constants'
-import { buildCommand } from './commands/build'
+import { testCommand } from './commands/test'
 
 const main = defineCommand({
   meta: {
@@ -9,7 +9,8 @@ const main = defineCommand({
     description: DESCRIPTION,
   },
   subCommands: {
-    build: buildCommand,
+    test: testCommand,
+    // build: buildCommand,
     // dev: devCommand,
     // start: startCommand
   },
