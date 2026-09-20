@@ -1,4 +1,4 @@
-import type { PropsWithChildren} from 'react'
+import type { PropsWithChildren } from 'react'
 import { useEffect, useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useRouter, usePathname } from '@idlesummer/pen'
