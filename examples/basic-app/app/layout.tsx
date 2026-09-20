@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { PropsWithChildren} from 'react'
 import { useEffect, useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useRouter, usePathname } from '@idlesummer/pen'
@@ -17,18 +17,15 @@ Routes:
   └─ page
 `
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: PropsWithChildren) {
   const [value, setValue] = useState('')
-  const { push } = useRouter()
+  const router = useRouter()
   const pathname = usePathname()
 
-  useEffect(() => {
-    console.log(FILE_TREE)
-  }, [])
-
+  useEffect(() => console.log(FILE_TREE))
   useInput((input, key) => {
     if (key.return) {
-      push(value)
+      router.push(value)
       setValue('')
     }
     else if (key.backspace || key.delete)
