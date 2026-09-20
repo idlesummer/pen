@@ -6,7 +6,6 @@ import { useRouter, usePathname } from '@idlesummer/pen'
 const FILE_TREE = `
 Routes:
   /
-  ├─ default
   ├─ home/
   │  ├─ [id]/
   │  │  └─ page
@@ -14,6 +13,7 @@ Routes:
   │  │  └─ page
   │  └─ page
   ├─ layout
+  ├─ default
   └─ page
 `
 
