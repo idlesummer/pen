@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pen build",
-    "start": "tsx start.mjs"
+    "test:build": "pen build",
+    "test:start": "tsx start.mjs"
   },
   "dependencies": {
     "@idlesummer/pen": "file:../..",
