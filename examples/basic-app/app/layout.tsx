@@ -12,6 +12,9 @@ Routes:
   │  ├─ about/
   │  │  └─ page
   │  └─ page
+  ├─ slow/
+  │  ├─ loading
+  │  └─ page
   ├─ layout
   ├─ default
   └─ page
