@@ -19,8 +19,7 @@ const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta
  */
 export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
-  const { diagnostics } = compileApp(filePaths)
-
+  const diagnostics = compileApp(filePaths).diagnostics
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
     return diagnostics
 
