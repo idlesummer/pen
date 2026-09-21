@@ -19,7 +19,7 @@ type RouteModule = { default: RouteComponent }
 function createComponentsByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
   const moduleEntries = Object.entries(modules)
   const componentsByPath = new Map(moduleEntries.map(([path, module]) => [
-    path.slice('/src/app/'.length),
+    path.slice(path.indexOf('/app/') + '/app/'.length),
     module.default,
   ]))
   componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
