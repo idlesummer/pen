@@ -13,7 +13,6 @@ export const startCommand = defineCommand({
     const entryPath = join(process.cwd(), BUILD_OUT_DIR, BUILD_ENTRY_FILE)
     if (!existsSync(entryPath))
       throw new Error(`No build found at '${join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)}' - run \`pen build\` first.`)
-
     await import(pathToFileURL(entryPath).href)
   },
 })
