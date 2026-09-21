@@ -27,13 +27,13 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       noExternal: [PACKAGE_NAME],
     },
     build: {
-      outDir, // should be ./pen/dist
+      outDir, // should be .pen/dist
       // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
         // The entry-app discovers the user's routes for bundling
         input: join(import.meta.dirname, 'entry-app.tsx'),
-        output: { entryFileNames: 'entry.js' },
+        output: { entryFileNames: 'main.js' },
       },
     },
   })
