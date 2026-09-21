@@ -1,20 +1,47 @@
 import type { CompileDiagnostic } from '@/router'
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { build as viteBuild } from 'vite'
 import { findFiles } from '@/lib/find-files'
 import { compile } from '@/router'
-import { generateComponentMap } from './generate/component-map'
-import { generateEntry } from './generate/entry'
 
-/** Discovers route modules under `appDir` and emits the generated
- *  `component-map` and `entry` files into `outDir`. */
-export function build(appDir: string, outDir: string): CompileDiagnostic[] {
+// Resolves next to this module both from source (src/react/build/) and once
+// bundled (tsdown copies entry-template.tsx flat into dist/, alongside
+// bin.mjs), so import.meta.url always has the right sibling.
+const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta.url))
+
+/**
+ * Compiles routes for diagnostics, then bundles the app with Vite - the
+ * compiled tree itself is discarded, since the bundled entry template
+ * rediscovers routes on its own via `import.meta.glob`. Skips the (real,
+ * costly) Vite build entirely when the tree has errors, since there's no
+ * point bundling an app already known to be broken.
+ */
+export async function build(appDir: string, outDir: string): Promise<CompileDiagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
-  const { modulePaths, diagnostics } = compile(filePaths)
+  const { diagnostics } = compile(filePaths)
 
-  mkdirSync(outDir, { recursive: true })
-  writeFileSync(join(outDir, 'component-map.ts'), generateComponentMap({ appDir, outDir, modulePaths }))
-  writeFileSync(join(outDir, 'entry.ts'), generateEntry())
+  if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
+    return diagnostics
+
+  await viteBuild({
+    configFile: false,
+    // import.meta.glob('/app/**/*.tsx') inside the entry template is root-
+    // relative - this is the root it resolves against.
+    root: process.cwd(),
+    build: {
+      outDir,
+      rollupOptions: {
+        input: ENTRY_TEMPLATE,
+        // react/ink stay real imports, resolved from the app's own
+        // node_modules at runtime; everything else (pen's own runtime
+        // included) gets bundled into the app.
+        external: ['react', 'ink'],
+        // A fixed name, not the default content-hashed one - `pen start`
+        // needs a predictable path to run (`node <outDir>/entry.js`).
+        output: { entryFileNames: 'entry.js' },
+      },
+    },
+  })
 
   return diagnostics
 }

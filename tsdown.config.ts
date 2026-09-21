@@ -14,6 +14,10 @@ export default defineConfig({
   clean: true,      // Remove dist/ before build
   minify: true,     // Minify the emitted JavaScript
 
+  // Ships raw (never bundled by tsdown) - Vite needs the literal
+  // import.meta.glob call, transformed fresh against each app it builds.
+  copy: 'src/react/build/entry-template.tsx',
+
   // Build-time constant injection
   define: {
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
