@@ -46,27 +46,6 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
   })
   // Vite creates both client and SSR environments, so explicitly build only
   // the server version
-  const output = await builder.build(builder.environments.ssr!)
-  logTransformedFiles(output)
+  await builder.build(builder.environments.ssr!)
   return diagnostics
-}
-
-/** Lists every module that went into the bundle. `builder.build` returns a
- *  watcher instead of output only in watch mode, which this never uses. */
-function logTransformedFiles(output: Awaited<ReturnType<ViteBuilder['build']>>): void {
-  const outputs = Array.isArray(output) ? output : [output]
-  console.log('Bundled files:')
-
-  for (const output of outputs) {
-    if (!('output' in output)) continue
-    for (const chunk of output.output) {
-      if (chunk.type !== 'chunk') continue
-      for (const moduleId of chunk.moduleIds) {
-        // Virtual modules aren't real files - Rolldown's own injected runtime
-        // helper is one, conventionally marked by a leading null byte.
-        if (!moduleId || moduleId.startsWith('\0')) continue
-        console.log(`  ${relative(process.cwd(), moduleId)}`)
-      }
-    }
-  }
 }
