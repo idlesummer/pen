@@ -3,5 +3,5 @@ export type { Endpoint, Frame, PositionConflicts, PositionNode } from './positio
 export type { CompiledRoutes } from './compiler'
 export type { Diagnostic, FormattedDiagnostic } from './diagnostic'
 
-export { compile } from './compiler'
+export { compileApp } from './compiler'
 export { formatDiagnostics } from './diagnostic'

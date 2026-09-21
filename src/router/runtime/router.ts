@@ -1,6 +1,6 @@
 import type { Diagnostic } from '../compiler'
 import type { Match } from './matcher'
-import { compile } from '../compiler'
+import { compileApp } from '../compiler'
 import { match } from './matcher'
 
 export type Matcher =
@@ -15,7 +15,7 @@ export type Router = {
 /** Creates a router from route file paths: a matcher, diagnostics, and every
  *  module path the compiled tree can render. */
 export function createRouter(filePaths: string[]): Router {
-  const { positionTree, modulePaths, diagnostics } = compile(filePaths)
+  const { positionTree, modulePaths, diagnostics } = compileApp(filePaths)
   const matcher: Matcher = (url) => match(positionTree, url)
   return { matcher, modulePaths, diagnostics }
 }
