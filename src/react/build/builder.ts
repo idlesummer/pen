@@ -1,6 +1,5 @@
 import type { Diagnostic } from '@/router'
-import type { ViteBuilder } from 'vite'
-import { join, relative } from 'node:path'
+import { join } from 'node:path'
 import { createBuilder } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
