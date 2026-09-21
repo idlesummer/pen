@@ -46,16 +46,17 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
   })
   // Vite creates both client and SSR environments, so explicitly build only
   // the server version
-  const result = await builder.build(builder.environments.ssr!)
-  logTransformedFiles(result)
+  const output = await builder.build(builder.environments.ssr!)
+  logTransformedFiles(output)
   return diagnostics
 }
 
 /** Lists every module that went into the bundle. `builder.build` returns a
  *  watcher instead of output only in watch mode, which this never uses. */
-function logTransformedFiles(result: Awaited<ReturnType<ViteBuilder['build']>>): void {
-  const outputs = Array.isArray(result) ? result : [result]
+function logTransformedFiles(output: Awaited<ReturnType<ViteBuilder['build']>>): void {
+  const outputs = Array.isArray(output) ? output : [output]
   console.log('Bundled files:')
+
   for (const output of outputs) {
     if (!('output' in output)) continue
     for (const chunk of output.output) {
