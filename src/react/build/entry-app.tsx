@@ -42,7 +42,7 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
   return componentMap
 }
 
-/** Converts module imports to app-relative path -> component. */
+// Converts module imports to app-relative path -> component
 const moduleImports = import.meta.glob<RouteModule>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
