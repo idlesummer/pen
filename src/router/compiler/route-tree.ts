@@ -2,7 +2,7 @@ import type { RouteModulePaths } from './route-module'
 import type { SegmentType } from './route-segment'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { filterRouteFiles, getRouteModuleType } from './route-module'
+import { filterRouteFiles, getRouteModuleRole } from './route-module'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
 /** The parse: one node per folder, mirroring the app directory.
@@ -45,7 +45,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const moduleName = parts[index]! // always defined - create only yields existing indices
       if (index === parts.length-1) {  // the last part is the file itself
-        parentRouteNode.modules[getRouteModuleType(moduleName)] = filePath
+        parentRouteNode.modules[getRouteModuleRole(moduleName)] = filePath
         return
       }
       if (isPrivate(moduleName)) return // prunes the rest of this path

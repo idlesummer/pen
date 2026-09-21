@@ -7,7 +7,7 @@ import {
   ErrorFallback,
   GLOBAL_DEFAULT,
   GLOBAL_ERROR,
-  getRouteModuleType,
+  getRouteModuleRole,
 } from '@idlesummer/pen/internal'
 
 /** The shape of a route module file - only its default export matters. */
@@ -33,11 +33,7 @@ function createComponentsByPath(modules: Record<string, RouteModule>): Map<strin
 function createComponentMap(modulePaths: string[], componentsByPath: Map<string, RouteComponent>): ComponentMap {
   const componentMap: ComponentMap = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const modulePath of modulePaths) {
-    const role =
-      modulePath === GLOBAL_DEFAULT ? 'default' :
-      modulePath === GLOBAL_ERROR ? 'error' :
-      getRouteModuleType(modulePath)
-
+    const role = getRouteModuleRole(modulePath)
     // Safe to assert since modulePaths is a subset of componentsByPath.keys()
     const component = componentsByPath.get(modulePath)!
     componentMap[role][modulePath] = component
