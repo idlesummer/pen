@@ -38,7 +38,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
     },
   })
   // Vite creates both client and SSR environments, so explicitly build only
-  // the server version.
+  // the server version
   await builder.build(builder.environments.ssr!)
   return diagnostics
 }
