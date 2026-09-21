@@ -4,16 +4,18 @@ import { App, createRouter, getRouteModuleType, GLOBAL_DEFAULT, GLOBAL_ERROR, De
 
 // Discovers every route module in the app - Vite resolves this glob at
 // build time against whichever app this gets bundled into, so this file
-// itself never needs to change per app.
-const modules = import.meta.glob('/app/**/*.tsx', { eager: true })
+// itself never needs to change per app. The brace-expansion keeps anything
+// that isn't a route file (a colocated component, say) out of `modules`
+// entirely, rather than relying on createRouter to drop it later.
+const modules = import.meta.glob('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 
 const moduleByPath = new Map(
   Object.entries(modules).map(([path, module]) => [path.replace(/^\/app\//, ''), (module as { default: unknown }).default]),
 )
 
-// createRouter compiles the route tree and narrows modulePaths down to real
-// route module files, dropping anything else that got glob-matched (e.g. a
-// colocated component that isn't itself a page/layout/loading/error/default).
+// createRouter compiles the route tree and narrows modulePaths down further -
+// a file can still be excluded here even with a valid role basename, e.g. one
+// living under a private folder or a malformed segment.
 const { matcher, modulePaths } = createRouter([...moduleByPath.keys()])
 
 const componentMap: ComponentMap = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
