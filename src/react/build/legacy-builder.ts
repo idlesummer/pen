@@ -1,4 +1,4 @@
-import type { CompileDiagnostic } from '@/router'
+import type { Diagnostic } from '@/router'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { findFiles } from '@/lib/find-files'
@@ -9,7 +9,7 @@ import { generateEntry } from './generate/entry'
 /** Discovers route modules under `appDir` and emits the generated
  *  `component-map` and `entry` files into `outDir` - the pre-Vite codegen
  *  pipeline, kept only for `pen test` while `pen build` moves to Vite. */
-export function legacyBuild(appDir: string, outDir: string): CompileDiagnostic[] {
+export function legacyBuild(appDir: string, outDir: string): Diagnostic[] {
   const filePaths = findFiles(appDir, '.tsx')
   const { modulePaths, diagnostics } = compile(filePaths)
 

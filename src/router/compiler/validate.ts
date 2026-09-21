@@ -1,6 +1,6 @@
 import type { RouteNode } from './route-tree'
 import type { PositionConflicts } from './position-node'
-import type { CompileDiagnostic } from './compile-diagnostic'
+import type { Diagnostic } from './diagnostic'
 import { forEach, getRouteSource } from './route-tree'
 
 /** The file a page-conflict diagnostic should name. A folder can own several
@@ -34,8 +34,8 @@ function findRepeatedParam(routeNode: RouteNode): string | undefined {
 /** Intrinsic issues: everything decidable from one folder and its ancestry.
  *  Reads the route tree and changes nothing, so it can run before or after
  *  compiling - the tree it inspects is the same either way. */
-export function validateRouteTree(routeTree: RouteNode): CompileDiagnostic[] {
-  const diagnostics: CompileDiagnostic[] = []
+export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
+  const diagnostics: Diagnostic[] = []
 
   forEach(routeTree, (routeNode) => {
     const segmentType = routeNode.type
@@ -88,8 +88,8 @@ export function validateRouteTree(routeTree: RouteNode): CompileDiagnostic[] {
  *  positions, which is why the build collects them as it goes. Route nodes are
  *  kept here rather than on the search node precisely so a diagnostic can name
  *  a file - a position has no file to name. */
-export function validateConflicts(conflicts: PositionConflicts[]): CompileDiagnostic[] {
-  const diagnostics: CompileDiagnostic[] = []
+export function validateConflicts(conflicts: PositionConflicts[]): Diagnostic[] {
+  const diagnostics: Diagnostic[] = []
 
   for (const { pages, defaults, catchalls, dynamics } of conflicts) {
     if (pages.length > 1) {
