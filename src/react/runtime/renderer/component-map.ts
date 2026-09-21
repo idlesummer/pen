@@ -13,6 +13,10 @@ export type ComponentMap = {
   error: Record<string, ErrorComponent>
   default: Record<string, DefaultComponent>
 }
+
+/** Any route module's component, before it's been classified into its specific role. */
+export type RouteComponent =
+  PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
 type ComponentRole = keyof ComponentMap
 type ComponentFor<Role extends ComponentRole> = ComponentMap[Role][string]
 
