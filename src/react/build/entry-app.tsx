@@ -40,9 +40,11 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
   return componentMap
 }
 
-// Converts module imports to app-relative path -> component
-const glob = '/app/**/{page,layout,loading,error,default}.tsx'
-const moduleImports = import.meta.glob<RouteModule>(glob, { eager: true })
+// Converts module imports to app-relative path -> component. The pattern
+// must be a literal string here, not a variable - import.meta.glob is a
+// build-time Vite transform, and its static analysis can't follow an
+// indirection to find the pattern.
+const moduleImports = import.meta.glob<RouteModule>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further
