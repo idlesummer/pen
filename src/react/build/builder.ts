@@ -27,7 +27,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
 
   const builder = await createBuilder({
     configFile: false,
-    // Bundle pen's runtime instead of leaving it external.
+    // Bundle pen's runtime instead of leaving it external
     ssr: {
       noExternal: [PACKAGE_NAME],
     },
