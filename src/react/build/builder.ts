@@ -6,13 +6,13 @@ import { findFiles } from '@/lib/find-files'
 import { compileApp } from '@/router'
 
 // Resolves next to this module both from source (src/react/build/) and once
-// bundled (tsdown copies entry-template.tsx flat into dist/, alongside
-// bin.mjs), so import.meta.url always has the right sibling.
-const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta.url))
+// bundled (tsdown copies entry-app.tsx flat into dist/, alongside bin.mjs),
+// so import.meta.url always has the right sibling.
+const ENTRY_APP = fileURLToPath(new URL('./entry-app.tsx', import.meta.url))
 
 /**
   * Compiles routes for diagnostics, then bundles the app with Vite.
-  * The bundle discovers routes independently through the entry template.
+  * The bundle discovers routes independently through the entry app.
   * Skips the Vite build when compilation has errors.
   *
   * @param appDir Directory containing the app's route files.
@@ -36,7 +36,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
-        input: ENTRY_TEMPLATE,
+        input: ENTRY_APP,
         output: { entryFileNames: 'entry.js' },
       },
     },
