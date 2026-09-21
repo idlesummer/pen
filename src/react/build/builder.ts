@@ -11,11 +11,9 @@ import { compileApp } from '@/router'
 const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta.url))
 
 /**
-  * Compiles routes for diagnostics, then bundles the app with Vite - the
-  * compiled tree itself is discarded, since the bundled entry template
-  * rediscovers routes on its own via `import.meta.glob`. Skips the (real,
-  * costly) Vite build entirely when the tree has errors, since there's no
-  * point bundling an app already known to be broken.
+  * Compiles routes for diagnostics, then bundles the app with Vite.
+  * The bundle discovers routes independently through the entry template.
+  * Skips the Vite build when compilation has errors.
   *
   * @param appDir Directory containing the app's route files.
   * @param outDir Directory where the built app is written.
@@ -29,21 +27,13 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
 
   const builder = await createBuilder({
     configFile: false,
-    // ssr:true already externalizes every resolvable node_modules package
-    // by default (confirmed empirically - react, ink, and react/jsx-runtime
-    // all stay real imports with no explicit `external` needed at all).
-    // pen's own runtime is the one package that default would ALSO
-    // externalize but shouldn't - it's meant to bundle into the app like any
-    // of the app's own source, not be a separate runtime dependency of it.
+    // Bundle pen's runtime instead of leaving it external.
     ssr: {
       noExternal: [PACKAGE_NAME],
     },
     build: {
       outDir,
-      // This bundles for Node (an Ink TUI, not a browser page) - without
-      // this, Vite's default client mode silently externalizes Node
-      // builtins (node:fs, ...) as browser-compat shims instead of leaving
-      // them as real imports.
+      // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
         input: ENTRY_TEMPLATE,
@@ -51,12 +41,8 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       },
     },
   })
-
-  // createBuilder always sets up a default 'client' environment alongside
-  // 'ssr' (confirmed empirically - build.ssr:true doesn't suppress it the
-  // way it does for the plain build() function), so builder.buildApp()
-  // would waste a whole redundant browser-mode build. Build only the one
-  // environment this app actually has.
+  // Vite creates both client and SSR environments, so explicitly build only
+  // the server version.
   await builder.build(builder.environments.ssr!)
   return diagnostics
 }
