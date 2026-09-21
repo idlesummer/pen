@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "pen build",
-    "start": "pen start"
+    "start": "pen start",
+    "start:native": "node .pen/dist/main.js"
   },
   "dependencies": {
     "@idlesummer/pen": "file:../..",
