@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "pen build",
     "test:build": "pen test",
     "test:start": "tsx start.mjs"
   },
