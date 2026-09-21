@@ -16,7 +16,7 @@ const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta
  * costly) Vite build entirely when the tree has errors, since there's no
  * point bundling an app already known to be broken.
  */
-export async function build(appDir: string, outDir: string): Promise<Diagnostic[]> {
+export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const { diagnostics } = compile(filePaths)
 
