@@ -42,6 +42,5 @@ export async function build(appDir: string, outDir: string): Promise<Diagnostic[
       },
     },
   })
-
   return diagnostics
 }
