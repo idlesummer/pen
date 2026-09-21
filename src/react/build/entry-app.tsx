@@ -7,10 +7,10 @@ import { App, createRouter, getRouteModuleType, GLOBAL_DEFAULT, GLOBAL_ERROR, De
 // itself never needs to change per app. The brace-expansion keeps anything
 // that isn't a route file (a colocated component, say) out of `modules`
 // entirely, rather than relying on createRouter to drop it later.
-const modules = import.meta.glob('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
+const modules = import.meta.glob<{ default: unknown }>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 
 const moduleByPath = new Map(
-  Object.entries(modules).map(([path, module]) => [path.replace(/^\/app\//, ''), (module as { default: unknown }).default]),
+  Object.entries(modules).map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]),
 )
 
 // createRouter compiles the route tree and narrows modulePaths down further -
