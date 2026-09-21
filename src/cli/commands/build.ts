@@ -8,7 +8,7 @@ export const buildCommand = defineCommand({
     description: 'Compile routes and bundle the app with Vite',
   },
   run: async () => {
-    const diagnostics = await buildApp('app', '.pen/dist')
+    const diagnostics = await buildApp('src/app', '.pen/dist')
     for (const { severity, text } of formatDiagnostics(diagnostics))
       console[severity](text)
 

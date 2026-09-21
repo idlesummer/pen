@@ -19,7 +19,7 @@ type RouteModule = { default: RouteComponent }
 function createComponentsByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
   const moduleEntries = Object.entries(modules)
   const componentsByPath = new Map(moduleEntries.map(([path, module]) => [
-    path.slice('/app/'.length),
+    path.slice('/src/app/'.length),
     module.default,
   ]))
   componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
@@ -40,8 +40,9 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
   return componentMap
 }
 
-// Maps paths to module objects
-const moduleImports = import.meta.glob<RouteModule>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
+// Maps paths to module objects - pattern must stay a literal string, not a
+// variable, since import.meta.glob is a build-time Vite transform
+const moduleImports = import.meta.glob<RouteModule>('/src/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further
