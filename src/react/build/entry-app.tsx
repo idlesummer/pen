@@ -49,5 +49,11 @@ const componentsByPath = createComponentsByPath(moduleImports)
 const { matcher, modulePaths } = createRouter([...componentsByPath.keys()])
 const componentMap = createComponentMap(modulePaths, componentsByPath)
 
-const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
+// Ink's own auto-detection treats a CI-flagged env as non-interactive even
+// with a real TTY attached, which some sandboxed/cloud terminals set by
+// default - deciding by stdout.isTTY alone avoids that false negative,
+// without forcing interactive mode onto genuinely piped output.
+const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />, {
+  interactive: process.stdout.isTTY,
+})
 await waitUntilExit()
