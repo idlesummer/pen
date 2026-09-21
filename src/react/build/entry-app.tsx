@@ -18,7 +18,9 @@ type RouteModule = { default: RouteComponent }
  *  component. */
 function createComponentsByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
   const moduleEntries = Object.entries(modules)
-  return new Map(moduleEntries.map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]))
+  // Every key is a glob match against '/app/**/...' below, so it's always
+  // rooted at '/app/' - a fixed-length slice is enough, no regex needed.
+  return new Map(moduleEntries.map(([path, module]) => [path.slice('/app/'.length), module.default]))
 }
 
 /** Buckets the compiled route tree's module paths by role - the two
