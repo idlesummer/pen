@@ -30,6 +30,11 @@ export async function build(appDir: string, outDir: string): Promise<Diagnostic[
     root: process.cwd(),
     build: {
       outDir,
+      // This bundles for Node (an Ink TUI, not a browser page) - without
+      // this, Vite's default client mode silently externalizes Node
+      // builtins (node:fs, ...) as browser-compat shims instead of leaving
+      // them as real imports.
+      ssr: true,
       rollupOptions: {
         input: ENTRY_TEMPLATE,
         // react/ink stay real imports, resolved from the app's own
