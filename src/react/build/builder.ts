@@ -1,6 +1,7 @@
 import type { Diagnostic } from '@/router'
 import { fileURLToPath } from 'node:url'
 import { createBuilder } from 'vite'
+import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
 import { compileApp } from '@/router'
 
@@ -28,6 +29,15 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
     // import.meta.glob('/app/**/*.tsx') inside the entry template is root-
     // relative - this is the root it resolves against.
     root: process.cwd(),
+    // ssr:true already externalizes every resolvable node_modules package
+    // by default (confirmed empirically - react, ink, and react/jsx-runtime
+    // all stay real imports with no explicit `external` needed at all).
+    // pen's own runtime is the one package that default would ALSO
+    // externalize but shouldn't - it's meant to bundle into the app like any
+    // of the app's own source, not be a separate runtime dependency of it.
+    ssr: {
+      noExternal: [PACKAGE_NAME],
+    },
     build: {
       outDir,
       // This bundles for Node (an Ink TUI, not a browser page) - without
@@ -37,10 +47,6 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       ssr: true,
       rolldownOptions: {
         input: ENTRY_TEMPLATE,
-        // react/ink stay real imports, resolved from the app's own
-        // node_modules at runtime; everything else (pen's own runtime
-        // included) gets bundled into the app.
-        external: ['react', 'ink'],
         // A fixed name, not the default content-hashed one - `pen start`
         // needs a predictable path to run (`node <outDir>/entry.js`).
         output: { entryFileNames: 'entry.js' },
