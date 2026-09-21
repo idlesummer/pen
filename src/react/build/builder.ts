@@ -2,7 +2,7 @@ import type { Diagnostic } from '@/router'
 import { fileURLToPath } from 'node:url'
 import { build as viteBuild } from 'vite'
 import { findFiles } from '@/lib/find-files'
-import { compile } from '@/router'
+import { compileApp } from '@/router'
 
 // Resolves next to this module both from source (src/react/build/) and once
 // bundled (tsdown copies entry-template.tsx flat into dist/, alongside
@@ -18,7 +18,7 @@ const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta
  */
 export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
-  const { diagnostics } = compile(filePaths)
+  const { diagnostics } = compileApp(filePaths)
 
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
     return diagnostics
