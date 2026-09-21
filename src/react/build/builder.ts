@@ -27,7 +27,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       noExternal: [PACKAGE_NAME],
     },
     build: {
-      outDir,
+      outDir, // should be ./pen/dist
       // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
