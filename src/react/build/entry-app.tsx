@@ -38,9 +38,7 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
       modulePath === GLOBAL_ERROR ? 'error' :
       getRouteModuleType(modulePath)
 
-    // Every non-sentinel modulePath here came from createRouter, whose input
-    // was [...componentsByPath.keys()] - it only narrows that list, never
-    // invents paths, so the lookup below can't miss.
+    // Safe to assert since modulePaths is a subset of componentsByPath.keys()
     const component = componentsByPath.get(modulePath)!
     componentMap[role][modulePath] = component
   }
