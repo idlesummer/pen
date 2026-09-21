@@ -35,8 +35,6 @@ export async function build(appDir: string, outDir: string): Promise<Diagnostic[
       // builtins (node:fs, ...) as browser-compat shims instead of leaving
       // them as real imports.
       ssr: true,
-      // rollupOptions is a deprecated alias for this, kept only for
-      // familiarity - same RolldownOptions shape, Vite now runs on Rolldown.
       rolldownOptions: {
         input: ENTRY_TEMPLATE,
         // react/ink stay real imports, resolved from the app's own
