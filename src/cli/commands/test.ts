@@ -10,7 +10,7 @@ export const testCommand = defineCommand({
   run: () => {
     const diagnostics = legacyBuild('app', '.pen/generated')
     for (const { severity, text } of formatDiagnostics(diagnostics))
-      (severity === 'error' ? console.error : console.warn)(text)
+      console[severity](text)
 
     if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
       throw new Error('Build failed')

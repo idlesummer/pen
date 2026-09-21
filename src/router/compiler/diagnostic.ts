@@ -1,6 +1,8 @@
 export type Diagnostic = {
   rule: string
-  severity: 'error' | 'warning'
+  // Named to match the console method it's meant to be dispatched to
+  // (console[severity](text)), not English ('warning').
+  severity: 'error' | 'warn'
   message: string
   files: string[]
 }
