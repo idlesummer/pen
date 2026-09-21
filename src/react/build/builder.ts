@@ -5,11 +5,6 @@ import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
 import { compileApp } from '@/router'
 
-// Resolves next to this module both from source (src/react/build/) and once
-// bundled (tsdown copies entry-app.tsx flat into dist/, alongside bin.mjs),
-// so import.meta.dirname always has the right sibling.
-const ENTRY_APP = join(import.meta.dirname, 'entry-app.tsx')
-
 /**
   * Compiles routes for diagnostics, then bundles the app with Vite.
   * The bundle discovers routes independently through the entry app.
@@ -36,7 +31,8 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
-        input: ENTRY_APP,
+        // The entry-app discovers the user's routes for bundling
+        input: join(import.meta.dirname, 'entry-app.tsx'),
         output: { entryFileNames: 'entry.js' },
       },
     },
