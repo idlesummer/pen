@@ -25,9 +25,9 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
 
   const builder = await createBuilder({
     configFile: false,
-    // import.meta.glob('/app/**/*.tsx') inside the entry template is root-
-    // relative - this is the root it resolves against.
-    root: process.cwd(),
+    // No explicit `root` - it defaults to process.cwd(), which is exactly
+    // what import.meta.glob('/app/**/*.tsx') inside the entry template
+    // needs (root-relative resolution), confirmed empirically.
     // ssr:true already externalizes every resolvable node_modules package
     // by default (confirmed empirically - react, ink, and react/jsx-runtime
     // all stay real imports with no explicit `external` needed at all).
