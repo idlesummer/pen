@@ -9,6 +9,7 @@ import { compileApp } from '@/router'
 // find the same file `pen build` just wrote.
 export const BUILD_OUT_DIR = '.pen/dist'
 export const BUILD_ENTRY_FILE = 'main.js'
+export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 
 /**
   * Compiles routes for diagnostics, then bundles the app with Vite.
