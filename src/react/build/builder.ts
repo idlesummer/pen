@@ -11,12 +11,16 @@ import { compileApp } from '@/router'
 const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta.url))
 
 /**
- * Compiles routes for diagnostics, then bundles the app with Vite - the
- * compiled tree itself is discarded, since the bundled entry template
- * rediscovers routes on its own via `import.meta.glob`. Skips the (real,
- * costly) Vite build entirely when the tree has errors, since there's no
- * point bundling an app already known to be broken.
- */
+  * Compiles routes for diagnostics, then bundles the app with Vite - the
+  * compiled tree itself is discarded, since the bundled entry template
+  * rediscovers routes on its own via `import.meta.glob`. Skips the (real,
+  * costly) Vite build entirely when the tree has errors, since there's no
+  * point bundling an app already known to be broken.
+  *
+  * @param appDir Directory containing the app's route files.
+  * @param outDir Directory where the built app is written.
+  * @returns Diagnostics produced while compiling the app.
+  */
 export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const diagnostics = compileApp(filePaths).diagnostics
@@ -25,9 +29,6 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
 
   const builder = await createBuilder({
     configFile: false,
-    // No explicit `root` - it defaults to process.cwd(), which is exactly
-    // what import.meta.glob('/app/**/*.tsx') inside the entry template
-    // needs (root-relative resolution), confirmed empirically.
     // ssr:true already externalizes every resolvable node_modules package
     // by default (confirmed empirically - react, ink, and react/jsx-runtime
     // all stay real imports with no explicit `external` needed at all).
