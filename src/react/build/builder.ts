@@ -46,8 +46,6 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       ssr: true,
       rolldownOptions: {
         input: ENTRY_TEMPLATE,
-        // A fixed name, not the default content-hashed one - `pen start`
-        // needs a predictable path to run (`node <outDir>/entry.js`).
         output: { entryFileNames: 'entry.js' },
       },
     },
