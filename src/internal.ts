@@ -6,6 +6,6 @@
 
 export { App } from './react'
 export type { ComponentMap, RouteComponent, RouteModule } from './react'
-export { DefaultFallback, ErrorFallback, toModuleByPath } from './react'
+export { DefaultFallback, ErrorFallback, toModuleByPath, toComponentMap } from './react'
 
 export { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleType, formatDiagnostics, compileApp, createRouter } from './router'
