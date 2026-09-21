@@ -28,7 +28,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
   const router = useRouter()
   const pathname = usePathname()
 
-  useEffect(() => console.log(FILE_TREE))
+  useEffect(() => console.log(FILE_TREE), [])
   useInput((input, key) => {
     if (key.return) {
       router.push(value)
