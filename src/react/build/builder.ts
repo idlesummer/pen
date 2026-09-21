@@ -1,5 +1,5 @@
 import type { Diagnostic } from '@/router'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { createBuilder } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
@@ -7,8 +7,8 @@ import { compileApp } from '@/router'
 
 // Resolves next to this module both from source (src/react/build/) and once
 // bundled (tsdown copies entry-app.tsx flat into dist/, alongside bin.mjs),
-// so import.meta.url always has the right sibling.
-const ENTRY_APP = fileURLToPath(new URL('./entry-app.tsx', import.meta.url))
+// so import.meta.dirname always has the right sibling.
+const ENTRY_APP = join(import.meta.dirname, 'entry-app.tsx')
 
 /**
   * Compiles routes for diagnostics, then bundles the app with Vite.
