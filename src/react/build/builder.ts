@@ -8,7 +8,7 @@ import { compileApp } from '@/router'
 // Default build output location - shared with `pen start`, which needs to
 // find the same file `pen build` just wrote.
 export const BUILD_OUT_DIR = '.pen/dist'
-export const BUILD_ENTRY_FILE = 'main.js'
+const BUILD_ENTRY_FILE = 'main.js'
 export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 
 /**
