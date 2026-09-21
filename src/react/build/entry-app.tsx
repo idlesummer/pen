@@ -37,7 +37,9 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
       modulePath === GLOBAL_ERROR ? ErrorFallback :
       componentsByPath.get(modulePath)
 
-    ;(componentMap[role] as Record<string, unknown>)[modulePath] = component
+    if (!component)
+      throw new Error(`No component discovered for route module "${modulePath}".`)
+    componentMap[role][modulePath] = component
   }
   return componentMap
 }
