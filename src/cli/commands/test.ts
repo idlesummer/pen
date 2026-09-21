@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty'
-import { reportDiagnostics } from '@/router'
+import { formatDiagnostics } from '@/router'
 import { legacyBuild } from '@/react/build'
 
 export const testCommand = defineCommand({
@@ -9,7 +9,8 @@ export const testCommand = defineCommand({
   },
   run: () => {
     const diagnostics = legacyBuild('app', '.pen/generated')
-    reportDiagnostics(diagnostics)
+    for (const { severity, text } of formatDiagnostics(diagnostics))
+      (severity === 'error' ? console.error : console.warn)(text)
 
     if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
       throw new Error('Build failed')

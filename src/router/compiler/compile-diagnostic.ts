@@ -5,15 +5,16 @@ export type CompileDiagnostic = {
   files: string[]
 }
 
-/** Prints compile diagnostics to the console, one line per diagnostic plus its files. */
-export function reportDiagnostics(diagnostics: CompileDiagnostic[]): void {
-  for (const { severity, rule, message, files } of diagnostics) {
-    const log = severity === 'error'
-      ? console.error
-      : console.warn
+export type FormattedDiagnostic = {
+  severity: CompileDiagnostic['severity']
+  text: string
+}
 
-    const header = `[${severity}] ${rule}: ${message}`
-    const output = [header, ...files.map(file => `  at ${file}`)]
-    log(output)
-  }
+/** Formats each diagnostic into display-ready text, one block per
+ *  diagnostic plus its files. Pure - callers decide where the text goes. */
+export function formatDiagnostics(diagnostics: CompileDiagnostic[]): FormattedDiagnostic[] {
+  return diagnostics.map(({ severity, rule, message, files }) => ({
+    severity,
+    text: [`[${severity}] ${rule}: ${message}`, ...files.map(file => `  at ${file}`)].join('\n'),
+  }))
 }
