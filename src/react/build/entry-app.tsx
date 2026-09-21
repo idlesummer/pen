@@ -17,9 +17,8 @@ type RouteModule = { default: RouteComponent }
  *  import.meta.glob returns them), reduced to appDir-relative path ->
  *  component. */
 function toModuleByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
-  return new Map(
-    Object.entries(modules).map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]),
-  )
+  const moduleEntries = Object.entries(modules)
+  return new Map(moduleEntries.map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]))
 }
 
 /** Buckets the compiled route tree's module paths by role - the two
