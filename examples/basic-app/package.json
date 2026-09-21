@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pen build",
+    "start": "pen start",
     "test:build": "pen test",
     "test:start": "tsx start.mjs"
   },
