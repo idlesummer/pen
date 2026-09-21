@@ -18,7 +18,7 @@ export type CompiledRoutes = {
  *
  * @param filePaths Route file paths to compile.
  */
-export function compile(filePaths: string[]): CompiledRoutes {
+export function compileApp(filePaths: string[]): CompiledRoutes {
   const routeTree = createRouteTree(filePaths)
   const [positionTree, conflicts, modulePaths] = createPositionTree(routeTree)
   const diagnostics = validateRouteTree(routeTree)
