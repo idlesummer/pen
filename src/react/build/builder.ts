@@ -1,6 +1,6 @@
 import type { Diagnostic } from '@/router'
 import { fileURLToPath } from 'node:url'
-import { build as viteBuild } from 'vite'
+import { createBuilder } from 'vite'
 import { findFiles } from '@/lib/find-files'
 import { compileApp } from '@/router'
 
@@ -23,7 +23,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
     return diagnostics
 
-  await viteBuild({
+  const builder = await createBuilder({
     configFile: false,
     // import.meta.glob('/app/**/*.tsx') inside the entry template is root-
     // relative - this is the root it resolves against.
@@ -47,5 +47,12 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       },
     },
   })
+
+  // createBuilder always sets up a default 'client' environment alongside
+  // 'ssr' (confirmed empirically - build.ssr:true doesn't suppress it the
+  // way it does for the plain build() function), so builder.buildApp()
+  // would waste a whole redundant browser-mode build. Build only the one
+  // environment this app actually has.
+  await builder.build(builder.environments.ssr!)
   return diagnostics
 }

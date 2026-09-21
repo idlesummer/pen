@@ -2,7 +2,7 @@ import type { Diagnostic } from '@/router'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { findFiles } from '@/lib/find-files'
-import { compile } from '@/router'
+import { compileApp } from '@/router'
 import { generateComponentMap } from './generate/component-map'
 import { generateEntry } from './generate/entry'
 
@@ -11,7 +11,7 @@ import { generateEntry } from './generate/entry'
  *  pipeline, kept only for `pen test` while `pen build` moves to Vite. */
 export function legacyBuild(appDir: string, outDir: string): Diagnostic[] {
   const filePaths = findFiles(appDir, '.tsx')
-  const { modulePaths, diagnostics } = compile(filePaths)
+  const { modulePaths, diagnostics } = compileApp(filePaths)
 
   mkdirSync(outDir, { recursive: true })
   writeFileSync(join(outDir, 'component-map.ts'), generateComponentMap({ appDir, outDir, modulePaths }))
