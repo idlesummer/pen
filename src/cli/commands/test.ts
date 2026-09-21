@@ -8,7 +8,7 @@ export const testCommand = defineCommand({
     description: 'Compile routes and generate static entry files (legacy codegen pipeline, kept for comparison while build/start move to Vite)',
   },
   run: () => {
-    const diagnostics = legacyBuild('app', '.pen/generated')
+    const diagnostics = legacyBuild('src/app', '.pen/generated')
     for (const { severity, text } of formatDiagnostics(diagnostics))
       console[severity](text)
 
