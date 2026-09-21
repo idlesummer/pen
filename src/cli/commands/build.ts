@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty'
-import { reportDiagnostics } from '@/router'
+import { formatDiagnostics } from '@/router'
 import { build } from '@/react/build'
 
 export const buildCommand = defineCommand({
@@ -9,7 +9,8 @@ export const buildCommand = defineCommand({
   },
   run: async () => {
     const diagnostics = await build('app', '.pen/dist')
-    reportDiagnostics(diagnostics)
+    for (const { severity, text } of formatDiagnostics(diagnostics))
+      (severity === 'error' ? console.error : console.warn)(text)
 
     if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
       throw new Error('Build failed')
