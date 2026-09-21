@@ -51,7 +51,7 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
     if (segmentType === 'catchall' && routeNode.children.length) {
       diagnostics.push({
         rule: 'non-terminal-catchall',
-        severity: 'warning',
+        severity: 'warn',
         message:
           `"${routeNode.path}" is a catch-all route and must be terminal, ` +
           'but has routes nested beneath it that can never be reached',
