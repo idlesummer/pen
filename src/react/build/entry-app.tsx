@@ -41,11 +41,7 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
     // Every non-sentinel modulePath here came from createRouter, whose input
     // was [...componentsByPath.keys()] - it only narrows that list, never
     // invents paths, so the lookup below can't miss.
-    const component =
-      modulePath === GLOBAL_DEFAULT ? DefaultFallback :
-      modulePath === GLOBAL_ERROR ? ErrorFallback :
-      componentsByPath.get(modulePath)!
-
+    const component = componentsByPath.get(modulePath)!
     componentMap[role][modulePath] = component
   }
   return componentMap
