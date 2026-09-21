@@ -8,8 +8,7 @@ import { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleType } from '@/router'
 import { ErrorFallback } from '../route-modules/ErrorBoundary'
 import { DefaultFallback } from '../route-modules/DefaultBoundary'
 
-/** Any route module's component, before it's been classified into its
- *  specific role. */
+/** Any route module's component, before it's been classified into its specific role. */
 export type RouteComponent =
   PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
 
