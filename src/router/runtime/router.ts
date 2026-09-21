@@ -1,4 +1,4 @@
-import type { CompileDiagnostic } from '../compiler'
+import type { Diagnostic } from '../compiler'
 import type { Match } from './matcher'
 import { compile } from '../compiler'
 import { match } from './matcher'
@@ -9,7 +9,7 @@ export type Matcher =
 export type Router = {
   matcher: Matcher
   modulePaths: string[] // for the generated component map
-  diagnostics: CompileDiagnostic[]
+  diagnostics: Diagnostic[]
 }
 
 /** Creates a router from route file paths: a matcher, diagnostics, and every

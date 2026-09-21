@@ -1,4 +1,4 @@
-import type { CompileDiagnostic } from './compile-diagnostic'
+import type { Diagnostic } from './diagnostic'
 import type { PositionNode } from './position-node'
 import { createRouteTree } from './route-tree'
 import { createPositionTree } from './position-tree'
@@ -10,7 +10,7 @@ export type CompiledRoutes = {
   /** Every module the tree can render, for the generated component map. */
   modulePaths: string[]
   /** Problems, each pointing at a file the user can open. */
-  diagnostics: CompileDiagnostic[]
+  diagnostics: Diagnostic[]
 }
 
 /**

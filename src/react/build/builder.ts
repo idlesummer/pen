@@ -1,4 +1,4 @@
-import type { CompileDiagnostic } from '@/router'
+import type { Diagnostic } from '@/router'
 import { fileURLToPath } from 'node:url'
 import { build as viteBuild } from 'vite'
 import { findFiles } from '@/lib/find-files'
@@ -16,7 +16,7 @@ const ENTRY_TEMPLATE = fileURLToPath(new URL('./entry-template.tsx', import.meta
  * costly) Vite build entirely when the tree has errors, since there's no
  * point bundling an app already known to be broken.
  */
-export async function build(appDir: string, outDir: string): Promise<CompileDiagnostic[]> {
+export async function build(appDir: string, outDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const { diagnostics } = compile(filePaths)
 
