@@ -1,6 +1,6 @@
 import { join, relative, sep } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleType } from '@/router'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleRole } from '@/router'
 import { GENERATED_HEADER } from './header'
 
 type ComponentMapOptions = {
@@ -27,16 +27,6 @@ function toImportStatement(appDir: string, outDir: string, modulePath: string, i
   return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
 }
 
-/** Which ComponentMap bucket a module path belongs to. GLOBAL_DEFAULT and
- *  GLOBAL_ERROR are synthetic sentinels, not real files, so they can't be
- *  classified by their (nonexistent) basename the way every other module
- *  path can. */
-function toRole(modulePath: string): string {
-  if (modulePath === GLOBAL_DEFAULT) return 'default'
-  if (modulePath === GLOBAL_ERROR) return 'error'
-  return getRouteModuleType(modulePath)
-}
-
 /** Emits the generated `component-map.ts`, statically importing each route
  *  module and bucketing it by role (page/layout/loading/error/default) into
  *  the generated ComponentMap. Assumes `outDir` is outside `appDir`. */
@@ -46,7 +36,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
 
   for (const [index, modulePath] of modulePaths.entries()) {
     imports.push(toImportStatement(appDir, outDir, modulePath, index))
-    entriesByRole[toRole(modulePath)]!.push(`    ${JSON.stringify(modulePath)}: Component${index},`)
+    entriesByRole[getRouteModuleRole(modulePath)]!.push(`    ${JSON.stringify(modulePath)}: Component${index},`)
   }
 
   const roleBlocks = Object.entries(entriesByRole).flatMap(([role, entries]) =>
