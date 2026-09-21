@@ -18,7 +18,13 @@ type RouteModule = { default: RouteComponent }
  *  component. */
 function createComponentsByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
   const moduleEntries = Object.entries(modules)
-  return new Map(moduleEntries.map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]))
+  const componentsByPath = new Map(moduleEntries.map(([path, module]) => [
+    path.replace(/^\/app\//, ''),
+    module.default,
+  ]))
+  componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
+  componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
+  return componentsByPath
 }
 
 /** Buckets the compiled route tree's module paths by role - the two
@@ -32,12 +38,12 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
       modulePath === GLOBAL_ERROR ? 'error' :
       getRouteModuleType(modulePath)
 
+    // Every non-sentinel modulePath here came from createRouter, whose input
+    // was [...componentsByPath.keys()] - it only narrows that list, never
+    // invents paths, so the lookup below can't miss.
     const component =
       modulePath === GLOBAL_DEFAULT ? DefaultFallback :
       modulePath === GLOBAL_ERROR ? ErrorFallback :
-      // modulePath came from createRouter, whose input was
-      // [...componentsByPath.keys()] - it only narrows that list, never
-      // invents paths, so this lookup can't miss.
       componentsByPath.get(modulePath)!
 
     componentMap[role][modulePath] = component
