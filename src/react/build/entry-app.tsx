@@ -49,16 +49,6 @@ const componentsByPath = createComponentsByPath(moduleImports)
 const { matcher, modulePaths } = createRouter([...componentsByPath.keys()])
 const componentMap = createComponentMap(modulePaths, componentsByPath)
 
-// TEMP diagnostic - remove once the reprint-instead-of-overwrite issue is resolved
-console.error('[pen diagnostic]', {
-  isTTY: process.stdout.isTTY,
-  stdinIsTTY: process.stdin.isTTY,
-  CI: process.env.CI,
-  TERM: process.env.TERM,
-  rows: process.stdout.rows,
-  columns: process.stdout.columns,
-})
-
 // Ink's own auto-detection treats a CI-flagged env as non-interactive even
 // with a real TTY attached, which some sandboxed/cloud terminals set by
 // default - deciding by stdout.isTTY alone avoids that false negative,
