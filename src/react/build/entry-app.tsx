@@ -34,15 +34,15 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
   const componentMap: ComponentMap = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const modulePath of modulePaths) {
     const role = getRouteModuleRole(modulePath)
-    // Safe to assert since modulePaths is a subset of componentsByPath.keys()
-    const component = componentsByPath.get(modulePath)!
+    const component = componentsByPath.get(modulePath)! // Safe since modulePaths is subset of componentsByPath.keys()
     componentMap[role][modulePath] = component
   }
   return componentMap
 }
 
 // Converts module imports to app-relative path -> component
-const moduleImports = import.meta.glob<RouteModule>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
+const glob = '/app/**/{page,layout,loading,error,default}.tsx'
+const moduleImports = import.meta.glob<RouteModule>(glob, { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further
