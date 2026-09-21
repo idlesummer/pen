@@ -42,17 +42,11 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
   return componentMap
 }
 
-// Discovers every route module in the app - Vite resolves this glob at
-// build time against whichever app this gets bundled into, so this file
-// itself never needs to change per app. The brace-expansion keeps anything
-// that isn't a route file (a colocated component, say) out of `modules`
-// entirely, rather than relying on createRouter to drop it later.
+/** Converts module imports to app-relative path -> component. */
 const moduleImports = import.meta.glob<RouteModule>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
-// createRouter compiles the route tree and narrows modulePaths down further -
-// a file can still be excluded here even with a valid role basename, e.g. one
-// living under a private folder or a malformed segment.
+// createRouter compiles the route tree and narrows modulePaths down further
 const { matcher, modulePaths } = createRouter([...componentsByPath.keys()])
 const componentMap = createComponentMap(modulePaths, componentsByPath)
 
