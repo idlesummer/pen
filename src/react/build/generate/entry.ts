@@ -9,7 +9,7 @@ export function generateEntry(): string {
     '',
     'import { createElement } from "react"',
     'import { render } from "ink"',
-    `import { App, createRouter } from "${PACKAGE_NAME}"`,
+    `import { App, createRouter } from "${PACKAGE_NAME}/internal"`,
     'import { componentMap } from "./component-map"',
     '',
     '// Each role bucket\'s own keys are the module paths - componentMap\'s',

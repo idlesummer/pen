@@ -1,6 +1,6 @@
-import type { ComponentMap, RouteModule } from '@idlesummer/pen'
+import type { ComponentMap, RouteModule } from '@idlesummer/pen/internal'
 import { render } from 'ink'
-import { App, createRouter, getRouteModuleType, GLOBAL_DEFAULT, GLOBAL_ERROR, DefaultFallback, ErrorFallback } from '@idlesummer/pen'
+import { App, createRouter, getRouteModuleType, GLOBAL_DEFAULT, GLOBAL_ERROR, DefaultFallback, ErrorFallback, toModuleByPath } from '@idlesummer/pen/internal'
 
 // Discovers every route module in the app - Vite resolves this glob at
 // build time against whichever app this gets bundled into, so this file
@@ -8,10 +8,7 @@ import { App, createRouter, getRouteModuleType, GLOBAL_DEFAULT, GLOBAL_ERROR, De
 // that isn't a route file (a colocated component, say) out of `modules`
 // entirely, rather than relying on createRouter to drop it later.
 const modules = import.meta.glob<RouteModule>('/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
-
-const moduleByPath = new Map(
-  Object.entries(modules).map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]),
-)
+const moduleByPath = toModuleByPath(modules)
 
 // createRouter compiles the route tree and narrows modulePaths down further -
 // a file can still be excluded here even with a valid role basename, e.g. one

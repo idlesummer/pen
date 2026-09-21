@@ -5,6 +5,7 @@ export default defineConfig({
   // Entry points
   entry: {
     index: 'src/index.ts',  // Library API
+    internal: 'src/internal.ts',  // Framework-internal API - for pen's own generated/bundled code
     bin: 'src/bin.ts',  // CLI executable entry
   },
 

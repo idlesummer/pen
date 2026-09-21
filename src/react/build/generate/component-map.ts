@@ -20,9 +20,9 @@ function toImportSpecifier(appDir: string, outDir: string, modulePath: string): 
  *  fallback for a sentinel path, otherwise a real app file. */
 function toImportStatement(appDir: string, outDir: string, modulePath: string, index: number): string {
   if (modulePath === GLOBAL_DEFAULT)
-    return `import { DefaultFallback as Component${index} } from "${PACKAGE_NAME}"`
+    return `import { DefaultFallback as Component${index} } from "${PACKAGE_NAME}/internal"`
   if (modulePath === GLOBAL_ERROR)
-    return `import { ErrorFallback as Component${index} } from "${PACKAGE_NAME}"`
+    return `import { ErrorFallback as Component${index} } from "${PACKAGE_NAME}/internal"`
 
   return `import Component${index} from "${toImportSpecifier(appDir, outDir, modulePath)}"`
 }
@@ -55,7 +55,7 @@ export function generateComponentMap({ appDir, outDir, modulePaths }: ComponentM
   return [
     GENERATED_HEADER,
     '',
-    `import type { ComponentMap } from "${PACKAGE_NAME}"`,
+    `import type { ComponentMap } from "${PACKAGE_NAME}/internal"`,
     ...imports,
     '',
     'export const componentMap: ComponentMap = {',

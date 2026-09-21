@@ -11,3 +11,12 @@ export type RouteComponent =
 
 /** The shape of a route module file - only its default export matters. */
 export type RouteModule = { default: RouteComponent }
+
+/** Discovered route modules, keyed by root-relative path (as
+ *  import.meta.glob returns them), reduced to appDir-relative path ->
+ *  component. */
+export function toModuleByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
+  return new Map(
+    Object.entries(modules).map(([path, module]) => [path.replace(/^\/app\//, ''), module.default]),
+  )
+}
