@@ -1,12 +1,12 @@
-import type { PageComponent } from '../renderer/route-modules/PageComponent'
-import type { LayoutComponent } from '../renderer/route-modules/LayoutComponent'
-import type { LoadingComponent } from '../renderer/route-modules/LoadingBoundary'
-import type { ErrorComponent } from '../renderer/route-modules/ErrorBoundary'
-import type { DefaultComponent } from '../renderer/route-modules/DefaultBoundary'
-import type { ComponentMap } from '../renderer/component-map'
+import type { PageComponent } from '../runtime/renderer/route-modules/PageComponent'
+import type { LayoutComponent } from '../runtime/renderer/route-modules/LayoutComponent'
+import type { LoadingComponent } from '../runtime/renderer/route-modules/LoadingBoundary'
+import type { ErrorComponent } from '../runtime/renderer/route-modules/ErrorBoundary'
+import type { DefaultComponent } from '../runtime/renderer/route-modules/DefaultBoundary'
+import type { ComponentMap } from '../runtime/renderer/component-map'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleType } from '@/router'
-import { ErrorFallback } from '../renderer/route-modules/ErrorBoundary'
-import { DefaultFallback } from '../renderer/route-modules/DefaultBoundary'
+import { ErrorFallback } from '../runtime/renderer/route-modules/ErrorBoundary'
+import { DefaultFallback } from '../runtime/renderer/route-modules/DefaultBoundary'
 
 /** Any route module's component, before it's been classified into its specific role. */
 export type RouteComponent =
