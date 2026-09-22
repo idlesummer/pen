@@ -46,7 +46,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <Text>Current path: {pathname}</Text>
         <Text>Browser url: {value}</Text>
       </Box>
-      <Box borderStyle="round" borderColor="green" paddingX={1}>
+      <Box borderStyle="round" justifyContent="center" paddingY={4} borderColor="green" paddingX={1}>
         {children}
       </Box>
     </Box>
