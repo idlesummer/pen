@@ -1,32 +1,20 @@
-import { use, useEffect } from 'react'
 import { Box, Text } from 'ink'
 
-let promise: Promise<string> | undefined
+// TEMP diagnostic - remove once confirmed this fires once per visit
+let fetchCount = 0
 
-const fetchData = (): Promise<string> =>
-  promise ??= new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
+const fetchData = (): Promise<string> => {
+  const count = ++fetchCount
+  console.error(`[slow diagnostic] fetchData call #${count}`)
+  return new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
+}
 
-/** Simulates a slow data fetch - use() suspends until it resolves, and the
- *  sibling loading.tsx shows in the meantime.
- *
- *  The cache has to live outside the component tree entirely, not in a hook.
- *  React's "stable promise via useMemo in a parent" pattern only works when
- *  that parent renders the Suspense boundary itself, putting it structurally
- *  above the boundary's retry scope. Here the boundary is inserted by the
- *  framework (wrapFrame wraps this page's output in <LoadingBoundary> before
- *  this file ever runs) - so this component, and anything it renders, is
- *  always *inside* that boundary, with no way to place code above it. Every
- *  retry re-renders the whole subtree from the boundary down, which wipes
- *  hook state (confirmed: even a two-component split showed the "outer"
- *  component re-rendering in lockstep with the one calling use()). A plain
- *  module-level variable is the only thing that actually sits outside the
- *  boundary's subtree.
- *
- *  The effect cleanup clears it on unmount, so leaving and coming back to
- *  this page refetches. */
-export default function SlowPage() {
-  useEffect(() => () => { promise = undefined }, [])
-  const data = use(fetchData())
+/** An async page - pen calls it outside React and suspends on the result,
+ *  so the sibling loading.tsx shows until it resolves. No cache, no hooks,
+ *  no use(): the render tree is memoized per navigation, so revisiting the
+ *  route re-runs this and refetches. */
+export default async function SlowPage() {
+  const data = await fetchData()
 
   return (
     <Box flexDirection="column">
