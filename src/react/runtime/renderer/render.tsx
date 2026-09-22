@@ -86,7 +86,6 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
   else {
     element = <Content params={contentParams} />
   }
-
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
     const frame = endpoint.frames[i]!
     element = wrapFrame(frame, element, params, slotElements, components, pathname)
@@ -94,14 +93,12 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
   return element
 }
 
-/**
- * Turns a router `Match` into a React element tree by rendering its slots
- * and wrapping the main match with its frame chain.
+/** Turns a router `Match` into a React element tree by rendering its slots
+ *  and wrapping the main match with its frame chain.
  *
- * @param mainMatch - The resolved route match to render.
- * @param components - The component map used to resolve route modules.
- * @returns The rendered React element tree.
- */
+ *  @param mainMatch - The resolved route match to render.
+ *  @param components - The component map used to resolve route modules.
+ *  @returns The rendered React element tree. */
 export function renderMatch(mainMatch: Match, components: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
