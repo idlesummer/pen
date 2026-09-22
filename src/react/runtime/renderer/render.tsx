@@ -92,17 +92,10 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
   const { endpoint, params, pathname } = match
   const Content = resolveContent(endpoint.content, components)
   const contentParams = sliceParams(params, endpoint.contentDepth)
-  let element: ReactNode
+  let element: ReactNode = isAsyncComponent(Content)
+    ? <AsyncContent promise={Content({ params: contentParams })} /> // validateAsyncPages ensures every async page has a loading boundary
+    : <Content params={contentParams} />
 
-  if (isAsyncComponent(Content)) {
-    // Safe to assume a loading.tsx exists somewhere in the frame chain -
-    // validateAsyncPages checks every async page for this eagerly, before
-    // any of them ever render.
-    element = <AsyncContent promise={Content({ params: contentParams })} />
-  }
-  else {
-    element = <Content params={contentParams} />
-  }
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
     const frame = endpoint.frames[i]!
     element = wrapFrame(frame, element, params, slotElements, components, pathname)
