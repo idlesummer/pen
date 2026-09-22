@@ -2,12 +2,30 @@ import type { ReactNode } from 'react'
 import type { Frame, Match, Params } from '@/router'
 import type { ComponentMap } from './component-map'
 import type { ParamTable } from './route-modules/ParamTable'
+import type { AsyncPageComponent, PageComponent } from './route-modules/PageComponent'
+import type { DefaultComponent } from './route-modules/DefaultBoundary'
+import { use } from 'react'
 import { resolveComponent, resolveContent } from './component-map'
 import { DefaultBoundary } from './route-modules/DefaultBoundary'
 import { LoadingBoundary } from './route-modules/LoadingBoundary'
 import { ErrorBoundary } from './route-modules/ErrorBoundary'
 
 type SlotElements = Record<string, ReactNode>
+
+/** Async pages are declared with `async`, so they're distinguishable before
+ *  being called - which matters, since a sync page can't be called outside
+ *  React without breaking its hooks. */
+function isAsyncComponent(Content: PageComponent | DefaultComponent): Content is AsyncPageComponent {
+  return Content.constructor.name === 'AsyncFunction'
+}
+
+/** Unwraps an async page's promise where the route's Suspense boundary can
+ *  catch it. The promise is created by renderChain, above the boundary, so
+ *  the same one comes back on every retry - creating it here instead would
+ *  make a new promise per retry and never settle. */
+function AsyncContent({ promise }: { promise: Promise<ReactNode> }): ReactNode {
+  return use(promise)
+}
 
 /** Returns params up to the given depth as an object. */
 function sliceParams(params: Params, depth: number): ParamTable {
@@ -55,7 +73,19 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
 function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { endpoint, params, pathname } = match
   const Content = resolveContent(endpoint.content, components)
-  let element: ReactNode = <Content params={sliceParams(params, endpoint.contentDepth)} />
+  const contentParams = sliceParams(params, endpoint.contentDepth)
+  let element: ReactNode
+
+  if (isAsyncComponent(Content)) {
+    // An async page always suspends, and pen only mounts a Suspense boundary
+    // where a loading.tsx exists - without one there'd be nothing to catch it.
+    if (!endpoint.frames.some(frame => frame.loading))
+      throw new Error(`"${endpoint.content}" is an async page, so its route needs a loading.tsx to suspend into.`)
+    element = <AsyncContent promise={Content({ params: contentParams })} />
+  }
+  else {
+    element = <Content params={contentParams} />
+  }
 
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
     const frame = endpoint.frames[i]!
