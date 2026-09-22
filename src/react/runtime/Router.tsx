@@ -21,5 +21,9 @@ type RouterProps = {
  *  survives. */
 export function Router({ matcher, componentMap }: RouterProps) {
   const pathname = usePathname()
-  return useMemo(() => renderMatch(matcher(pathname), componentMap), [pathname, matcher, componentMap])
+  const render = () => {
+    const match = matcher(pathname)
+    return renderMatch(match, componentMap)
+  }
+  return useMemo(render, [pathname, matcher, componentMap])
 }
