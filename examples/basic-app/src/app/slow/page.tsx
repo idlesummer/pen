@@ -1,18 +1,16 @@
+import { use } from 'react'
 import { Box, Text } from 'ink'
 
-let promise: Promise<void> | undefined
-let data: string | undefined
+let promise: Promise<string> | undefined
 
-/** Simulates a slow data fetch by throwing a promise on first render -
- *  the sibling loading.tsx shows until it resolves. */
+/** Simulates a slow data fetch - use() suspends until it resolves, and the
+ *  sibling loading.tsx shows in the meantime. */
+function fetchData(): Promise<string> {
+  return promise ??= new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
+}
+
 export default function SlowPage() {
-  if (data === undefined) {
-    promise ??= new Promise(resolve => setTimeout(() => {
-      data = 'fetched after 1.5s'
-      resolve()
-    }, 1500))
-    throw promise
-  }
+  const data = use(fetchData())
 
   return (
     <Box flexDirection="column">
