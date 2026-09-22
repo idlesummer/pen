@@ -1,1 +1,2 @@
-export { buildApp, BUILD_OUT_DIR, BUILD_ENTRY } from './builder'
+export { buildApp } from './builder'
+export { startApp } from './starter'
