@@ -1,13 +1,7 @@
 import { Box, Text } from 'ink'
 
-// TEMP diagnostic - remove once confirmed this fires once per visit
-let fetchCount = 0
-
-const fetchData = (): Promise<string> => {
-  const count = ++fetchCount
-  console.error(`[slow diagnostic] fetchData call #${count}`)
-  return new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
-}
+const fetchData = (): Promise<string> =>
+  new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
 
 /** An async page - pen calls it outside React and suspends on the result,
  *  so the sibling loading.tsx shows until it resolves. No cache, no hooks,
