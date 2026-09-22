@@ -1,28 +1,19 @@
-import { use, useMemo } from 'react'
+import { use, useEffect } from 'react'
 import { Box, Text } from 'ink'
 
-// TEMP diagnostic counters - remove once the "loading forever" issue is resolved
-let renderCount = 0
-let fetchCount = 0
+let promise: Promise<string> | undefined
 
-const fetchData = (): Promise<string> => {
-  fetchCount++
-  console.error(`[slow diagnostic] fetchData call #${fetchCount}`)
-  return new Promise(resolve => setTimeout(() => {
-    console.error(`[slow diagnostic] promise #${fetchCount} resolved`)
-    resolve('fetched after 1.5s')
-  }, 1500))
-}
+const fetchData = (): Promise<string> =>
+  promise ??= new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
 
 /** Simulates a slow data fetch - use() suspends until it resolves, and the
- *  sibling loading.tsx shows in the meantime. useMemo keeps the same promise
- *  across re-renders of this mount (use() needs a stable promise, not a new
- *  one every render), but a fresh mount - navigating back to this page -
- *  gets a fresh promise, so it refetches every visit. */
+ *  sibling loading.tsx shows in the meantime. The cache is module-level, not
+ *  a hook, since useMemo isn't guaranteed (and in practice doesn't) survive
+ *  the suspend/retry cycle here - a plain closure does. The effect cleanup
+ *  clears it on unmount, so leaving and coming back to this page refetches. */
 export default function SlowPage() {
-  console.error(`[slow diagnostic] SlowPage render #${++renderCount}`)
-  const promise = useMemo(fetchData, [])
-  const data = use(promise)
+  useEffect(() => () => { promise = undefined }, [])
+  const data = use(fetchData())
 
   return (
     <Box flexDirection="column">
