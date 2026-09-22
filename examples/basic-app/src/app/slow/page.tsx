@@ -1,20 +1,26 @@
 import { use, useMemo } from 'react'
 import { Box, Text } from 'ink'
 
-// TEMP diagnostic - remove once the split is confirmed to fix it
+// TEMP diagnostic - remove once the loading-forever issue is fully resolved
+const t0 = Date.now()
+const elapsed = () => `${Date.now() - t0}ms`
 let fetchCount = 0
+let slowPageRenderCount = 0
+let slowContentRenderCount = 0
 
 function fetchData(): Promise<string> {
   const count = ++fetchCount
-  console.error(`[slow diagnostic] fetchData call #${count}`)
+  console.error(`[slow diagnostic] ${elapsed()} fetchData call #${count}`)
   return new Promise(resolve => setTimeout(() => {
-    console.error(`[slow diagnostic] promise #${count} resolved`)
+    console.error(`[slow diagnostic] ${elapsed()} promise #${count} resolved`)
     resolve('fetched after 1.5s')
   }, 1500))
 }
 
 function SlowContent({ dataPromise }: { dataPromise: Promise<string> }) {
+  console.error(`[slow diagnostic] ${elapsed()} SlowContent render #${++slowContentRenderCount} (about to call use())`)
   const data = use(dataPromise)
+  console.error(`[slow diagnostic] ${elapsed()} SlowContent render #${slowContentRenderCount} PAST use() - data resolved, returning real JSX`)
 
   return (
     <Box flexDirection="column">
@@ -35,6 +41,7 @@ function SlowContent({ dataPromise }: { dataPromise: Promise<string> }) {
  *  fiber that suspends, not its ancestors - so SlowPage's useMemo survives
  *  SlowContent's retries fine. */
 export default function SlowPage() {
+  console.error(`[slow diagnostic] ${elapsed()} SlowPage render #${++slowPageRenderCount}`)
   const dataPromise = useMemo(fetchData, [])
   return <SlowContent dataPromise={dataPromise} />
 }
