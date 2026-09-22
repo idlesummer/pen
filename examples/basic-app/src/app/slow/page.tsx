@@ -1,16 +1,17 @@
-import { use } from 'react'
+import { use, useMemo } from 'react'
 import { Box, Text } from 'ink'
 
-let promise: Promise<string> | undefined
+const fetchData = (): Promise<string> =>
+  new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
 
 /** Simulates a slow data fetch - use() suspends until it resolves, and the
- *  sibling loading.tsx shows in the meantime. */
-function fetchData(): Promise<string> {
-  return promise ??= new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
-}
-
+ *  sibling loading.tsx shows in the meantime. useMemo keeps the same promise
+ *  across re-renders of this mount (use() needs a stable promise, not a new
+ *  one every render), but a fresh mount - navigating back to this page -
+ *  gets a fresh promise, so it refetches every visit. */
 export default function SlowPage() {
-  const data = use(fetchData())
+  const promise = useMemo(fetchData, [])
+  const data = use(promise)
 
   return (
     <Box flexDirection="column">
