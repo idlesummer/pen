@@ -12,6 +12,8 @@ export type AsyncPageComponent =
   (props: PageProps) => Promise<ReactNode>
 
 /** A page renders synchronously like any other component, or is declared
- *  async and suspends into its route's loading.tsx while it settles. */
+ *  async and suspends into its route's loading.tsx while it settles -
+ *  ComponentType already covers both, since FunctionComponent's own call
+ *  signature returns `ReactNode | Promise<ReactNode>`. */
 export type PageComponent =
-  ComponentType<PageProps> | AsyncPageComponent
+  ComponentType<PageProps>
