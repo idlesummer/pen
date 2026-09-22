@@ -1,5 +1,5 @@
 import type { RouteNode } from './route-tree'
-import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position-node'
+import type { Endpoint, Frame, PositionConflicts, PositionContext, PositionNode } from './position-node'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner } from './route-tree'
@@ -91,9 +91,21 @@ function getModulePaths(positions: Iterable<PositionNode>): string[] {
   return [...modules].sort()
 }
 
+/** Every real page endpoint in the tree - excludes fallback endpoints, since
+ *  those render a sentinel (GLOBAL_DEFAULT/GLOBAL_ERROR), never a real
+ *  page.tsx a page author could have declared async. */
+function getPageEndpoints(positions: Iterable<PositionNode>): Endpoint[] {
+  const endpoints: Endpoint[] = []
+  for (const position of positions) {
+    if (position.endpoint)
+      endpoints.push(position.endpoint)
+  }
+  return endpoints
+}
+
 // ── build ────────────────────────────────────────────────────────────────
 
-export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], string[]] {
+export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], string[], Endpoint[]] {
   const positionTree: PositionNode = {
     urlDepth: 0,
     staticness: 0,
@@ -144,5 +156,5 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
   for (const position of positions)
     setEndpoints(position, context)
 
-  return [positionTree, [...state.conflictsOf.values()], getModulePaths(positions)]
+  return [positionTree, [...state.conflictsOf.values()], getModulePaths(positions), getPageEndpoints(positions)]
 }
