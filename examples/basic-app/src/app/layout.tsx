@@ -7,6 +7,8 @@ const FILE_TREE = `
 Routes:
   /
   ├─ home/
+  │  ├─ [...ids]/
+  │  │  └─ page
   │  ├─ [id]/
   │  │  └─ page
   │  ├─ about/
