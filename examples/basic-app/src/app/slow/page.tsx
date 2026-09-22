@@ -1,26 +1,32 @@
-import { use, useMemo } from 'react'
+import { use, useEffect } from 'react'
 import { Box, Text } from 'ink'
 
-// TEMP diagnostic - remove once the loading-forever issue is fully resolved
-const t0 = Date.now()
-const elapsed = () => `${Date.now() - t0}ms`
-let fetchCount = 0
-let slowPageRenderCount = 0
-let slowContentRenderCount = 0
+let promise: Promise<string> | undefined
 
-function fetchData(): Promise<string> {
-  const count = ++fetchCount
-  console.error(`[slow diagnostic] ${elapsed()} fetchData call #${count}`)
-  return new Promise(resolve => setTimeout(() => {
-    console.error(`[slow diagnostic] ${elapsed()} promise #${count} resolved`)
-    resolve('fetched after 1.5s')
-  }, 1500))
-}
+const fetchData = (): Promise<string> =>
+  promise ??= new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
 
-function SlowContent({ dataPromise }: { dataPromise: Promise<string> }) {
-  console.error(`[slow diagnostic] ${elapsed()} SlowContent render #${++slowContentRenderCount} (about to call use())`)
-  const data = use(dataPromise)
-  console.error(`[slow diagnostic] ${elapsed()} SlowContent render #${slowContentRenderCount} PAST use() - data resolved, returning real JSX`)
+/** Simulates a slow data fetch - use() suspends until it resolves, and the
+ *  sibling loading.tsx shows in the meantime.
+ *
+ *  The cache has to live outside the component tree entirely, not in a hook.
+ *  React's "stable promise via useMemo in a parent" pattern only works when
+ *  that parent renders the Suspense boundary itself, putting it structurally
+ *  above the boundary's retry scope. Here the boundary is inserted by the
+ *  framework (wrapFrame wraps this page's output in <LoadingBoundary> before
+ *  this file ever runs) - so this component, and anything it renders, is
+ *  always *inside* that boundary, with no way to place code above it. Every
+ *  retry re-renders the whole subtree from the boundary down, which wipes
+ *  hook state (confirmed: even a two-component split showed the "outer"
+ *  component re-rendering in lockstep with the one calling use()). A plain
+ *  module-level variable is the only thing that actually sits outside the
+ *  boundary's subtree.
+ *
+ *  The effect cleanup clears it on unmount, so leaving and coming back to
+ *  this page refetches. */
+export default function SlowPage() {
+  useEffect(() => () => { promise = undefined }, [])
+  const data = use(fetchData())
 
   return (
     <Box flexDirection="column">
@@ -31,17 +37,4 @@ function SlowContent({ dataPromise }: { dataPromise: Promise<string> }) {
       <Text color="yellow">data: {data}</Text>
     </Box>
   )
-}
-
-/** Simulates a slow data fetch - use() suspends until it resolves, and the
- *  sibling loading.tsx shows in the meantime. The promise has to be created
- *  in a component that itself never suspends: SlowPage owns the useMemo and
- *  passes the promise down as a prop, while SlowContent is the one that
- *  actually calls use() and suspends. React only wipes hook state on the
- *  fiber that suspends, not its ancestors - so SlowPage's useMemo survives
- *  SlowContent's retries fine. */
-export default function SlowPage() {
-  console.error(`[slow diagnostic] ${elapsed()} SlowPage render #${++slowPageRenderCount}`)
-  const dataPromise = useMemo(fetchData, [])
-  return <SlowContent dataPromise={dataPromise} />
 }
