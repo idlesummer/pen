@@ -8,6 +8,7 @@ import {
   GLOBAL_DEFAULT,
   GLOBAL_ERROR,
   getRouteModuleRole,
+  validateAsyncPages,
 } from '@idlesummer/pen/internal'
 
 /** The shape of a route module file - only its default export matters. */
@@ -46,7 +47,8 @@ const moduleImports = import.meta.glob<RouteModule>('/src/app/**/{page,layout,lo
 const componentsByPath = createComponentsByPath(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further
-const { matcher, modulePaths } = createRouter([...componentsByPath.keys()])
+const { matcher, modulePaths, pageEndpoints } = createRouter([...componentsByPath.keys()])
+validateAsyncPages(pageEndpoints, componentsByPath)
 const componentMap = createComponentMap(modulePaths, componentsByPath)
 
 // Ink's own auto-detection treats a CI-flagged env as non-interactive even
