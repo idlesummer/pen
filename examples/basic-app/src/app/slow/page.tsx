@@ -1,19 +1,26 @@
-import { use, useEffect } from 'react'
+import { use, useRef } from 'react'
 import { Box, Text } from 'ink'
 
-let promise: Promise<string> | undefined
+// TEMP diagnostic counter - remove once useRef is confirmed to survive
+// the suspend/retry cycle
+let fetchCount = 0
 
-const fetchData = (): Promise<string> =>
-  promise ??= new Promise(resolve => setTimeout(() => resolve('fetched after 1.5s'), 1500))
+const fetchData = (): Promise<string> => {
+  const count = ++fetchCount
+  console.error(`[slow diagnostic] fetchData call #${count}`)
+  return new Promise(resolve => setTimeout(() => {
+    console.error(`[slow diagnostic] promise #${count} resolved`)
+    resolve('fetched after 1.5s')
+  }, 1500))
+}
 
 /** Simulates a slow data fetch - use() suspends until it resolves, and the
- *  sibling loading.tsx shows in the meantime. The cache is module-level, not
- *  a hook, since useMemo isn't guaranteed (and in practice doesn't) survive
- *  the suspend/retry cycle here - a plain closure does. The effect cleanup
- *  clears it on unmount, so leaving and coming back to this page refetches. */
+ *  sibling loading.tsx shows in the meantime. useRef holds the promise so
+ *  it's stable across re-renders of this mount; a fresh mount (navigating
+ *  back to this page) gets its own ref, so it refetches every visit. */
 export default function SlowPage() {
-  useEffect(() => () => { promise = undefined }, [])
-  const data = use(fetchData())
+  const promiseRef = useRef<Promise<string>>(undefined)
+  const data = use(promiseRef.current ??= fetchData())
 
   return (
     <Box flexDirection="column">
