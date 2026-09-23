@@ -1,4 +1,4 @@
-export { App } from './App'
+export { App } from './renderer/App'
 export { renderMatch } from './renderer/render'
 export type { ComponentMap, RouteComponent } from './renderer/component-map'
 export type { ParamTable } from './renderer/components/ParamTable'

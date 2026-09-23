@@ -1,8 +1,8 @@
 import type { Matcher } from '@/core/runtime'
-import type { ComponentMap } from './renderer/component-map'
+import type { ComponentMap } from './component-map'
 import { useMemo } from 'react'
-import { usePathname } from './navigation/hooks/use-pathname'
-import { renderMatch } from './renderer/render'
+import { usePathname } from '../navigation/hooks/use-pathname'
+import { renderMatch } from './render'
 
 type RouterProps = {
   matcher: Matcher
