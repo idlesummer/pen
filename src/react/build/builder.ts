@@ -20,7 +20,6 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
  *  and it's closed before this returns. */
 async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent>> {
   const server = await createServer({ configFile: false, server: { middlewareMode: true } })
-
   try {
     const componentsByPath = new Map<string, RouteComponent>()
     for (const filePath of filePaths) {
