@@ -32,6 +32,15 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   }
 }
 
+/** Vite/rolldown errors commonly carry the offending file as `.id` - named
+ *  when present, since formatDiagnostics can point at it like any other
+ *  diagnostic; omitted otherwise rather than guessed. */
+function errorFile(error: unknown): string[] {
+  if (error && typeof error === 'object' && 'id' in error && typeof error.id === 'string')
+    return [error.id]
+  return []
+}
+
 /** Compiles routes, validates them, then bundles the app with Vite. The
   * bundle discovers routes independently through the entry app. Skips
   * later stages once earlier ones report an error, so a broken app never
@@ -75,12 +84,8 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
     return diagnostics
   }
   catch (error) {
-    // Everything above this point is either findFiles (throws a clean,
-    // known message) or Vite/rolldown (throws its own transform/bundle
-    // errors, e.g. a syntax error in an app file). Neither goes through
-    // formatDiagnostics on its own, so without this they'd reach the CLI
-    // as a raw uncaught exception instead of the same reporting path
-    // every other failure in this pipeline uses.
+    // FindFiles and Vite/rolldown throw regular errors, so route them through
+    // the same reporting path as the rest of the pipeline.
     return [{
       rule: 'build-failed',
       severity: 'error',
@@ -88,13 +93,4 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
       files: errorFile(error),
     }]
   }
-}
-
-/** Vite/rolldown errors commonly carry the offending file as `.id` - named
- *  when present, since formatDiagnostics can point at it like any other
- *  diagnostic; omitted otherwise rather than guessed. */
-function errorFile(error: unknown): string[] {
-  if (error && typeof error === 'object' && 'id' in error && typeof error.id === 'string')
-    return [error.id]
-  return []
 }
