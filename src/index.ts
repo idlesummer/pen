@@ -11,5 +11,5 @@ export { renderMatch } from './react'
 export { NavigationProvider } from './react'
 export { useHistory, useNavigate, usePathname, useRouter, useSearchParams } from './react'
 
-export type { RouteNode, Endpoint, Frame, PositionConflicts, PositionNode, Diagnostic, FormattedDiagnostic } from './router'
-export type { Match, Matcher, Params, Router } from './router'
+export type { RouteNode, Endpoint, Frame, PositionConflicts, PositionNode, Diagnostic, FormattedDiagnostic } from './core'
+export type { Match, Matcher, Params, Router } from './core'

@@ -1,9 +1,9 @@
-import type { Diagnostic } from '@/router'
+import type { Diagnostic } from '@/core'
 import { join } from 'node:path'
 import { createBuilder } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
-import { compileApp } from '@/router'
+import { compileApp } from '@/core'
 import { validateModuleExports } from './validate'
 
 // Build output location - starter.ts needs to find the same file this writes.

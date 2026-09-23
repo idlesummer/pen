@@ -1,7 +1,7 @@
-import type { Diagnostic, Endpoint } from '@/router'
+import type { Diagnostic, Endpoint } from '@/core'
 import type { RouteComponent } from '@/react'
 import { createServer } from 'vite'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/router'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/core'
 import { DefaultFallback, ErrorFallback, isAsyncComponent } from '@/react'
 
 /** Imports every route module for real through Vite's transform pipeline -
