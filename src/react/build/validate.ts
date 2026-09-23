@@ -7,7 +7,7 @@ import { isAsyncComponent } from '@/react'
  *  catches what TypeScript alone can't guarantee (a missing default export,
  *  or one of the wrong shape). The same failure Next.js surfaces as "the
  *  default export is not a React Component". */
-export function validateComponentExports(modulePaths: string[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
+export function validateComponentExports(modulePaths: string[], componentsByPath: Map<string, RouteComponent | undefined>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const path of modulePaths) {
@@ -32,7 +32,7 @@ export function validateComponentExports(modulePaths: string[], componentsByPath
  *  there is actually usable, the same question validateComponentExports
  *  asks; isAsyncComponent would throw reading .constructor off a value
  *  that fails it. */
-export function validateAsyncPages(pageEndpoints: Endpoint[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
+export function validateAsyncPages(pageEndpoints: Endpoint[], componentsByPath: Map<string, RouteComponent | undefined>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
