@@ -39,7 +39,7 @@ export function validateAsyncPages(pageEndpoints: Endpoint[], componentsByPath: 
     const Content = componentsByPath.get(endpoint.content)! // Safe - every real page endpoint has a discovered component
     return isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)
   })
-  if (broken.length > 0) {
+  if (broken.length) {
     const messages = broken.map(endpoint => `"${endpoint.content}" is an async page, so its route needs a loading.tsx to suspend into.`)
     throw new Error(messages.join('\n'))
   }
@@ -92,6 +92,7 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
   const { endpoint, params, pathname } = match
   const Content = resolveContent(endpoint.content, components)
   const contentParams = sliceParams(params, endpoint.contentDepth)
+
   let element: ReactNode = isAsyncComponent(Content)
     ? <AsyncContent promise={Content({ params: contentParams })} /> // validateAsyncPages ensures every async page has a loading boundary
     : <Content params={contentParams} />
@@ -111,8 +112,8 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
  *  @returns The rendered React element tree. */
 export function renderMatch(mainMatch: Match, components: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
+
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
     slotElements[slotName] = renderChain(slotMatch, {}, components)
-
   return renderChain(mainMatch, slotElements, components)
 }
