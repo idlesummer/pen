@@ -19,7 +19,11 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
  *  in middleware mode does the importing; nothing here is served over HTTP,
  *  and it's closed before this returns. */
 async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true } })
+  // Silent: a transform error here still throws and reaches buildApp's own
+  // catch, which reports it through the same Diagnostic path as everything
+  // else - Vite's own dev-server logger would otherwise print it a second
+  // time, ahead of and separately from that diagnostic.
+  const server = await createServer({ configFile: false, logLevel: 'silent', server: { middlewareMode: true } })
   try {
     const componentsByPath = new Map<string, RouteComponent | undefined>()
     for (const filePath of filePaths) {
@@ -45,33 +49,58 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   * @returns Diagnostics produced while compiling and validating the app.
   */
 export async function buildApp(appDir: string): Promise<Diagnostic[]> {
-  const filePaths = findFiles(appDir, '.tsx')
-  const componentsByPath = await loadComponents(appDir, filePaths)
-  const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
+  try {
+    const filePaths = findFiles(appDir, '.tsx')
+    const componentsByPath = await loadComponents(appDir, filePaths)
+    const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-  diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
-  diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
-  if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
-    return diagnostics
+    diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
+    diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
+    if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
+      return diagnostics
 
-  const builder = await createBuilder({
-    configFile: false,
-    ssr: {  // Bundle pen's runtime instead of leaving it external
-      noExternal: [PACKAGE_NAME],
-    },
-    build: {
-      outDir: BUILD_OUT_DIR,
-      // Build for Node so imports work instead of being treated as browser code
-      ssr: true,
-      rolldownOptions: {
-        // The entry-app template discovers the user's routes for bundling
-        input: join(import.meta.dirname, 'templates/entry-app.tsx'),
-        output: { entryFileNames: BUILD_ENTRY_FILE },
+    const builder = await createBuilder({
+      configFile: false,
+      ssr: {  // Bundle pen's runtime instead of leaving it external
+        noExternal: [PACKAGE_NAME],
       },
-    },
-  })
-  // Vite creates both client and SSR environments, so explicitly build only
-  // the server version
-  await builder.build(builder.environments.ssr!)
-  return diagnostics
+      build: {
+        outDir: BUILD_OUT_DIR,
+        // Build for Node so imports work instead of being treated as browser code
+        ssr: true,
+        rolldownOptions: {
+          // The entry-app template discovers the user's routes for bundling
+          input: join(import.meta.dirname, 'templates/entry-app.tsx'),
+          output: { entryFileNames: BUILD_ENTRY_FILE },
+        },
+      },
+    })
+    // Vite creates both client and SSR environments, so explicitly build only
+    // the server version
+    await builder.build(builder.environments.ssr!)
+    return diagnostics
+  }
+  catch (error) {
+    // Everything above this point is either findFiles (throws a clean,
+    // known message) or Vite/rolldown (throws its own transform/bundle
+    // errors, e.g. a syntax error in an app file). Neither goes through
+    // formatDiagnostics on its own, so without this they'd reach the CLI
+    // as a raw uncaught exception instead of the same reporting path
+    // every other failure in this pipeline uses.
+    return [{
+      rule: 'build-failed',
+      severity: 'error',
+      message: error instanceof Error ? error.message : String(error),
+      files: errorFile(error),
+    }]
+  }
+}
+
+/** Vite/rolldown errors commonly carry the offending file as `.id` - named
+ *  when present, since formatDiagnostics can point at it like any other
+ *  diagnostic; omitted otherwise rather than guessed. */
+function errorFile(error: unknown): string[] {
+  if (error && typeof error === 'object' && 'id' in error && typeof error.id === 'string')
+    return [error.id]
+  return []
 }
