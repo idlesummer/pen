@@ -59,7 +59,7 @@ Without this guarantee, `@sidebar` would just be missing from the render output 
 
 ## runtime
 
-`src/router/` (decision layer) and `src/react/runtime/` (runtime layer) are deliberately separate - router has zero React/Ink imports anywhere, produces plain data (a `RenderNode` tree), and every "what if" (unmatched URL, missing slot content) gets resolved *inside* it, provably, before any component ever renders. The runtime layer only translates already-decided data into elements; it never has to guess.
+`src/core/` (decision layer) and `src/react/runtime/` (runtime layer) are deliberately separate - core has zero React/Ink imports anywhere, produces plain data (a `RenderNode` tree), and every "what if" (unmatched URL, missing slot content) gets resolved *inside* it, provably, before any component ever renders. The runtime layer only translates already-decided data into elements; it never has to guess.
 
 Navigation state is the one thing genuinely runtime-only - it doesn't exist until an app instance is alive. Three layers:
 

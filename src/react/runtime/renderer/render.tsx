@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Frame, Match, Params } from '@/router'
+import type { Frame, Match, Params } from '@/core'
 import type { ComponentMap } from './component-map'
 import type { ParamTable } from './route-modules/ParamTable'
 import { use } from 'react'
