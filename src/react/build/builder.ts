@@ -28,16 +28,14 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   }
 }
 
-/**
-  * Compiles routes, validates them, then bundles the app with Vite. The
+/** Compiles routes, validates them, then bundles the app with Vite. The
   * bundle discovers routes independently through the entry app. Skips
   * later stages once earlier ones report an error, so a broken app never
   * produces a bundle that would only fail once someone runs it.
   *
   * @param appDir Directory containing the app's route files.
-  * @returns Diagnostics produced while compiling and validating the app.
-  */
-export async function buildApp(appDir: string, outDir: string, ): Promise<Diagnostic[]> {
+  * @returns Diagnostics produced while compiling and validating the app. */
+export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const components = await loadComponents(appDir, filePaths)
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
