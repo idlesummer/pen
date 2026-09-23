@@ -1,10 +1,12 @@
 import type { Diagnostic } from '@/core'
+import type { RouteComponent } from '@/react'
 import { join } from 'node:path'
-import { createBuilder } from 'vite'
+import { createBuilder, createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
-import { compileApp } from '@/core'
-import { validateModuleExports } from './validate'
+import { compileApp, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/core'
+import { DefaultFallback, ErrorFallback } from '@/react'
+import { validateAsyncPages, validateComponentExports } from './validate'
 
 // Build output location - starter.ts needs to find the same file this writes.
 export const BUILD_OUT_DIR = '.pen/dist'
@@ -23,7 +25,10 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
-  diagnostics.push(...await validateModuleExports(appDir, filePaths, modulePaths, pageEndpoints))
+
+  const componentsByPath = await loadComponents(appDir, filePaths)
+  diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
+  diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
     return diagnostics
 
@@ -47,4 +52,27 @@ export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   // the server version
   await builder.build(builder.environments.ssr!)
   return diagnostics
+}
+
+/** Imports every route module for real through Vite's transform pipeline -
+ *  the only way to know facts like "is this page async", which exist only
+ *  on the executed function, never on its file path. A transient dev server
+ *  in middleware mode does the importing; nothing here is served over HTTP,
+ *  and it's closed before this returns. */
+async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent>> {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true } })
+
+  try {
+    const componentsByPath = new Map<string, RouteComponent>()
+    for (const filePath of filePaths) {
+      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default: RouteComponent }
+      componentsByPath.set(filePath, module.default)
+    }
+    componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
+    componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
+    return componentsByPath
+  }
+  finally {
+    await server.close()
+  }
 }
