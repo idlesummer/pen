@@ -27,15 +27,15 @@ export function validateComponentExports(modulePaths: string[], componentsByPath
 /** Every async page's frame chain needs a loading.tsx to suspend into -
  *  checked against every route the app can render, not reactively on
  *  whichever one a user happens to visit first, so a misconfigured page
- *  can't ship silently. The typeof guard skips a module already reported
- *  invalid by validateComponentExports, since isAsyncComponent would throw
- *  on a non-function value. */
+ *  can't ship silently. The `Content &&` guard skips a module already
+ *  reported invalid by validateComponentExports, since isAsyncComponent
+ *  would throw reading .constructor off a nullish default export. */
 export function validateAsyncPages(pageEndpoints: Endpoint[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
     const Content = componentsByPath.get(endpoint.content)! // Safe - every real page endpoint has a discovered component
-    if (typeof Content === 'function' && isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
+    if (Content && isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push({
         rule: 'async-page-missing-loading',
         severity: 'error',
