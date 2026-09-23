@@ -9,7 +9,7 @@ export const buildCommand = defineCommand({
   },
   run: async () => {
     const BUILD_APP_DIR = './src/app'
-    const BUILD_OUT_DIR = './pen/dist'
+    const BUILD_OUT_DIR = '.pen/dist'
     const diagnostics = await buildApp(BUILD_APP_DIR, BUILD_OUT_DIR)
 
     for (const { severity, text } of formatDiagnostics(diagnostics))
