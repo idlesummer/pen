@@ -1,24 +1,15 @@
 import type { ReactNode } from 'react'
-import type { Endpoint, Frame, Match, Params } from '@/router'
-import type { ComponentMap, RouteComponent } from './component-map'
+import type { Frame, Match, Params } from '@/router'
+import type { ComponentMap } from './component-map'
 import type { ParamTable } from './route-modules/ParamTable'
-import type { AsyncPageComponent } from './route-modules/PageComponent'
 import { use } from 'react'
 import { resolveComponent, resolveContent } from './component-map'
+import { isAsyncComponent } from './route-modules/PageComponent'
 import { DefaultBoundary } from './route-modules/DefaultBoundary'
 import { LoadingBoundary } from './route-modules/LoadingBoundary'
 import { ErrorBoundary } from './route-modules/ErrorBoundary'
 
 type SlotElements = Record<string, ReactNode>
-
-/** Async pages are declared with `async`, so they're distinguishable before
- *  being called - which matters, since a sync page can't be called outside
- *  React without breaking its hooks. Takes any RouteComponent, not just a
- *  page, since validateAsyncPages checks entries from a map spanning every
- *  role - the check itself is generic, just a constructor name. */
-function isAsyncComponent(Content: RouteComponent): Content is AsyncPageComponent {
-  return Content.constructor.name === 'AsyncFunction'
-}
 
 /** Unwraps an async page's promise where the route's Suspense boundary can
  *  catch it. The promise is created by renderChain, above the boundary, so
@@ -26,23 +17,6 @@ function isAsyncComponent(Content: RouteComponent): Content is AsyncPageComponen
  *  make a new promise per retry and never settle. */
 function AsyncContent({ promise }: { promise: Promise<ReactNode> }): ReactNode {
   return use(promise)
-}
-
-/** Fails fast, once, for every async page whose frame chain has no
- *  loading.tsx to suspend into - checked eagerly against every route the
- *  app can render, not reactively on whichever one a user happens to visit
- *  first, so a misconfigured page can't ship silently. Keeps renderChain
- *  itself free of validation concerns; it can assume every async page it
- *  encounters is already known-good. */
-export function validateAsyncPages(pageEndpoints: Endpoint[], componentsByPath: Map<string, RouteComponent>): void {
-  const broken = pageEndpoints.filter((endpoint) => {
-    const Content = componentsByPath.get(endpoint.content)! // Safe - every real page endpoint has a discovered component
-    return isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)
-  })
-  if (broken.length > 0) {
-    const messages = broken.map(endpoint => `"${endpoint.content}" is an async page, so its route needs a loading.tsx to suspend into.`)
-    throw new Error(messages.join('\n'))
-  }
 }
 
 /** Returns params up to the given depth as an object. */
@@ -96,7 +70,7 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
 
   if (isAsyncComponent(Content)) {
     // Safe to assume a loading.tsx exists somewhere in the frame chain -
-    // validateAsyncPages checks every async page for this eagerly, before
+    // validateModules checks every async page for this eagerly, before
     // any of them ever render.
     element = <AsyncContent promise={Content({ params: contentParams })} />
   }
