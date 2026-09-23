@@ -24,9 +24,6 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
-  if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
-    return diagnostics
-
   diagnostics.push(...await validateModuleExports(appDir, filePaths, modulePaths, pageEndpoints))
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
     return diagnostics
