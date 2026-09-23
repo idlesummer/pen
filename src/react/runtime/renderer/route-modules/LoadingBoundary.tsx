@@ -1,7 +1,7 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { FunctionComponent, ReactNode } from 'react'
 import { Suspense } from 'react'
 
-export type LoadingComponent = ComponentType<Record<string, never>>
+export type LoadingComponent = FunctionComponent<Record<string, never>>
 
 type Props = {
   fallback: LoadingComponent

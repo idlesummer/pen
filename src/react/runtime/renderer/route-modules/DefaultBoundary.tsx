@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { FunctionComponent, ReactNode } from 'react'
 import type { ParamTable } from './ParamTable'
 import { Component } from 'react'
 import { Text } from 'ink'
@@ -31,7 +31,7 @@ export function DefaultFallback() {
 /** default.tsx is used two ways - direct content (gets params) or here, as
  *  DefaultBoundary's fallback (no props, see render() below) - so params
  *  must be optional to be valid for both. */
-export type DefaultComponent = ComponentType<{ params?: ParamTable }>
+export type DefaultComponent = FunctionComponent<{ params?: ParamTable }>
 
 type Props = {
   fallback: DefaultComponent

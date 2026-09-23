@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { FunctionComponent, ReactNode } from 'react'
 import { Component } from 'react'
 import { Text } from 'ink'
 import { DefaultSignal } from './DefaultBoundary'
@@ -8,7 +8,7 @@ export type ErrorFallbackProps = {
   reset: () => void
 }
 
-export type ErrorComponent = ComponentType<ErrorFallbackProps>
+export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
 
 /** Built-in fallback rendered when an app defines no root `error.tsx` -
  *  guarantees an uncaught throw never crashes the whole process. */
