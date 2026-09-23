@@ -7,8 +7,7 @@ export const startCommand = defineCommand({
     description: 'Run the app built by `pen build`',
   },
   run: async () => {
-    const BUILD_APP_DIR = './src/app'
     const BUILD_OUT_DIR = '.pen/dist'
-    await startApp(BUILD_OUT_DIR, BUILD_APP_DIR)
+    await startApp(BUILD_OUT_DIR)
   },
 })
