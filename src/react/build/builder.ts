@@ -13,11 +13,7 @@ const BUILD_ENTRY_FILE = 'main.js'
 export const BUILD_OUT_DIR = '.pen/dist'
 export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 
-/** Imports every route module for real through Vite's transform pipeline -
- *  the only way to know facts like "is this page async", which exist only
- *  on the executed function, never on its file path. A transient dev server
- *  in middleware mode does the importing; nothing here is served over HTTP,
- *  and it's closed before this returns. */
+/** Imports every route module for real through Vite's transform pipeline. */
 async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
   const server = await createServer({ configFile: false, server: { middlewareMode: true } })
   try {
