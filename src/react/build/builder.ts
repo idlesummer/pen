@@ -18,13 +18,13 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
  *  on the executed function, never on its file path. A transient dev server
  *  in middleware mode does the importing; nothing here is served over HTTP,
  *  and it's closed before this returns. */
-async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent>> {
+async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
   const server = await createServer({ configFile: false, server: { middlewareMode: true } })
 
   try {
-    const componentsByPath = new Map<string, RouteComponent>()
+    const componentsByPath = new Map<string, RouteComponent | undefined>()
     for (const filePath of filePaths) {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default: RouteComponent }
+      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default?: RouteComponent }
       componentsByPath.set(filePath, module.default)
     }
     componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
