@@ -37,8 +37,8 @@ export async function buildApp(appDir: string): Promise<Diagnostic[]> {
       // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
-        // The entry-app discovers the user's routes for bundling
-        input: join(import.meta.dirname, 'entry-app.tsx'),
+        // The entry-app template discovers the user's routes for bundling
+        input: join(import.meta.dirname, 'templates/entry-app.tsx'),
         output: { entryFileNames: BUILD_ENTRY_FILE },
       },
     },

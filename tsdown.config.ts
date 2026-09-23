@@ -17,7 +17,7 @@ export default defineConfig({
 
   // Ships raw (never bundled by tsdown) - Vite needs the literal
   // import.meta.glob call, transformed fresh against each app it builds.
-  copy: 'src/react/build/entry-app.tsx',
+  copy: { from: 'src/react/build/templates/entry-app.tsx', to: 'dist/templates' },
 
   // Build-time constant injection
   define: {
