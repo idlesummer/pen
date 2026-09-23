@@ -6,16 +6,12 @@ import { isAsyncComponent } from '@/react'
  *  typeof 'function' covers sync, class, and async components alike, and
  *  catches what TypeScript alone can't guarantee (a missing default export,
  *  or one of the wrong shape). The same failure Next.js surfaces as "the
- *  default export is not a React Component".
- *
- *  No assertion on the lookup: modulePaths guarantees the key is present,
- *  but says nothing about the value - loadComponents stores whatever a
- *  real file's default export actually is, which can itself be undefined. */
+ *  default export is not a React Component". */
 export function validateComponentExports(modulePaths: string[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const path of modulePaths) {
-    const Content = componentsByPath.get(path)
+    const Content = componentsByPath.get(path)! // Safe - modulePaths is a subset of componentsByPath.keys()
     if (typeof Content !== 'function') {
       diagnostics.push({
         rule: 'invalid-component-export',
@@ -31,16 +27,16 @@ export function validateComponentExports(modulePaths: string[], componentsByPath
 /** Every async page's frame chain needs a loading.tsx to suspend into -
  *  checked against every route the app can render, not reactively on
  *  whichever one a user happens to visit first, so a misconfigured page
- *  can't ship silently. The `Content &&` guard skips a module already
- *  reported invalid by validateComponentExports: the key is always present
- *  (every real page endpoint has an entry), but the value it holds can
- *  itself be undefined, and isAsyncComponent would throw reading
- *  .constructor off that. */
+ *  can't ship silently. The `Content &&` isn't re-asserting key presence -
+ *  that's what the ! already covers - it's asking whether the value found
+ *  there is actually usable, the same question validateComponentExports
+ *  asks; isAsyncComponent would throw reading .constructor off a value
+ *  that fails it. */
 export function validateAsyncPages(pageEndpoints: Endpoint[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
-    const Content = componentsByPath.get(endpoint.content)
+    const Content = componentsByPath.get(endpoint.content)! // Safe - every real page endpoint has a discovered component
     if (Content && isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push({
         rule: 'async-page-missing-loading',
