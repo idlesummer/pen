@@ -80,6 +80,17 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
         files: [getRouteSource(routeNode)],
       })
     }
+    if (routeNode.children.some(child => child.type === 'slot') && !routeNode.modules.layout) {
+      diagnostics.push({
+        rule: 'slot-without-layout',
+        severity: 'error',
+        message:
+          `"${routeNode.path}" has a slot but no layout.tsx of its own to render it into ` +
+          '- a slot is only ever rendered as a prop passed to a layout, so without one ' +
+          'its content can never appear, no matter what matches inside it',
+        files: [getRouteSource(routeNode)],
+      })
+    }
   })
   return diagnostics
 }
