@@ -15,7 +15,13 @@ export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
 /** Built-in fallback rendered when an app defines no root `error.tsx` -
  *  guarantees an uncaught throw never crashes the whole process. */
 export function ErrorFallback({ error }: ErrorFallbackProps) {
-  return <Text>Something went wrong: {error.message}</Text>
+  return (
+    <Text>
+      Something went wrong: {error.message}
+      {'\n\n'}
+      {error.stack}
+    </Text>
+  )
 }
 
 // ── boundary ─────────────────────────────────────────────────────────────
