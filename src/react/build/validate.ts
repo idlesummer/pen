@@ -50,7 +50,6 @@ function validateModules(pageEndpoints: Endpoint[], modulePaths: string[], compo
       })
     }
   }
-
   for (const endpoint of pageEndpoints) {
     if (invalid.has(endpoint.content)) continue // Already reported - isAsyncComponent would throw on a non-function value
 
