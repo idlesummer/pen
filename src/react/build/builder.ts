@@ -1,11 +1,10 @@
-import type { Diagnostic, Endpoint } from '@/router'
-import type { RouteComponent } from '@/react'
+import type { Diagnostic } from '@/router'
 import { join } from 'node:path'
-import { createBuilder, createServer } from 'vite'
+import { createBuilder } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
-import { compileApp, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/router'
-import { DefaultFallback, ErrorFallback, validateModules } from '@/react'
+import { compileApp } from '@/router'
+import { validateModuleExports } from './validate'
 
 // Build output location - starter.ts needs to find the same file this writes.
 export const BUILD_OUT_DIR = '.pen/dist'
@@ -48,28 +47,4 @@ export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   // the server version
   await builder.build(builder.environments.ssr!)
   return diagnostics
-}
-
-/** Imports every route module for real through Vite's transform pipeline -
- *  the only way to know facts like "is this page async", which exist only
- *  on the executed function, never on its file path. A transient dev server
- *  in middleware mode does the importing; nothing here is served over HTTP,
- *  and it's closed before this returns. Keeps entry-app.tsx itself free of
- *  validation - by the time it runs, the app already passed this. */
-async function validateModuleExports(appDir: string, filePaths: string[], modulePaths: string[], pageEndpoints: Endpoint[]): Promise<Diagnostic[]> {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true } })
-
-  try {
-    const componentsByPath = new Map<string, RouteComponent>()
-    for (const filePath of filePaths) {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default: RouteComponent }
-      componentsByPath.set(filePath, module.default)
-    }
-    componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
-    componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
-    return validateModules(pageEndpoints, modulePaths, componentsByPath)
-  }
-  finally {
-    await server.close()
-  }
 }
