@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { FunctionComponent, ReactNode } from 'react'
 import type { ParamTable } from './ParamTable'
 import type { RouteComponent } from '../component-map'
 
@@ -14,10 +14,12 @@ export type AsyncPageComponent =
 
 /** A page renders synchronously like any other component, or is declared
  *  async and suspends into its route's loading.tsx while it settles -
- *  ComponentType already covers both, since FunctionComponent's own call
- *  signature returns `ReactNode | Promise<ReactNode>`. */
+ *  FunctionComponent already covers both, since its own call signature
+ *  returns `ReactNode | Promise<ReactNode>`. Not ComponentType: pen's route
+ *  modules are always functions, the one exception (boundaries) being
+ *  pen's own internal implementation, never something an app authors. */
 export type PageComponent =
-  ComponentType<PageProps>
+  FunctionComponent<PageProps>
 
 /** Async pages are declared with `async`, so they're distinguishable before
  *  being called - which matters, since a sync page can't be called outside
