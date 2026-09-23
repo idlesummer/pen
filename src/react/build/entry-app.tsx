@@ -5,11 +5,9 @@ import {
   createRouter,
   DefaultFallback,
   ErrorFallback,
-  formatDiagnostics,
   GLOBAL_DEFAULT,
   GLOBAL_ERROR,
   getRouteModuleRole,
-  validateModules,
 } from '@idlesummer/pen/internal'
 
 /** The shape of a route module file - only its default export matters. */
@@ -47,17 +45,9 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
 const moduleImports = import.meta.glob<RouteModule>('/src/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
-// createRouter compiles the route tree and narrows modulePaths down further
-const { matcher, modulePaths, pageEndpoints } = createRouter([...componentsByPath.keys()])
-
-// Module validation: checks only decidable once real components are
-// imported, unlike compileApp's own file-tree diagnostics further upstream.
-const diagnostics = validateModules(pageEndpoints, modulePaths, componentsByPath)
-for (const { severity, text } of formatDiagnostics(diagnostics))
-  console[severity](text)
-if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
-  throw new Error('App failed to start')
-
+// createRouter compiles the route tree and narrows modulePaths down further -
+// buildApp already validated these modules, so entry-app trusts them as-is
+const { matcher, modulePaths } = createRouter([...componentsByPath.keys()])
 const componentMap = createComponentMap(modulePaths, componentsByPath)
 
 // Ink's own auto-detection treats a CI-flagged env as non-interactive even
