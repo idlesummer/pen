@@ -2,13 +2,16 @@ import { defineCommand } from 'citty'
 import { formatDiagnostics } from '@/core'
 import { buildApp } from '@/react/build'
 
+const BUILD_APP_DIR = './src/app'
+const BUILD_OUT_DIR = './pen/dist'
+
 export const buildCommand = defineCommand({
   meta: {
     name: 'build',
     description: 'Compile routes and bundle the app with Vite',
   },
   run: async () => {
-    const diagnostics = await buildApp('src/app')
+    const diagnostics = await buildApp(BUILD_APP_DIR, BUILD_OUT_DIR)
     for (const { severity, text } of formatDiagnostics(diagnostics))
       console[severity](text)
 
