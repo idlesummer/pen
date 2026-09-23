@@ -1,19 +1,18 @@
 import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { APP_DIR } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
 import { BUILD_ENTRY } from './builder'
 
 /** Runs whatever `pen build` last wrote. Imported in-process (not spawned)
  *  so Ink's TUI gets the real stdin/stdout rather than something piped
  *  through a child process. */
-export async function startApp(): Promise<void> {
-  const entryPath = join(process.cwd(), BUILD_ENTRY)
+export async function startApp(outDir: string, appDir: string): Promise<void> {
+  const entryPath = join(process.cwd(), outDir, BUILD_ENTRY)
   if (!existsSync(entryPath))
-    throw new Error(`No build found at '${BUILD_ENTRY}' - run \`pen build\` first.`)
+    throw new Error(`No build found at '${outDir}' - run \`pen build\` first.`)
 
-  warnIfStale(entryPath)
+  warnIfStale(entryPath, appDir)
   await import(pathToFileURL(entryPath).href)
 }
 
@@ -22,14 +21,14 @@ export async function startApp(): Promise<void> {
  *  which has nothing to compare against and isn't an error case, just
  *  nothing to warn about. A warning, not a block: there are legitimate
  *  reasons to run an old build on purpose. */
-function warnIfStale(entryPath: string): void {
-  const appDir = join(process.cwd(), APP_DIR)
-  if (!existsSync(appDir)) return
+function warnIfStale(entryPath: string, appDir: string): void {
+  const appPath = join(process.cwd(), appDir)
+  if (!existsSync(appPath)) return
 
   const entryMtime = statSync(entryPath).mtimeMs
-  const sourceFiles = findFiles(appDir, '.tsx')
-  const newestSourceMtime = sourceFiles.reduce((newest, file) => Math.max(newest, statSync(join(appDir, file)).mtimeMs), 0)
+  const sourceFiles = findFiles(appPath, '.tsx')
+  const newestSourceMtime = sourceFiles.reduce((newest, file) => Math.max(newest, statSync(join(appPath, file)).mtimeMs), 0)
 
   if (newestSourceMtime > entryMtime)
-    console.warn(`[warn] '${BUILD_ENTRY}' is older than '${APP_DIR}' - run \`pen build\` to pick up recent changes`)
+    console.warn(`[warn] '${BUILD_ENTRY}' is older than '${appDir}' - run \`pen build\` to pick up recent changes`)
 }

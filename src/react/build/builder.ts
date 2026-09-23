@@ -8,16 +8,9 @@ import { compileApp, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/core'
 import { DefaultFallback, ErrorFallback } from '@/react'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
-// Build output location - starter.ts needs to find the same file this writes.
-export const BUILD_OUT_DIR = '.pen/dist'
-const BUILD_ENTRY_FILE = 'main.js'
-export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
+export const BUILD_ENTRY = 'main.js'
 
-/** Imports every route module for real through Vite's transform pipeline -
- *  the only way to know facts like "is this page async", which exist only
- *  on the executed function, never on its file path. A transient dev server
- *  in middleware mode does the importing; nothing here is served over HTTP,
- *  and it's closed before this returns. */
+/** Imports every route module for real through Vite's transform pipeline. */
 async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
   // Silent: a transform error here still throws and reaches buildApp's own
   // catch, which reports it through the same Diagnostic path as everything
@@ -25,37 +18,36 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   // time, ahead of and separately from that diagnostic.
   const server = await createServer({ configFile: false, logLevel: 'silent', server: { middlewareMode: true } })
   try {
-    const componentsByPath = new Map<string, RouteComponent | undefined>()
+    const components = new Map<string, RouteComponent | undefined>()
     for (const filePath of filePaths) {
       const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default?: RouteComponent }
-      componentsByPath.set(filePath, module.default)
+      components.set(filePath, module.default)
     }
-    componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
-    componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
-    return componentsByPath
+    components.set(GLOBAL_DEFAULT, DefaultFallback)
+    components.set(GLOBAL_ERROR, ErrorFallback)
+    return components
   }
   finally {
     await server.close()
   }
 }
 
-/**
-  * Compiles routes, validates them, then bundles the app with Vite. The
+/** Compiles routes, validates them, then bundles the app with Vite. The
   * bundle discovers routes independently through the entry app. Skips
   * later stages once earlier ones report an error, so a broken app never
   * produces a bundle that would only fail once someone runs it.
   *
   * @param appDir Directory containing the app's route files.
-  * @returns Diagnostics produced while compiling and validating the app.
-  */
-export async function buildApp(appDir: string): Promise<Diagnostic[]> {
+  * @param outDir Directory to write the bundle to.
+  * @returns Diagnostics produced while compiling and validating the app. */
+export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
   try {
     const filePaths = findFiles(appDir, '.tsx')
-    const componentsByPath = await loadComponents(appDir, filePaths)
+    const components = await loadComponents(appDir, filePaths)
     const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-    diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
-    diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
+    diagnostics.push(...validateComponentExports(modulePaths, components))
+    diagnostics.push(...validateAsyncPages(pageEndpoints, components))
     if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
       return diagnostics
 
@@ -65,13 +57,15 @@ export async function buildApp(appDir: string): Promise<Diagnostic[]> {
         noExternal: [PACKAGE_NAME],
       },
       build: {
-        outDir: BUILD_OUT_DIR,
+        outDir,
         // Build for Node so imports work instead of being treated as browser code
         ssr: true,
         rolldownOptions: {
           // The entry-app template discovers the user's routes for bundling
           input: join(import.meta.dirname, 'templates/entry-app.tsx'),
-          output: { entryFileNames: BUILD_ENTRY_FILE },
+          // Relative to build.outDir, not a second path to join it onto -
+          // entryFileNames: join(outDir, BUILD_ENTRY) here would double it up.
+          output: { entryFileNames: BUILD_ENTRY },
         },
       },
     })
