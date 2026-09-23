@@ -9,8 +9,8 @@ import { DefaultFallback, ErrorFallback } from '@/react'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
 // Build output location - starter.ts needs to find the same file this writes.
-export const BUILD_OUT_DIR = '.pen/dist'
 const BUILD_ENTRY_FILE = 'main.js'
+export const BUILD_OUT_DIR = '.pen/dist'
 export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 
 /** Imports every route module for real through Vite's transform pipeline -
