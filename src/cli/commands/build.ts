@@ -2,7 +2,6 @@ import { defineCommand } from 'citty'
 import { formatDiagnostics } from '@/core'
 import { buildApp } from '@/react/build'
 
-
 export const buildCommand = defineCommand({
   meta: {
     name: 'build',
