@@ -8,10 +8,7 @@ import { compileApp, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/core'
 import { DefaultFallback, ErrorFallback } from '@/react'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
-// Build output location - starter.ts needs to find the same file this writes.
-const BUILD_ENTRY_FILE = 'main.js'
-export const BUILD_OUT_DIR = '.pen/dist'
-export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
+export const BUILD_ENTRY = 'main.js'
 
 /** Imports every route module for real through Vite's transform pipeline. */
 async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
@@ -40,7 +37,7 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   * @param appDir Directory containing the app's route files.
   * @returns Diagnostics produced while compiling and validating the app.
   */
-export async function buildApp(appDir: string): Promise<Diagnostic[]> {
+export async function buildApp(appDir: string, outDir: string, ): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
   const components = await loadComponents(appDir, filePaths)
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
@@ -56,13 +53,13 @@ export async function buildApp(appDir: string): Promise<Diagnostic[]> {
       noExternal: [PACKAGE_NAME],
     },
     build: {
-      outDir: BUILD_OUT_DIR,
+      outDir,
       // Build for Node so imports work instead of being treated as browser code
       ssr: true,
       rolldownOptions: {
         // The entry-app template discovers the user's routes for bundling
         input: join(import.meta.dirname, 'templates/entry-app.tsx'),
-        output: { entryFileNames: BUILD_ENTRY_FILE },
+        output: { entryFileNames: join(outDir, BUILD_ENTRY) },
       },
     },
   })
