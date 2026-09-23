@@ -36,9 +36,9 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
  *  when present, since formatDiagnostics can point at it like any other
  *  diagnostic; omitted otherwise rather than guessed. */
 function errorFile(error: unknown): string[] {
-  if (error && typeof error === 'object' && 'id' in error && typeof error.id === 'string')
-    return [error.id]
-  return []
+  return error && typeof error === 'object' && 'id' in error && typeof error.id === 'string'
+    ? [error.id]
+    : []
 }
 
 /** Compiles routes, validates them, then bundles the app with Vite. The
