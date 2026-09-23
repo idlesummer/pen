@@ -52,7 +52,7 @@ const { matcher, modulePaths, pageEndpoints } = createRouter([...componentsByPat
 
 // Module validation: checks only decidable once real components are
 // imported, unlike compileApp's own file-tree diagnostics further upstream.
-const diagnostics = validateModules(pageEndpoints, componentsByPath)
+const diagnostics = validateModules(pageEndpoints, modulePaths, componentsByPath)
 for (const { severity, text } of formatDiagnostics(diagnostics))
   console[severity](text)
 if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))

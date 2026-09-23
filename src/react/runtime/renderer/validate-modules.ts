@@ -8,11 +8,27 @@ import { isAsyncComponent } from './route-modules/PageComponent'
  *  eagerly, against every route the app can render - not reactively on
  *  whichever one a user happens to visit first, so a misconfigured page
  *  can't ship silently. */
-export function validateModules(pageEndpoints: Endpoint[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
+export function validateModules(pageEndpoints: Endpoint[], modulePaths: string[], componentsByPath: Map<string, RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
+  const invalid = new Set<string>()
+
+  for (const path of modulePaths) {
+    const Content = componentsByPath.get(path)! // Safe - modulePaths is a subset of componentsByPath.keys()
+    if (typeof Content !== 'function') {
+      invalid.add(path)
+      diagnostics.push({
+        rule: 'invalid-component-export',
+        severity: 'error',
+        message: 'its default export is not a valid React component',
+        files: [path],
+      })
+    }
+  }
 
   for (const endpoint of pageEndpoints) {
-    const Content = componentsByPath.get(endpoint.content)! // Safe - every real page endpoint has a discovered component
+    if (invalid.has(endpoint.content)) continue // Already reported - isAsyncComponent would throw on a non-function value
+
+    const Content = componentsByPath.get(endpoint.content)!
     if (isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push({
         rule: 'async-page-missing-loading',
