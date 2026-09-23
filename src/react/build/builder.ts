@@ -47,9 +47,9 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   */
 export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
+  const componentsByPath = await loadComponents(appDir, filePaths)
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-  const componentsByPath = await loadComponents(appDir, filePaths)
   diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
   diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
