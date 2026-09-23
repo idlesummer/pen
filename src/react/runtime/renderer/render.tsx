@@ -11,10 +11,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 
 type SlotElements = Record<string, ReactNode>
 
-/** Unwraps an async page's promise where the route's Suspense boundary can
- *  catch it. The promise is created by renderChain, above the boundary, so
- *  the same one comes back on every retry - creating it here instead would
- *  make a new promise per retry and never settle. */
+/** Unwraps an async page's promise where the route's Suspense boundary can catch it. */
 function AsyncContent({ promise }: { promise: Promise<ReactNode> }): ReactNode {
   return use(promise)
 }
@@ -32,11 +29,7 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
   return slotProps
 }
 
-/** Wraps content with a frame's boundaries, layout, and slots. Boundary
- *  order matches Next.js's own hierarchy: layout, then error, then loading,
- *  then the not-found/default fallback closest to the content - so error
- *  stays the outermost net, able to catch a throw from loading's own
- *  fallback, not just from the content it wraps. */
+/** Wraps content with a frame's boundaries, layout, and slots. */
 function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
