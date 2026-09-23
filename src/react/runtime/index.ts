@@ -1,5 +1,6 @@
 export { App } from './App'
-export { renderMatch, validateAsyncPages } from './renderer/render'
+export { renderMatch } from './renderer/render'
+export { validateModules } from './renderer/validate-modules'
 export type { ComponentMap, RouteComponent } from './renderer/component-map'
 export type { ParamTable } from './renderer/route-modules/ParamTable'
 export type { PageComponent } from './renderer/route-modules/PageComponent'
