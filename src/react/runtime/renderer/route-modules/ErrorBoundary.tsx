@@ -3,6 +3,8 @@ import { Component } from 'react'
 import { Text } from 'ink'
 import { DefaultSignal } from './DefaultBoundary'
 
+// ── fallback ─────────────────────────────────────────────────────────────
+
 export type ErrorFallbackProps = {
   error: Error
   reset: () => void
@@ -16,6 +18,8 @@ export function ErrorFallback({ error }: ErrorFallbackProps) {
   return <Text>Something went wrong: {error.message}</Text>
 }
 
+// ── boundary ─────────────────────────────────────────────────────────────
+
 type Props = {
   fallback: ErrorComponent
   pathname: string
@@ -28,7 +32,6 @@ type State = {
 }
 
 /** Catches render errors and renders the route's `error` module. */
-
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { pathname: this.props.pathname }
 
