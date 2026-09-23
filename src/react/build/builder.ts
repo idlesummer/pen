@@ -21,14 +21,14 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
   const server = await createServer({ configFile: false, server: { middlewareMode: true } })
   try {
-    const componentsByPath = new Map<string, RouteComponent | undefined>()
+    const components = new Map<string, RouteComponent | undefined>()
     for (const filePath of filePaths) {
       const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default?: RouteComponent }
-      componentsByPath.set(filePath, module.default)
+      components.set(filePath, module.default)
     }
-    componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
-    componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
-    return componentsByPath
+    components.set(GLOBAL_DEFAULT, DefaultFallback)
+    components.set(GLOBAL_ERROR, ErrorFallback)
+    return components
   }
   finally {
     await server.close()
@@ -46,11 +46,11 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   */
 export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
-  const componentsByPath = await loadComponents(appDir, filePaths)
+  const components = await loadComponents(appDir, filePaths)
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-  diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
-  diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
+  diagnostics.push(...validateComponentExports(modulePaths, components))
+  diagnostics.push(...validateAsyncPages(pageEndpoints, components))
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
     return diagnostics
 
