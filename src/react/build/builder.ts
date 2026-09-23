@@ -13,6 +13,29 @@ export const BUILD_OUT_DIR = '.pen/dist'
 const BUILD_ENTRY_FILE = 'main.js'
 export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
 
+/** Imports every route module for real through Vite's transform pipeline -
+ *  the only way to know facts like "is this page async", which exist only
+ *  on the executed function, never on its file path. A transient dev server
+ *  in middleware mode does the importing; nothing here is served over HTTP,
+ *  and it's closed before this returns. */
+async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent>> {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true } })
+
+  try {
+    const componentsByPath = new Map<string, RouteComponent>()
+    for (const filePath of filePaths) {
+      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default: RouteComponent }
+      componentsByPath.set(filePath, module.default)
+    }
+    componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
+    componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
+    return componentsByPath
+  }
+  finally {
+    await server.close()
+  }
+}
+
 /**
   * Compiles routes, validates them, then bundles the app with Vite. The
   * bundle discovers routes independently through the entry app. Skips
@@ -24,9 +47,9 @@ export const BUILD_ENTRY = join(BUILD_OUT_DIR, BUILD_ENTRY_FILE)
   */
 export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   const filePaths = findFiles(appDir, '.tsx')
+  const componentsByPath = await loadComponents(appDir, filePaths)
   const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-  const componentsByPath = await loadComponents(appDir, filePaths)
   diagnostics.push(...validateComponentExports(modulePaths, componentsByPath))
   diagnostics.push(...validateAsyncPages(pageEndpoints, componentsByPath))
   if (diagnostics.some(diagnostic => diagnostic.severity === 'error'))
@@ -52,27 +75,4 @@ export async function buildApp(appDir: string): Promise<Diagnostic[]> {
   // the server version
   await builder.build(builder.environments.ssr!)
   return diagnostics
-}
-
-/** Imports every route module for real through Vite's transform pipeline -
- *  the only way to know facts like "is this page async", which exist only
- *  on the executed function, never on its file path. A transient dev server
- *  in middleware mode does the importing; nothing here is served over HTTP,
- *  and it's closed before this returns. */
-async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent>> {
-  const server = await createServer({ configFile: false, server: { middlewareMode: true } })
-
-  try {
-    const componentsByPath = new Map<string, RouteComponent>()
-    for (const filePath of filePaths) {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default: RouteComponent }
-      componentsByPath.set(filePath, module.default)
-    }
-    componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
-    componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
-    return componentsByPath
-  }
-  finally {
-    await server.close()
-  }
 }
