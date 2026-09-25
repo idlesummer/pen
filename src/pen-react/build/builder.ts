@@ -1,11 +1,11 @@
 import type { Diagnostic } from '@/pen-core'
-import type { RouteComponent } from '@/pen-react'
+import type { RouteComponent } from '@/pen-react/runtime'
 import { join } from 'node:path'
 import { createBuilder, createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
 import { compileApp, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { DefaultFallback, ErrorFallback } from '@/pen-react'
+import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
 export const BUILD_ENTRY = 'main.js'
