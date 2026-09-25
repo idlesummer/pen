@@ -8,7 +8,7 @@ const ENTRY_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_ID = `\0${ENTRY_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
-/** Rollup/Vite input id for the entry template - a virtual module, not a
+/** Vite/rolldown input id for the entry template - a virtual module, not a
  *  real path, so it's this plugin's resolveId that decides what it means. */
 export const ENTRY_MODULE_ID = ENTRY_ID
 
