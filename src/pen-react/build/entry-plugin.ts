@@ -12,12 +12,11 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *  real path, so it's this plugin's resolveId that decides what it means. */
 export const ENTRY_MODULE_ID = ENTRY_ID
 
-/** Serves the entry-app template as a virtual module instead of pointing
- *  the build directly at a shipped file. The template's own glob pattern
- *  has to stay a literal string for Vite's static analysis, so it ships
- *  with a placeholder token and this plugin substitutes the real appDir
- *  in per build, rather than the pattern being frozen at pen's own
- *  publish time regardless of what appDir a caller actually passes. */
+/** Provides the virtual entry module used to discover and bundle the app's
+ *  route files. The entry template contains the glob pattern, with appDir
+ *  substituted at build time.
+ *
+ *  @param appDir App route directory relative to project root. */
 export function entryPlugin(appDir: string): Plugin {
   return {
     name: 'pen:entry-app',
