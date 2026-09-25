@@ -18,7 +18,7 @@ export const ENTRY_MODULE_ID = ENTRY_ID
  *  with a placeholder token and this plugin substitutes the real appDir
  *  in per build, rather than the pattern being frozen at pen's own
  *  publish time regardless of what appDir a caller actually passes. */
-export function entryPlugin(appDir: string): Plugin {
+export const entryPlugin = (appDir: string): Plugin => {
   return {
     name: 'pen:entry-app',
     resolveId(id) {
