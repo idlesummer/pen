@@ -19,7 +19,7 @@ type RouteModule = { default: RouteComponent }
 function createComponentsByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
   const moduleEntries = Object.entries(modules)
   const componentsByPath = new Map(moduleEntries.map(([path, module]) => [
-    path.slice(path.indexOf('/app/') + '/app/'.length),
+    path.slice(path.indexOf('/__PEN_APP_DIR__/') + '/__PEN_APP_DIR__/'.length),
     module.default,
   ]))
   componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
@@ -41,8 +41,10 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
 }
 
 // Maps paths to module objects - pattern must stay a literal string, not a
-// variable, since import.meta.glob is a build-time Vite transform
-const moduleImports = import.meta.glob<RouteModule>('/src/app/**/{page,layout,loading,error,default}.tsx', { eager: true })
+// variable, since import.meta.glob is a build-time Vite transform. The
+// __PEN_APP_DIR__ token is substituted for the real appDir by entry-plugin's
+// load() hook before Vite ever parses this file.
+const moduleImports = import.meta.glob<RouteModule>('/__PEN_APP_DIR__/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const componentsByPath = createComponentsByPath(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further -
