@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Frame, Match, Params } from '@/core'
+import type { Frame, Match, Params } from '@/pen-core'
 import type { ComponentMap } from './component-map'
 import type { ParamTable } from './components/ParamTable'
 import { use } from 'react'
