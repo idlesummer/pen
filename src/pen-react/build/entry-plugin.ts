@@ -21,8 +21,9 @@ export const ENTRY_MODULE_ID = ENTRY_ID
 export function entryPlugin(appDir: string): Plugin {
   return {
     name: 'pen:entry-app',
-    resolveId: (id) =>
-      id === ENTRY_ID && RESOLVED_ENTRY_ID,
+    resolveId: (id) => {
+      if (id === ENTRY_ID) return RESOLVED_ENTRY_ID
+    },
 
     load: (id) => {
       if (id !== RESOLVED_ENTRY_ID)
