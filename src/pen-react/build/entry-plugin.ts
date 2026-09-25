@@ -1,6 +1,5 @@
 import type { Plugin } from 'vite'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import entryAppSource from './templates/entry-app.tsx?raw'
 
 /** Virtual module ID for the entry template. */
 export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
@@ -11,6 +10,10 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  * Provides the virtual entry module used to discover and bundle the app's
  * route files. The entry template contains the glob pattern, with appDir
  * substituted at build time.
+ *
+ * entryAppSource is inlined at pen's own build time by tsdown.config.ts's
+ * raw-import plugin - no file is read at runtime, and nothing ships in
+ * dist/ beyond this module's own compiled output.
  *
  * @param appDir App route directory relative to project root.
  */
@@ -25,9 +28,7 @@ export function entryPlugin(appDir: string): Plugin {
       if (id !== RESOLVED_ENTRY_MODULE_ID)
         return
 
-      const templatePath = join(import.meta.dirname, 'templates/entry-app.tsx')
-      const source = readFileSync(templatePath, 'utf-8')
-      return source.replaceAll(APP_DIR_TOKEN, appDir)
+      return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
   }
 }
