@@ -22,7 +22,8 @@ export function entryPlugin(appDir: string): Plugin {
   return {
     name: 'pen:entry-app',
     resolveId: (id) => {
-      if (id === ENTRY_ID) return RESOLVED_ENTRY_ID
+      if (id === ENTRY_ID)
+        return RESOLVED_ENTRY_ID
     },
 
     load: (id) => {
