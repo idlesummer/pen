@@ -46,7 +46,7 @@ function errorFile(error: unknown): string[] {
   * later stages once earlier ones report an error, so a broken app never
   * produces a bundle that would only fail once someone runs it.
   *
-  * @param appDir Directory containing the app's route files.
+  * @param appDir Path to the app's route directory, relative to the project root.
   * @param outDir Directory to write the bundle to.
   * @returns Diagnostics produced while compiling and validating the app. */
 export async function buildApp(appDir: string, outDir: string): Promise<Diagnostic[]> {
