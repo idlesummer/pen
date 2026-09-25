@@ -1,6 +1,6 @@
-import type { Diagnostic, Endpoint } from '@/core'
-import type { RouteComponent } from '@/react'
-import { isAsyncComponent } from '@/react'
+import type { Diagnostic, Endpoint } from '@/pen-core'
+import type { RouteComponent } from '@/pen-react'
+import { isAsyncComponent } from '@/pen-react'
 
 /** Every discovered module's default export must be a real component -
  *  typeof 'function' covers sync, class, and async components alike, and

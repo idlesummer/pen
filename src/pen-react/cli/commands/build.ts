@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty'
-import { formatDiagnostics } from '@/core'
-import { buildApp } from '@/react/build'
+import { formatDiagnostics } from '@/pen-core'
+import { buildApp } from '@/pen-react/build'
 
 export const buildCommand = defineCommand({
   meta: {
