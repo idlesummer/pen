@@ -21,11 +21,13 @@ export const ENTRY_MODULE_ID = ENTRY_ID
 export function entryPlugin(appDir: string): Plugin {
   return {
     name: 'pen:entry-app',
-    resolveId: (id) => {
-      if (id === ENTRY_ID) return RESOLVED_ENTRY_ID
-    },
+    resolveId: (id) =>
+      id === ENTRY_ID && RESOLVED_ENTRY_ID,
+
     load: (id) => {
-      if (id !== RESOLVED_ENTRY_ID) return
+      if (id !== RESOLVED_ENTRY_ID)
+        return
+
       const templatePath = join(import.meta.dirname, 'templates/entry-app.tsx')
       const source = readFileSync(templatePath, 'utf-8')
       // import.meta.glob normalizes its returned keys (strips a leading
