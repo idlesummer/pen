@@ -4,12 +4,9 @@ export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
-// The entry app's own source, kept as a string here rather than a separate
-// .tsx file read at build time - it's small, changes rarely, and its real
-// correctness is verified by actually building and running an app against
-// it, not by tsc checking this string's syntax. Its own glob pattern has to
-// stay a literal string for Vite's static analysis, so it ships with the
-// placeholder token above, substituted for the real appDir per build.
+// Embedded entry-app source rather than a separate file, since it's small and
+// rarely changes. The glob must remain a literal for Vite's static analysis,
+// so appDir is represented by a placeholder and substituted per build.
 const ENTRY_APP_SOURCE = `
 import type { ComponentMap, RouteComponent } from '@idlesummer/pen/internal'
 import { render } from 'ink'
