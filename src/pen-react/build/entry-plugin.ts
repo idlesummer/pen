@@ -25,7 +25,6 @@ export function entryPlugin(appDir: string): Plugin {
       if (id === ENTRY_ID)
         return RESOLVED_ENTRY_ID
     },
-
     load: (id) => {
       if (id !== RESOLVED_ENTRY_ID)
         return
