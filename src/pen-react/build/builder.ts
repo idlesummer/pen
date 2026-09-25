@@ -1,11 +1,11 @@
 import type { Diagnostic } from '@/pen-core'
 import type { RouteComponent } from '@/pen-react/runtime'
-import { join } from 'node:path'
 import { createBuilder, createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
 import { compileApp, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
+import { entryPlugin, ENTRY_MODULE_ID } from './entry-plugin'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
 export const BUILD_ENTRY = 'main.js'
@@ -62,6 +62,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
 
     const builder = await createBuilder({
       configFile: false,
+      plugins: [entryPlugin(appDir)],
       ssr: {  // Bundle pen's runtime instead of leaving it external
         noExternal: [PACKAGE_NAME],
       },
@@ -71,7 +72,7 @@ export async function buildApp(appDir: string, outDir: string): Promise<Diagnost
         ssr: true,
         rolldownOptions: {
           // The entry-app template discovers the user's routes for bundling
-          input: join(import.meta.dirname, 'templates/entry-app.tsx'),
+          input: ENTRY_MODULE_ID,
           // Relative to build.outDir, not a second path to join it onto -
           // entryFileNames: join(outDir, BUILD_ENTRY) here would double it up.
           output: { entryFileNames: BUILD_ENTRY },
