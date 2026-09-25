@@ -30,11 +30,7 @@ export function entryPlugin(appDir: string): Plugin {
 
       const templatePath = join(import.meta.dirname, 'templates/entry-app.tsx')
       const source = readFileSync(templatePath, 'utf-8')
-      // import.meta.glob normalizes its returned keys (strips a leading
-      // "./"), so the substituted appDir has to match that normalized form
-      // or the slice-marker search below silently finds nothing.
-      const normalizedAppDir = appDir.replace(/^\.\//, '')
-      return source.replaceAll(APP_DIR_TOKEN, normalizedAppDir)
+      return source.replaceAll(APP_DIR_TOKEN, appDir)
     },
   }
 }
