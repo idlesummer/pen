@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-import { run } from '@/cli'
+import { run } from '@/react/cli'
 
 run()
