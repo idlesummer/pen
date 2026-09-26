@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import type { ComponentMap, RouteComponent } from '@idlesummer/pen/internal'
 import { render } from 'ink'
 import {
