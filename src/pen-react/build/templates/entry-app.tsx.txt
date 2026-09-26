@@ -26,7 +26,7 @@ function createRouteComponents(modules: Record<string, RouteModule>): Map<string
   return routeComponents
 }
 
-/** Buckets the compiled route tree's module paths by role - the two
+/** Buckets the compiled route tree's module paths by role. The two
  *  sentinels get pen's own built-in fallback, everything else its real
  *  discovered component. */
 function createComponentMap(modulePaths: string[], routeComponents: Map<string, RouteComponent>): ComponentMap {
