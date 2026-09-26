@@ -28,11 +28,9 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
   return slotProps
 }
 
-/** Wraps content with a frame's boundaries, layout, and slots. The `!`s
- *  below are safe: components and the frames that reference them both come
- *  from the same createRouter() call in the generated entry app, so a frame
- *  can never name a path componentMap doesn't have - if it ever throws
- *  here, that's a compileApp/createRouter bug, not a stale build. */
+/** Wraps content with a frame's boundaries, layout, and slots. The assertions are
+ *  safe since frames and components should come from the same createRouter() call.
+ *  A missing component means there is a compiler bug, not stale data. */
 function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
