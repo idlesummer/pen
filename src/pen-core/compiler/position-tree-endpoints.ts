@@ -13,14 +13,12 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   if (frameOf.has(routeNode))
     return frameOf.get(routeNode)
 
-  const { layout, loading, error, default: def } = routeNode.modules
-  const _default = def ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
-  // Only the true root, never a slot - unlike default, an error boundary
-  // composes through the render tree regardless of which chain constructed
-  // it, so a slot's content is already covered by whatever wraps the root.
-  const _error = error ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)
+  const { layout, loading, error: errorPath, default: defaultPath } = routeNode.modules
+  const _default = defaultPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  const _error = errorPath ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)  // Only the root needs a global error fallback
   const paramCount = context.positionOf.get(routeNode)!.dynamicCount
   const slots = context.slotsOf.get(routeNode)
+
   const frame = (layout || loading || _error || _default || slots)
     ? { layout, loading, error: _error, default: _default, slots, paramCount }
     : undefined
