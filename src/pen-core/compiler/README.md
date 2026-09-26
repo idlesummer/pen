@@ -52,7 +52,7 @@ wrong - however tidy the type looks.
 ## Not yet here
 
 Matching and rendering. `Endpoint` is shaped for them - `frames` is the full
-wrapper chain outermost-first, `paramDepth`/`contentDepth` say which position's
+wrapper chain outermost-first, `paramCount`/`contentDepth` say which position's
 params each part sees, verified to stay continuous through a slot boundary
 rather than reset there (checked against a real Next.js build) - but nothing
 consumes it yet.
