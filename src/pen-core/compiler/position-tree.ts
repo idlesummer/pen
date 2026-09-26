@@ -121,7 +121,7 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
     defaultOwnerOf: new Map<PositionNode, RouteNode>(),
     slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
-    frameOf: new Map<RouteNode, Frame | undefined>(),
+    frameOf: new Map<RouteNode, Frame>(),
     fallbackFrameOf: new Map<Frame, Frame>(),
   }
   traverse(routeTree, {
