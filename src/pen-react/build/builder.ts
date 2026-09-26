@@ -1,5 +1,5 @@
 import type { Diagnostic } from '@/pen-core'
-import type { RouteComponent } from '@/pen-react/runtime'
+import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { createBuilder, createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
@@ -20,7 +20,7 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
   try {
     const components = new Map<string, RouteComponent | undefined>()
     for (const filePath of filePaths) {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as { default?: RouteComponent }
+      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
       components.set(filePath, module.default)
     }
     components.set(GLOBAL_DEFAULT, DefaultFallback)

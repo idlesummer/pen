@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { ComponentMap, RouteComponent } from '@idlesummer/pen/internal'
+import type { ComponentMap, RouteComponent, RouteModule } from '@idlesummer/pen/internal'
 import { render } from 'ink'
 import {
   App,
@@ -11,9 +11,6 @@ import {
   GLOBAL_ERROR,
   getRouteModuleRole,
 } from '@idlesummer/pen/internal'
-
-/** The shape of a route module file - only its default export matters. */
-type RouteModule = { default: RouteComponent }
 
 /** Discovered route modules, keyed by root-relative path (as
  *  import.meta.glob returns them), reduced to appDir-relative path ->

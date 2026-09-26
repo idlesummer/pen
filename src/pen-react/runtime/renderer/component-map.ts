@@ -16,6 +16,10 @@ export type ComponentMap = {
 
 /** Any route module's component, before it's been classified into its specific role. */
 export type RouteComponent = PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
+
+/** The shape of a route module file - only its default export matters. */
+export type RouteModule = { default: RouteComponent }
+
 type ComponentRole = keyof ComponentMap
 type ComponentFor<Role extends ComponentRole> = ComponentMap[Role][string]
 
