@@ -3,7 +3,6 @@ import type { Frame, Match, Params } from '@/pen-core'
 import type { ComponentMap } from './component-map'
 import type { ParamTable } from './components/ParamTable'
 import { use } from 'react'
-import { resolveComponent, resolveContent } from './component-map'
 import { isAsyncComponent } from './components/PageComponent'
 import { DefaultBoundary } from './components/DefaultBoundary'
 import { LoadingBoundary } from './components/LoadingBoundary'
@@ -29,24 +28,28 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
   return slotProps
 }
 
-/** Wraps content with a frame's boundaries, layout, and slots. */
+/** Wraps content with a frame's boundaries, layout, and slots. The `!`s
+ *  below are safe: components and the frames that reference them both come
+ *  from the same createRouter() call in the generated entry app, so a frame
+ *  can never name a path componentMap doesn't have - if it ever throws
+ *  here, that's a compileApp/createRouter bug, not a stale build. */
 function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramDepth } = frame
 
   if (_default) {
-    const Fallback = resolveComponent('default', _default, components)
+    const Fallback = components.default[_default]!
     content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
   }
   if (loading) {
-    const Fallback = resolveComponent('loading', loading, components)
+    const Fallback = components.loading[loading]!
     content = <LoadingBoundary fallback={Fallback}>{content}</LoadingBoundary>
   }
   if (error) {
-    const Fallback = resolveComponent('error', error, components)
+    const Fallback = components.error[error]!
     content = <ErrorBoundary fallback={Fallback} pathname={pathname}>{content}</ErrorBoundary>
   }
   if (layout) {
-    const Layout = resolveComponent('layout', layout, components)
+    const Layout = components.layout[layout]!
     const slotProps = slots ? getSlotProps(slots, slotElements) : {}
     const paramTable = sliceParams(params, paramDepth)
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
@@ -57,7 +60,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
 /** Wraps endpoint content with its frame chain, from inner to outer. */
 function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { endpoint, params, pathname } = match
-  const Content = resolveContent(endpoint.content, components)
+  const Content = (components.page[endpoint.content] ?? components.default[endpoint.content])! // same invariant as wrapFrame
   const contentParams = sliceParams(params, endpoint.contentDepth)
 
   let element: ReactNode = isAsyncComponent(Content)
