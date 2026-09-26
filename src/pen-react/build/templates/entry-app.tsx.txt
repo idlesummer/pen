@@ -15,25 +15,25 @@ import {
 /** Discovered route modules, keyed by root-relative path (as
  *  import.meta.glob returns them), reduced to appDir-relative path ->
  *  component. */
-function createComponentsByPath(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
+function createRouteComponents(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
   const moduleEntries = Object.entries(modules)
-  const componentsByPath = new Map(moduleEntries.map(([path, module]) => [
+  const routeComponents = new Map(moduleEntries.map(([path, module]) => [
     path.slice(path.indexOf('/__PEN_APP_DIR__/') + '/__PEN_APP_DIR__/'.length),
     module.default,
   ]))
-  componentsByPath.set(GLOBAL_DEFAULT, DefaultFallback)
-  componentsByPath.set(GLOBAL_ERROR, ErrorFallback)
-  return componentsByPath
+  routeComponents.set(GLOBAL_DEFAULT, DefaultFallback)
+  routeComponents.set(GLOBAL_ERROR, ErrorFallback)
+  return routeComponents
 }
 
 /** Buckets the compiled route tree's module paths by role - the two
  *  sentinels get pen's own built-in fallback, everything else its real
  *  discovered component. */
-function createComponentMap(modulePaths: string[], componentsByPath: Map<string, RouteComponent>): ComponentMap {
+function createComponentMap(modulePaths: string[], routeComponents: Map<string, RouteComponent>): ComponentMap {
   const componentMap: ComponentMap = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const modulePath of modulePaths) {
     const role = getRouteModuleRole(modulePath)
-    const component = componentsByPath.get(modulePath)! // Safe since modulePaths is subset of componentsByPath.keys()
+    const component = routeComponents.get(modulePath)! // Safe since modulePaths is subset of routeComponents.keys()
     componentMap[role][modulePath] = component
   }
   return componentMap
@@ -42,12 +42,12 @@ function createComponentMap(modulePaths: string[], componentsByPath: Map<string,
 // Maps paths to module objects - pattern must stay a literal string, not a
 // variable, since import.meta.glob is a build-time Vite transform.
 const moduleImports = import.meta.glob<RouteModule>('/__PEN_APP_DIR__/**/{page,layout,loading,error,default}.tsx', { eager: true })
-const componentsByPath = createComponentsByPath(moduleImports)
+const routeComponents = createRouteComponents(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further -
 // buildApp already validated these modules, so entry-app trusts them as-is
-const { matcher, modulePaths } = createRouter([...componentsByPath.keys()])
-const componentMap = createComponentMap(modulePaths, componentsByPath)
+const { matcher, modulePaths } = createRouter([...routeComponents.keys()])
+const componentMap = createComponentMap(modulePaths, routeComponents)
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
