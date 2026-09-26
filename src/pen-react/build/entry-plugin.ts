@@ -26,10 +26,8 @@ export function entryPlugin(appDir: string): Plugin {
         return RESOLVED_ENTRY_MODULE_ID
     },
     load: (id) => {
-      if (id !== RESOLVED_ENTRY_MODULE_ID)
-        return
-
-      return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
+      if (id === RESOLVED_ENTRY_MODULE_ID)
+        return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
   }
 }
