@@ -19,10 +19,10 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   // composes through the render tree regardless of which chain constructed
   // it, so a slot's content is already covered by whatever wraps the root.
   const _error = error ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)
-  const paramDepth = -context.positionOf.get(routeNode)!.staticness
+  const paramCount = -context.positionOf.get(routeNode)!.staticness
   const slots = context.slotsOf.get(routeNode)
   const frame = (layout || loading || _error || _default || slots)
-    ? { layout, loading, error: _error, default: _default, slots, paramDepth }
+    ? { layout, loading, error: _error, default: _default, slots, paramCount }
     : undefined
   frameOf.set(routeNode, frame)
   return frame
@@ -30,8 +30,8 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
 
 /** The same frame without its own `default` - for an endpoint whose content is that default */
 function createFallbackFrame(frame: Frame): Frame {
-  const { layout, loading, error, slots, paramDepth } = frame
-  return { layout, loading, error, slots, paramDepth }
+  const { layout, loading, error, slots, paramCount } = frame
+  return { layout, loading, error, slots, paramCount }
 }
 
 // ── endpoints ───────────────────────────────────────────────────────────

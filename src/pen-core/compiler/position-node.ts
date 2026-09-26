@@ -3,7 +3,7 @@ import type { RouteNode } from './route-tree'
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.
  *
- *  paramDepth is -staticness (see PositionNode), not one shared value per
+ *  paramCount is -staticness (see PositionNode), not one shared value per
  *  chain: a slot can sit between two dynamic ancestors without resetting the
  *  param count, so frames on either side of it can be bound at different
  *  counts within the same chain. */
@@ -13,7 +13,7 @@ export type Frame = {
   error?: string
   default?: string
   slots?: Record<string, PositionNode> // this folder's own declared slots, by name
-  paramDepth: number
+  paramCount: number
 }
 
 /** Everything needed to render one accepted position: the complete wrapper
