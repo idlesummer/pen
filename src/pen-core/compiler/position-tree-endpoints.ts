@@ -19,11 +19,9 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   const paramCount = context.positionOf.get(routeNode)!.dynamicCount
   const slots = context.slotsOf.get(routeNode)
 
-  let frame: Frame | undefined
   if (layout || loading || error || _default || slots)
-    frame = { layout, loading, error, default: _default, slots, paramCount }
-  frameOf.set(routeNode, frame)
-  return frame
+    frameOf.set(routeNode, { layout, loading, error, default: _default, slots, paramCount })
+  return frameOf.get(routeNode)
 }
 
 /** The same frame without its own `default` for an endpoint whose content is that default */
