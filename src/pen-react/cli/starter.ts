@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { BUILD_ENTRY } from './builder'
+import { BUILD_ENTRY } from '@/pen-react/plugin'
 
 /** Runs whatever `pen build` last wrote. Imported in-process (not spawned)
  *  so Ink's TUI gets the real stdin/stdout rather than something piped

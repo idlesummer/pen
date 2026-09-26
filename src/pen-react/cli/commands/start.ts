@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty'
-import { startApp } from '@/pen-react/build'
+import { startApp } from '@/pen-react/cli/starter'
 
 export const startCommand = defineCommand({
   meta: {
