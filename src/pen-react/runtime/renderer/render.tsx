@@ -55,14 +55,15 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   return content
 }
 
-/** Wraps endpoint content with its frame chain, from inner to outer. */
+/** Wraps endpoint content with its frame chain, from inner to outer. Component
+ *  and frame assertions are safe for the same reason as in wrapFrame. Async
+ *  pages are guaranteed to have a loading boundary by validation. */
 function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { endpoint, params, pathname } = match
-  const Content = (components.page[endpoint.content] ?? components.default[endpoint.content])! // same invariant as wrapFrame
+  const Content = (components.page[endpoint.content] ?? components.default[endpoint.content])!
   const contentParams = sliceParams(params, endpoint.contentDepth)
-
   let element: ReactNode = isAsyncComponent(Content)
-    ? <AsyncContent promise={Content({ params: contentParams })} /> // validateModules ensures every async page has a loading boundary
+    ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page has a loading boundary
     : <Content params={contentParams} />
 
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
