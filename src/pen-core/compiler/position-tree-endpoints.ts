@@ -19,9 +19,9 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   const paramCount = context.positionOf.get(routeNode)!.dynamicCount
   const slots = context.slotsOf.get(routeNode)
 
-  const frame = (layout || loading || error || _default || slots)
-    ? { layout, loading, error, default: _default, slots, paramCount }
-    : undefined
+  let frame: Frame | undefined
+  if (layout || loading || error || _default || slots)
+    frame = { layout, loading, error, default: _default, slots, paramCount }
   frameOf.set(routeNode, frame)
   return frame
 }
