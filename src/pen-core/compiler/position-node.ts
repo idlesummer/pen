@@ -58,6 +58,6 @@ export type PositionContext = {
   pageOwnerOf: Map<PositionNode, RouteNode>
   defaultOwnerOf: Map<PositionNode, RouteNode>
   slotsOf: Map<RouteNode, Record<string, PositionNode>> // folder -> its declared slots, by name
-  frameOf: Map<RouteNode, Frame | undefined>            // folder -> its frame, memoised even when it has none
+  frameOf: Map<RouteNode, Frame>                        // folder -> its frame, only entered when it has one
   fallbackFrameOf: Map<Frame, Frame>                    // frame -> the variant used as a fallback's innermost frame
 }
