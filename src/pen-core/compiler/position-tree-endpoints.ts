@@ -38,14 +38,14 @@ function createFallbackFrame(frame: Frame): Frame {
 
 /** Flattens a folder's ancestry into the chain that wraps it - the walk the
  *  render stage would otherwise repeat on every navigation. */
-function createEndpoint(pageOwner: RouteNode, content: string, context: PositionContext): Endpoint {
+function createEndpoint(pageOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
   const contentDepth = -context.positionOf.get(pageOwner)!.staticness
-  return { frames, content, contentDepth }
+  return { frames, contentPath, contentDepth }
 }
 
-function createFallback(defaultOwner: RouteNode, content: string, context: PositionContext): Endpoint {
-  const endpoint = createEndpoint(defaultOwner, content, context)
+function createFallback(defaultOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
+  const endpoint = createEndpoint(defaultOwner, contentPath, context)
   const frames = endpoint.frames
   const lastFrame = frames[frames.length-1]
   if (!lastFrame) // undefined last frame means list is empty

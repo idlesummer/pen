@@ -36,13 +36,13 @@ export function validateAsyncPages(pageEndpoints: Endpoint[], components: Map<st
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
-    const Content = components.get(endpoint.content)! // Safe - every real page endpoint has a discovered component
+    const Content = components.get(endpoint.contentPath)! // Safe - every real page endpoint has a discovered component
     if (Content && isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push({
         rule: 'async-page-missing-loading',
         severity: 'error',
         message: 'is an async page, so its route needs a loading.tsx to suspend into',
-        files: [endpoint.content],
+        files: [endpoint.contentPath],
       })
     }
   }
