@@ -62,6 +62,7 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
   const { endpoint, params, pathname } = match
   const Content = (components.page[endpoint.content] ?? components.default[endpoint.content])!
   const contentParams = sliceParams(params, endpoint.contentDepth)
+
   let element: ReactNode = isAsyncComponent(Content)
     ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page has a loading boundary
     : <Content params={contentParams} />
