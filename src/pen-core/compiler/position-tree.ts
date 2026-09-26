@@ -34,7 +34,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
   const type = route.type
   const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
-    staticness: parent.staticness - +isDynamicOrCatchall(type),
+    dynamicCount: parent.dynamicCount + +isDynamicOrCatchall(type),
     fallback: undefined as never, //* filled by setEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
@@ -108,7 +108,7 @@ function getPageEndpoints(positions: Iterable<PositionNode>): Endpoint[] {
 export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], string[], Endpoint[]] {
   const positionTree: PositionNode = {
     urlDepth: 0,
-    staticness: 0,
+    dynamicCount: 0,
     fallback: undefined as never, //* Must be populated later
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order

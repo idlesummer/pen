@@ -69,7 +69,7 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params, pa
       if (isAccepting && position.endpoint)
         return (winner = candidate, true)
 
-      const isBetterStatic = !bestStatic || position.staticness > bestStatic.position.staticness
+      const isBetterStatic = !bestStatic || position.dynamicCount < bestStatic.position.dynamicCount
       if (candidate.isTerminal && isBetterStatic)
         bestStatic = candidate
     },

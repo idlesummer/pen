@@ -3,7 +3,7 @@ import type { RouteNode } from './route-tree'
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.
  *
- *  paramCount is -staticness (see PositionNode), not one shared value per
+ *  paramCount is dynamicCount (see PositionNode), not one shared value per
  *  chain: a slot can sit between two dynamic ancestors without resetting the
  *  param count, so frames on either side of it can be bound at different
  *  counts within the same chain. */
@@ -29,7 +29,7 @@ export type Endpoint = {
  *  several RouteNodes can share one PositionNode. */
 export type PositionNode = {
   urlDepth: number    // url segments consumed to reach this position
-  staticness: number  // higher means more static. Negated, it also counts bound params.
+  dynamicCount: number  // dynamic/catchall segments from root to here. Also the count of bound params.
   param?: string      // the name this position binds, for dynamic/catch-all
   // Children
   statics?: Record<string, PositionNode>
