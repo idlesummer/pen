@@ -13,13 +13,13 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   if (frameOf.has(routeNode))
     return frameOf.get(routeNode)
 
-  const { layout, loading, error: errorPath, default: defaultPath } = routeNode.modules
-  const _default = defaultPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  const { layout, error: errorPath, loading, default: defaultPath } = routeNode.modules
   const error = errorPath ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)  // Only the root needs a global error fallback
-  const paramCount = context.positionOf.get(routeNode)!.dynamicCount
+  const _default = defaultPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
   const slots = context.slotsOf.get(routeNode)
 
-  if (layout || loading || error || _default || slots) {
+  if (layout || error || loading || _default || slots) {
+    const paramCount = context.positionOf.get(routeNode)!.dynamicCount
     const frame = { layout, loading, error, default: _default, slots, paramCount }
     frameOf.set(routeNode, frame)
     return frame
