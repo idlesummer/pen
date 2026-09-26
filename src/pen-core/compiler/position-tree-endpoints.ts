@@ -19,7 +19,7 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   // composes through the render tree regardless of which chain constructed
   // it, so a slot's content is already covered by whatever wraps the root.
   const _error = error ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)
-  const paramCount = -context.positionOf.get(routeNode)!.staticness
+  const paramCount = context.positionOf.get(routeNode)!.dynamicCount
   const slots = context.slotsOf.get(routeNode)
   const frame = (layout || loading || _error || _default || slots)
     ? { layout, loading, error: _error, default: _default, slots, paramCount }
@@ -40,7 +40,7 @@ function createFallbackFrame(frame: Frame): Frame {
  *  render stage would otherwise repeat on every navigation. */
 function createEndpoint(pageOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
-  const paramCount = -context.positionOf.get(pageOwner)!.staticness
+  const paramCount = context.positionOf.get(pageOwner)!.dynamicCount
   return { frames, contentPath, paramCount }
 }
 
