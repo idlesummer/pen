@@ -79,7 +79,7 @@ function getModulePaths(positions: Iterable<PositionNode>): string[] {
   for (const position of positions) {
     for (const endpoint of [position.endpoint, position.fallback]) {
       if (!endpoint) continue
-      modules.add(endpoint.content)
+      modules.add(endpoint.contentPath)
       for (const { layout, loading, error, default: _default } of endpoint.frames) {
         if (layout)   modules.add(layout)
         if (loading)  modules.add(loading)

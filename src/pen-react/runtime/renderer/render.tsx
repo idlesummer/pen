@@ -60,7 +60,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
  *  pages are guaranteed to have a loading boundary by validation. */
 function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { endpoint, params, pathname } = match
-  const Content = (components.page[endpoint.content] ?? components.default[endpoint.content])!
+  const Content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
   const contentParams = sliceParams(params, endpoint.contentDepth)
 
   let element: ReactNode = isAsyncComponent(Content)

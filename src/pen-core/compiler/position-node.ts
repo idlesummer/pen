@@ -20,8 +20,8 @@ export type Frame = {
  *  chain, outermost first, and the module at the bottom of it. */
 export type Endpoint = {
   frames: Frame[]
-  content: string
-  contentDepth: number // which position's params `content` receives
+  contentPath: string
+  contentDepth: number // which position's params `contentPath` receives
 }
 
 /** One URL position: somewhere a URL segment can land. Groups fold
