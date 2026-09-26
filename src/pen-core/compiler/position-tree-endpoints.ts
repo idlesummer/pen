@@ -26,7 +26,7 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   return frame
 }
 
-/** The same frame without its own `default` - for an endpoint whose content is that default */
+/** The same frame without its own `default` for an endpoint whose content is that default */
 function createFallbackFrame(frame: Frame): Frame {
   const { layout, loading, error, slots, paramCount } = frame
   return { layout, loading, error, slots, paramCount }
