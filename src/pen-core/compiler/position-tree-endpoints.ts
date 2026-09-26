@@ -40,8 +40,8 @@ function createFallbackFrame(frame: Frame): Frame {
  *  render stage would otherwise repeat on every navigation. */
 function createEndpoint(pageOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
-  const contentDepth = -context.positionOf.get(pageOwner)!.staticness
-  return { frames, contentPath, contentDepth }
+  const paramCount = -context.positionOf.get(pageOwner)!.staticness
+  return { frames, contentPath, paramCount }
 }
 
 function createFallback(defaultOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
