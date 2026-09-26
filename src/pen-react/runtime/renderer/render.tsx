@@ -61,7 +61,7 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
 function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap): ReactNode {
   const { endpoint, params, pathname } = match
   const Content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
-  const contentParams = sliceParams(params, endpoint.contentDepth)
+  const contentParams = sliceParams(params, endpoint.paramCount)
 
   let element: ReactNode = isAsyncComponent(Content)
     ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page has a loading boundary

@@ -21,7 +21,7 @@ export type Frame = {
 export type Endpoint = {
   frames: Frame[]
   contentPath: string
-  contentDepth: number // which position's params `contentPath` receives
+  paramCount: number // which position's params `contentPath` receives
 }
 
 /** One URL position: somewhere a URL segment can land. Groups fold
