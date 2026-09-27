@@ -77,7 +77,6 @@ export function pen(appDir: string): Plugin {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
-
     async buildStart() {
       const filePaths = findFiles(appDir, '.tsx')
       const components = await loadComponents(appDir, filePaths)
