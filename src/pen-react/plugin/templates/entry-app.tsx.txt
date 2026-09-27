@@ -6,7 +6,6 @@ import {
   App,
   createRouter,
   DefaultFallback,
-  dict,
   ErrorFallback,
   GLOBAL_DEFAULT,
   GLOBAL_ERROR,
@@ -15,7 +14,7 @@ import {
 
 /** Reduces discovered route modules to app-relative paths and components. */
 function createRouteComponents(modules: Record<string, RouteModule>): Record<string, RouteComponent> {
-  const routeComponents = dict<RouteComponent>()
+  const routeComponents: Record<string, RouteComponent> = {}
   for (const [path, module] of Object.entries(modules))
     routeComponents[path.slice(path.indexOf('/__PEN_APP_DIR__/') + '/__PEN_APP_DIR__/'.length)] = module.default
 
@@ -26,13 +25,7 @@ function createRouteComponents(modules: Record<string, RouteModule>): Record<str
 
 /** Groups route components by module role. */
 function createComponentMap(modulePaths: string[], routeComponents: Record<string, RouteComponent>): ComponentMap {
-  const componentMap: ComponentMap = {
-    page: dict(),
-    layout: dict(),
-    loading: dict(),
-    error: dict(),
-    default: dict(),
-  }
+  const componentMap: ComponentMap = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const modulePath of modulePaths) {
     const role = getRouteModuleRole(modulePath)
     const component = routeComponents[modulePath]! // Safe since modulePaths is subset of routeComponents's keys
