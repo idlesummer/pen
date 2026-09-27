@@ -1,5 +1,5 @@
-import { basename } from 'node:path'
 import type { RouteModuleRole } from './types'
+import { basename } from 'node:path'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
 import { ROUTE_MODULE_ROLES } from './types'
 
