@@ -55,7 +55,6 @@ export function pen(appDir: string): Plugin {
   return {
     name: 'pen',
     applyToEnvironment: environment => environment.name === 'ssr',
-
     config: () => ({
       ssr: { // Bundle pen's runtime instead of leaving it external
         noExternal: [PACKAGE_NAME],
@@ -70,7 +69,6 @@ export function pen(appDir: string): Plugin {
         },
       },
     }),
-
     resolveId: (id) => {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
