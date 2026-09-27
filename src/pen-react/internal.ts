@@ -2,6 +2,6 @@
 
 export { App } from './runtime'
 export type { ComponentMap, RouteComponent, RouteModule } from './runtime'
-export { DefaultFallback, ErrorFallback } from './runtime'
+export { attachFallbackComponents } from './runtime'
 
-export { GLOBAL_DEFAULT, GLOBAL_ERROR, getRouteModuleRole, compileApp, createRouter } from '@/pen-core'
+export { getRouteModuleRole, compileApp, createRouter } from '@/pen-core'
