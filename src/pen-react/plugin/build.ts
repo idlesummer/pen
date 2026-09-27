@@ -54,6 +54,7 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
 export function pen(appDir: string): Plugin {
   return {
     name: 'pen',
+
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
