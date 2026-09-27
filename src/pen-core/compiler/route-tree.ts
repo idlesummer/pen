@@ -1,8 +1,8 @@
-import type { RouteModulePaths } from './route-module'
+import type { RouteModulePaths } from '../resolution'
 import type { SegmentType } from './route-segment'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { filterRouteFiles, getRouteModuleRole } from './route-module'
+import { filterRouteFiles, getRouteModuleRole } from '../resolution'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
 /** The parse: one node per folder, mirroring the app directory.
