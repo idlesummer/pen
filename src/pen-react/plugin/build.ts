@@ -54,26 +54,30 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<
 export function pen(appDir: string): Plugin {
   return {
     name: 'pen',
-    applyToEnvironment: environment => environment.name === 'ssr',
-    config: () => ({
-      ssr: { // Bundle pen's runtime instead of leaving it external
-        noExternal: [PACKAGE_NAME],
-      },
-      build: {
-        // Build for Node so imports work instead of being treated as browser code
-        ssr: true,
-        rolldownOptions: {
-          // The entry-app template discovers the user's routes for bundling
-          input: ENTRY_MODULE_ID,
-          output: { entryFileNames: BUILD_ENTRY },
+    applyToEnvironment(environment) {
+      return environment.name === 'ssr'
+    },
+    config() {
+      return {
+        ssr: { // Bundle pen's runtime instead of leaving it external
+          noExternal: [PACKAGE_NAME],
         },
-      },
-    }),
-    resolveId: (id) => {
+        build: {
+          // Build for Node so imports work instead of being treated as browser code
+          ssr: true,
+          rolldownOptions: {
+            // The entry-app template discovers the user's routes for bundling
+            input: ENTRY_MODULE_ID,
+            output: { entryFileNames: BUILD_ENTRY },
+          },
+        },
+      }
+    },
+    resolveId(id) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
-    load: (id) => {
+    load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
