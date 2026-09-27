@@ -13,10 +13,12 @@ import {
 } from '@idlesummer/pen/internal'
 
 /** Reduces discovered route modules to app-relative paths and components. */
-function createRouteComponents(modules: Record<string, RouteModule>): Record<string, RouteComponent> {
+function createRouteComponents(moduleImports: Record<string, RouteModule>): Record<string, RouteComponent> {
   const routeComponents: Record<string, RouteComponent> = {}
-  for (const [path, module] of Object.entries(modules))
-    routeComponents[path.slice(path.indexOf('/__PEN_APP_DIR__/') + '/__PEN_APP_DIR__/'.length)] = module.default
+  for (const [modulePath, module] of Object.entries(moduleImports)) {
+    const routePath = modulePath.replace('/__PEN_APP_DIR__/', '')
+    routeComponents[routePath] = module.default
+  }
 
   routeComponents[GLOBAL_DEFAULT] = DefaultFallback
   routeComponents[GLOBAL_ERROR] = ErrorFallback
