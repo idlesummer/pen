@@ -6,10 +6,7 @@ import { getRouteModuleRole } from './classify'
  *  root sentinel slots with the given fallbacks when the app supplies
  *  neither. Agnostic to what T is - the fallback values are the only place
  *  that meaning enters. */
-export function resolveRouteModules<T>(
-  modules: Record<string, Partial<RouteModule<T>> | undefined>,
-  fallbacks: { default: T, error: T },
-): Record<string, T | undefined> {
+export function resolveRouteModules<T>(modules: Record<string, Partial<RouteModule<T>> | undefined>, fallbacks: { default: T, error: T }): Record<string, T | undefined> {
   const resolved: Record<string, T | undefined> = {}
   for (const [path, module] of Object.entries(modules))
     resolved[path] = module?.default
