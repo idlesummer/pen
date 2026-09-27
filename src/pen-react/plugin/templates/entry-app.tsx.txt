@@ -6,6 +6,7 @@ import {
   App,
   createRouter,
   DefaultFallback,
+  dict,
   ErrorFallback,
   GLOBAL_DEFAULT,
   GLOBAL_ERROR,
@@ -14,26 +15,28 @@ import {
 
 /** Discovered route modules, keyed by root-relative path (as
  *  import.meta.glob returns them), reduced to appDir-relative path ->
- *  component. */
-function createRouteComponents(modules: Record<string, RouteModule>): Map<string, RouteComponent> {
-  const moduleEntries = Object.entries(modules)
-  const routeComponents = new Map(moduleEntries.map(([path, module]) => [
-    path.slice(path.indexOf('/__PEN_APP_DIR__/') + '/__PEN_APP_DIR__/'.length),
-    module.default,
-  ]))
-  routeComponents.set(GLOBAL_DEFAULT, DefaultFallback)
-  routeComponents.set(GLOBAL_ERROR, ErrorFallback)
+ *  component. A dict, not a plain object - keys come from file/folder
+ *  names, and a route folder literally named `__proto__` would otherwise
+ *  reassign the object's prototype instead of storing an entry. */
+function createRouteComponents(modules: Record<string, RouteModule>): Record<string, RouteComponent> {
+  const routeComponents = dict<RouteComponent>()
+  for (const [path, module] of Object.entries(modules))
+    routeComponents[path.slice(path.indexOf('/__PEN_APP_DIR__/') + '/__PEN_APP_DIR__/'.length)] = module.default
+
+  routeComponents[GLOBAL_DEFAULT] = DefaultFallback
+  routeComponents[GLOBAL_ERROR] = ErrorFallback
   return routeComponents
 }
 
 /** Buckets the compiled route tree's module paths by role. The two
  *  sentinels get pen's own built-in fallback, everything else its real
- *  discovered component. */
-function createComponentMap(modulePaths: string[], routeComponents: Map<string, RouteComponent>): ComponentMap {
-  const componentMap: ComponentMap = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
+ *  discovered component. Same dict reasoning as createRouteComponents -
+ *  modulePath is still a file/folder-derived key. */
+function createComponentMap(modulePaths: string[], routeComponents: Record<string, RouteComponent>): ComponentMap {
+  const componentMap: ComponentMap = { page: dict(), layout: dict(), loading: dict(), error: dict(), default: dict() }
   for (const modulePath of modulePaths) {
     const role = getRouteModuleRole(modulePath)
-    const component = routeComponents.get(modulePath)! // Safe since modulePaths is subset of routeComponents.keys()
+    const component = routeComponents[modulePath]! // Safe since modulePaths is subset of routeComponents's keys
     componentMap[role][modulePath] = component
   }
   return componentMap
@@ -46,7 +49,7 @@ const routeComponents = createRouteComponents(moduleImports)
 
 // createRouter compiles the route tree and narrows modulePaths down further -
 // buildApp already validated these modules, so entry-app trusts them as-is
-const { matcher, modulePaths } = createRouter([...routeComponents.keys()])
+const { matcher, modulePaths } = createRouter(Object.keys(routeComponents))
 const componentMap = createComponentMap(modulePaths, routeComponents)
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
