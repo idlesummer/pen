@@ -2,7 +2,7 @@
  *  extension so rolldown's `with { type: 'text' }` import attribute takes
  *  effect - a real .tsx extension already has a built-in loader that claims
  *  the file before the attribute gets a say. */
-declare module '*.txt' {
+declare module '*.tsx.txt' {
   const content: string
   export default content
 }
