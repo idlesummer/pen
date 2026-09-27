@@ -1,19 +1,7 @@
 import { basename } from 'node:path'
-
-type RouteModuleRole =
-  typeof ROUTE_MODULE_ROLES extends Set<infer T> ? T : never
-
-export type RouteModulePaths =
-  Partial<Record<RouteModuleRole, string>>
-
-const ROUTE_MODULE_ROLES =
-  new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
-
-/** Sentinel path for the root route when no `default.tsx` exists. */
-export const GLOBAL_DEFAULT = '\0default'
-
-/** Sentinel path for the root route when no `error.tsx` exists. */
-export const GLOBAL_ERROR = '\0error'
+import type { RouteModuleRole } from './types'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
+import { ROUTE_MODULE_ROLES } from './types'
 
 /** Which role a module path belongs to. The two sentinels carry their role
  *  in the constant itself, since they're not real files with a basename. */

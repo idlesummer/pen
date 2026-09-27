@@ -3,7 +3,7 @@ import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
-import { compileApp, formatDiagnostics, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
+import { compileApp, formatDiagnostics, resolveRouteModules } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 import { validateAsyncPages, validateComponentExports } from './validate'
@@ -24,14 +24,11 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Reco
   // it a second time, ahead of and separately from that diagnostic.
   const server = await createServer({ configFile: false, logLevel: 'silent', server: { middlewareMode: true } })
   try {
-    const components: Record<string, RouteComponent | undefined> = {}
-    for (const filePath of filePaths) {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
-      components[filePath] = module.default
-    }
-    components[GLOBAL_DEFAULT] = DefaultFallback
-    components[GLOBAL_ERROR] = ErrorFallback
-    return components
+    const modules: Record<string, Partial<RouteModule> | undefined> = {}
+    for (const filePath of filePaths)
+      modules[filePath] = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
+
+    return resolveRouteModules<RouteComponent>(modules, { default: DefaultFallback, error: ErrorFallback })
   }
   finally {
     await server.close()
