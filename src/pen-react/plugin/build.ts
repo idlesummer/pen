@@ -17,20 +17,20 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *  Needs its own server even inside a build environment's buildStart - a
  *  build environment has no ssrLoadModule equivalent, only a dev server
  *  does, so there's no way to get real executed exports otherwise. */
-async function loadComponents(appDir: string, filePaths: string[]): Promise<Map<string, RouteComponent | undefined>> {
+async function loadComponents(appDir: string, filePaths: string[]): Promise<Record<string, RouteComponent | undefined>> {
   // Silent: a transform error here still throws and reaches buildStart's
   // own this.error, which reports it through the same channel as every
   // other diagnostic - Vite's own dev-server logger would otherwise print
   // it a second time, ahead of and separately from that diagnostic.
   const server = await createServer({ configFile: false, logLevel: 'silent', server: { middlewareMode: true } })
   try {
-    const components = new Map<string, RouteComponent | undefined>()
+    const components: Record<string, RouteComponent | undefined> = {}
     for (const filePath of filePaths) {
       const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
-      components.set(filePath, module.default)
+      components[filePath] = module.default
     }
-    components.set(GLOBAL_DEFAULT, DefaultFallback)
-    components.set(GLOBAL_ERROR, ErrorFallback)
+    components[GLOBAL_DEFAULT] = DefaultFallback
+    components[GLOBAL_ERROR] = ErrorFallback
     return components
   }
   finally {
