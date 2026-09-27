@@ -13,11 +13,7 @@ import {
   getRouteModuleRole,
 } from '@idlesummer/pen/internal'
 
-/** Discovered route modules, keyed by root-relative path (as
- *  import.meta.glob returns them), reduced to appDir-relative path ->
- *  component. A dict, not a plain object - keys come from file/folder
- *  names, and a route folder literally named `__proto__` would otherwise
- *  reassign the object's prototype instead of storing an entry. */
+/** Reduces discovered route modules to app-relative paths and components. */
 function createRouteComponents(modules: Record<string, RouteModule>): Record<string, RouteComponent> {
   const routeComponents = dict<RouteComponent>()
   for (const [path, module] of Object.entries(modules))
@@ -28,12 +24,15 @@ function createRouteComponents(modules: Record<string, RouteModule>): Record<str
   return routeComponents
 }
 
-/** Buckets the compiled route tree's module paths by role. The two
- *  sentinels get pen's own built-in fallback, everything else its real
- *  discovered component. Same dict reasoning as createRouteComponents -
- *  modulePath is still a file/folder-derived key. */
+/** Groups route components by module role. */
 function createComponentMap(modulePaths: string[], routeComponents: Record<string, RouteComponent>): ComponentMap {
-  const componentMap: ComponentMap = { page: dict(), layout: dict(), loading: dict(), error: dict(), default: dict() }
+  const componentMap: ComponentMap = {
+    page: dict(),
+    layout: dict(),
+    loading: dict(),
+    error: dict(),
+    default: dict(),
+  }
   for (const modulePath of modulePaths) {
     const role = getRouteModuleRole(modulePath)
     const component = routeComponents[modulePath]! // Safe since modulePaths is subset of routeComponents's keys
