@@ -11,13 +11,13 @@ type RoleMap<T> = Record<ModuleRole, Record<string, T>>
  *  neither. Agnostic to what T is - the fallback values are the only place
  *  that meaning enters. */
 export function createModuleExports<T>(modules: ModuleMap<T>, fallbacks: { default: T, error: T }): ModuleExports<T> {
-  const resolved: ModuleExports<T> = {}
+  const moduleExports: ModuleExports<T> = {}
   for (const [path, module] of Object.entries(modules))
-    resolved[path] = module?.default
+    moduleExports[path] = module?.default
 
-  resolved[GLOBAL_DEFAULT] = fallbacks.default
-  resolved[GLOBAL_ERROR] = fallbacks.error
-  return resolved
+  moduleExports[GLOBAL_DEFAULT] = fallbacks.default
+  moduleExports[GLOBAL_ERROR] = fallbacks.error
+  return moduleExports
 }
 
 /** Buckets resolved modules by role. */
