@@ -3,25 +3,25 @@ import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
 import { getModuleRole } from './classify'
 
 type ModuleMap<T> = Record<string, Partial<Module<T>> | undefined>
-type ModuleExports<T> = Record<string, T | undefined>
+type DefaultExports<T> = Record<string, T | undefined>
 type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
 /** Extracts each module's default export, keyed by path, and fills the two
  *  root sentinel slots with the given fallbacks when the app supplies
  *  neither. Agnostic to what T is - the fallback values are the only place
  *  that meaning enters. */
-export function createModuleExports<T>(modules: ModuleMap<T>, fallbacks: { default: T, error: T }): ModuleExports<T> {
-  const moduleExports: ModuleExports<T> = {}
+export function resolveDefaultExports<T>(modules: ModuleMap<T>, fallbacks: { default: T, error: T }): DefaultExports<T> {
+  const moduleExports: DefaultExports<T> = {
+    [GLOBAL_DEFAULT]: fallbacks.default,
+    [GLOBAL_ERROR]: fallbacks.error,
+  }
   for (const [path, module] of Object.entries(modules))
     moduleExports[path] = module?.default
-
-  moduleExports[GLOBAL_DEFAULT] = fallbacks.default
-  moduleExports[GLOBAL_ERROR] = fallbacks.error
   return moduleExports
 }
 
 /** Buckets resolved modules by role. */
-export function createRoleMap<T>(modulePaths: string[], moduleExports: ModuleExports<T>): RoleMap<T> {
+export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultExports<T>): RoleMap<T> {
   const roleMap: RoleMap<T> = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const path of modulePaths) {
     const role = getModuleRole(path)
