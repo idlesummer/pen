@@ -1,4 +1,4 @@
-import type { RouteModule as CoreRouteModule } from '@/pen-core'
+import type { Module } from '@/pen-core'
 import type { ErrorComponent } from './components/ErrorBoundary'
 import type { DefaultComponent } from './components/DefaultBoundary'
 import type { LoadingComponent } from './components/LoadingBoundary'
@@ -19,4 +19,4 @@ export type ComponentMap = {
 export type RouteComponent = PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
 
 /** The shape of a route module file. */
-export type RouteModule = CoreRouteModule<RouteComponent>
+export type RouteModule = Module<RouteComponent>

@@ -1,8 +1,8 @@
-import type { RouteModulePaths } from '../resolution'
+import type { ModulePaths } from '../resolution'
 import type { SegmentType } from './route-segment'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { filterRouteFiles, getRouteModuleRole } from '../resolution'
+import { filterModuleFiles, getModuleRole } from '../resolution'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
 /** The parse: one node per folder, mirroring the app directory.
@@ -18,7 +18,7 @@ export type RouteNode = {
   type: SegmentType
   segment: string
   path: string
-  modules: RouteModulePaths
+  modules: ModulePaths
   // Tree
   parent?: RouteNode
   children: RouteNode[]
@@ -41,11 +41,11 @@ export function createRouteTree(filePaths: string[]): RouteNode {
 
   // Always '/', never node:path's sep - these are route paths, not OS file
   // paths, and stay forward-slash on every platform regardless of host OS.
-  treeify(routeTree, filterRouteFiles(filePaths), '/', {
+  treeify(routeTree, filterModuleFiles(filePaths), '/', {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const moduleName = parts[index]! // always defined - create only yields existing indices
       if (index === parts.length-1) {  // the last part is the file itself
-        parentRouteNode.modules[getRouteModuleRole(moduleName)] = filePath
+        parentRouteNode.modules[getModuleRole(moduleName)] = filePath
         return
       }
       if (isPrivate(moduleName)) return // prunes the rest of this path

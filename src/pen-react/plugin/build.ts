@@ -3,7 +3,7 @@ import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { findFiles } from '@/lib/find-files'
-import { compileApp, formatDiagnostics, resolveRouteModules } from '@/pen-core'
+import { compileApp, formatDiagnostics, resolveModules } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 import { validateAsyncPages, validateComponentExports } from './validate'
@@ -28,7 +28,7 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Reco
     for (const filePath of filePaths)
       modules[filePath] = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
 
-    return resolveRouteModules<RouteComponent>(modules, { default: DefaultFallback, error: ErrorFallback })
+    return resolveModules<RouteComponent>(modules, { default: DefaultFallback, error: ErrorFallback })
   }
   finally {
     await server.close()
