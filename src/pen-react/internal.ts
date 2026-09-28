@@ -4,4 +4,4 @@ export { App } from './runtime'
 export type { ComponentMap, RouteComponent, RouteModule } from './runtime'
 export { DefaultFallback, ErrorFallback } from './runtime'
 
-export { compileApp, createRouter, resolveModules, createRoleMap } from '@/pen-core'
+export { compileApp, createRouter, createModuleExports, createRoleMap } from '@/pen-core'
