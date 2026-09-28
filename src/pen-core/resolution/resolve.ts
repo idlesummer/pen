@@ -4,7 +4,6 @@ import { getModuleRole } from './classify'
 
 type ModuleEntries<T> = Iterable<readonly [string, Partial<Module<T>> | undefined]>
 type DefaultExports<T> = Record<string, T | undefined>
-type GlobalFallbacks<T> = { default: T; error: T }
 type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
 /** Extracts each module's default export, keyed by path, and fills the two
@@ -13,10 +12,10 @@ type RoleMap<T> = Record<ModuleRole, Record<string, T>>
  *  that meaning enters. Takes entries rather than a Record so a caller that
  *  already has entries (e.g. from mapping over Object.entries) doesn't have
  *  to round-trip through Object.fromEntries just to hand them over. */
-export function resolveDefaultExports<T>(modules: ModuleEntries<T>, fallbacks: GlobalFallbacks<T>): DefaultExports<T> {
+export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallback: T, errorFallback: T): DefaultExports<T> {
   const moduleExports: DefaultExports<T> = {
-    [GLOBAL_DEFAULT]: fallbacks.default,
-    [GLOBAL_ERROR]: fallbacks.error,
+    [GLOBAL_DEFAULT]: defaultFallback,
+    [GLOBAL_ERROR]: errorFallback,
   }
   for (const [path, module] of modules)
     moduleExports[path] = module?.default

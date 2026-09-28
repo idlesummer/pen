@@ -24,11 +24,12 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Reco
   // it a second time, ahead of and separately from that diagnostic.
   const server = await createServer({ configFile: false, logLevel: 'silent', server: { middlewareMode: true } })
   try {
-    const modules: Record<string, Partial<RouteModule> | undefined> = {}
-    for (const filePath of filePaths)
-      modules[filePath] = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
-
-    return resolveDefaultExports<RouteComponent>(Object.entries(modules), { default: DefaultFallback, error: ErrorFallback })
+    const loadModule = async (filePath: string) => {
+      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`)
+      return [filePath, module as Partial<RouteModule>] as const
+    }
+    const moduleEntries = await Promise.all(filePaths.map(loadModule))
+    return resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
   }
   finally {
     await server.close()
