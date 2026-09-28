@@ -28,7 +28,7 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Reco
     for (const filePath of filePaths)
       modules[filePath] = await server.ssrLoadModule(`/${appDir}/${filePath}`) as Partial<RouteModule>
 
-    return resolveDefaultExports<RouteComponent>(modules, { default: DefaultFallback, error: ErrorFallback })
+    return resolveDefaultExports<RouteComponent>(Object.entries(modules), { default: DefaultFallback, error: ErrorFallback })
   }
   finally {
     await server.close()
