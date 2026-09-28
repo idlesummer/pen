@@ -22,14 +22,20 @@ async function loadComponents(appDir: string, filePaths: string[]): Promise<Reco
   // own this.error, which reports it through the same channel as every
   // other diagnostic - Vite's own dev-server logger would otherwise print
   // it a second time, ahead of and separately from that diagnostic.
-  const server = await createServer({ configFile: false, logLevel: 'silent', server: { middlewareMode: true } })
+  const server = await createServer({
+    configFile: false,
+    logLevel: 'silent',
+    server: {
+      middlewareMode: true,
+    },
+  })
   try {
-    const loadModule = async (filePath: string) => {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`)
-      return [filePath, module as Partial<RouteModule>] as const
-    }
-    const moduleEntries = await Promise.all(filePaths.map(loadModule))
-    return resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
+    const moduleEntries = await Promise.all(filePaths.map(async (filePath) => {
+      const module: Partial<RouteModule> = await server.ssrLoadModule(`/${appDir}/${filePath}`)
+      return [filePath, module] as const
+    }))
+    const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
+    return routeComponents
   }
   finally {
     await server.close()
