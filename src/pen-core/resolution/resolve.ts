@@ -21,10 +21,11 @@ export function createModuleExports<T>(modules: ModuleMap<T>, fallbacks: { defau
 }
 
 /** Buckets resolved modules by role. */
-export function createRoleMap<T>(modulePaths: string[], resolved: ModuleExports<T>): RoleMap<T> {
-  const buckets: RoleMap<T> = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
-  for (const path of modulePaths)
-    buckets[getModuleRole(path)][path] = resolved[path]! // Safe - modulePaths is a subset of resolved's keys
-
-  return buckets
+export function createRoleMap<T>(modulePaths: string[], moduleExports: ModuleExports<T>): RoleMap<T> {
+  const roleMap: RoleMap<T> = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
+  for (const path of modulePaths) {
+    const role = getModuleRole(path)
+    roleMap[role][path] = moduleExports[path]! // Safe - modulePaths is a subset of resolved's keys
+  }
+  return roleMap
 }
