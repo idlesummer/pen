@@ -22,7 +22,7 @@ export function resolveRouteModules<T>(modules: ModuleMap<T>, fallbacks: { defau
 
 /** Buckets resolved modules by role. */
 export function bucketByRole<T>(modulePaths: string[], resolved: ResolvedComponents<T>): RoleMap<T> {
-  const buckets = { page: {}, layout: {}, loading: {}, error: {}, default: {} } as RoleMap<T>
+  const buckets: RoleMap<T> = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const path of modulePaths)
     buckets[getRouteModuleRole(path)][path] = resolved[path]! // Safe - modulePaths is a subset of resolved's keys
 
