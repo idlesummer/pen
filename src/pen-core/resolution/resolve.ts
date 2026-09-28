@@ -4,7 +4,7 @@ import { getModuleRole } from './classify'
 
 type ModuleMap<T> = Record<string, Partial<Module<T>> | undefined>
 type DefaultExports<T> = Record<string, T | undefined>
-type GlobalFallbacks<T> = { default: T, error: T }
+type GlobalFallbacks<T> = { default: T; error: T }
 type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
 /** Extracts each module's default export, keyed by path, and fills the two
@@ -23,7 +23,13 @@ export function resolveDefaultExports<T>(modules: ModuleMap<T>, fallbacks: Globa
 
 /** Buckets resolved modules by role. */
 export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultExports<T>): RoleMap<T> {
-  const roleMap: RoleMap<T> = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
+  const roleMap: RoleMap<T> = {
+    page: {},
+    layout: {},
+    loading: {},
+    error: {},
+    default: {},
+  }
   for (const path of modulePaths) {
     const role = getModuleRole(path)
     roleMap[role][path] = moduleExports[path]! // Safe - modulePaths is a subset of resolved's keys
