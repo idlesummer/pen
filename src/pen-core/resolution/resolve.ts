@@ -1,16 +1,16 @@
-import type { RouteModule, RouteModuleRole } from './types'
+import type { Module, ModuleRole } from './types'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
-import { getRouteModuleRole } from './classify'
+import { getModuleRole } from './classify'
 
-type ModuleMap<T> = Record<string, Partial<RouteModule<T>> | undefined>
+type ModuleMap<T> = Record<string, Partial<Module<T>> | undefined>
 type ResolvedComponents<T> = Record<string, T | undefined>
-type RoleMap<T> = Record<RouteModuleRole, Record<string, T>>
+type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
 /** Extracts each module's default export, keyed by path, and fills the two
  *  root sentinel slots with the given fallbacks when the app supplies
  *  neither. Agnostic to what T is - the fallback values are the only place
  *  that meaning enters. */
-export function resolveRouteModules<T>(modules: ModuleMap<T>, fallbacks: { default: T, error: T }): ResolvedComponents<T> {
+export function resolveModules<T>(modules: ModuleMap<T>, fallbacks: { default: T, error: T }): ResolvedComponents<T> {
   const resolved: ResolvedComponents<T> = {}
   for (const [path, module] of Object.entries(modules))
     resolved[path] = module?.default
@@ -24,7 +24,7 @@ export function resolveRouteModules<T>(modules: ModuleMap<T>, fallbacks: { defau
 export function bucketByRole<T>(modulePaths: string[], resolved: ResolvedComponents<T>): RoleMap<T> {
   const buckets: RoleMap<T> = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const path of modulePaths)
-    buckets[getRouteModuleRole(path)][path] = resolved[path]! // Safe - modulePaths is a subset of resolved's keys
+    buckets[getModuleRole(path)][path] = resolved[path]! // Safe - modulePaths is a subset of resolved's keys
 
   return buckets
 }
