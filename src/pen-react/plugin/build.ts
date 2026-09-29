@@ -13,34 +13,53 @@ export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
-/** Imports every route module for real through Vite's transform pipeline.
- *  Needs its own server even inside a build environment's buildStart - a
- *  build environment has no ssrLoadModule equivalent, only a dev server
- *  does, so there's no way to get real executed exports otherwise. */
-async function loadComponents(appDir: string, filePaths: string[]): Promise<Record<string, RouteComponent | undefined>> {
-  // Silent: a transform error here still throws and reaches buildStart's
-  // own this.error, which reports it through the same channel as every
-  // other diagnostic - Vite's own dev-server logger would otherwise print
-  // it a second time, ahead of and separately from that diagnostic.
+async function glob<T>(appDir: string): Promise<Record<string, T>> {
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
-    server: {
-      middlewareMode: true,
-    },
+    server: { middlewareMode: true },
   })
   try {
-    const moduleEntries = await Promise.all(filePaths.map(async (filePath) => {
-      const module: Partial<RouteModule> = await server.ssrLoadModule(`/${appDir}/${filePath}`)
-      return [filePath, module] as const
+    const filePaths = findFiles(appDir, '.tsx')
+    const modules: Record<string, T> = {}
+    await Promise.all(filePaths.map(async (filePath) => {
+      modules[filePath] = await server.ssrLoadModule(`/${appDir}/${filePath}`) as T
     }))
-    const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
-    return routeComponents
+    return modules
   }
   finally {
     await server.close()
   }
 }
+
+/** Imports every route module for real through Vite's transform pipeline.
+ *  Needs its own server even inside a build environment's buildStart - a
+ *  build environment has no ssrLoadModule equivalent, only a dev server
+ *  does, so there's no way to get real executed exports otherwise. */
+// async function loadComponents(appDir: string, filePaths: string[]): Promise<Record<string, RouteComponent | undefined>> {
+//   // Silent: a transform error here still throws and reaches buildStart's
+//   // own this.error, which reports it through the same channel as every
+//   // other diagnostic - Vite's own dev-server logger would otherwise print
+//   // it a second time, ahead of and separately from that diagnostic.
+//   const server = await createServer({
+//     configFile: false,
+//     logLevel: 'silent',
+//     server: {
+//       middlewareMode: true,
+//     },
+//   })
+//   try {
+//     const moduleEntries = await Promise.all(filePaths.map(async (filePath) => {
+//       const module: Partial<RouteModule> = await server.ssrLoadModule(`/${appDir}/${filePath}`)
+//       return [filePath, module] as const
+//     }))
+//     const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
+//     return routeComponents
+//   }
+//   finally {
+//     await server.close()
+//   }
+// }
 
 /**
  * Compiles the app's routes into the virtual entry module Vite bundles, and
@@ -87,8 +106,11 @@ export function pen(appDir: string): Plugin {
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
     async buildStart() {
-      const filePaths = findFiles(appDir, '.tsx')
-      const components = await loadComponents(appDir, filePaths)
+      // const filePaths = findFiles(appDir, '.tsx')
+      // const components = await loadComponents(appDir, filePaths)
+      const moduleMap = await glob<Partial<RouteModule>>(appDir)
+      const filePaths = Object.keys(moduleMap)
+      const components = resolveDefaultExports<RouteComponent>(Object.entries(moduleMap), DefaultFallback, ErrorFallback)
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
       diagnostics.push(...validateComponentExports(modulePaths, components))
