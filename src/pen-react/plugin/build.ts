@@ -14,6 +14,11 @@ export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
+
+type GlobResult<T> = Promise<{
+  filePaths: string[]
+  entries: Array<readonly [string, T]>
+}>
 /** Imports every route module for real through Vite's transform pipeline.
  *  Needs its own server even inside a build environment's buildStart - a
  *  build environment has no ssrLoadModule equivalent, only a dev server
@@ -25,7 +30,7 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *  follow resolution timing instead. filePaths itself is returned alongside
  *  entries rather than left for the caller to re-derive from them - it
  *  already exists as a real array before entries is ever built. */
-async function glob<T>(appDir: string): Promise<{ filePaths: string[], entries: Array<readonly [string, T]> }> {
+async function glob<T>(appDir: string): GlobResult<T> {
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
