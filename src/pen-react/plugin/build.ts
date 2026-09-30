@@ -24,7 +24,7 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *  resolves first, so the sorted order survives; concurrent callbacks
  *  writing into an object wouldn't, since insertion order would follow
  *  resolution timing instead. */
-async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
+async function glob<T>(appDir: string): Promise<Array<[string, T]>> {
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
@@ -32,10 +32,8 @@ async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
   })
   try {
     const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
-    return await Promise.all(paths.map(async (path) => {
-      const module = await server.ssrLoadModule(`/${appDir}/${path}`) as T
-      return [path, module] as const
-    }))
+    const modules = paths.map(async path => [path, await server.ssrLoadModule(`/${appDir}/${path}`)] as [string, T])
+    return await Promise.all(modules)
   }
   finally {
     await server.close()
