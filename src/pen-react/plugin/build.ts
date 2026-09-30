@@ -14,17 +14,12 @@ const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
 /**
- * Compiles the app's routes into the virtual entry module Vite bundles, and
- * validates them during buildStart - before any transform work starts, so a
- * broken app never produces a bundle that would only fail once someone runs
- * it. Reports through Vite's own logger (this.warn/this.error) instead of a
- * separate print path, so there's a single source of truth for build output.
+ * Loads the app's route modules, compiles their paths, and validates the
+ * resulting routes before the build proceeds.
  *
- * Gated to the ssr environment: buildStart otherwise runs once per
- * environment Vite builds, and the client environment has no route modules
- * of its own to validate.
+ * Runs only in the SSR environment.
  *
- * @param appDir App route directory relative to project root.
+ * @param appDir - App route directory relative to the project root.
  */
 export function pen(appDir: string): Plugin {
   return {
