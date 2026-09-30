@@ -3,7 +3,7 @@ import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { existsSync } from 'node:fs'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { compileApp, formatDiagnostics, resolveDefaultExports } from '@/pen-core'
+import { createRouter, formatDiagnostics, resolveDefaultExports } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 import { validateAsyncPages, validateComponentExports } from './validate'
@@ -61,9 +61,10 @@ export function pen(appDir: string): Plugin {
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir)
       const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
 
-      // Compiles paths into route and position trees
+      // createRouter compiles paths into route and position trees - matcher
+      // goes unused here, this only needs the compiled-routes byproducts
       const filePaths = moduleEntries.map(entry => entry[0])
-      const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
+      const { modulePaths, pageEndpoints, diagnostics } = createRouter(filePaths)
 
       // Validates component exports and async pages
       diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
