@@ -3,7 +3,7 @@ import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { existsSync } from 'node:fs'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { createRouter, formatDiagnostics, resolveDefaultExports } from '@/pen-core'
+import { createRouter, resolveDefaultExports } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 import { validateAsyncPages, validateComponentExports } from './validate'
@@ -64,12 +64,11 @@ export function pen(appDir: string): Plugin {
       diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
       diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
-      const formatted = formatDiagnostics(diagnostics)
-      for (const { severity, text } of formatted)
+      for (const { severity, text } of diagnostics)
         if (severity === 'warn')
           this.warn(text)
 
-      const errorText = formatted.filter(d => d.severity === 'error').map(d => d.text).join('\n\n')
+      const errorText = diagnostics.filter(d => d.severity === 'error').map(d => d.text).join('\n\n')
       if (errorText)
         this.error(errorText)
     },

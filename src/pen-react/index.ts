@@ -11,5 +11,5 @@ export { renderMatch } from './runtime'
 export { NavigationProvider } from './runtime'
 export { useHistory, useNavigate, usePathname, useRouter, useSearchParams } from './runtime'
 
-export type { RouteNode, Endpoint, Frame, PositionConflicts, PositionNode, Diagnostic, FormattedDiagnostic } from '@/pen-core'
+export type { RouteNode, Endpoint, Frame, PositionConflicts, PositionNode, Diagnostic } from '@/pen-core'
 export type { Match, Matcher, Params, Router } from '@/pen-core'
