@@ -11,15 +11,20 @@ type RoleMap<T> = Record<ModuleRole, Record<string, T>>
  *  neither. Agnostic to what T is - the fallback values are the only place
  *  that meaning enters. Takes entries rather than a Record so a caller that
  *  already has entries (e.g. from mapping over Object.entries) doesn't have
- *  to round-trip through Object.fromEntries just to hand them over. */
-export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallback: T, errorFallback: T): DefaultExports<T> {
+ *  to round-trip through Object.fromEntries just to hand them over. Returns
+ *  paths alongside moduleExports - building it in the same pass that already
+ *  visits every path is cheaper than a caller calling Object.keys() after. */
+export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallback: T, errorFallback: T): { paths: string[], moduleExports: DefaultExports<T> } {
   const moduleExports: DefaultExports<T> = {
     [GLOBAL_DEFAULT]: defaultFallback,
     [GLOBAL_ERROR]: errorFallback,
   }
-  for (const [path, module] of modules)
+  const paths = [GLOBAL_DEFAULT, GLOBAL_ERROR]
+  for (const [path, module] of modules) {
     moduleExports[path] = module?.default
-  return moduleExports
+    paths.push(path)
+  }
+  return { paths, moduleExports }
 }
 
 /** Buckets resolved modules by role. */
