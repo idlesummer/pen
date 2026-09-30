@@ -35,13 +35,10 @@ export function pen(appDir: string): Plugin {
     },
     config() {
       return {
-        // Bundle pen's runtime instead of leaving it external
-        ssr: { noExternal: [PACKAGE_NAME] },
+        ssr: { noExternal: [PACKAGE_NAME] },  // Bundle pen's runtime instead of leaving it external
         build: {
-          // Build for Node so imports work instead of being treated as browser code
-          ssr: true,
-          rolldownOptions: {
-            // The entry-app template discovers the user's routes for bundling
+          ssr: true,          // Build for Node so imports work instead of being treated as browser code
+          rolldownOptions: {  // The entry-app template discovers the user's routes for bundling
             input: ENTRY_MODULE_ID,
             output: { entryFileNames: BUILD_ENTRY },
           },
