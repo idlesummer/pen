@@ -5,18 +5,12 @@ export type Diagnostic = {
   severity: 'error' | 'warn'
   message: string
   files: string[]
-}
-
-export type FormattedDiagnostic = {
-  severity: Diagnostic['severity']
   text: string
 }
 
-/** Formats each diagnostic into display-ready text, one block per
- *  diagnostic plus its files. Pure - callers decide where the text goes. */
-export function formatDiagnostics(diagnostics: Diagnostic[]): FormattedDiagnostic[] {
-  return diagnostics.map(({ severity, rule, message, files }) => ({
-    severity,
-    text: [`[${severity}] ${rule}: ${message}`, ...files.map(file => `  at ${file}`)].join('\n'),
-  }))
+/** Builds a diagnostic, formatting its display-ready text up front - one
+ *  line for the rule and message, plus one line per file. */
+export function createDiagnostic(rule: string, severity: Diagnostic['severity'], message: string, files: string[]): Diagnostic {
+  const text = [`[${severity}] ${rule}: ${message}`, ...files.map(file => `  at ${file}`)].join('\n')
+  return { rule, severity, message, files, text }
 }
