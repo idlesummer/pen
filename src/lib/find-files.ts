@@ -9,8 +9,5 @@ import { normalize } from './normalize-path'
 export function findFiles(dir: string, pattern: string): string[] {
   if (!existsSync(dir))
     throw new Error(`No such directory: '${dir}'`)
-
-  return globSync(pattern, { cwd: dir })
-    .map(normalize)
-    .sort()
+  return globSync(pattern, { cwd: dir }).map(normalize).sort()
 }
