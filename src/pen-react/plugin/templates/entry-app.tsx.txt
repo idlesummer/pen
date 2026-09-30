@@ -16,12 +16,12 @@ import {
 // Maps paths to module objects
 const modules = import.meta.glob<RouteModule>('/__PEN_APP_DIR__/**/{page,layout,loading,error,default}.tsx', { eager: true })
 const entries = Object.entries(modules).map(([path, mod]) => [path.replace('/__PEN_APP_DIR__/', ''), mod] as const)
-const { paths, moduleExports } = resolveDefaultExports<RouteComponent>(entries, DefaultFallback, ErrorFallback)
+const routeComponents = resolveDefaultExports<RouteComponent>(entries, DefaultFallback, ErrorFallback)
 
 // `createRouter` narrows modulePaths down further to valid routes
 // Modules should be already validated by buildApp
-const { matcher, modulePaths } = createRouter(paths)
-const componentMap = createRoleMap(modulePaths, moduleExports) as ComponentMap
+const { matcher, modulePaths } = createRouter(Object.keys(routeComponents))
+const componentMap = createRoleMap(modulePaths, routeComponents) as ComponentMap
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
