@@ -61,8 +61,7 @@ export function pen(appDir: string): Plugin {
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir)
       const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
 
-      // createRouter compiles paths into route and position trees - matcher
-      // goes unused here, this only needs the compiled-routes byproducts
+      // createRouter compiles paths into route and position trees
       const filePaths = moduleEntries.map(entry => entry[0])
       const { modulePaths, pageEndpoints, diagnostics } = createRouter(filePaths)
 
