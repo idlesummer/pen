@@ -7,11 +7,11 @@ import { isAsyncComponent } from '@/pen-react/runtime'
  *  catches what TypeScript alone can't guarantee (a missing default export,
  *  or one of the wrong shape). The same failure Next.js surfaces as "the
  *  default export is not a React Component". */
-export function validateComponentExports(modulePaths: string[], components: Record<string, RouteComponent | undefined>): Diagnostic[] {
+export function validateComponentExports(modulePaths: string[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const path of modulePaths) {
-    const Content = components[path]! // Safe - modulePaths is a subset of components's keys
+    const Content = routeComponents[path]! // Safe - modulePaths is a subset of components's keys
     if (typeof Content !== 'function') {
       diagnostics.push({
         rule: 'invalid-component-export',
@@ -32,11 +32,11 @@ export function validateComponentExports(modulePaths: string[], components: Reco
  *  there is actually usable, the same question validateComponentExports
  *  asks; isAsyncComponent would throw reading .constructor off a value
  *  that fails it. */
-export function validateAsyncPages(pageEndpoints: Endpoint[], components: Record<string, RouteComponent | undefined>): Diagnostic[] {
+export function validateAsyncPages(pageEndpoints: Endpoint[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
-    const Content = components[endpoint.contentPath]! // Safe - every real page endpoint has a discovered component
+    const Content = routeComponents[endpoint.contentPath]! // Safe - every real page endpoint has a discovered component
     if (Content && isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push({
         rule: 'async-page-missing-loading',
