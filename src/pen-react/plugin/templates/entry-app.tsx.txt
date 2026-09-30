@@ -20,7 +20,8 @@ const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, Def
 
 // `createRouter` narrows modulePaths down further to valid routes
 // Modules should be already validated by buildApp
-const { matcher, modulePaths } = createRouter(Object.keys(routeComponents))
+const filePaths = Object.keys(routeComponents)
+const { matcher, modulePaths } = createRouter(filePaths)
 const componentMap = createRoleMap(modulePaths, routeComponents) as ComponentMap
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
