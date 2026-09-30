@@ -1,11 +1,5 @@
 import { globSync } from 'node:fs'
-import { posix, win32 } from 'node:path'
-import { createServer } from 'vite'
-
-/** Normalizes a path by replacing backslashes with forward slashes. */
-function normalize(path: string): string {
-  return path.replaceAll(win32.sep, posix.sep)
-}
+import { createServer, normalizePath } from 'vite'
 
 /** Imports every route module for real through Vite's transform pipeline.
  *  Needs its own server even inside a build environment's buildStart - a
@@ -23,7 +17,7 @@ export async function ssrGlob<T>(appDir: string): Promise<Array<[string, T]>> {
     server: { middlewareMode: true },
   })
   try {
-    const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
+    const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalizePath).sort()
     const modules = paths.map(async path => [path, await server.ssrLoadModule(`/${appDir}/${path}`)] as [string, T])
     return await Promise.all(modules)
   }
