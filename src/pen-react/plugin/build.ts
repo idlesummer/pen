@@ -57,14 +57,17 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
+      // Imports route modules
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir)
-      const components = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
+      const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
 
+      // Compiles paths into route and position trees
       const filePaths = moduleEntries.map(entry => entry[0])
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-      diagnostics.push(...validateComponentExports(modulePaths, components))
-      diagnostics.push(...validateAsyncPages(pageEndpoints, components))
+      // Validates modules against their compiled routes
+      diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
+      diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
       const formatted = formatDiagnostics(diagnostics)
       for (const { severity, text } of formatted)
