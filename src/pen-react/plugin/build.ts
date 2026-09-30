@@ -57,7 +57,7 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
-      // Imports route modules
+      // Maps paths to module objects as entries
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir)
       const routeComponents = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
 
