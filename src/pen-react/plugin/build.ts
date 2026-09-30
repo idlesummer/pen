@@ -15,22 +15,16 @@ const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
 
-type GlobResult<T> = Promise<{
-  paths: string[]
-  modules: Array<readonly [string, T]>
-}>
 /** Imports every route module for real through Vite's transform pipeline.
  *  Needs its own server even inside a build environment's buildStart - a
  *  build environment has no ssrLoadModule equivalent, only a dev server
  *  does, so there's no way to get real executed exports otherwise. entries
  *  is built via Promise.all rather than assigning into a shared object -
  *  its result array preserves input order regardless of which module
- *  resolves first, so filePaths' sorted order survives; concurrent
- *  callbacks writing into an object wouldn't, since insertion order would
- *  follow resolution timing instead. filePaths itself is returned alongside
- *  entries rather than left for the caller to re-derive from them - it
- *  already exists as a real array before entries is ever built. */
-async function glob<T>(appDir: string): GlobResult<T> {
+ *  resolves first, so the sorted order survives; concurrent callbacks
+ *  writing into an object wouldn't, since insertion order would follow
+ *  resolution timing instead. */
+async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
@@ -38,11 +32,10 @@ async function glob<T>(appDir: string): GlobResult<T> {
   })
   try {
     const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
-    const modules = await Promise.all(paths.map(async (path) => {
+    return await Promise.all(paths.map(async (path) => {
       const module = await server.ssrLoadModule(`/${appDir}/${path}`) as T
       return [path, module] as const
     }))
-    return { paths, modules }
   }
   finally {
     await server.close()
@@ -97,7 +90,8 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
-      const { paths, modules } = await glob<Partial<RouteModule>>(appDir)
+      const modules = await glob<Partial<RouteModule>>(appDir)
+      const paths = modules.map(([path]) => path)
       const components = resolveDefaultExports<RouteComponent>(modules, DefaultFallback, ErrorFallback)
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(paths)
 
