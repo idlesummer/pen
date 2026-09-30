@@ -65,7 +65,7 @@ export function pen(appDir: string): Plugin {
       const filePaths = moduleEntries.map(entry => entry[0])
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
-      // Validates modules against their compiled routes
+      // Validates component exports and async pages
       diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
       diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
