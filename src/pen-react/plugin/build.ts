@@ -16,7 +16,7 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
 
 type GlobResult<T> = Promise<{
-  filePaths: string[]
+  paths: string[]
   entries: Array<readonly [string, T]>
 }>
 /** Imports every route module for real through Vite's transform pipeline.
@@ -37,12 +37,12 @@ async function glob<T>(appDir: string): GlobResult<T> {
     server: { middlewareMode: true },
   })
   try {
-    const filePaths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
-    const entries = await Promise.all(filePaths.map(async (filePath) => {
-      const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as T
-      return [filePath, module] as const
+    const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
+    const entries = await Promise.all(paths.map(async (path) => {
+      const module = await server.ssrLoadModule(`/${appDir}/${path}`) as T
+      return [path, module] as const
     }))
-    return { filePaths, entries }
+    return { paths, entries }
   }
   finally {
     await server.close()
@@ -97,9 +97,9 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
-      const { filePaths, entries } = await glob<Partial<RouteModule>>(appDir)
+      const { paths, entries } = await glob<Partial<RouteModule>>(appDir)
       const components = resolveDefaultExports<RouteComponent>(entries, DefaultFallback, ErrorFallback)
-      const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
+      const { modulePaths, pageEndpoints, diagnostics } = compileApp(paths)
 
       diagnostics.push(...validateComponentExports(modulePaths, components))
       diagnostics.push(...validateAsyncPages(pageEndpoints, components))
