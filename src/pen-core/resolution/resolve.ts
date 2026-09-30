@@ -2,7 +2,7 @@ import type { Module, ModuleRole } from './types'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
 import { getModuleRole } from './classify'
 
-type ModuleEntries<T> = Iterable<readonly [string, Partial<Module<T>> | undefined]>
+type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>> | undefined]>
 type DefaultExports<T> = Record<string, T | undefined>
 type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
