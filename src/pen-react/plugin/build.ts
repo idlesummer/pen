@@ -1,9 +1,8 @@
 import type { Plugin } from 'vite'
 import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
-import { existsSync, globSync } from 'node:fs'
-import { createServer } from 'vite'
+import { existsSync } from 'node:fs'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { normalize } from '@/lib/normalize-path'
+import { glob } from '@/lib/glob'
 import { compileApp, formatDiagnostics, resolveDefaultExports } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
@@ -13,32 +12,6 @@ export const BUILD_ENTRY = 'main.js'
 export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 const APP_DIR_TOKEN = '__PEN_APP_DIR__'
-
-
-/** Imports every route module for real through Vite's transform pipeline.
- *  Needs its own server even inside a build environment's buildStart - a
- *  build environment has no ssrLoadModule equivalent, only a dev server
- *  does, so there's no way to get real executed exports otherwise. entries
- *  is built via Promise.all rather than assigning into a shared object -
- *  its result array preserves input order regardless of which module
- *  resolves first, so the sorted order survives; concurrent callbacks
- *  writing into an object wouldn't, since insertion order would follow
- *  resolution timing instead. */
-async function glob<T>(appDir: string): Promise<Array<[string, T]>> {
-  const server = await createServer({
-    configFile: false,
-    logLevel: 'silent',
-    server: { middlewareMode: true },
-  })
-  try {
-    const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
-    const modules = paths.map(async path => [path, await server.ssrLoadModule(`/${appDir}/${path}`)] as [string, T])
-    return await Promise.all(modules)
-  }
-  finally {
-    await server.close()
-  }
-}
 
 /**
  * Compiles the app's routes into the virtual entry module Vite bundles, and
