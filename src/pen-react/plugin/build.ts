@@ -24,9 +24,6 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *  callbacks wouldn't, since insertion order would follow resolution timing
  *  instead. */
 async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
-  if (!existsSync(appDir))
-    throw new Error(`No such directory: '${appDir}'`)
-
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
@@ -89,6 +86,9 @@ export function pen(appDir: string): Plugin {
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
     async buildStart() {
+      if (!existsSync(appDir))
+        this.error(`No such directory: '${appDir}'`)
+
       const moduleEntries = await glob<Partial<RouteModule>>(appDir)
       const filePaths = moduleEntries.map(([path]) => path)
       const components = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
