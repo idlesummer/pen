@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { existsSync } from 'node:fs'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { glob } from '@/lib/glob'
+import { ssrGlob } from '@/lib/ssr-glob'
 import { compileApp, formatDiagnostics, resolveDefaultExports } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
@@ -57,7 +57,7 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
-      const modules = await glob<Partial<RouteModule>>(appDir)
+      const modules = await ssrGlob<Partial<RouteModule>>(appDir)
       const filePaths = modules.map(module => module[0])
       const components = resolveDefaultExports<RouteComponent>(modules, DefaultFallback, ErrorFallback)
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)

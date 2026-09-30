@@ -11,7 +11,7 @@ import { normalize } from './normalize-path'
  *  resolves first, so the sorted order survives; concurrent callbacks
  *  writing into an object wouldn't, since insertion order would follow
  *  resolution timing instead. */
-export async function glob<T>(appDir: string): Promise<Array<[string, T]>> {
+export async function ssrGlob<T>(appDir: string): Promise<Array<[string, T]>> {
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
