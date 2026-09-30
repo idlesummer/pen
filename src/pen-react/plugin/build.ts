@@ -17,7 +17,7 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 
 type GlobResult<T> = Promise<{
   paths: string[]
-  entries: Array<readonly [string, T]>
+  modules: Array<readonly [string, T]>
 }>
 /** Imports every route module for real through Vite's transform pipeline.
  *  Needs its own server even inside a build environment's buildStart - a
@@ -38,11 +38,11 @@ async function glob<T>(appDir: string): GlobResult<T> {
   })
   try {
     const paths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
-    const entries = await Promise.all(paths.map(async (path) => {
+    const modules = await Promise.all(paths.map(async (path) => {
       const module = await server.ssrLoadModule(`/${appDir}/${path}`) as T
       return [path, module] as const
     }))
-    return { paths, entries }
+    return { paths, modules }
   }
   finally {
     await server.close()
@@ -97,8 +97,8 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
-      const { paths, entries } = await glob<Partial<RouteModule>>(appDir)
-      const components = resolveDefaultExports<RouteComponent>(entries, DefaultFallback, ErrorFallback)
+      const { paths, modules } = await glob<Partial<RouteModule>>(appDir)
+      const components = resolveDefaultExports<RouteComponent>(modules, DefaultFallback, ErrorFallback)
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(paths)
 
       diagnostics.push(...validateComponentExports(modulePaths, components))
