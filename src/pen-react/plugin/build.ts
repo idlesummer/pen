@@ -29,7 +29,7 @@ async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
     server: { middlewareMode: true },
   })
   try {
-    const filePaths = findFiles(appDir, '.tsx')
+    const filePaths = findFiles(appDir, '**/*.tsx')
     return await Promise.all(filePaths.map(async (filePath) => {
       const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as T
       return [filePath, module] as const
