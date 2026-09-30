@@ -13,10 +13,16 @@ const DYNAMIC_PATTERN = /^\[(.+)\]$/        // [param] - dynamic (exactly one se
 const GROUP_PATTERN = /^\((.+)\)$/          // (label) - route group: invisible in the URL
 const STRAY_BRACKET_PATTERN = /[[\]()@]/    // A name containing stray brackets is malformed
 
-/** Parses one folder name into RouteNode's own type/segment fields directly -
- *  flattened here rather than nested in a Segment object, since every caller
- *  just spreads the result straight into a RouteNode. '' is the app root's
- *  own case - it never gets a real folder name of its own to parse. */
+/**
+ * Parses a folder name into its route segment type and value.
+ *
+ * The app root is represented by an empty name and receives the `root` type.
+ * Invalid route syntax receives the `malformed` type with a diagnostic value
+ * in `segment`.
+ *
+ * @param name - The folder name to parse.
+ * @returns The parsed segment type and value.
+ */
 export function createSegment(name: string): { type: SegmentType; segment: string } {
   let match: RegExpMatchArray | null
 
