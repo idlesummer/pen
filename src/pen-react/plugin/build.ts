@@ -91,9 +91,9 @@ export function pen(appDir: string): Plugin {
         this.error(`No such directory: '${appDir}'`)
 
       const modules = await glob<Partial<RouteModule>>(appDir)
-      const paths = modules.map(([path]) => path)
+      const filePaths = modules.map(([path]) => path)
       const components = resolveDefaultExports<RouteComponent>(modules, DefaultFallback, ErrorFallback)
-      const { modulePaths, pageEndpoints, diagnostics } = compileApp(paths)
+      const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
       diagnostics.push(...validateComponentExports(modulePaths, components))
       diagnostics.push(...validateAsyncPages(pageEndpoints, components))
