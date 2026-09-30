@@ -1,5 +1,5 @@
 import { existsSync, globSync } from 'node:fs'
-import { sep } from 'node:path'
+import { normalize } from './normalize-path'
 
 /** Recursively collects every file under `dir` matching `pattern`, already
  *  relative to `dir`. globSync's nested paths use the platform separator -
@@ -11,6 +11,6 @@ export function findFiles(dir: string, pattern: string): string[] {
     throw new Error(`No such directory: '${dir}'`)
 
   return globSync(pattern, { cwd: dir })
-    .map(path => path.replaceAll(sep, '/'))
+    .map(normalize)
     .sort()
 }
