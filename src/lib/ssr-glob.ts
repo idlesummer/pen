@@ -1,6 +1,11 @@
 import { globSync } from 'node:fs'
+import { posix, win32 } from 'node:path'
 import { createServer } from 'vite'
-import { normalize } from './normalize-path'
+
+/** Normalizes a path by replacing backslashes with forward slashes. */
+function normalize(path: string): string {
+  return path.replaceAll(win32.sep, posix.sep)
+}
 
 /** Imports every route module for real through Vite's transform pipeline.
  *  Needs its own server even inside a build environment's buildStart - a
