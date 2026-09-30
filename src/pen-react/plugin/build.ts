@@ -1,8 +1,9 @@
 import type { Plugin } from 'vite'
 import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
+import { existsSync, globSync } from 'node:fs'
 import { createServer } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { findFiles } from '@/lib/find-files'
+import { normalize } from '@/lib/normalize-path'
 import { compileApp, formatDiagnostics, resolveDefaultExports } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
@@ -18,18 +19,21 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *  build environment has no ssrLoadModule equivalent, only a dev server
  *  does, so there's no way to get real executed exports otherwise. Returns
  *  entries rather than a Record - Promise.all's result array preserves
- *  input order regardless of which module resolves first, so findFiles'
- *  sorted order survives; assigning into a shared object across concurrent
+ *  input order regardless of which module resolves first, so the sorted
+ *  file order survives; assigning into a shared object across concurrent
  *  callbacks wouldn't, since insertion order would follow resolution timing
  *  instead. */
 async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
+  if (!existsSync(appDir))
+    throw new Error(`No such directory: '${appDir}'`)
+
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
     server: { middlewareMode: true },
   })
   try {
-    const filePaths = findFiles(appDir, '**/*.tsx')
+    const filePaths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
     return await Promise.all(filePaths.map(async (filePath) => {
       const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as T
       return [filePath, module] as const
