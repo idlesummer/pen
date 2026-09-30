@@ -64,9 +64,8 @@ export function pen(appDir: string): Plugin {
     },
     config() {
       return {
-        ssr: { // Bundle pen's runtime instead of leaving it external
-          noExternal: [PACKAGE_NAME],
-        },
+        // Bundle pen's runtime instead of leaving it external
+        ssr: {  noExternal: [PACKAGE_NAME] },
         build: {
           // Build for Node so imports work instead of being treated as browser code
           ssr: true,
