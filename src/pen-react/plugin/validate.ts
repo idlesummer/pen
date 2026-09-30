@@ -2,11 +2,7 @@ import type { Diagnostic, Endpoint } from '@/pen-core'
 import type { RouteComponent } from '@/pen-react/runtime'
 import { isAsyncComponent } from '@/pen-react/runtime'
 
-/** Every discovered module's default export must be a real component -
- *  typeof 'function' covers sync, class, and async components alike, and
- *  catches what TypeScript alone can't guarantee (a missing default export,
- *  or one of the wrong shape). The same failure Next.js surfaces as "the
- *  default export is not a React Component". */
+/** Validates that every discovered module has a valid component default export. */
 export function validateComponentExports(modulePaths: string[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
@@ -24,14 +20,7 @@ export function validateComponentExports(modulePaths: string[], routeComponents:
   return diagnostics
 }
 
-/** Every async page's frame chain needs a loading.tsx to suspend into -
- *  checked against every route the app can render, not reactively on
- *  whichever one a user happens to visit first, so a misconfigured page
- *  can't ship silently. The `Content &&` isn't re-asserting key presence -
- *  that's what the ! already covers - it's asking whether the value found
- *  there is actually usable, the same question validateComponentExports
- *  asks; isAsyncComponent would throw reading .constructor off a value
- *  that fails it. */
+/** Validates that every async page has a loading.tsx in its frame chain. */
 export function validateAsyncPages(pageEndpoints: Endpoint[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
