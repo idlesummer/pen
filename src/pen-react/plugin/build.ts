@@ -17,13 +17,15 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 /** Imports every route module for real through Vite's transform pipeline.
  *  Needs its own server even inside a build environment's buildStart - a
  *  build environment has no ssrLoadModule equivalent, only a dev server
- *  does, so there's no way to get real executed exports otherwise. Returns
- *  entries rather than a Record - Promise.all's result array preserves
- *  input order regardless of which module resolves first, so the sorted
- *  file order survives; assigning into a shared object across concurrent
- *  callbacks wouldn't, since insertion order would follow resolution timing
- *  instead. */
-async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
+ *  does, so there's no way to get real executed exports otherwise. entries
+ *  is built via Promise.all rather than assigning into a shared object -
+ *  its result array preserves input order regardless of which module
+ *  resolves first, so filePaths' sorted order survives; concurrent
+ *  callbacks writing into an object wouldn't, since insertion order would
+ *  follow resolution timing instead. filePaths itself is returned alongside
+ *  entries rather than left for the caller to re-derive from them - it
+ *  already exists as a real array before entries is ever built. */
+async function glob<T>(appDir: string): Promise<{ filePaths: string[], entries: Array<readonly [string, T]> }> {
   const server = await createServer({
     configFile: false,
     logLevel: 'silent',
@@ -31,10 +33,11 @@ async function glob<T>(appDir: string): Promise<Array<readonly [string, T]>> {
   })
   try {
     const filePaths = globSync('**/*.tsx', { cwd: appDir }).map(normalize).sort()
-    return await Promise.all(filePaths.map(async (filePath) => {
+    const entries = await Promise.all(filePaths.map(async (filePath) => {
       const module = await server.ssrLoadModule(`/${appDir}/${filePath}`) as T
       return [filePath, module] as const
     }))
+    return { filePaths, entries }
   }
   finally {
     await server.close()
@@ -89,9 +92,8 @@ export function pen(appDir: string): Plugin {
       if (!existsSync(appDir))
         this.error(`No such directory: '${appDir}'`)
 
-      const moduleEntries = await glob<Partial<RouteModule>>(appDir)
-      const filePaths = moduleEntries.map(([path]) => path)
-      const components = resolveDefaultExports<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
+      const { filePaths, entries } = await glob<Partial<RouteModule>>(appDir)
+      const components = resolveDefaultExports<RouteComponent>(entries, DefaultFallback, ErrorFallback)
       const { modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
 
       diagnostics.push(...validateComponentExports(modulePaths, components))
