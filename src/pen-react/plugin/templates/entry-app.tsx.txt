@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { ComponentMap, DefaultComponent, ErrorComponent, Fallbacks, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
+import type { ComponentMap, DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
 import { render } from 'ink'
 import {
   App,
@@ -22,30 +22,24 @@ const loadingModules = import.meta.glob<Module<LoadingComponent>>('**/loading.ts
 const errorModules = import.meta.glob<Module<ErrorComponent>>('**/error.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 
-function toComponents<T>(modules: Record<string, Module<T>>, fallbacks?: Fallbacks<T>) {
-  return createDefaultExportMap(Object.entries(modules), fallbacks)
-}
-
-type RoleModules = {
-  page: Record<string, Module<PageComponent>>
-  layout: Record<string, Module<LayoutComponent>>
-  loading: Record<string, Module<LoadingComponent>>
-  error: Record<string, Module<ErrorComponent>>
-  default: Record<string, Module<DefaultComponent>>
-}
-
 /** Resolves each role's glob'd modules into its own component map and
  *  builds the matcher from the same paths. A component map can carry
  *  entries createRouter didn't resolve into a route (an orphaned file,
  *  say) - harmless, since render.tsx only ever looks up paths that came
  *  from the same compiled tree the matcher did. Modules should be
  *  already validated by buildApp. */
-function createApp(modules: RoleModules) {
-  const pageComponents = toComponents(modules.page)
-  const layoutComponents = toComponents(modules.layout)
-  const loadingComponents = toComponents(modules.loading)
-  const errorComponents = toComponents(modules.error, { [GLOBAL_ERROR]: ErrorFallback })
-  const defaultComponents = toComponents(modules.default, { [GLOBAL_DEFAULT]: DefaultFallback })
+function createApp(
+  pageModules: Record<string, Module<PageComponent>>,
+  layoutModules: Record<string, Module<LayoutComponent>>,
+  loadingModules: Record<string, Module<LoadingComponent>>,
+  errorModules: Record<string, Module<ErrorComponent>>,
+  defaultModules: Record<string, Module<DefaultComponent>>,
+) {
+  const pageComponents = createDefaultExportMap(Object.entries(pageModules))
+  const layoutComponents = createDefaultExportMap(Object.entries(layoutModules))
+  const loadingComponents = createDefaultExportMap(Object.entries(loadingModules))
+  const errorComponents = createDefaultExportMap(Object.entries(errorModules), { [GLOBAL_ERROR]: ErrorFallback })
+  const defaultComponents = createDefaultExportMap(Object.entries(defaultModules), { [GLOBAL_DEFAULT]: DefaultFallback })
 
   const filePaths = [
     ...Object.keys(pageComponents),
@@ -66,13 +60,7 @@ function createApp(modules: RoleModules) {
   return { matcher, componentMap }
 }
 
-const { matcher, componentMap } = createApp({
-  page: pageModules,
-  layout: layoutModules,
-  loading: loadingModules,
-  error: errorModules,
-  default: defaultModules,
-})
+const { matcher, componentMap } = createApp(pageModules, layoutModules, loadingModules, errorModules, defaultModules)
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
