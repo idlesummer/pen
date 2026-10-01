@@ -1,9 +1,9 @@
-import type { ModulePaths, ModuleRole } from '../module-role'
+import type { ModulePaths, ModuleRole } from './route-module'
 import type { SegmentType } from './route-segment'
 import { basename } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from '../module-role'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from './route-module'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
 /** The role a module path belongs to. Sentinels encode their role in the
