@@ -5,6 +5,12 @@ import type { LoadingComponent } from './components/LoadingBoundary'
 import type { PageComponent } from './components/PageComponent'
 import type { LayoutComponent } from './components/LayoutComponent'
 
+/** Any route module's component, before it's been classified into its specific role. */
+export type RouteComponent = PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
+
+/** The shape of a route module file. */
+export type RouteModule = Module<RouteComponent>
+
 /** One bucket per route module role; every module in a bucket shares that
  *  role's real prop shape. Lookups can still miss a key - wrapFrame/
  *  renderChain trust specific keys exist because they come from the same
@@ -16,9 +22,3 @@ export type ComponentMap = {
   error: Record<string, ErrorComponent | undefined>
   default: Record<string, DefaultComponent | undefined>
 }
-
-/** Any route module's component, before it's been classified into its specific role. */
-export type RouteComponent = PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
-
-/** The shape of a route module file. */
-export type RouteModule = Module<RouteComponent>
