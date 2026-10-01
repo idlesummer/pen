@@ -64,13 +64,17 @@ export function pen(appDir: string): Plugin {
       diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
       diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
-      for (const { severity, message } of diagnostics)
+      for (const { severity, message, files } of diagnostics)
         if (severity === 'warn')
-          this.warn(message)
+          this.warn({ message, ids: files })
 
-      const errorText = diagnostics.filter(d => d.severity === 'error').map(d => d.message).join('\n\n')
-      if (errorText)
-        this.error(errorText)
+      const errors = diagnostics.filter(d => d.severity === 'error')
+      if (errors.length) {
+        this.error({
+          message: errors.map(d => d.message).join('\n\n'),
+          ids: [...new Set(errors.flatMap(d => d.files))],
+        })
+      }
     },
   }
 }
