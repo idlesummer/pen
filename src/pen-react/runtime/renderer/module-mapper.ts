@@ -1,5 +1,5 @@
-import type { Module } from './types'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
+import type { Module } from '@/pen-core'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 
 type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>> | undefined]>
 type Fallbacks<T> = Partial<Record<typeof GLOBAL_DEFAULT | typeof GLOBAL_ERROR, T>>
