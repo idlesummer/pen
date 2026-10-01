@@ -1,27 +1,59 @@
 /// <reference types="vite/client" />
 
-import type { ComponentMap, RouteComponent, RouteModule } from '@idlesummer/pen/internal'
+import type { ComponentMap, DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
 import { render } from 'ink'
 import {
   App,
   createDefaultExportMap,
-  createRoleMap,
   createRouter,
   DefaultFallback,
   ErrorFallback,
+  GLOBAL_DEFAULT,
+  GLOBAL_ERROR,
 } from '@idlesummer/pen/internal'
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-// Maps paths to module objects
-const modules = import.meta.glob<RouteModule>('**/{page,layout,loading,error,default}.tsx', { eager: true, base: '__PEN_APP_DIR__' })
-const routeComponents = createDefaultExportMap<RouteComponent>(Object.entries(modules), DefaultFallback, ErrorFallback)
+// One glob per role - each module lands in its own, correctly-typed bucket
+// by construction, so no runtime role classification or cast is needed.
+const pageModules = import.meta.glob<Module<PageComponent>>('**/page.tsx', { eager: true, base: '__PEN_APP_DIR__' })
+const layoutModules = import.meta.glob<Module<LayoutComponent>>('**/layout.tsx', { eager: true, base: '__PEN_APP_DIR__' })
+const loadingModules = import.meta.glob<Module<LoadingComponent>>('**/loading.tsx', { eager: true, base: '__PEN_APP_DIR__' })
+const errorModules = import.meta.glob<Module<ErrorComponent>>('**/error.tsx', { eager: true, base: '__PEN_APP_DIR__' })
+const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 
-// `createRouter` narrows modulePaths down further to valid routes
+const pageComponents = createDefaultExportMap(Object.entries(pageModules))
+const layoutComponents = createDefaultExportMap(Object.entries(layoutModules))
+const loadingComponents = createDefaultExportMap(Object.entries(loadingModules))
+const errorComponents = createDefaultExportMap(Object.entries(errorModules))
+const defaultComponents = createDefaultExportMap(Object.entries(defaultModules))
+errorComponents[GLOBAL_ERROR] = ErrorFallback
+defaultComponents[GLOBAL_DEFAULT] = DefaultFallback
+
+// `createRouter` narrows these paths down further to valid routes
 // Modules should be already validated by buildApp
-const filePaths = Object.keys(routeComponents)
+const filePaths = [
+  ...Object.keys(pageComponents),
+  ...Object.keys(layoutComponents),
+  ...Object.keys(loadingComponents),
+  ...Object.keys(errorComponents),
+  ...Object.keys(defaultComponents),
+]
 const { matcher, modulePaths } = createRouter(filePaths)
-const componentMap = createRoleMap(modulePaths, routeComponents) as ComponentMap
+
+// Keeps only entries createRouter resolved as part of a real route
+const validPaths = new Set(modulePaths)
+function pickValid<T>(components: Record<string, T>): Record<string, T> {
+  return Object.fromEntries(Object.entries(components).filter(([path]) => validPaths.has(path)))
+}
+
+const componentMap: ComponentMap = {
+  page: pickValid(pageComponents),
+  layout: pickValid(layoutComponents),
+  loading: pickValid(loadingComponents),
+  error: pickValid(errorComponents),
+  default: pickValid(defaultComponents),
+}
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
