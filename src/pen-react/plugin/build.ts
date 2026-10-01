@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite'
 import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createDefaultExportMap, createRouter } from '@/pen-core'
@@ -49,11 +50,14 @@ export function pen(appDir: string): Plugin {
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
     async buildStart() {
-      if (!existsSync(appDir))
+      // existsSync/ssrGlob are plain Node fs calls - Vite's own root option
+      // doesn't reach them, so root is read explicitly and joined by hand
+      const root = this.environment.config.root
+      if (!existsSync(join(root, appDir)))
         this.error(`No such directory: '${appDir}'`)
 
       // Maps paths to module objects as entries
-      const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir)
+      const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
       const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
 
       // createRouter compiles paths into route and position trees
