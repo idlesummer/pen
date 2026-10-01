@@ -1,4 +1,4 @@
-import type { RouteNode } from './route-tree'
+import type { RouteNode } from '../route/route-tree'
 
 /** One folder's wrapping modules - everything it contributes AROUND a page,
  *  never the page itself. A folder earns a Frame only if it wraps something.

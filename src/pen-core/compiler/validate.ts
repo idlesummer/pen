@@ -1,8 +1,8 @@
-import type { RouteNode } from './route-tree'
-import type { PositionConflicts } from './position-node'
+import type { RouteNode } from './route/route-tree'
+import type { PositionConflicts } from './position/position-node'
 import type { Diagnostic } from './diagnostic'
 import { createDiagnostic } from './diagnostic'
-import { forEach, getRouteSource } from './route-tree'
+import { forEach, getRouteSource } from './route/route-tree'
 
 /** The file a page-conflict diagnostic should name. A folder can own several
  *  modules, so the generic source is not good enough here - the page is what
