@@ -11,11 +11,18 @@ import { ErrorFallback } from './components/ErrorBoundary'
 import { createDefaultExportMap } from './module-mapper'
 
 /** Resolves each role's glob'd modules into its own component map and
- *  builds the matcher from the same paths. A component map can carry
- *  entries createRouter didn't resolve into a route (an orphaned file,
- *  say) - harmless, since render.tsx only ever looks up paths that came
- *  from the same compiled tree the matcher did. Modules should be
- *  already validated by buildApp. */
+ *  builds the matcher from the same paths. Modules are expected to have
+ *  been validated by `buildApp`.
+ *
+ *  A component map can carry entries createRouter didn't resolve into a
+ *  route (an orphaned file, say) - harmless, since render.tsx only ever
+ *  looks up paths that came from the same compiled tree the matcher did.
+ *
+ *  @param pageModules - Page route modules.
+ *  @param layoutModules - Layout route modules.
+ *  @param loadingModules - Loading boundary modules.
+ *  @param errorModules - Error boundary modules.
+ *  @param defaultModules - Default boundary modules. */
 export function createAppRuntime(
   pageModules: Record<string, Module<PageComponent>>,
   layoutModules: Record<string, Module<LayoutComponent>>,
