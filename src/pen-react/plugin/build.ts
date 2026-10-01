@@ -64,11 +64,11 @@ export function pen(appDir: string): Plugin {
       diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
       diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
-      for (const { severity, text } of diagnostics)
+      for (const { severity, message } of diagnostics)
         if (severity === 'warn')
-          this.warn(text)
+          this.warn(message)
 
-      const errorText = diagnostics.filter(d => d.severity === 'error').map(d => d.text).join('\n\n')
+      const errorText = diagnostics.filter(d => d.severity === 'error').map(d => d.message).join('\n\n')
       if (errorText)
         this.error(errorText)
     },
