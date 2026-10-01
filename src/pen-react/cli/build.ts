@@ -1,3 +1,4 @@
+import { sep } from 'node:path'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { pen } from '@/pen-react/plugin'
@@ -21,7 +22,7 @@ import { pen } from '@/pen-react/plugin'
  *  @param outDir Directory to write the bundle to. */
 export async function buildApp(appDir: string, outDir: string): Promise<void> {
   const builder = await createBuilder({
-    root: findProjectRoot(process.cwd()),
+    root: findProjectRoot(process.cwd() + sep),
     configFile: false,
     plugins: [pen(appDir)],
     build: { outDir },
