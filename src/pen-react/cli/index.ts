@@ -1,7 +1,9 @@
 import { defineCommand, runMain } from 'citty'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/lib/constants'
 import { buildCommand } from './commands/build'
+// import { devCommand } from './commands/dev'
 import { startCommand } from './commands/start'
+
 
 const main = defineCommand({
   meta: {
