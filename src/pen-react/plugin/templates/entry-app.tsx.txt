@@ -25,10 +25,8 @@ const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.ts
 const pageComponents = createDefaultExportMap(Object.entries(pageModules))
 const layoutComponents = createDefaultExportMap(Object.entries(layoutModules))
 const loadingComponents = createDefaultExportMap(Object.entries(loadingModules))
-const errorComponents = createDefaultExportMap(Object.entries(errorModules))
-const defaultComponents = createDefaultExportMap(Object.entries(defaultModules))
-errorComponents[GLOBAL_ERROR] = ErrorFallback
-defaultComponents[GLOBAL_DEFAULT] = DefaultFallback
+const errorComponents = createDefaultExportMap(Object.entries(errorModules), { [GLOBAL_ERROR]: ErrorFallback })
+const defaultComponents = createDefaultExportMap(Object.entries(defaultModules), { [GLOBAL_DEFAULT]: DefaultFallback })
 
 // `createRouter` narrows these paths down further to valid routes
 // Modules should be already validated by buildApp
