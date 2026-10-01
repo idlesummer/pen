@@ -1,16 +1,8 @@
 /// <reference types="vite/client" />
 
-import type { ComponentMap, DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
+import type { DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
 import { render } from 'ink'
-import {
-  App,
-  createDefaultExportMap,
-  createRouter,
-  DefaultFallback,
-  ErrorFallback,
-  GLOBAL_DEFAULT,
-  GLOBAL_ERROR,
-} from '@idlesummer/pen/internal'
+import { App, createApp } from '@idlesummer/pen/internal'
 
 // One glob per role - each module lands in its own, correctly-typed bucket
 // by construction, so no runtime role classification or cast is needed.
@@ -19,42 +11,6 @@ const layoutModules = import.meta.glob<Module<LayoutComponent>>('**/layout.tsx',
 const loadingModules = import.meta.glob<Module<LoadingComponent>>('**/loading.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 const errorModules = import.meta.glob<Module<ErrorComponent>>('**/error.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.tsx', { eager: true, base: '__PEN_APP_DIR__' })
-
-/** Resolves each role's glob'd modules into its own component map and
- *  builds the matcher from the same paths. A component map can carry
- *  entries createRouter didn't resolve into a route (an orphaned file,
- *  say) - harmless, since render.tsx only ever looks up paths that came
- *  from the same compiled tree the matcher did. Modules should be
- *  already validated by buildApp. */
-function createApp(
-  pageModules: Record<string, Module<PageComponent>>,
-  layoutModules: Record<string, Module<LayoutComponent>>,
-  loadingModules: Record<string, Module<LoadingComponent>>,
-  errorModules: Record<string, Module<ErrorComponent>>,
-  defaultModules: Record<string, Module<DefaultComponent>>,
-) {
-  const pageComponents = createDefaultExportMap(Object.entries(pageModules))
-  const layoutComponents = createDefaultExportMap(Object.entries(layoutModules))
-  const loadingComponents = createDefaultExportMap(Object.entries(loadingModules))
-  const errorComponents = createDefaultExportMap(Object.entries(errorModules), { [GLOBAL_ERROR]: ErrorFallback })
-  const defaultComponents = createDefaultExportMap(Object.entries(defaultModules), { [GLOBAL_DEFAULT]: DefaultFallback })
-
-  const { matcher } = createRouter([
-    ...Object.keys(pageComponents),
-    ...Object.keys(layoutComponents),
-    ...Object.keys(loadingComponents),
-    ...Object.keys(errorComponents),
-    ...Object.keys(defaultComponents),
-  ])
-  const componentMap: ComponentMap = {
-    page: pageComponents,
-    layout: layoutComponents,
-    loading: loadingComponents,
-    error: errorComponents,
-    default: defaultComponents,
-  }
-  return { matcher, componentMap }
-}
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
