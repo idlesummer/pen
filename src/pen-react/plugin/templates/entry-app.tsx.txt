@@ -26,36 +26,57 @@ function toComponents<T>(modules: Record<string, Module<T>>, fallbacks?: Fallbac
   return createDefaultExportMap(Object.entries(modules), fallbacks)
 }
 
-const pageComponents = toComponents(pageModules)
-const layoutComponents = toComponents(layoutModules)
-const loadingComponents = toComponents(loadingModules)
-const errorComponents = toComponents(errorModules, { [GLOBAL_ERROR]: ErrorFallback })
-const defaultComponents = toComponents(defaultModules, { [GLOBAL_DEFAULT]: DefaultFallback })
-
-// `createRouter` narrows these paths down further to valid routes
-// Modules should be already validated by buildApp
-const filePaths = [
-  ...Object.keys(pageComponents),
-  ...Object.keys(layoutComponents),
-  ...Object.keys(loadingComponents),
-  ...Object.keys(errorComponents),
-  ...Object.keys(defaultComponents),
-]
-const { matcher, modulePaths } = createRouter(filePaths)
-
-// Keeps only entries createRouter resolved as part of a real route
-const validPaths = new Set(modulePaths)
-function pickValid<T>(components: Record<string, T>): Record<string, T> {
-  return Object.fromEntries(Object.entries(components).filter(([path]) => validPaths.has(path)))
+type RoleModules = {
+  page: Record<string, Module<PageComponent>>
+  layout: Record<string, Module<LayoutComponent>>
+  loading: Record<string, Module<LoadingComponent>>
+  error: Record<string, Module<ErrorComponent>>
+  default: Record<string, Module<DefaultComponent>>
 }
 
-const componentMap: ComponentMap = {
-  page: pickValid(pageComponents),
-  layout: pickValid(layoutComponents),
-  loading: pickValid(loadingComponents),
-  error: pickValid(errorComponents),
-  default: pickValid(defaultComponents),
+/** Resolves each role's glob'd modules into its own component map, then
+ *  narrows every bucket down to the paths createRouter resolved as part
+ *  of a real route. Returns the matcher alongside it since it's a
+ *  byproduct of that same resolution. Modules should be already
+ *  validated by buildApp. */
+function createApp(modules: RoleModules) {
+  const pageComponents = toComponents(modules.page)
+  const layoutComponents = toComponents(modules.layout)
+  const loadingComponents = toComponents(modules.loading)
+  const errorComponents = toComponents(modules.error, { [GLOBAL_ERROR]: ErrorFallback })
+  const defaultComponents = toComponents(modules.default, { [GLOBAL_DEFAULT]: DefaultFallback })
+
+  const filePaths = [
+    ...Object.keys(pageComponents),
+    ...Object.keys(layoutComponents),
+    ...Object.keys(loadingComponents),
+    ...Object.keys(errorComponents),
+    ...Object.keys(defaultComponents),
+  ]
+  const { matcher, modulePaths } = createRouter(filePaths)
+
+  const validPaths = new Set(modulePaths)
+  function pickValid<T>(components: Record<string, T>): Record<string, T> {
+    return Object.fromEntries(Object.entries(components).filter(([path]) => validPaths.has(path)))
+  }
+
+  const componentMap: ComponentMap = {
+    page: pickValid(pageComponents),
+    layout: pickValid(layoutComponents),
+    loading: pickValid(loadingComponents),
+    error: pickValid(errorComponents),
+    default: pickValid(defaultComponents),
+  }
+  return { matcher, componentMap }
 }
+
+const { matcher, componentMap } = createApp({
+  page: pageModules,
+  layout: layoutModules,
+  loading: loadingModules,
+  error: errorModules,
+  default: defaultModules,
+})
 
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
