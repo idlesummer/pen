@@ -1,7 +1,7 @@
 import type { RouteNode } from '../route/route-tree'
 import type { Endpoint, Frame, PositionContext, PositionNode } from './position-node'
 import { compactMapAncestors } from '../route/route-tree'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '../module-role'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '../route/route-module'
 import { isBoundary } from '../route/route-segment'
 
 // ── frames ───────────────────────────────────────────────────────────────
