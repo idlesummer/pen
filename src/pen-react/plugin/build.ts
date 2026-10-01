@@ -64,6 +64,7 @@ export function pen(appDir: string): Plugin {
       diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
       diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
+      // Display diagnostics
       for (const { severity, message, files } of diagnostics)
         if (severity === 'warn')
           this.warn({ message, ids: files })
