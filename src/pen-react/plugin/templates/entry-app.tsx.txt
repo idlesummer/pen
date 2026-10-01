@@ -2,7 +2,7 @@
 
 import type { DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
 import { render } from 'ink'
-import { App, createApp } from '@idlesummer/pen/internal'
+import { App, createAppRuntime } from '@idlesummer/pen/internal'
 
 // One glob per role - each module lands in its own, correctly-typed bucket
 // by construction, so no runtime role classification or cast is needed.
@@ -14,7 +14,7 @@ const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.ts
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-const { matcher, componentMap } = createApp(
+const { matcher, componentMap } = createAppRuntime(
   pageModules,
   layoutModules,
   loadingModules,
