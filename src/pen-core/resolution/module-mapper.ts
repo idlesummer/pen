@@ -8,7 +8,9 @@ type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
 /**
  * Extracts each module's default export, keyed by path, and fills the root
- * default and error entries with the given fallbacks.
+ * default and error entries with the given fallbacks. A leading './' is
+ * stripped from each path - callers whose source already produces bare
+ * relative paths are unaffected, since there's nothing to strip.
  *
  * @param entries - Module entries containing a path and optional module.
  * @param defaultFallback - Fallback for the root default entry.
@@ -21,7 +23,7 @@ export function createDefaultExportMap<T>(modules: ModuleEntries<T>, defaultFall
     [GLOBAL_ERROR]: errorFallback,
   }
   for (const [path, module] of modules)
-    moduleExports[path] = module?.default
+    moduleExports[path.replace(/^\.\//, '')] = module?.default
   return moduleExports
 }
 
