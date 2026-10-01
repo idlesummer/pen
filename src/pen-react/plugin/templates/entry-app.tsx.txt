@@ -12,8 +12,6 @@ import {
   GLOBAL_ERROR,
 } from '@idlesummer/pen/internal'
 
-// ── Main entry point ─────────────────────────────────────────────────────
-
 // One glob per role - each module lands in its own, correctly-typed bucket
 // by construction, so no runtime role classification or cast is needed.
 const pageModules = import.meta.glob<Module<PageComponent>>('**/page.tsx', { eager: true, base: '__PEN_APP_DIR__' })
@@ -58,7 +56,14 @@ function createApp(
   return { matcher, componentMap }
 }
 
-const { matcher, componentMap } = createApp(pageModules, layoutModules, loadingModules, errorModules, defaultModules)
+// ── Main entry point ─────────────────────────────────────────────────────
 
+const { matcher, componentMap } = createApp(
+  pageModules,
+  layoutModules,
+  loadingModules,
+  errorModules,
+  defaultModules
+)
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
