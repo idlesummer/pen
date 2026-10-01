@@ -55,7 +55,6 @@ function createApp(modules: RoleModules) {
     ...Object.keys(defaultComponents),
   ]
   const { matcher } = createRouter(filePaths)
-
   const componentMap: ComponentMap = {
     page: pageComponents,
     layout: layoutComponents,
