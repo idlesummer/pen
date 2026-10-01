@@ -75,10 +75,9 @@ export function pen(appDir: string): Plugin {
 
       const errors = diagnostics.filter(d => d.severity === 'error')
       if (errors.length) {
-        this.error({
-          message: errors.map(d => d.message).join('\n\n'),
-          ids: [...new Set(errors.flatMap(d => d.files))],
-        })
+        const message = errors.map(d => d.message).join('\n\n')
+        const ids = [...new Set(errors.flatMap(d => d.files))]
+        this.error({ message, ids })
       }
     },
   }
