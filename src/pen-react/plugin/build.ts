@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { createDefaultExportMap, createRouter } from '@/pen-core'
+import { createDefaultExportMap, createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 import { validateAsyncPages, validateComponentExports } from './validate'
@@ -58,7 +58,9 @@ export function pen(appDir: string): Plugin {
 
       // Maps paths to module objects as entries
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
-      const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, DefaultFallback, ErrorFallback)
+      const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries)
+      routeComponents[GLOBAL_DEFAULT] = DefaultFallback
+      routeComponents[GLOBAL_ERROR] = ErrorFallback
 
       // createRouter compiles paths into route and position trees
       const filePaths = moduleEntries.map(entry => entry[0])

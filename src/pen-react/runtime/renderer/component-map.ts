@@ -6,13 +6,15 @@ import type { PageComponent } from './components/PageComponent'
 import type { LayoutComponent } from './components/LayoutComponent'
 
 /** One bucket per route module role; every module in a bucket shares that
- *  role's real prop shape. */
+ *  role's real prop shape. Lookups can still miss a key - wrapFrame/
+ *  renderChain trust specific keys exist because they come from the same
+ *  compiled route tree that produced this map. */
 export type ComponentMap = {
-  page: Record<string, PageComponent>
-  layout: Record<string, LayoutComponent>
-  loading: Record<string, LoadingComponent>
-  error: Record<string, ErrorComponent>
-  default: Record<string, DefaultComponent>
+  page: Record<string, PageComponent | undefined>
+  layout: Record<string, LayoutComponent | undefined>
+  loading: Record<string, LoadingComponent | undefined>
+  error: Record<string, ErrorComponent | undefined>
+  default: Record<string, DefaultComponent | undefined>
 }
 
 /** Any route module's component, before it's been classified into its specific role. */
