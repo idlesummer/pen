@@ -58,7 +58,10 @@ export function pen(appDir: string): Plugin {
 
       // Maps paths to module objects as entries
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
-      const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, { [GLOBAL_DEFAULT]: DefaultFallback, [GLOBAL_ERROR]: ErrorFallback })
+      const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
+        [GLOBAL_DEFAULT]: DefaultFallback,
+        [GLOBAL_ERROR]: ErrorFallback,
+      })
 
       // createRouter compiles paths into route and position trees
       const filePaths = moduleEntries.map(entry => entry[0])
