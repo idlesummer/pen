@@ -1,7 +1,7 @@
 import type { Diagnostic } from './diagnostic'
-import type { Endpoint, PositionNode } from './position-node'
-import { createRouteTree } from './route-tree'
-import { createPositionTree } from './position-tree'
+import type { Endpoint, PositionNode } from './position/position-node'
+import { createRouteTree } from './route/route-tree'
+import { createPositionTree } from './position/position-tree'
 import { validateConflicts, validateRouteTree } from './validate'
 
 export type CompiledRoutes = {

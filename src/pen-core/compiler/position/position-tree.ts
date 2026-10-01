@@ -1,10 +1,10 @@
-import type { RouteNode } from './route-tree'
+import type { RouteNode } from '../route/route-tree'
 import type { Endpoint, Frame, PositionConflicts, PositionContext, PositionNode } from './position-node'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findDefaultOwner } from './route-tree'
+import { findDefaultOwner } from '../route/route-tree'
 import { setEndpoints } from './position-tree-endpoints'
-import { isDynamicOrCatchall, isUrlConsuming } from './route-segment'
+import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
 // ── traversal ────────────────────────────────────────────────────────────
 
