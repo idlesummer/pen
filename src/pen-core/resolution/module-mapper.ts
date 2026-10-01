@@ -30,12 +30,19 @@ export function createDefaultExportMap<T>(modules: ModuleEntries<T>, defaultFall
 /**
  * Buckets resolved module exports by their route role.
  *
+ * Untyped rather than generic over T - every bucket here shares one type,
+ * but each role actually has its own distinct component shape (a page
+ * isn't a layout isn't an error boundary). Resolving that only happens at
+ * the call site, which knows the real per-role types and asserts them;
+ * no instantiation of T could express that here, so the type parameter
+ * was never doing real work.
+ *
  * @param modulePaths - Paths of the modules to include.
  * @param moduleExports - Resolved module exports keyed by path.
  * @returns Module exports grouped by route role and path.
  */
-export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultExportMap<T>): RoleMap<T> {
-  const roleMap: RoleMap<T> = {
+export function createRoleMap(modulePaths: string[], moduleExports: DefaultExportMap<unknown>): RoleMap<unknown> {
+  const roleMap: RoleMap<unknown> = {
     page: {},
     layout: {},
     loading: {},
@@ -44,7 +51,7 @@ export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultEx
   }
   for (const path of modulePaths) {
     const role = getModuleRole(path)
-    roleMap[role][path] = moduleExports[path]! // Safe - modulePaths is a subset of resolved's keys
+    roleMap[role][path] = moduleExports[path] // Safe - modulePaths is a subset of resolved's keys
   }
   return roleMap
 }
