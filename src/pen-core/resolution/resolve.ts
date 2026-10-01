@@ -3,7 +3,7 @@ import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
 import { getModuleRole } from './classify'
 
 type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>> | undefined]>
-type DefaultExports<T> = Record<string, T | undefined>
+type DefaultExportMap<T> = Record<string, T | undefined>
 type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
 /**
@@ -15,8 +15,8 @@ type RoleMap<T> = Record<ModuleRole, Record<string, T>>
  * @param errorFallback - Fallback for the root error entry.
  * @returns Default exports keyed by module path.
  */
-export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallback: T, errorFallback: T): DefaultExports<T> {
-  const moduleExports: DefaultExports<T> = {
+export function createDefaultExportMap<T>(modules: ModuleEntries<T>, defaultFallback: T, errorFallback: T): DefaultExportMap<T> {
+  const moduleExports: DefaultExportMap<T> = {
     [GLOBAL_DEFAULT]: defaultFallback,
     [GLOBAL_ERROR]: errorFallback,
   }
@@ -32,7 +32,7 @@ export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallb
  * @param moduleExports - Resolved module exports keyed by path.
  * @returns Module exports grouped by route role and path.
  */
-export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultExports<T>): RoleMap<T> {
+export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultExportMap<T>): RoleMap<T> {
   const roleMap: RoleMap<T> = {
     page: {},
     layout: {},
