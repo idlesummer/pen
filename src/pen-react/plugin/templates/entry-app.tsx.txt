@@ -34,11 +34,12 @@ type RoleModules = {
   default: Record<string, Module<DefaultComponent>>
 }
 
-/** Resolves each role's glob'd modules into its own component map, then
- *  narrows every bucket down to the paths createRouter resolved as part
- *  of a real route. Returns the matcher alongside it since it's a
- *  byproduct of that same resolution. Modules should be already
- *  validated by buildApp. */
+/** Resolves each role's glob'd modules into its own component map and
+ *  builds the matcher from the same paths. A component map can carry
+ *  entries createRouter didn't resolve into a route (an orphaned file,
+ *  say) - harmless, since render.tsx only ever looks up paths that came
+ *  from the same compiled tree the matcher did. Modules should be
+ *  already validated by buildApp. */
 function createApp(modules: RoleModules) {
   const pageComponents = toComponents(modules.page)
   const layoutComponents = toComponents(modules.layout)
@@ -53,19 +54,14 @@ function createApp(modules: RoleModules) {
     ...Object.keys(errorComponents),
     ...Object.keys(defaultComponents),
   ]
-  const { matcher, modulePaths } = createRouter(filePaths)
-
-  const validPaths = new Set(modulePaths)
-  function pickValid<T>(components: Record<string, T>): Record<string, T> {
-    return Object.fromEntries(Object.entries(components).filter(([path]) => validPaths.has(path)))
-  }
+  const { matcher } = createRouter(filePaths)
 
   const componentMap: ComponentMap = {
-    page: pickValid(pageComponents),
-    layout: pickValid(layoutComponents),
-    loading: pickValid(loadingComponents),
-    error: pickValid(errorComponents),
-    default: pickValid(defaultComponents),
+    page: pageComponents,
+    layout: layoutComponents,
+    loading: loadingComponents,
+    error: errorComponents,
+    default: defaultComponents,
   }
   return { matcher, componentMap }
 }
