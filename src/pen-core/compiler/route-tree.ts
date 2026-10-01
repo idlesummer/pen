@@ -6,8 +6,8 @@ import { traverse } from '@/lib/traverse'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from '../module-role'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
-/** Which role a module path belongs to. The two sentinels carry their role
- *  in the constant itself, since they're not real files with a basename. */
+/** The role a module path belongs to. Sentinels encode their role in the
+ *  constant since they are not real files. */
 function getModuleRole(fileName: string): ModuleRole {
   if (fileName === GLOBAL_DEFAULT) return 'default'
   if (fileName === GLOBAL_ERROR) return 'error'
@@ -25,14 +25,10 @@ function filterModuleFiles(filePaths: readonly string[]): string[] {
   return filePaths.filter(isModuleFilePath)
 }
 
-/** The parse: one node per folder, mirroring the app directory.
+/** The parse tree, with one node per folder in the app directory.
  *
- *  Built once and never mutated. Two passes that used to run here are gone:
- *  the `default` fallback injection, which is a routing guarantee and now lives
- *  next to the fallback that needs it, and the pruning of invalid routes, which
- *  is now a skip rule in the position-tree walk. Immutability is what removes the
- *  ordering constraint between validating and compiling - they can run in
- *  either order, or not at all, without changing the result. */
+ *  Built once and never mutated. Fallbacks and invalid routes are handled
+ *  during compilation. */
 export type RouteNode = {
   name: string
   type: SegmentType
@@ -58,10 +54,9 @@ export function forEach(root: RouteNode, visit: (routeNode: RouteNode) => void) 
  *  including illegal names - reporting those needs the folder to still exist. */
 export function createRouteTree(filePaths: string[]): RouteNode {
   const routeTree = createRouteNode('', '')
+  const modulePaths = filterModuleFiles(filePaths)  // Route paths stay '/' regardless of OS
 
-  // Always '/', never node:path's sep - these are route paths, not OS file
-  // paths, and stay forward-slash on every platform regardless of host OS.
-  treeify(routeTree, filterModuleFiles(filePaths), '/', {
+  treeify(routeTree, modulePaths, '/', {
     create: (parentRouteNode, { index, parts, path: filePath }) => {
       const moduleName = parts[index]! // always defined - create only yields existing indices
       if (index === parts.length-1) {  // the last part is the file itself
