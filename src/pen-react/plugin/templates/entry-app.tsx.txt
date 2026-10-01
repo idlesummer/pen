@@ -4,8 +4,7 @@ import type { DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponen
 import { render } from 'ink'
 import { App, createAppRuntime } from '@idlesummer/pen/internal'
 
-// One glob per role - each module lands in its own, correctly-typed bucket
-// by construction, so no runtime role classification or cast is needed.
+// Each glob is typed by module role, so no runtime classification is needed
 const pageModules = import.meta.glob<Module<PageComponent>>('**/page.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 const layoutModules = import.meta.glob<Module<LayoutComponent>>('**/layout.tsx', { eager: true, base: '__PEN_APP_DIR__' })
 const loadingModules = import.meta.glob<Module<LoadingComponent>>('**/loading.tsx', { eager: true, base: '__PEN_APP_DIR__' })
