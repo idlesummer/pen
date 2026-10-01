@@ -2,8 +2,8 @@ import type { Module } from './types'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR } from './sentinel'
 
 type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>> | undefined]>
-type DefaultExportMap<T> = Record<string, T | undefined>
 type Fallbacks<T> = Partial<Record<typeof GLOBAL_DEFAULT | typeof GLOBAL_ERROR, T>>
+type DefaultExportMap<T> = Record<string, T | undefined>
 
 /**
  * Extracts each module's default export, keyed by path, optionally seeded
