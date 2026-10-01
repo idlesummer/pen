@@ -16,7 +16,7 @@ import { createDefaultExportMap } from './module-mapper'
  *  say) - harmless, since render.tsx only ever looks up paths that came
  *  from the same compiled tree the matcher did. Modules should be
  *  already validated by buildApp. */
-export function createApp(
+export function createAppRuntime(
   pageModules: Record<string, Module<PageComponent>>,
   layoutModules: Record<string, Module<LayoutComponent>>,
   loadingModules: Record<string, Module<LoadingComponent>>,
