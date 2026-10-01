@@ -20,9 +20,9 @@ import { pen } from '@/pen-react/plugin'
  *
  *  @param appDir Path to the app's route directory, relative to the project root.
  *  @param outDir Directory to write the bundle to. */
-export async function buildApp(appDir: string, outDir: string): Promise<void> {
+export async function buildApp(appDir: string, outDir: string) {
   const builder = await createBuilder({
-    root: findProjectRoot(process.cwd() + sep),
+    root: findProjectRoot(process.cwd() + sep), // add sep cuz findProjectRoot needs trailing slash
     configFile: false,
     plugins: [pen(appDir)],
     build: { outDir },
