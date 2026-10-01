@@ -1,6 +1,7 @@
 export { App } from './renderer/App'
 export { renderMatch } from './renderer/render'
 export type { ComponentMap, RouteComponent, RouteModule } from './renderer/component-map'
+export { createDefaultExportMap } from './renderer/module-mapper'
 export type { ParamTable } from './renderer/components/ParamTable'
 export { isAsyncComponent } from './renderer/components/PageComponent'
 export type { PageComponent } from './renderer/components/PageComponent'
