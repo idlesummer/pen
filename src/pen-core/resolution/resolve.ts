@@ -6,12 +6,15 @@ type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>> | undefined]>
 type DefaultExports<T> = Record<string, T | undefined>
 type RoleMap<T> = Record<ModuleRole, Record<string, T>>
 
-/** Extracts each module's default export, keyed by path, and fills the two
- *  root sentinel slots with the given fallbacks when the app supplies
- *  neither. Agnostic to what T is - the fallback values are the only place
- *  that meaning enters. Takes entries rather than a Record so a caller that
- *  already has entries (e.g. from mapping over Object.entries) doesn't have
- *  to round-trip through Object.fromEntries just to hand them over. */
+/**
+ * Extracts each module's default export, keyed by path, and fills the root
+ * default and error entries with the given fallbacks.
+ *
+ * @param entries - Module entries containing a path and optional module.
+ * @param defaultFallback - Fallback for the root default entry.
+ * @param errorFallback - Fallback for the root error entry.
+ * @returns Default exports keyed by module path.
+ */
 export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallback: T, errorFallback: T): DefaultExports<T> {
   const moduleExports: DefaultExports<T> = {
     [GLOBAL_DEFAULT]: defaultFallback,
@@ -22,7 +25,13 @@ export function resolveDefaultExports<T>(modules: ModuleEntries<T>, defaultFallb
   return moduleExports
 }
 
-/** Buckets resolved modules by role. */
+/**
+ * Buckets resolved module exports by their route role.
+ *
+ * @param modulePaths - Paths of the modules to include.
+ * @param moduleExports - Resolved module exports keyed by path.
+ * @returns Module exports grouped by route role and path.
+ */
 export function createRoleMap<T>(modulePaths: string[], moduleExports: DefaultExports<T>): RoleMap<T> {
   const roleMap: RoleMap<T> = {
     page: {},
