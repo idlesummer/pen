@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { BUILD_ENTRY } from '@/pen-react/plugin'
@@ -10,7 +10,7 @@ import { BUILD_ENTRY } from '@/pen-react/plugin'
  *  so `pen start` locates the same outDir regardless of which subdirectory
  *  either command was run from. */
 export async function startApp(outDir: string): Promise<void> {
-  const entryPath = join(findProjectRoot(process.cwd()), outDir, BUILD_ENTRY)
+  const entryPath = join(findProjectRoot(process.cwd() + sep), outDir, BUILD_ENTRY)
   if (!existsSync(entryPath))
     throw new Error(`No build found at '${outDir}' - run \`pen build\` first.`)
 
