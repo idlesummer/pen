@@ -41,14 +41,13 @@ function createApp(
   const errorComponents = createDefaultExportMap(Object.entries(errorModules), { [GLOBAL_ERROR]: ErrorFallback })
   const defaultComponents = createDefaultExportMap(Object.entries(defaultModules), { [GLOBAL_DEFAULT]: DefaultFallback })
 
-  const filePaths = [
+  const { matcher } = createRouter([
     ...Object.keys(pageComponents),
     ...Object.keys(layoutComponents),
     ...Object.keys(loadingComponents),
     ...Object.keys(errorComponents),
     ...Object.keys(defaultComponents),
-  ]
-  const { matcher } = createRouter(filePaths)
+  ])
   const componentMap: ComponentMap = {
     page: pageComponents,
     layout: layoutComponents,
