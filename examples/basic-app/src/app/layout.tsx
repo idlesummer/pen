@@ -7,12 +7,16 @@ const FILE_TREE = `
 Routes:
   /
   ├─ home/
+  │  ├─ @sidebar/
+  │  │  ├─ default
+  │  │  └─ page
   │  ├─ [...ids]/
   │  │  └─ page
   │  ├─ [id]/
   │  │  └─ page
   │  ├─ about/
   │  │  └─ page
+  │  ├─ layout
   │  └─ page
   ├─ slow/
   │  ├─ loading
