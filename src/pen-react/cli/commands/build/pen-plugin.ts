@@ -6,7 +6,7 @@ import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { createDefaultExportMap, DefaultFallback, ErrorFallback } from '@/pen-react/runtime'
-import { BUILD_ENTRY } from './constants'
+import { BUILD_ENTRY } from '../../constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 import { validateAsyncPages, validateComponentExports } from './validate'
 

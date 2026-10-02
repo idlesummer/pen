@@ -2,8 +2,8 @@ import { sep } from 'node:path'
 import { defineCommand } from 'citty'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { pen } from '@/pen-react/plugin'
-import { BUILD_OUT_DIR } from '../constants'
+import { BUILD_OUT_DIR } from '../../constants'
+import { pen } from './pen-plugin'
 
 export const buildCommand = defineCommand({
   meta: {
