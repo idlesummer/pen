@@ -1,13 +1,20 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import type { ParamTable } from '../types/param-table'
 
-type PageProps = { params: ParamTable }
+// ── component ────────────────────────────────────────────────────────────
 
-/** An async page called outside React, with its result unwrapped by pen. */
-export type AsyncPageComponent = (props: PageProps) => Promise<ReactNode>
+/** Props passed to a page component. */
+export type PageComponentProps = {
+  params: ParamTable
+}
 
 /** A page component. */
-export type PageComponent = FunctionComponent<PageProps>
+export type PageComponent = FunctionComponent<PageComponentProps>
+
+/** An async page called outside React, with its result unwrapped by pen. */
+export type AsyncPageComponent = (props: PageComponentProps) => Promise<ReactNode>
+
+// ── utility ──────────────────────────────────────────────────────────────
 
 /** Checks whether a component is declared with `async`.
  *
