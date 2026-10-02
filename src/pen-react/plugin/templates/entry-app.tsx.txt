@@ -1,8 +1,15 @@
 /// <reference types="vite/client" />
 
-import type { DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
+import type {
+  Module,
+  PageComponent,
+  LayoutComponent,
+  LoadingComponent,
+  ErrorComponent,
+  DefaultComponent,
+} from '@idlesummer/pen/internal'
 import { render } from 'ink'
-import { App, createAppRuntime } from '@idlesummer/pen/internal'
+import { App, createAppProps } from '@idlesummer/pen/internal'
 
 // Each glob is typed by module role, so no runtime classification is needed
 const pageModules = import.meta.glob<Module<PageComponent>>('**/page.tsx', { eager: true, base: '__PEN_APP_DIR__' })
@@ -13,12 +20,12 @@ const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.ts
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-const { matcher, componentMap } = createAppRuntime(
-  pageModules,
-  layoutModules,
-  loadingModules,
-  errorModules,
-  defaultModules
-)
+const { matcher, componentMap } = createAppProps({
+  page: pageModules,
+  layout: layoutModules,
+  loading: loadingModules,
+  error: errorModules,
+  default: defaultModules,
+})
 const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
 await waitUntilExit()
