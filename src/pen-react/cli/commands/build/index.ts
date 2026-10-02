@@ -3,7 +3,7 @@ import { defineCommand } from 'citty'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { BUILD_OUT_DIR } from '../../constants'
-import { pen } from './pen-plugin'
+import { pen } from './build-plugin'
 
 export const buildCommand = defineCommand({
   meta: {
