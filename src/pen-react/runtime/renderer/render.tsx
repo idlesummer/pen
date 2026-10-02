@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Frame, Match, Params } from '@/pen-core'
-import type { ComponentMap } from './components/component-map'
+import type { ComponentMap } from './component-map'
 import type { ParamTable } from './components/param-table'
 import { use } from 'react'
 import { isAsyncComponent } from './components/PageComponent'
