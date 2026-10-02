@@ -27,5 +27,5 @@ const { matcher, componentMap } = createAppProps({
   error: errorModules,
   default: defaultModules,
 })
-const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />)
+const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />, { maxFps: 60 })
 await waitUntilExit()
