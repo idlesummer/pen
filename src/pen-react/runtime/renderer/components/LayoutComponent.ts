@@ -1,7 +1,7 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import type { ParamTable } from '../types/param-table'
 
-type LayoutComponentProps =
+export type LayoutComponentProps =
   & Record<string, ReactNode | ParamTable>  // must be included so `params` satisfies the index signature
   & { params: ParamTable }
 
