@@ -22,22 +22,22 @@ export function DefaultFallback() {
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
-type Props = {
+type DefaultBoundaryProps = {
   fallback: DefaultComponent
   params: ParamTable
   children: ReactNode
 }
 
-type State = {
+type DefaultBoundaryState = {
   triggered: boolean
 }
 
 /** Catches notFound() and renders this position's default component.
  *  Other errors are re-thrown for the nearest error boundary. */
-export class DefaultBoundary extends Component<Props, State> {
-  state: State = { triggered: false }
+export class DefaultBoundary extends Component<DefaultBoundaryProps, DefaultBoundaryState> {
+  state: DefaultBoundaryState = { triggered: false }
 
-  static getDerivedStateFromError(error: unknown): State {
+  static getDerivedStateFromError(error: unknown): DefaultBoundaryState {
     if (!(error instanceof DefaultSignal)) throw error
     return { triggered: true }
   }
