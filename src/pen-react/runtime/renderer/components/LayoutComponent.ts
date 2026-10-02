@@ -1,7 +1,9 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import type { Params } from '../types/params'
 
-/** Index signature must include Params, not just ReactNode, or `params`
- *  itself fails to satisfy its own index signature. */
-export type LayoutComponent =
-  FunctionComponent<{ params: Params } & Record<string, ReactNode | Params>>
+export type LayoutComponentProps =
+  & Record<string, ReactNode | Params>  // must be included so `params` satisfies the index signature
+  & { params: Params }
+
+/** A layout component receiving route params and slot content. */
+export type LayoutComponent = FunctionComponent<LayoutComponentProps>
