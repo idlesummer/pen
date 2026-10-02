@@ -6,18 +6,18 @@ import { DefaultSignal } from './DefaultBoundary'
 // ── component ────────────────────────────────────────────────────────────
 
 /** Props passed to an error component. */
-export type ErrorFallbackProps = {
+export type ErrorComponentProps = {
   error: Error
   reset: () => void
 }
 
 /** An error component receiving the current error and a reset function. */
-export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
+export type ErrorComponent = FunctionComponent<ErrorComponentProps>
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
 /** Built-in fallback rendered when an app defines no root `error.tsx`. */
-export function ErrorFallback({ error }: ErrorFallbackProps) {
+export function ErrorFallback({ error }: ErrorComponentProps) {
   return <Text>Something went wrong: {error.message}{'\n\n'}{error.stack}</Text>
 }
 
