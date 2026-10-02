@@ -1,5 +1,5 @@
 export { ErrorBoundary } from './runtime'
-export type { ErrorFallbackProps, ErrorComponent } from './runtime'
+export type { ErrorComponentProps, ErrorComponent } from './runtime'
 export { DefaultBoundary, notFound, DefaultSignal } from './runtime'
 export type { DefaultComponent } from './runtime'
 export { LoadingBoundary } from './runtime'
