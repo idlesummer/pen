@@ -1,9 +1,9 @@
 import type { Module } from '@/pen-core'
-import type { ErrorComponent } from './components/ErrorBoundary'
-import type { DefaultComponent } from './components/DefaultBoundary'
-import type { LoadingComponent } from './components/LoadingBoundary'
-import type { PageComponent } from './components/PageComponent'
-import type { LayoutComponent } from './components/LayoutComponent'
+import type { ErrorComponent } from './ErrorBoundary'
+import type { DefaultComponent } from './DefaultBoundary'
+import type { LoadingComponent } from './LoadingBoundary'
+import type { PageComponent } from './PageComponent'
+import type { LayoutComponent } from './LayoutComponent'
 
 // ── build ────────────────────────────────────────────────────────────────
 // Role-agnostic: build.ts validates every discovered module the same way

@@ -1,6 +1,6 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { ParamTable } from './ParamTable'
-import type { RouteComponent } from '../component-map'
+import type { ParamTable } from './param-table'
+import type { RouteComponent } from './component-map'
 
 type PageProps = { params: ParamTable }
 

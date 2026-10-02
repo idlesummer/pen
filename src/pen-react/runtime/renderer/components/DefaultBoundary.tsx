@@ -1,5 +1,5 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { ParamTable } from './ParamTable'
+import type { ParamTable } from './param-table'
 import { Component } from 'react'
 import { Text } from 'ink'
 

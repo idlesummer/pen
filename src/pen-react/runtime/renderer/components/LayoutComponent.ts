@@ -1,5 +1,5 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { ParamTable } from './ParamTable'
+import type { ParamTable } from './param-table'
 
 /** Index signature must include ParamTable, not just ReactNode, or `params`
  *  itself fails to satisfy its own index signature. */

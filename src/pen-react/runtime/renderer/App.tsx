@@ -1,5 +1,5 @@
 import type { Matcher } from '@/pen-core/runtime'
-import type { ComponentMap } from './component-map'
+import type { ComponentMap } from './components/component-map'
 import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
 
