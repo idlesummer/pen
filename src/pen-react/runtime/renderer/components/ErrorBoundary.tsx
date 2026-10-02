@@ -3,14 +3,17 @@ import { Component } from 'react'
 import { Text } from 'ink'
 import { DefaultSignal } from './DefaultBoundary'
 
-// ── fallback ─────────────────────────────────────────────────────────────
+// ── component ────────────────────────────────────────────────────────────
 
 export type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
 
-export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
+export type ErrorComponent =
+  FunctionComponent<ErrorFallbackProps>
+
+// ── fallback ─────────────────────────────────────────────────────────────
 
 /** Built-in fallback rendered when an app defines no root `error.tsx` -
  *  guarantees an uncaught throw never crashes the whole process. */
