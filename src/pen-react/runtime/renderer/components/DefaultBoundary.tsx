@@ -1,5 +1,5 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { ParamTable } from '../types/param-table'
+import type { Params } from '../types/params'
 import { Component } from 'react'
 import { Text } from 'ink'
 
@@ -30,11 +30,11 @@ export function DefaultFallback() {
  *  fallback on a notFound() call - both always have params to offer, scoped to
  *  whichever position owns the default (the matched position for direct
  *  content, this boundary's own frame when triggered). */
-export type DefaultComponent = FunctionComponent<{ params: ParamTable }>
+export type DefaultComponent = FunctionComponent<{ params: Params }>
 
 type Props = {
   fallback: DefaultComponent
-  params: ParamTable
+  params: Params
   children: ReactNode
 }
 

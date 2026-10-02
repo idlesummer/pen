@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import type { Frame, Match, Params } from '@/pen-core'
+import type { Frame, Match, ParamEntries } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
-import type { ParamTable } from './types/param-table'
+import type { Params } from './types/params'
 import { use } from 'react'
 import { isAsyncComponent } from './components/PageComponent'
 import { DefaultBoundary } from './components/DefaultBoundary'
@@ -16,7 +16,7 @@ function AsyncContent({ promise }: { promise: Promise<ReactNode> }): ReactNode {
 }
 
 /** Returns params up to the given depth as an object. */
-function sliceParams(params: Params, depth: number): ParamTable {
+function sliceParams(params: ParamEntries, depth: number): Params {
   return Object.fromEntries(params.slice(0, depth))
 }
 
@@ -31,7 +31,7 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
 /** Wraps content with a frame's boundaries, layout, and slots. The assertions are
  *  safe because frames and components come from the same createRouter() call. A
  *  missing component indicates a compiler bug. */
-function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
+function wrapFrame(frame: Frame, content: ReactNode, params: ParamEntries, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramCount } = frame
   const paramTable = sliceParams(params, paramCount)
 

@@ -1,7 +1,7 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { ParamTable } from '../types/param-table'
+import type { Params } from '../types/params'
 
-/** Index signature must include ParamTable, not just ReactNode, or `params`
+/** Index signature must include Params, not just ReactNode, or `params`
  *  itself fails to satisfy its own index signature. */
 export type LayoutComponent =
-  FunctionComponent<{ params: ParamTable } & Record<string, ReactNode | ParamTable>>
+  FunctionComponent<{ params: Params } & Record<string, ReactNode | Params>>

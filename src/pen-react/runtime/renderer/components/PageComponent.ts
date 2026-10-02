@@ -1,7 +1,7 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { ParamTable } from '../types/param-table'
+import type { Params } from '../types/params'
 
-type PageProps = { params: ParamTable }
+type PageProps = { params: Params }
 
 /** An async page called outside React, with its result unwrapped by pen. */
 export type AsyncPageComponent = (props: PageProps) => Promise<ReactNode>
