@@ -3,11 +3,11 @@ import { Box } from 'ink'
 
 export default function HomeLayout({ children, sidebar }: PropsWithChildren<{ sidebar: ReactNode }>) {
   return (
-    <Box>
-      <Box flexDirection="column" flexGrow={1}>
+    <Box flexDirection="row" height="100%">
+      <Box width="50%" borderStyle="round">
         {children}
       </Box>
-      <Box flexDirection="column" borderStyle="round" borderColor="magenta" paddingX={1} marginLeft={1}>
+      <Box width="50%" borderStyle="round" borderColor="magenta">
         {sidebar}
       </Box>
     </Box>
