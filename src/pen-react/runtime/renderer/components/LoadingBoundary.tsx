@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 // ── component ────────────────────────────────────────────────────────────
 
 /** A loading component rendered while its content is suspended. */
-export type LoadingComponent = FunctionComponent<Record<string, never>>
+export type LoadingComponent = FunctionComponent
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
