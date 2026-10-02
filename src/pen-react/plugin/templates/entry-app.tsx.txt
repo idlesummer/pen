@@ -1,6 +1,13 @@
 /// <reference types="vite/client" />
 
-import type { DefaultComponent, ErrorComponent, LayoutComponent, LoadingComponent, Module, PageComponent } from '@idlesummer/pen/internal'
+import type {
+  Module,
+  PageComponent,
+  LayoutComponent,
+  LoadingComponent,
+  ErrorComponent,
+  DefaultComponent,
+} from '@idlesummer/pen/internal'
 import { render } from 'ink'
 import { App, createAppRuntime } from '@idlesummer/pen/internal'
 
