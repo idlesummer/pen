@@ -36,7 +36,10 @@ type ErrorBoundaryState = {
 
 /** Catches render errors and renders the route's `error` module. */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { pathname: this.props.pathname }
+  constructor(props: ErrorBoundaryProps) {
+    super(props)
+    this.state = { pathname: this.props.pathname }
+  }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     if (error instanceof DefaultSignal) throw error // let it climb to a DefaultBoundary instead

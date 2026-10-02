@@ -35,7 +35,10 @@ type DefaultBoundaryState = {
 /** Catches notFound() and renders this position's default component.
  *  Other errors are re-thrown for the nearest error boundary. */
 export class DefaultBoundary extends Component<DefaultBoundaryProps, DefaultBoundaryState> {
-  state: DefaultBoundaryState = { triggered: false }
+  constructor(props: DefaultBoundaryProps) {
+    super(props)
+    this.state = { triggered: false }
+  }
 
   static getDerivedStateFromError(error: unknown): DefaultBoundaryState {
     if (!(error instanceof DefaultSignal)) throw error
