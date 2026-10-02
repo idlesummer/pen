@@ -1,7 +1,7 @@
 import { use, useSyncExternalStore } from 'react'
 import { NavigationContext } from '../NavigationProvider'
 
-/** Returns the current navigation snapshot ({ history, position }).
+/** Returns the current navigation snapshot.
  *
  *  Subscribes the calling component to re-render whenever it changes.
  *
