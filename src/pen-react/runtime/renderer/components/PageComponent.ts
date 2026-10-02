@@ -1,6 +1,5 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import type { ParamTable } from './param-table'
-import type { RouteComponent } from './component-map'
 
 type PageProps = { params: ParamTable }
 
@@ -21,9 +20,11 @@ export type PageComponent = FunctionComponent<PageProps>
 
 /** Async pages are declared with `async`, so they're distinguishable before
  *  being called - which matters, since a sync page can't be called outside
- *  React without breaking its hooks. Takes any RouteComponent, not just a
- *  page, since module validation checks entries from a map spanning every
- *  role - the check itself is generic, just a constructor name. */
-export function isAsyncComponent(Content: RouteComponent): Content is AsyncPageComponent {
+ *  React without breaking its hooks. Takes any component-shaped function,
+ *  not just a page, since module validation checks entries from a map
+ *  spanning every role - the check itself is generic, just a constructor
+ *  name. The `never` param accepts any role's props structurally, without
+ *  needing to name the role union this file would otherwise have to import. */
+export function isAsyncComponent(Content: (props: never) => ReactNode | Promise<ReactNode>): Content is AsyncPageComponent {
   return Content.constructor.name === 'AsyncFunction'
 }
