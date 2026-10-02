@@ -1,12 +1,6 @@
-import type { Matcher } from '@/pen-core/runtime'
-import type { ComponentMap } from './component-map'
+import type { AppProps } from './app-props'
 import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
-
-type AppProps = {
-  matcher: Matcher
-  componentMap: ComponentMap
-}
 
 /** Root component: owns the navigation store for this app instance, seeded
  *  at the root, and renders whatever the current URL matches. */
