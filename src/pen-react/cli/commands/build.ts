@@ -13,17 +13,8 @@ export const buildCommand = defineCommand({
     const BUILD_APP_DIR = 'src/app'
     const BUILD_OUT_DIR = '.pen/dist'
 
-    // Bundles the app with Vite, using a default config equivalent to what a
-    // user's own vite.config.ts would need if they added the plugin
-    // themselves. Vite creates both client and SSR environments, so
-    // explicitly build only the server one - the plugin's own
-    // applyToEnvironment gate protects a user's own `vite build` the same
-    // way, since that call builds every environment by default.
-    //
-    // root is found explicitly (rather than left to Vite's default, which
-    // is just process.cwd()) so `pen build` works from any subdirectory of
-    // the project, the same way git/npm do - appDir and outDir both
-    // resolve against it.
+    // Build with Pen's default Vite config, targeting the SSR environment only.
+    // The plugin handles both explicit Pen builds and user `vite build` calls.
     const builder = await createBuilder({
       root: findProjectRoot(process.cwd() + sep), // add sep cuz findProjectRoot needs trailing slash
       configFile: false,
