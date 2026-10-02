@@ -5,31 +5,24 @@ import { Text } from 'ink'
 
 // ── signal ───────────────────────────────────────────────────────────────
 
-/** Thrown by notFound() and caught only by DefaultBoundary - ErrorBoundary
- *  re-throws it unrecognized so it keeps climbing past any error.tsx that
- *  doesn't also own a default.tsx, until it reaches one that does. */
+/** Thrown by notFound() to trigger the nearest default boundary. */
 export class DefaultSignal extends Error {}
 
-/** Call from anywhere in a page's render to show that position's default
- *  module instead of the page. */
+/** Replaces the current content with its nearest default module. */
 export function notFound() {
   throw new DefaultSignal()
 }
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
-/** Built-in fallback rendered when an app defines no root `default.tsx` -
- *  guarantees every URL resolves to something instead of a blank screen. */
+/** Built-in fallback when no root default.tsx is defined. */
 export function DefaultFallback() {
   return <Text>404 - Not Found</Text>
 }
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
-/** default.tsx is used two ways - direct content, or here as DefaultBoundary's
- *  fallback on a notFound() call - both always have params to offer, scoped to
- *  whichever position owns the default (the matched position for direct
- *  content, this boundary's own frame when triggered). */
+/** A default module receiving the params of its route position. */
 export type DefaultComponent = FunctionComponent<{ params: ParamTable }>
 
 type Props = {
@@ -42,10 +35,8 @@ type State = {
   triggered: boolean
 }
 
-/** Catches notFound() calls in its subtree and swaps in this position's
- *  default module. Re-throws anything that isn't a DefaultSignal so real
- *  errors keep climbing to find an actual ErrorBoundary instead of being
- *  swallowed here. */
+/** Catches notFound() and renders this position's default module.
+ *  Other errors are re-thrown for the nearest error boundary. */
 export class DefaultBoundary extends Component<Props, State> {
   state: State = { triggered: false }
 
