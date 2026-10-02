@@ -1,10 +1,10 @@
 import type { Endpoint, PositionNode } from '../compiler/position/position-node'
 import { traverse } from '@/lib/traverse'
 
-export type Params = ReadonlyArray<readonly [name: string, value: string | string[]]>
+export type ParamEntries = ReadonlyArray<readonly [name: string, value: string | string[]]>
 export type Match = {
   endpoint: Endpoint              // the winning endpoint - page or fallback, same type either way
-  params: Params                  // every param bound reaching this position, in bind order
+  params: ParamEntries            // every param bound reaching this position, in bind order
   pathname: string                // the url this match was resolved against, unchanged across slots
   slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
@@ -13,7 +13,7 @@ export type Match = {
  *  endpoints already flatten their wrapper chain into frames. */
 type MatchCandidate = {
   position: PositionNode
-  params: Params
+  params: ParamEntries
   isCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
   isTerminal?: true
 }
@@ -34,13 +34,13 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 
   if (dynamic) {
     const paramName = dynamic.param!
-    const newParams: Params = [...params, [paramName, segment]]
+    const newParams: ParamEntries = [...params, [paramName, segment]]
     candidates.push({ position: dynamic, params: newParams })
   }
   if (catchall) {
     const paramName = catchall.param!
     const segments = url.slice(position.urlDepth)
-    const newParams: Params = [...params, [paramName, segments]]
+    const newParams: ParamEntries = [...params, [paramName, segments]]
     candidates.push({ position: catchall, params: newParams, isCatchall: true })
   }
   return candidates
@@ -49,7 +49,7 @@ function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidat
 /** Depth-first, static-preferring search over one position tree.
  *  Returns the first accepting endpoint, or the most static terminal
  *  position's fallback if no endpoint accepts. */
-function findMatch(position: PositionNode, url: string[], seedParams: Params, pathname: string): Match {
+function findMatch(position: PositionNode, url: string[], seedParams: ParamEntries, pathname: string): Match {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined

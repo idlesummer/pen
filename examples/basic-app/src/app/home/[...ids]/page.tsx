@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
-import type { ParamTable } from '@idlesummer/pen'
+import type { Params } from '@idlesummer/pen'
 
-export default function HomeItemsPage({ params }: { params: ParamTable }) {
+export default function HomeItemsPage({ params }: { params: Params }) {
   return (
     <Box flexDirection="column">
       <Box>
