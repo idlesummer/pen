@@ -1,16 +1,19 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import { Suspense } from 'react'
 
+// ── component ────────────────────────────────────────────────────────────
+
+/** A loading component rendered while its content is suspended. */
 export type LoadingComponent = FunctionComponent<Record<string, never>>
+
+// ── boundary ─────────────────────────────────────────────────────────────
 
 type Props = {
   fallback: LoadingComponent
   children: ReactNode
 }
 
-/** Wraps Suspense - unlike ErrorBoundary/DefaultBoundary there's nothing to
- *  catch here (Suspense handles that itself), so no class/state is needed,
- *  just a home for LoadingComponent's type. */
+/** Shows the loading component while its children are suspended. */
 export function LoadingBoundary({ fallback: Fallback, children }: Props) {
   return <Suspense fallback={<Fallback />}>{children}</Suspense>
 }
