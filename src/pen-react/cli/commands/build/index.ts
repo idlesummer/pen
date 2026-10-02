@@ -7,13 +7,12 @@ import { pen } from './build-plugin'
 
 function createPenBuilder(appDir: string, outDir: string) {
   const root = findProjectRoot(process.cwd() + sep)
-  const builder = createBuilder({
+  return createBuilder({
     root,
     configFile: false,
     plugins: [pen(appDir)],
     build: { outDir },
   })
-  return builder
 }
 
 export const buildCommand = defineCommand({
