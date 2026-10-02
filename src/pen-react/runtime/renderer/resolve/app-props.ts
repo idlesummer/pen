@@ -10,6 +10,19 @@ import { DefaultFallback } from '../components/DefaultBoundary'
 import { ErrorFallback } from '../components/ErrorBoundary'
 import { createDefaultExportMap } from './module-mapper'
 
+type AppModules = {
+  page: Record<string, Module<PageComponent>>
+  layout: Record<string, Module<LayoutComponent>>
+  loading: Record<string, Module<LoadingComponent>>
+  error: Record<string, Module<ErrorComponent>>
+  default: Record<string, Module<DefaultComponent>>
+}
+
+export type AppProps = {
+  matcher: Matcher
+  componentMap: ComponentMap
+}
+
 /** Resolves each role's glob'd modules into its own component map and
  *  builds the matcher from the same paths. Modules are expected to have
  *  been validated by `buildApp`.
@@ -18,23 +31,13 @@ import { createDefaultExportMap } from './module-mapper'
  *  route (an orphaned file, say) - harmless, since render.tsx only ever
  *  looks up paths that came from the same compiled tree the matcher did.
  *
- *  @param pageModules - Page route modules.
- *  @param layoutModules - Layout route modules.
- *  @param loadingModules - Loading boundary modules.
- *  @param errorModules - Error boundary modules.
- *  @param defaultModules - Default boundary modules. */
-export function createAppRuntime(
-  pageModules: Record<string, Module<PageComponent>>,
-  layoutModules: Record<string, Module<LayoutComponent>>,
-  loadingModules: Record<string, Module<LoadingComponent>>,
-  errorModules: Record<string, Module<ErrorComponent>>,
-  defaultModules: Record<string, Module<DefaultComponent>>,
-): { matcher: Matcher, componentMap: ComponentMap } {
-  const pageComponents = createDefaultExportMap(Object.entries(pageModules))
-  const layoutComponents = createDefaultExportMap(Object.entries(layoutModules))
-  const loadingComponents = createDefaultExportMap(Object.entries(loadingModules))
-  const errorComponents = createDefaultExportMap(Object.entries(errorModules), { [GLOBAL_ERROR]: ErrorFallback })
-  const defaultComponents = createDefaultExportMap(Object.entries(defaultModules), { [GLOBAL_DEFAULT]: DefaultFallback })
+ *  @param modules - Each role's glob'd modules, keyed by role. */
+export function createAppProps(modules: AppModules): AppProps {
+  const pageComponents = createDefaultExportMap(Object.entries(modules.page))
+  const layoutComponents = createDefaultExportMap(Object.entries(modules.layout))
+  const loadingComponents = createDefaultExportMap(Object.entries(modules.loading))
+  const errorComponents = createDefaultExportMap(Object.entries(modules.error), { [GLOBAL_ERROR]: ErrorFallback })
+  const defaultComponents = createDefaultExportMap(Object.entries(modules.default), { [GLOBAL_DEFAULT]: DefaultFallback })
 
   const { matcher } = createRouter([
     ...Object.keys(pageComponents),
