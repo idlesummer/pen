@@ -28,13 +28,15 @@ export function DefaultFallback() {
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
-/** default.tsx is used two ways - direct content (gets params) or here, as
- *  DefaultBoundary's fallback (no props, see render() below) - so params
- *  must be optional to be valid for both. */
-export type DefaultComponent = FunctionComponent<{ params?: ParamTable }>
+/** default.tsx is used two ways - direct content, or here as DefaultBoundary's
+ *  fallback on a notFound() call - both always have params to offer, scoped to
+ *  whichever position owns the default (the matched position for direct
+ *  content, this boundary's own frame when triggered). */
+export type DefaultComponent = FunctionComponent<{ params: ParamTable }>
 
 type Props = {
   fallback: DefaultComponent
+  params: ParamTable
   children: ReactNode
 }
 
@@ -56,7 +58,7 @@ export class DefaultBoundary extends Component<Props, State> {
   }
 
   render() {
-    const { fallback: Fallback, children } = this.props
-    return this.state.triggered ? <Fallback /> : children
+    const { fallback: Fallback, params, children } = this.props
+    return this.state.triggered ? <Fallback params={params} /> : children
   }
 }

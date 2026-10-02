@@ -33,10 +33,11 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
  *  missing component indicates a compiler bug. */
 function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramCount } = frame
+  const paramTable = sliceParams(params, paramCount)
 
   if (_default) {
     const Fallback = components.default[_default]!
-    content = <DefaultBoundary fallback={Fallback}>{content}</DefaultBoundary>
+    content = <DefaultBoundary fallback={Fallback} params={paramTable}>{content}</DefaultBoundary>
   }
   if (loading) {
     const Fallback = components.loading[loading]!
@@ -49,7 +50,6 @@ function wrapFrame(frame: Frame, content: ReactNode, params: Params, slotElement
   if (layout) {
     const Layout = components.layout[layout]!
     const slotProps = slots ? getSlotProps(slots, slotElements) : {}
-    const paramTable = sliceParams(params, paramCount)
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
   return content
