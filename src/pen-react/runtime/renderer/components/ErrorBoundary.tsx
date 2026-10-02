@@ -23,28 +23,28 @@ export function ErrorFallback({ error }: ErrorComponentProps) {
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
-type Props = {
+type ErrorBoundaryProps = {
   fallback: ErrorComponent
   pathname: string
   children: ReactNode
 }
 
-type State = {
+type ErrorBoundaryState = {
   error?: Error
   pathname: string
 }
 
 /** Catches render errors and renders the route's `error` module. */
-export class ErrorBoundary extends Component<Props, State> {
-  state: State = { pathname: this.props.pathname }
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { pathname: this.props.pathname }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     if (error instanceof DefaultSignal) throw error // let it climb to a DefaultBoundary instead
     return { error }
   }
 
   /** Resets the error when the route changes. */
-  static getDerivedStateFromProps(props: Props, state: State): State {
+  static getDerivedStateFromProps(props: ErrorBoundaryProps, state: ErrorBoundaryState): ErrorBoundaryState {
     return props.pathname !== state.pathname
       ? { error: undefined, pathname: props.pathname }
       : state
