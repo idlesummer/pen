@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { defineCommand } from 'citty'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { BUILD_ENTRY } from '@/pen-react/plugin'
+import { BUILD_OUT_DIR } from '../constants'
 
 export const startCommand = defineCommand({
   meta: {
@@ -11,8 +12,6 @@ export const startCommand = defineCommand({
     description: 'Run the app built by `pen build`',
   },
   run: async () => {
-    const BUILD_OUT_DIR = '.pen/dist'
-
     // Run the built entry in-process so Ink gets the real stdin/stdout.
     // Resolve from the project root so `pen start` works from subdirectories.
     const entryPath = join(findProjectRoot(process.cwd() + sep), BUILD_OUT_DIR, BUILD_ENTRY)

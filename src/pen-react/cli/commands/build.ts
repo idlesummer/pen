@@ -3,6 +3,7 @@ import { defineCommand } from 'citty'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { pen } from '@/pen-react/plugin'
+import { BUILD_OUT_DIR } from '../constants'
 
 export const buildCommand = defineCommand({
   meta: {
@@ -11,7 +12,6 @@ export const buildCommand = defineCommand({
   },
   run: async () => {
     const BUILD_APP_DIR = 'src/app'
-    const BUILD_OUT_DIR = '.pen/dist'
 
     // Build with Pen's default Vite config, targeting the SSR environment only.
     // The plugin handles both explicit Pen builds and user `vite build` calls.
