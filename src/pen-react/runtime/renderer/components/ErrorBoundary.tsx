@@ -3,51 +3,51 @@ import { Component } from 'react'
 import { Text } from 'ink'
 import { DefaultSignal } from './DefaultBoundary'
 
-// ── fallback ─────────────────────────────────────────────────────────────
+// ── component ────────────────────────────────────────────────────────────
 
-export type ErrorFallbackProps = {
+/** Props passed to an error component. */
+export type ErrorComponentProps = {
   error: Error
   reset: () => void
 }
 
-export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
+/** An error component receiving the current error and a reset function. */
+export type ErrorComponent = FunctionComponent<ErrorComponentProps>
 
-/** Built-in fallback rendered when an app defines no root `error.tsx` -
- *  guarantees an uncaught throw never crashes the whole process. */
-export function ErrorFallback({ error }: ErrorFallbackProps) {
-  return (
-    <Text>
-      Something went wrong: {error.message}
-      {'\n\n'}
-      {error.stack}
-    </Text>
-  )
+// ── fallback ─────────────────────────────────────────────────────────────
+
+/** Built-in fallback rendered when an app defines no root `error.tsx`. */
+export function ErrorFallback({ error }: ErrorComponentProps) {
+  return <Text>Something went wrong: {error.message}{'\n\n'}{error.stack}</Text>
 }
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
-type Props = {
+type ErrorBoundaryProps = {
   fallback: ErrorComponent
   pathname: string
   children: ReactNode
 }
 
-type State = {
+type ErrorBoundaryState = {
   error?: Error
   pathname: string
 }
 
 /** Catches render errors and renders the route's `error` module. */
-export class ErrorBoundary extends Component<Props, State> {
-  state: State = { pathname: this.props.pathname }
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props)
+    this.state = { pathname: this.props.pathname }
+  }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     if (error instanceof DefaultSignal) throw error // let it climb to a DefaultBoundary instead
     return { error }
   }
 
   /** Resets the error when the route changes. */
-  static getDerivedStateFromProps(props: Props, state: State): State {
+  static getDerivedStateFromProps(props: ErrorBoundaryProps, state: ErrorBoundaryState): ErrorBoundaryState {
     return props.pathname !== state.pathname
       ? { error: undefined, pathname: props.pathname }
       : state

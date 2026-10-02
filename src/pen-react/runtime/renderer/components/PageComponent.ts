@@ -1,13 +1,20 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import type { Params } from '../types/params'
 
-type PageProps = { params: Params }
+// ── component ────────────────────────────────────────────────────────────
 
-/** An async page called outside React, with its result unwrapped by pen. */
-export type AsyncPageComponent = (props: PageProps) => Promise<ReactNode>
+/** Props passed to a page component. */
+export type PageComponentProps = {
+  params: Params
+}
 
 /** A page component. */
-export type PageComponent = FunctionComponent<PageProps>
+export type PageComponent = FunctionComponent<PageComponentProps>
+
+/** An async page called outside React, with its result unwrapped by pen. */
+export type AsyncPageComponent = (props: PageComponentProps) => Promise<ReactNode>
+
+// ── utility ──────────────────────────────────────────────────────────────
 
 /** Checks whether a component is declared with `async`.
  *
