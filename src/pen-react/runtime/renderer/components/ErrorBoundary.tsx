@@ -5,26 +5,20 @@ import { DefaultSignal } from './DefaultBoundary'
 
 // ── component ────────────────────────────────────────────────────────────
 
+/** Props passed to an error component. */
 export type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
 
-export type ErrorComponent =
-  FunctionComponent<ErrorFallbackProps>
+/** An error component receiving the current error and a reset function. */
+export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
-/** Built-in fallback rendered when an app defines no root `error.tsx` -
- *  guarantees an uncaught throw never crashes the whole process. */
+/** Built-in fallback rendered when an app defines no root `error.tsx`. */
 export function ErrorFallback({ error }: ErrorFallbackProps) {
-  return (
-    <Text>
-      Something went wrong: {error.message}
-      {'\n\n'}
-      {error.stack}
-    </Text>
-  )
+  return <Text>Something went wrong: {error.message}{'\n\n'}{error.stack}</Text>
 }
 
 // ── boundary ─────────────────────────────────────────────────────────────
