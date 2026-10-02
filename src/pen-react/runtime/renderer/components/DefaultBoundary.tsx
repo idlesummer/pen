@@ -3,15 +3,11 @@ import type { ParamTable } from '../types/param-table'
 import { Component } from 'react'
 import { Text } from 'ink'
 
-// ── signal ───────────────────────────────────────────────────────────────
+// ── component ────────────────────────────────────────────────────────────
 
-/** Thrown by notFound() to trigger the nearest default boundary. */
-export class DefaultSignal extends Error {}
-
-/** Replaces the current content with its nearest default module. */
-export function notFound() {
-  throw new DefaultSignal()
-}
+/** A default module receiving the params of its route position. */
+export type DefaultComponent =
+  FunctionComponent<{ params: ParamTable }>
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
@@ -21,9 +17,6 @@ export function DefaultFallback() {
 }
 
 // ── boundary ─────────────────────────────────────────────────────────────
-
-/** A default module receiving the params of its route position. */
-export type DefaultComponent = FunctionComponent<{ params: ParamTable }>
 
 type Props = {
   fallback: DefaultComponent
@@ -49,4 +42,14 @@ export class DefaultBoundary extends Component<Props, State> {
     const { fallback: Fallback, params, children } = this.props
     return this.state.triggered ? <Fallback params={params} /> : children
   }
+}
+
+// ── signal ───────────────────────────────────────────────────────────────
+
+/** Thrown by notFound() to trigger the nearest default boundary. */
+export class DefaultSignal extends Error {}
+
+/** Replaces the current content with its nearest default module. */
+export function notFound() {
+  throw new DefaultSignal()
 }
