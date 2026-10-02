@@ -1,5 +1,5 @@
 import { Text } from 'ink'
 
-export default function HomeDefault() {
+export default function RootDefault() {
   return <Text>Page Not Found</Text>
 }
