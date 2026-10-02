@@ -11,9 +11,7 @@ import { Text } from 'ink'
 export class DefaultSignal extends Error {}
 
 /** Call from anywhere in a page's render to show that position's default
- *  module instead of the page. Whether the underlying data exists is only
- *  knowable once this code actually runs, unlike route matching itself -
- *  so unlike a plain unmatched URL, this genuinely needs a runtime catch. */
+ *  module instead of the page. */
 export function notFound() {
   throw new DefaultSignal()
 }
@@ -43,10 +41,9 @@ type State = {
 }
 
 /** Catches notFound() calls in its subtree and swaps in this position's
- *  default module - same climb-and-catch mechanism as ErrorBoundary, since
- *  only class components can catch. Re-throws anything that isn't a
- *  DefaultSignal from getDerivedStateFromError itself, so real errors keep
- *  climbing to find an actual ErrorBoundary instead of being swallowed here. */
+ *  default module. Re-throws anything that isn't a DefaultSignal so real
+ *  errors keep climbing to find an actual ErrorBoundary instead of being
+ *  swallowed here. */
 export class DefaultBoundary extends Component<Props, State> {
   state: State = { triggered: false }
 
