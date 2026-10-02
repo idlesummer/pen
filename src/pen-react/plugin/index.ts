@@ -1,1 +1,2 @@
-export { pen, BUILD_ENTRY, ENTRY_MODULE_ID } from './build'
+export { pen } from './build'
+export { BUILD_ENTRY } from './constants'
