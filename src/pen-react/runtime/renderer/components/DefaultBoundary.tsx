@@ -5,7 +5,7 @@ import { Text } from 'ink'
 
 // ── component ────────────────────────────────────────────────────────────
 
-/** A default module receiving the params of its route position. */
+/** A default component receiving the params of its route position. */
 export type DefaultComponent =
   FunctionComponent<{ params: ParamTable }>
 
@@ -28,7 +28,7 @@ type State = {
   triggered: boolean
 }
 
-/** Catches notFound() and renders this position's default module.
+/** Catches notFound() and renders this position's default component.
  *  Other errors are re-thrown for the nearest error boundary. */
 export class DefaultBoundary extends Component<Props, State> {
   state: State = { triggered: false }
@@ -49,7 +49,7 @@ export class DefaultBoundary extends Component<Props, State> {
 /** Thrown by notFound() to trigger the nearest default boundary. */
 export class DefaultSignal extends Error {}
 
-/** Replaces the current content with its nearest default module. */
+/** Replaces the current content with its nearest default component. */
 export function notFound() {
   throw new DefaultSignal()
 }
