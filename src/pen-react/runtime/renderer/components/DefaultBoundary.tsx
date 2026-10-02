@@ -5,9 +5,13 @@ import { Text } from 'ink'
 
 // ── component ────────────────────────────────────────────────────────────
 
+/** Props passed to a default component. */
+export type DefaultComponentProps = {
+  params: ParamTable
+}
+
 /** A default component receiving the params of its route position. */
-export type DefaultComponent =
-  FunctionComponent<{ params: ParamTable }>
+export type DefaultComponent = FunctionComponent<DefaultComponentProps>
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
