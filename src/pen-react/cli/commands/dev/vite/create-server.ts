@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { pen } from './dev-plugin'
+import { penDev } from './dev-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
@@ -15,7 +15,7 @@ export function createPenDevServer(appDir: string) {
   return createServer({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
-    plugins: [pen(appDir)],
+    plugins: [penDev(appDir)],
     server: {
       middlewareMode: true,  // don't open an HTTP server
       ws: false,  // no HMR socket; the ssr environment's HMR is in-process

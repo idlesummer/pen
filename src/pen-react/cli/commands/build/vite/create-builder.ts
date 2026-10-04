@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { pen } from './build-plugin'
+import { penBuild } from './build-plugin'
 
 /** Creates a Vite builder configured with the `pen` plugin, ready to build
  *  the app's SSR environment.
@@ -12,7 +12,7 @@ export function createPenBuilder(appDir: string, outDir: string) {
   return createBuilder({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
-    plugins: [pen(appDir)],
+    plugins: [penBuild(appDir)],
     build: { outDir },
   })
 }
