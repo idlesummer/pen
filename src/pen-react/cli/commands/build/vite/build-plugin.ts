@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { BUILD_ENTRY } from '@/pen-react/cli/constants'
+import { ENTRY_FILE } from '@/pen-react/cli/constants'
 import { discoverRoutes } from '@/pen-react/runtime'
 import entryAppSource from '../../vite/templates/entry-app.tsx.txt' with { type: 'text' }
 
@@ -35,7 +35,7 @@ export function pen(appDir: string): Plugin {
           ssr: true,  // Build for Node so imports work instead of being treated as browser code
           rolldownOptions: {  // The entry-app template discovers the user's routes for bundling
             input: ENTRY_MODULE_ID,
-            output: { entryFileNames: BUILD_ENTRY },
+            output: { entryFileNames: ENTRY_FILE },
           },
         },
       }

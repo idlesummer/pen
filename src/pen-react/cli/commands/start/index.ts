@@ -3,7 +3,7 @@ import { join, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { defineCommand } from 'citty'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { BUILD_ENTRY, BUILD_OUT_DIR } from '@/pen-react/cli/constants'
+import { ENTRY_FILE, OUT_DIR } from '@/pen-react/cli/constants'
 
 export const startCommand = defineCommand({
   meta: {
@@ -13,9 +13,9 @@ export const startCommand = defineCommand({
   run: async () => {
     // Run the built entry in-process so Ink gets the real stdin/stdout.
     // Resolve from the project root so `pen start` works from subdirectories.
-    const entryPath = join(findProjectRoot(process.cwd() + sep), BUILD_OUT_DIR, BUILD_ENTRY)
+    const entryPath = join(findProjectRoot(process.cwd() + sep), OUT_DIR, ENTRY_FILE)
     if (!existsSync(entryPath))
-      throw new Error(`No build found at '${BUILD_OUT_DIR}' - run \`pen build\` first.`)
+      throw new Error(`No build found at '${OUT_DIR}' - run \`pen build\` first.`)
 
     await import(pathToFileURL(entryPath).href)
   },
