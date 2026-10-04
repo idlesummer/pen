@@ -25,7 +25,7 @@ export function pen(appDir: string): Plugin {
   return {
     name: 'pen',
 
-    // Only runs this plugin's other hooks for the SSR environment, not the client one
+    // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
