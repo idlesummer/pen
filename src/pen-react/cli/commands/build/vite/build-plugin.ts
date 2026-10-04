@@ -61,11 +61,11 @@ export function pen(appDir: string): Plugin {
     async buildStart() {
       // existsSync is a plain Node fs call - Vite's own root option doesn't
       // reach it, so root is read explicitly and joined by hand
-      const root = this.environment.config.root
-      if (!existsSync(join(root, appDir)))
+      const projectDir = this.environment.config.root
+      if (!existsSync(join(projectDir, appDir)))
         this.error(`No such directory: '${appDir}'`)
 
-      const { diagnostics } = await discoverRoutes(appDir, root)
+      const { diagnostics } = await discoverRoutes(projectDir, appDir)
 
       // Display diagnostics
       for (const { severity, message, files } of diagnostics)
