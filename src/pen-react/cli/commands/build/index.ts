@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty'
 import { BUILD_OUT_DIR } from '../../constants'
-import { createPenBuilder } from './build-plugin'
+import { createPenBuilder } from './create-builder'
 
 export const buildCommand = defineCommand({
   meta: {
