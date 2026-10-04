@@ -1,10 +1,11 @@
 import type { Diagnostic, Endpoint } from '@/pen-core'
-import type { RouteComponent } from './renderer/types/component-map'
+import type { RouteComponent } from '../types/component-map'
+import type { DefaultExportMap } from './module-mapper'
 import { createDiagnostic } from '@/pen-core'
-import { isAsyncComponent } from './renderer/components/PageComponent'
+import { isAsyncComponent } from '../components/PageComponent'
 
 /** Validates that every discovered module has a valid component default export. */
-export function validateComponentExports(modulePaths: string[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
+export function validateComponentExports(modulePaths: string[], routeComponents: DefaultExportMap<RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const path of modulePaths) {
@@ -32,7 +33,7 @@ export function validateComponentExports(modulePaths: string[], routeComponents:
 }
 
 /** Validates that every async page has a loading.tsx in its frame chain. */
-export function validateAsyncPages(pageEndpoints: Endpoint[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
+export function validateAsyncPages(pageEndpoints: Endpoint[], routeComponents: DefaultExportMap<RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
