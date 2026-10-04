@@ -136,7 +136,6 @@ export function penReactRefreshInk(): Plugin {
             refresh: true,     // emit $RefreshReg$/$RefreshSig$ calls inline
           },
         })
-
         // No $RefreshReg$( call means no components - skip wrap so updates bubble to
         // a real boundary instead of being swallowed here. Map flows through.
         if (!result.code.includes('$RefreshReg$('))
