@@ -28,7 +28,7 @@ type AppModules = {
  *  looks up paths that came from the same compiled tree the matcher did.
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
-export function createAppProps(modules: AppModules): PenAppProps {
+export function createPenAppProps(modules: AppModules): PenAppProps {
   const pageComponents = createDefaultExportMap(Object.entries(modules.page))
   const layoutComponents = createDefaultExportMap(Object.entries(modules.layout))
   const loadingComponents = createDefaultExportMap(Object.entries(modules.loading))
