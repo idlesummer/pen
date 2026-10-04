@@ -4,7 +4,7 @@ import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
 
 /** Props for the root Pen app component. */
-type PenAppProps = {
+export type PenAppProps = {
   matcher: Matcher
   componentMap: ComponentMap
 }
