@@ -9,7 +9,7 @@ import type {
   DefaultComponent,
 } from '@idlesummer/pen/internal'
 import { render } from 'ink'
-import { App, createAppProps } from '@idlesummer/pen/internal'
+import { PenApp, createAppProps } from '@idlesummer/pen/internal'
 
 // Each glob is typed by module role, so no runtime classification is needed
 const pageModules = import.meta.glob<Module<PageComponent>>('**/page.tsx', { eager: true, base: '__PEN_APP_DIR__' })
@@ -27,5 +27,5 @@ const { matcher, componentMap } = createAppProps({
   error: errorModules,
   default: defaultModules,
 })
-const { waitUntilExit } = render(<App matcher={matcher} componentMap={componentMap} />, { maxFps: 60 })
+const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, { maxFps: 60 })
 await waitUntilExit()

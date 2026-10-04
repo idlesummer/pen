@@ -1,4 +1,4 @@
-export { App } from './renderer/App'
+export { PenApp } from './renderer/App'
 export { renderMatch } from './renderer/render'
 export type { ComponentMap } from './renderer/types/component-map'
 export type { RouteComponent, RouteModule } from './setup/route-component'
