@@ -16,12 +16,13 @@ type RouteModule = Module<RouteComponent>
  * and `pen dev` (once per file add/delete) - each decides separately how
  * to report the returned diagnostics.
  *
- * @param appDir - App route directory relative to root.
- * @param root - Project root to resolve appDir against.
+ * @param projectDir - Project directory containing the app directory.
+ * @param appDir - App route directory relative to the project directory.
+ * @returns Diagnostics produced while compiling and validating the routes.
  */
-export async function discoverRoutes(appDir: string, root: string) {
+export async function discoverRoutes(projectDir: string, appDir: string) {
   // Load modules and create component map
-  const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
+  const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, appDir)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
     [GLOBAL_DEFAULT]: DefaultFallback,
     [GLOBAL_ERROR]: ErrorFallback,
@@ -34,6 +35,5 @@ export async function discoverRoutes(appDir: string, root: string) {
   // Collect additional runtime diagnostics
   diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
   diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
-
   return { routeComponents, pageEndpoints, modulePaths, diagnostics }
 }
