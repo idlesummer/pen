@@ -9,9 +9,8 @@ import { pen } from './build-plugin'
  *  @param appDir - App route directory relative to the project root.
  *  @param outDir - Build output directory relative to the project root. */
 export function createPenBuilder(appDir: string, outDir: string) {
-  const root = findProjectRoot(process.cwd() + sep)
   return createBuilder({
-    root,
+    root: findProjectRoot(process.cwd() + sep),
     configFile: false,
     plugins: [pen(appDir)],
     build: { outDir },
