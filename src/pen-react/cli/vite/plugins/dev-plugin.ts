@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { transformWithOxc } from 'vite'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-react/cli/constants'
 import { discoverRoutes } from '@/pen-react/runtime'
-import entryAppSource from '../templates/entry-app.tsx.txt' with { type: 'text' }
+import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /**
  * Loads the app's route modules, compiles their paths, and validates the
