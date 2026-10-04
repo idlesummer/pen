@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
+import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 /** Globals installed by the plugin's dev server. */
 declare global {
@@ -19,6 +20,16 @@ declare global {
 }
 
 type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
+
+// Lives in its own file (rather than another template literal here) so the
+// IDE can type-check it against the declare global block above, the same
+// way entry-app.tsx.txt gets checked against vite/client's import.meta.glob
+// types. Its two tokens stand in for values only known per-transform: the
+// filename sits inside a real string literal (quotes already in the
+// template, like entry-app.tsx.txt's __PEN_APP_DIR__); the module's own code
+// can't be typed at all, so it's a whole-line comment swapped out wholesale.
+const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
+const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 // Save/restore of the globals is safe only because dev.js does ONE
 // runner.import() - Vite evaluates modules one at a time, so nothing else
@@ -41,23 +52,12 @@ type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
 // (no trailing spaces), else line-1 columns shift too. If the wrap ever edits
 // the middle of the code, this shortcut breaks: use magic-string + remapping.
 function createRefreshBoundary({ code, map: oxcMap }: TransformResult, filename: string) {
-  const boundary = `
-    const __prev_Reg__ = globalThis.$RefreshReg$
-    const __prev_Sig__ = globalThis.$RefreshSig$
-    globalThis.$RefreshReg$ = globalThis.RefreshRuntime.getRefreshReg(${JSON.stringify(filename)})
-    globalThis.$RefreshSig$ = globalThis.RefreshRuntime.createSignatureFunctionForTransform
-${code}
-    globalThis.$RefreshReg$ = __prev_Reg__
-    globalThis.$RefreshSig$ = __prev_Sig__
-    if (import.meta.hot) {
-      import(/* @vite-ignore */ import.meta.url).then((currentExports) => {
-        import.meta.hot.accept((nextExports) => {
-          if (!nextExports) return
-          const invalidateMessage = globalThis.RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(currentExports, nextExports)
-          if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage)
-        })
-      })
-    }`
+  // slice(1, -1) strips JSON.stringify's own quotes - the template already
+  // supplies them around the token, so this only needs the escaped inner text.
+  const escapedFilename = JSON.stringify(filename).slice(1, -1)
+  const boundary = refreshBoundarySource
+    .replace(REFRESH_FILENAME_TOKEN, escapedFilename)
+    .replace(REFRESH_CODE_TOKEN, code)
 
   const headerLines = boundary.slice(0, boundary.indexOf(code)).split('\n').length - 1
   const map = oxcMap ? { ...oxcMap, mappings: ';'.repeat(headerLines) + oxcMap.mappings } : oxcMap
