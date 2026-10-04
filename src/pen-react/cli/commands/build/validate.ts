@@ -17,6 +17,16 @@ export function validateComponentExports(modulePaths: string[], routeComponents:
         files: [path],
       }))
     }
+    else if (!/^[A-Z]/.test(Content.name)) {
+      diagnostics.push(createDiagnostic({
+        rule: 'unnamed-component-export',
+        severity: 'warn',
+        description:
+          'its default export is an anonymous or lowercase-named function - ' +
+          '`pen dev`\'s Fast Refresh only recognizes components whose name starts with a capital letter',
+        files: [path],
+      }))
+    }
   }
   return diagnostics
 }
