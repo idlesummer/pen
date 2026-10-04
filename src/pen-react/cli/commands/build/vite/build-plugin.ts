@@ -1,12 +1,9 @@
 import type { Plugin } from 'vite'
-import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { ssrGlob } from '@/lib/ssr-glob'
-import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { BUILD_ENTRY } from '@/pen-react/cli/constants'
-import { createDefaultExportMap, DefaultFallback, ErrorFallback, validateAsyncPages, validateComponentExports } from '@/pen-react/runtime'
+import { discoverRoutes } from '@/pen-react/runtime'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
@@ -62,26 +59,13 @@ export function pen(appDir: string): Plugin {
 
     // Discovers the app's routes, validates them, and reports any errors before the build continues
     async buildStart() {
-      // existsSync/ssrGlob are plain Node fs calls - Vite's own root option
-      // doesn't reach them, so root is read explicitly and joined by hand
+      // existsSync is a plain Node fs call - Vite's own root option doesn't
+      // reach it, so root is read explicitly and joined by hand
       const root = this.environment.config.root
       if (!existsSync(join(root, appDir)))
         this.error(`No such directory: '${appDir}'`)
 
-      // Maps paths to module objects as entries
-      const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
-      const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
-        [GLOBAL_DEFAULT]: DefaultFallback,
-        [GLOBAL_ERROR]: ErrorFallback,
-      })
-
-      // createRouter compiles paths into route and position trees
-      const filePaths = moduleEntries.map(entry => entry[0])
-      const { modulePaths, pageEndpoints, diagnostics } = createRouter(filePaths)
-
-      // Validates component exports and async pages
-      diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
-      diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
+      const { diagnostics } = await discoverRoutes(appDir, root)
 
       // Display diagnostics
       for (const { severity, message, files } of diagnostics)
