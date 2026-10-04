@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty'
 import { createServerModuleRunner } from 'vite'
 import { createPenDevServer } from './vite/create-server'
+import { APP_DIR } from '@/pen-react/cli/constants'
 
 export const devCommand = defineCommand({
   meta: {
@@ -12,11 +13,9 @@ export const devCommand = defineCommand({
     // import of the entry module below - must be set before that happens.
     process.env.NODE_ENV = 'development'
 
-    const DEV_APP_DIR = 'src/app'
-
     // Headless server driven by a module runner instead of an HTTP server
     // or browser - it serves the terminal program's own entry module.
-    const server = await createPenDevServer(DEV_APP_DIR)
+    const server = await createPenDevServer(APP_DIR)
 
     // Diagnostics are already reported through Vite's own logger by the
     // time a failure reaches here - nothing left to print.
