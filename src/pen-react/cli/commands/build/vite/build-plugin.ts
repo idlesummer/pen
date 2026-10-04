@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { createDefaultExportMap, DefaultFallback, ErrorFallback, validateAsyncPages, validateComponentExports } from '@/pen-react/runtime'
+import { createDefaultExportMap, Fallback, validate } from '@/pen-react/runtime'
 import { BUILD_ENTRY } from '@/pen-react/cli/constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
@@ -67,8 +67,8 @@ export function pen(appDir: string): Plugin {
       // Maps paths to module objects as entries
       const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
       const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
-        [GLOBAL_DEFAULT]: DefaultFallback,
-        [GLOBAL_ERROR]: ErrorFallback,
+        [GLOBAL_DEFAULT]: Fallback.Default,
+        [GLOBAL_ERROR]: Fallback.Error,
       })
 
       // createRouter compiles paths into route and position trees
@@ -76,8 +76,8 @@ export function pen(appDir: string): Plugin {
       const { modulePaths, pageEndpoints, diagnostics } = createRouter(filePaths)
 
       // Validates component exports and async pages
-      diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
-      diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
+      diagnostics.push(...validate.componentExports(modulePaths, routeComponents))
+      diagnostics.push(...validate.asyncPages(pageEndpoints, routeComponents))
 
       // Display diagnostics
       for (const { severity, message, files } of diagnostics)
