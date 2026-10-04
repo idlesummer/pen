@@ -1,5 +1,5 @@
 import type { Matcher, Module } from '@/pen-core'
-import type { ComponentMap } from '../renderer/types/component-map'
+import type { ComponentMap } from './component-map'
 import type { DefaultComponent } from '../renderer/components/DefaultBoundary'
 import type { ErrorComponent } from '../renderer/components/ErrorBoundary'
 import type { LayoutComponent } from '../renderer/components/LayoutComponent'
