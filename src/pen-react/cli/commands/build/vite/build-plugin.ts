@@ -18,7 +18,7 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  *
  * @param appDir - App route directory relative to the project root.
  */
-export function pen(appDir: string): Plugin {
+export function penBuild(appDir: string): Plugin {
   return {
     name: 'pen',
 
