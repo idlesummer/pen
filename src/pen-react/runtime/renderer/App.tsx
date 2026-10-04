@@ -1,5 +1,5 @@
 import type { Matcher } from '@/pen-core'
-import type { ComponentMap } from '../setup/component-map'
+import type { ComponentMap } from './types/component-map'
 import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
 

@@ -1,5 +1,5 @@
 import type { Matcher } from '@/pen-core/runtime'
-import type { ComponentMap } from '../setup/component-map'
+import type { ComponentMap } from './types/component-map'
 import { useMemo } from 'react'
 import { usePathname } from '../navigation/hooks/use-pathname'
 import { renderMatch } from './render'
