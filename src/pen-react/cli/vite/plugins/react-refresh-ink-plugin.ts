@@ -36,12 +36,12 @@ type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
 // only change to OXC's map is shifting every generated line down by the
 // header's line count - i.e. one ';' (the mappings line separator) per
 // header line. headerLines counts the newlines up to where `code` lands in
-// `wrapper` (safe since `code` is real module source, never a substring of
+// `boundary` (safe since `code` is real module source, never a substring of
 // the fixed boilerplate around it). The header MUST end exactly on a newline
 // (no trailing spaces), else line-1 columns shift too. If the wrap ever edits
 // the middle of the code, this shortcut breaks: use magic-string + remapping.
 function createRefreshBoundary({ code, map: oxcMap }: TransformResult, filename: string) {
-  const wrapper = `
+  const boundary = `
     const __prev_Reg__ = globalThis.$RefreshReg$
     const __prev_Sig__ = globalThis.$RefreshSig$
     globalThis.$RefreshReg$ = globalThis.RefreshRuntime.getRefreshReg(${JSON.stringify(filename)})
@@ -59,9 +59,9 @@ ${code}
       })
     }`
 
-  const headerLines = wrapper.slice(0, wrapper.indexOf(code)).split('\n').length - 1
+  const headerLines = boundary.slice(0, boundary.indexOf(code)).split('\n').length - 1
   const map = oxcMap ? { ...oxcMap, mappings: ';'.repeat(headerLines) + oxcMap.mappings } : oxcMap
-  return { code: wrapper, map }
+  return { code: boundary, map }
 }
 
 /**
