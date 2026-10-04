@@ -1,7 +1,7 @@
 export { PenApp } from './renderer/App'
 export { renderMatch } from './renderer/render'
 export type { ComponentMap } from './renderer/types/component-map'
-export type { RouteComponent } from './setup/types/route-component'
+export type { RouteComponent } from './renderer/types/route-component'
 export { createDefaultExportMap } from './setup/module-mapper'
 export { createPenAppProps } from './setup/pen-app-props'
 export type { Params } from './renderer/types/params'

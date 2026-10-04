@@ -1,5 +1,5 @@
 import type { Module } from '@/pen-core'
-import type { RouteComponent } from './types/route-component'
+import type { RouteComponent } from '../renderer/types/route-component'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'

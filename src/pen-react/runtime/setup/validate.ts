@@ -1,5 +1,5 @@
 import type { Diagnostic, Endpoint } from '@/pen-core'
-import type { RouteComponent } from './types/route-component'
+import type { RouteComponent } from '../renderer/types/route-component'
 import type { DefaultExportMap } from './module-mapper'
 import { createDiagnostic } from '@/pen-core'
 import { isAsyncComponent } from '../renderer/components/PageComponent'
