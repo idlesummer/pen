@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { usePathname } from '../navigation/hooks/use-pathname'
 import { renderMatch } from './render'
 
-type RouterProps = {
+export type RouterProps = {
   matcher: Matcher
   componentMap: ComponentMap
 }
