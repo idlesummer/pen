@@ -1,13 +1,16 @@
-import type { Matcher, Module } from '@/pen-core'
-import type { ComponentMap } from './component-map'
+import type { Module } from '@/pen-core'
 import type { DefaultComponent } from '../renderer/components/DefaultBoundary'
 import type { ErrorComponent } from '../renderer/components/ErrorBoundary'
 import type { LayoutComponent } from '../renderer/components/LayoutComponent'
 import type { LoadingComponent } from '../renderer/components/LoadingBoundary'
 import type { PageComponent } from '../renderer/components/PageComponent'
+import type { PenAppProps } from '../renderer/App'
+
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'
 import { ErrorFallback } from '../renderer/components/ErrorBoundary'
+
+import type { ComponentMap } from './component-map'
 import { createDefaultExportMap } from './module-mapper'
 
 type AppModules = {
@@ -16,11 +19,6 @@ type AppModules = {
   loading: Record<string, Module<LoadingComponent>>
   error: Record<string, Module<ErrorComponent>>
   default: Record<string, Module<DefaultComponent>>
-}
-
-type AppProps = {
-  matcher: Matcher
-  componentMap: ComponentMap
 }
 
 /** Resolves each role's glob'd modules into its own component map and
@@ -32,7 +30,7 @@ type AppProps = {
  *  looks up paths that came from the same compiled tree the matcher did.
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
-export function createAppProps(modules: AppModules): AppProps {
+export function createAppProps(modules: AppModules): PenAppProps {
   const pageComponents = createDefaultExportMap(Object.entries(modules.page))
   const layoutComponents = createDefaultExportMap(Object.entries(modules.layout))
   const loadingComponents = createDefaultExportMap(Object.entries(modules.loading))
