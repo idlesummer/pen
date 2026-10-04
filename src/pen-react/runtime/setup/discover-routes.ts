@@ -1,8 +1,8 @@
-import type { RouteComponent, RouteModule } from '../types/component-map'
+import type { RouteComponent, RouteModule } from '../renderer/types/component-map'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { DefaultFallback } from '../components/DefaultBoundary'
-import { ErrorFallback } from '../components/ErrorBoundary'
+import { DefaultFallback } from '../renderer/components/DefaultBoundary'
+import { ErrorFallback } from '../renderer/components/ErrorBoundary'
 import { createDefaultExportMap } from './module-mapper'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
