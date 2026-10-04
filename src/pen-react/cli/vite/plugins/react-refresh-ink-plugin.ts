@@ -26,25 +26,27 @@ type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
 //
 // Header must be PREPENDED so the $RefreshSig$ assignment lands above OXC's
 // `var _s = $RefreshSig$()`, else _s captures the no-op and signatures break.
+// Footer: import this module's own current exports, then self-accept and let
+// the runtime compare them with the incoming ones; if it isn't a clean
+// refresh boundary, invalidate so the update bubbles to importers. (The
+// official plugin does the self-import through RefreshRuntime.__hmr_import;
+// here it must be in the module so Vite's runner handles it.)
 //
-// Sourcemap: the header is a whole-line insertion above the code and the
-// footer sits below it, so the only change to OXC's map is shifting every
-// generated line down by the header's line count - i.e. one ';' (the mappings
-// line separator) per header line. The header MUST end exactly on a newline
+// Sourcemap: the header is a whole-line insertion above the code, so the
+// only change to OXC's map is shifting every generated line down by the
+// header's line count - i.e. one ';' (the mappings line separator) per
+// header line. headerLines counts the newlines up to where `code` lands in
+// `wrapper` (safe since `code` is real module source, never a substring of
+// the fixed boilerplate around it). The header MUST end exactly on a newline
 // (no trailing spaces), else line-1 columns shift too. If the wrap ever edits
 // the middle of the code, this shortcut breaks: use magic-string + remapping.
 function createRefreshBoundary({ code, map: oxcMap }: TransformResult, filename: string) {
-  const header = `
+  const wrapper = `
     const __prev_Reg__ = globalThis.$RefreshReg$
     const __prev_Sig__ = globalThis.$RefreshSig$
     globalThis.$RefreshReg$ = globalThis.RefreshRuntime.getRefreshReg(${JSON.stringify(filename)})
-    globalThis.$RefreshSig$ = globalThis.RefreshRuntime.createSignatureFunctionForTransform\n`
-
-  // Footer: import this module's own current exports, then self-accept and let the runtime
-  // compare them with the incoming ones; if it isn't a clean refresh boundary, invalidate
-  // so the update bubbles to importers. (The official plugin does the self-import through
-  // RefreshRuntime.__hmr_import; here it must be in the module so Vite's runner handles it.)
-  const footer = `
+    globalThis.$RefreshSig$ = globalThis.RefreshRuntime.createSignatureFunctionForTransform
+${code}
     globalThis.$RefreshReg$ = __prev_Reg__
     globalThis.$RefreshSig$ = __prev_Sig__
     if (import.meta.hot) {
@@ -57,9 +59,9 @@ function createRefreshBoundary({ code, map: oxcMap }: TransformResult, filename:
       })
     }`
 
-  const headerLines = header.split('\n').length - 1
+  const headerLines = wrapper.slice(0, wrapper.indexOf(code)).split('\n').length - 1
   const map = oxcMap ? { ...oxcMap, mappings: ';'.repeat(headerLines) + oxcMap.mappings } : oxcMap
-  return { code: `${header}${code}${footer}`, map }
+  return { code: wrapper, map }
 }
 
 /**
