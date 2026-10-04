@@ -5,9 +5,9 @@ import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { createDefaultExportMap, Fallback, validate } from '@/pen-react/runtime'
 import { BUILD_ENTRY } from '@/pen-react/cli/constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
+import { createDefaultExportMap, Fallback, validate } from '@/pen-react/runtime'
 
 const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
@@ -25,11 +25,12 @@ export function pen(appDir: string): Plugin {
   return {
     name: 'pen',
 
-    // Only runs this plugin's other hooks for the SSR environment, not the client one.
+    // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    // Supplies the Vite config needed to bundle the entry module for Node.
+
+    // Supplies the Vite config needed to bundle the entry module for Node
     config() {
       return {
         ssr: { noExternal: [PACKAGE_NAME] },  // Bundle pen's runtime instead of leaving it external
@@ -42,6 +43,7 @@ export function pen(appDir: string): Plugin {
         },
       }
     },
+
     // Vite tries each plugin's resolveId in turn and stops at the first one
     // that returns any string. Any string marks it as claimed - the `\0`
     // is just a convention marking the id as fake so nothing treats it
@@ -50,13 +52,15 @@ export function pen(appDir: string): Plugin {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
+
     // Same first-hit search again, but over the resolved id, not the
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
-    // Discovers the app's routes, validates them, and reports any errors before the build continues.
+
+    // Discovers the app's routes, validates them, and reports any errors before the build continues
     async buildStart() {
       // existsSync/ssrGlob are plain Node fs calls - Vite's own root option
       // doesn't reach them, so root is read explicitly and joined by hand
