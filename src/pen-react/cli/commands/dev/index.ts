@@ -8,6 +8,10 @@ export const devCommand = defineCommand({
     description: 'Start the pen development server',
   },
   run: async () => {
+    // React/Ink read this at module-init, inside the module runner's own
+    // import of the entry module below - must be set before that happens.
+    process.env.NODE_ENV = 'development'
+
     const DEV_APP_DIR = 'src/app'
 
     // Headless server driven by a module runner instead of an HTTP server
