@@ -40,6 +40,13 @@ export function pen(appDir: string): Plugin {
         },
       }
     },
+    // Vite resolves then loads every module id, including `input`, in two
+    // separate passes over all plugins - each pass stops at the first
+    // plugin that claims the id, so resolveId can't be skipped even though
+    // load is also keyed by id. `\0` marks the resolved id as synthetic, so
+    // Vite (and any other plugin that sees it) skips treating it as a real
+    // file path - it isn't required for resolveId/load to work, only for
+    // not misleading everything else that looks at the id afterward.
     resolveId(id) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
