@@ -1,9 +1,7 @@
 import type { Plugin } from 'vite'
 import type { RouteComponent, RouteModule } from '@/pen-react/runtime'
 import { existsSync } from 'node:fs'
-import { join, sep } from 'node:path'
-import { createBuilder } from 'vite'
-import { findProjectRoot } from '@/lib/find-project-root'
+import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
@@ -86,19 +84,4 @@ export function pen(appDir: string): Plugin {
       }
     },
   }
-}
-
-/** Creates a Vite builder configured with the `pen` plugin, ready to build
- *  the app's SSR environment.
- *
- *  @param appDir - App route directory relative to the project root.
- *  @param outDir - Build output directory relative to the project root. */
-export function createPenBuilder(appDir: string, outDir: string) {
-  const root = findProjectRoot(process.cwd() + sep)
-  return createBuilder({
-    root,
-    configFile: false,
-    plugins: [pen(appDir)],
-    build: { outDir },
-  })
 }
