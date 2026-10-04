@@ -4,7 +4,7 @@ import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'
 import { ErrorFallback } from '../renderer/components/ErrorBoundary'
-import { createDefaultExportMap } from './module-mapper'
+import { createDefaultExportMap } from './default-export-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
 /** The shape of a route module file. */
