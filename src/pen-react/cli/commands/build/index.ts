@@ -1,19 +1,6 @@
-import { sep } from 'node:path'
 import { defineCommand } from 'citty'
-import { createBuilder } from 'vite'
-import { findProjectRoot } from '@/lib/find-project-root'
 import { BUILD_OUT_DIR } from '../../constants'
-import { pen } from './build-plugin'
-
-function createPenBuilder(appDir: string, outDir: string) {
-  const root = findProjectRoot(process.cwd() + sep)
-  return createBuilder({
-    root,
-    configFile: false,
-    plugins: [pen(appDir)],
-    build: { outDir },
-  })
-}
+import { createPenBuilder } from './build-plugin'
 
 export const buildCommand = defineCommand({
   meta: {
