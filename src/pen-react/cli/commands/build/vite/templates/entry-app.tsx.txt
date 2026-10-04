@@ -9,7 +9,7 @@ import type {
   DefaultComponent,
 } from '@idlesummer/pen/internal'
 import { render } from 'ink'
-import { PenApp, createAppProps } from '@idlesummer/pen/internal'
+import { PenApp, createPenAppProps } from '@idlesummer/pen/internal'
 
 // Each glob is typed by module role, so no runtime classification is needed
 const pageModules = import.meta.glob<Module<PageComponent>>('**/page.tsx', { eager: true, base: '__PEN_APP_DIR__' })
@@ -20,7 +20,7 @@ const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.ts
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-const { matcher, componentMap } = createAppProps({
+const { matcher, componentMap } = createPenAppProps({
   page: pageModules,
   layout: layoutModules,
   loading: loadingModules,
