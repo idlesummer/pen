@@ -11,7 +11,7 @@ declare global {
     (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>)
 
   var RefreshRuntime: undefined |
-    (typeof RefreshRuntime & {
+    (typeof import('react-refresh/runtime') & {
       getRefreshReg: (filename: string) => (type: unknown, id: string) => void
       validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
         string | undefined
@@ -99,8 +99,8 @@ export function penReactRefreshInk(): Plugin {
       globalThis.RefreshRuntime = {
         ...RefreshRuntime,
 
-        getRefreshReg: (filename) => {
-          return (type, id) => RefreshRuntime.register(type, `${filename} ${id}`)
+        getRefreshReg: (filename: string) => {
+          return (type: unknown, id: string) => RefreshRuntime.register(type, `${filename} ${id}`)
         },
 
         // Decides whether a re-run module can be refreshed in place or must pass the update
