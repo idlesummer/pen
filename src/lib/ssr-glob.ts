@@ -2,21 +2,13 @@ import { globSync } from 'node:fs'
 import { join } from 'node:path'
 import { createServer, normalizePath } from 'vite'
 
-/** Imports every route module for real through Vite's transform pipeline.
- *  Needs its own server even inside a build environment's buildStart - a
- *  build environment has no ssrLoadModule equivalent, only a dev server
- *  does, so there's no way to get real executed exports otherwise. entries
- *  is built via Promise.all rather than assigning into a shared object -
- *  its result array preserves input order regardless of which module
- *  resolves first, so the sorted order survives; concurrent callbacks
- *  writing into an object wouldn't, since insertion order would follow
- *  resolution timing instead.
+/**
+ * Imports every route module through Vite's transform pipeline.
  *
- *  root is passed explicitly and used two different ways: globSync is a
- *  plain Node fs call, so its cwd needs an absolute path (root + appDir) -
- *  Vite's own root option has no effect on it. ssrLoadModule is a Vite
- *  call, so its module id stays root-relative ('/' + appDir), resolved
- *  correctly as long as the server itself is configured with root. */
+ * @param appDir - App route directory relative to the project root.
+ * @param root - Vite project root.
+ * @returns Sorted route file paths paired with their imported module values.
+ */
 export async function ssrGlob<T>(appDir: string, root: string): Promise<Array<[string, T]>> {
   const server = await createServer({
     root,
