@@ -18,7 +18,7 @@ type AppModules = {
   default: Record<string, Module<DefaultComponent>>
 }
 
-export type AppProps = {
+type AppProps = {
   matcher: Matcher
   componentMap: ComponentMap
 }
