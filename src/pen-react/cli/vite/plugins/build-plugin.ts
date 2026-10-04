@@ -2,13 +2,9 @@ import type { Plugin } from 'vite'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
-import { ENTRY_FILE } from '@/pen-react/cli/constants'
+import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-react/cli/constants'
 import { discoverRoutes } from '@/pen-react/runtime'
-import entryAppSource from '../../vite/templates/entry-app.tsx.txt' with { type: 'text' }
-
-const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
-const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
-const APP_DIR_TOKEN = '__PEN_APP_DIR__'
+import entryAppSource from '../templates/entry-app.tsx.txt' with { type: 'text' }
 
 /**
  * Loads the app's route modules, compiles their paths, and validates the
@@ -20,7 +16,7 @@ const APP_DIR_TOKEN = '__PEN_APP_DIR__'
  */
 export function penBuild(appDir: string): Plugin {
   return {
-    name: 'pen',
+    name: 'pen:build',
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {

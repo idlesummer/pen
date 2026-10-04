@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { penDev } from './dev-plugin'
+import { penDev } from '../../vite/plugins/dev-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
