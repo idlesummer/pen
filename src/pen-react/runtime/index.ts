@@ -1,6 +1,6 @@
 export { App } from './renderer/App'
 export { renderMatch } from './renderer/render'
-export type { ComponentMap, RouteComponent, RouteModule } from './renderer/types/component-map'
+export type { ComponentMap, RouteComponent, RouteModule } from './setup/component-map'
 export { createDefaultExportMap } from './setup/module-mapper'
 export { createAppProps } from './setup/app-props'
 export type { Params } from './renderer/types/params'
