@@ -13,6 +13,7 @@ export { DefaultBoundary, DefaultFallback, notFound, DefaultSignal } from './ren
 export type { DefaultComponent } from './renderer/components/DefaultBoundary'
 export { LoadingBoundary } from './renderer/components/LoadingBoundary'
 export type { LoadingComponent } from './renderer/components/LoadingBoundary'
+export { validateComponentExports, validateAsyncPages } from './validate'
 export { NavigationProvider } from './navigation/NavigationProvider'
 export { useHistory } from './navigation/hooks/use-history'
 export { useNavigate } from './navigation/hooks/use-navigate'

@@ -1,7 +1,7 @@
 import type { Diagnostic, Endpoint } from '@/pen-core'
-import type { RouteComponent } from '@/pen-react/runtime'
+import type { RouteComponent } from './renderer/types/component-map'
 import { createDiagnostic } from '@/pen-core'
-import { isAsyncComponent } from '@/pen-react/runtime'
+import { isAsyncComponent } from './renderer/components/PageComponent'
 
 /** Validates that every discovered module has a valid component default export. */
 export function validateComponentExports(modulePaths: string[], routeComponents: Record<string, RouteComponent | undefined>): Diagnostic[] {
