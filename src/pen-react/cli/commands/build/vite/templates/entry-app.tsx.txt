@@ -20,7 +20,7 @@ const defaultModules = import.meta.glob<Module<DefaultComponent>>('**/default.ts
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-const { matcher, componentMap } = createAppProps({
+const { matcher, componentMap } = createPenAppProps({
   page: pageModules,
   layout: layoutModules,
   loading: loadingModules,
