@@ -98,7 +98,10 @@ export function penReactRefreshInk(): Plugin {
       // runtime, same as the official plugin does.
       globalThis.RefreshRuntime = {
         ...RefreshRuntime,
-        getRefreshReg: (filename: string) => (type: unknown, id: string) => RefreshRuntime.register(type, `${filename} ${id}`),
+
+        getRefreshReg: (filename) => {
+          return (type, id) => RefreshRuntime.register(type, `${filename} ${id}`)
+        },
 
         // Decides whether a re-run module can be refreshed in place or must pass the update
         // up to its importers. Called from each module's footer (see createRefreshBoundary):
