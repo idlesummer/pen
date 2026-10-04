@@ -49,7 +49,7 @@ export function pen(appDir: string): Plugin {
         return RESOLVED_ENTRY_MODULE_ID
     },
     // Same first-hit search again, but over the resolved id, not the
-    // original one - this is why it checks RESOLVED_ENTRY_MODULE_ID.
+    // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
