@@ -67,9 +67,15 @@ export function penReactRefreshInk(): Plugin {
     // Transformed modules call $RefreshReg$/$RefreshSig$ during evaluation, so
     // the globals must exist first. configureServer finishes before any import.
     configureServer() {
-      RefreshRuntime.injectIntoGlobalHook(globalThis)
+      // @types/react-refresh types this as browser-only (Window), but the
+      // function itself just looks for/creates __REACT_DEVTOOLS_GLOBAL_HOOK__
+      // on whatever object it's given - Node's globalThis works the same way.
+      RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)
       globalThis.$RefreshReg$ = () => {}
-      globalThis.$RefreshSig$ = () => type => type
+      // Placeholder until a module's header (see createRefreshBoundary) installs
+      // the real signature tracker - never called with 0 args itself, so the
+      // official dual-overload type (0-arg or 4-arg) doesn't fit; cast past it.
+      globalThis.$RefreshSig$ = (() => (type: unknown) => type) as typeof globalThis.$RefreshSig$
 
       // getRefreshReg and validateRefreshBoundaryAndEnqueueUpdate aren't in
       // react-refresh/runtime - this plugin adds them to its own copy of the
