@@ -1,4 +1,4 @@
-import type { AppProps } from './setup/app-props'
+import type { AppProps } from '../setup/app-props'
 import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
 
