@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty'
 import { APP_DIR, OUT_DIR } from '../../constants'
-import { createPenBuilder } from './vite/create-builder'
+import { createPenBuilder } from './create-builder'
 
 export const buildCommand = defineCommand({
   meta: {
