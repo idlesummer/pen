@@ -3,14 +3,14 @@ import type { ComponentMap } from '../setup/component-map'
 import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
 
-type AppProps = {
+/** Props for the root Pen app component. */
+export type PenAppProps = {
   matcher: Matcher
   componentMap: ComponentMap
 }
 
-/** Root component: owns the navigation store for this app instance, seeded
- *  at the root, and renders whatever the current URL matches. */
-export function App({ matcher, componentMap }: AppProps) {
+/** Root component that provides navigation and renders the matched route. */
+export function PenApp({ matcher, componentMap }: PenAppProps) {
   return (
     <NavigationProvider>
       <Router matcher={matcher} componentMap={componentMap} />
