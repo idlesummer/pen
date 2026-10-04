@@ -2,18 +2,20 @@ import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
 
-// The three globals this plugin installs in configureServer, read back out
-// of transformed modules at runtime (via the generated header/footer
-// strings below, not by this file's own code - declared here so the
-// plugin's own assignments to them type-check). No other file touches
-// these, so they live here rather than in a shared ambient .d.ts.
+/** Globals installed by the plugin's dev server. */
 declare global {
-  var $RefreshReg$: ((type: unknown, id: string) => void) | undefined
-  var $RefreshSig$: (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>) | undefined
-  var RefreshRuntime: (typeof import('react-refresh/runtime') & {
-    getRefreshReg: (filename: string) => (type: unknown, id: string) => void
-    validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) => string | undefined
-  }) | undefined
+  var $RefreshReg$: undefined |
+    ((type: unknown, id: string) => void)
+
+  var $RefreshSig$: undefined |
+    (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>)
+
+  var RefreshRuntime: undefined |
+    (typeof RefreshRuntime & {
+      getRefreshReg: (filename: string) => (type: unknown, id: string) => void
+      validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
+        string | undefined
+    })
 }
 
 type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
