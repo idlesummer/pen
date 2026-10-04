@@ -16,15 +16,18 @@ import { validateAsyncPages, validateComponentExports } from './validate'
  * @param root - Project root to resolve appDir against.
  */
 export async function discoverRoutes(appDir: string, root: string) {
+  // Load modules and create component map
   const moduleEntries = await ssrGlob<Partial<RouteModule>>(appDir, root)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
     [GLOBAL_DEFAULT]: DefaultFallback,
     [GLOBAL_ERROR]: ErrorFallback,
   })
 
+  // Create router and collect diagnostics
   const filePaths = moduleEntries.map(entry => entry[0])
   const { modulePaths, pageEndpoints, diagnostics } = createRouter(filePaths)
 
+  // Collect additional runtime diagnostics
   diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
   diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
 
