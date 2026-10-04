@@ -1,10 +1,14 @@
-import type { RouteComponent, RouteModule } from './route-component'
+import type { Module } from '@/pen-core'
+import type { RouteComponent } from './types/route-component'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'
 import { ErrorFallback } from '../renderer/components/ErrorBoundary'
 import { createDefaultExportMap } from './module-mapper'
 import { validateAsyncPages, validateComponentExports } from './validate'
+
+/** The shape of a route module file. */
+type RouteModule = Module<RouteComponent>
 
 /**
  * Scans the app directory for route modules, compiles their paths, and
