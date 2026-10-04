@@ -41,15 +41,15 @@ export function pen(appDir: string): Plugin {
       }
     },
     // Vite tries each plugin's resolveId in turn and stops at the first one
-    // that claims the id by returning a string. `\0` is just a convention -
-    // any string would claim it, it just also marks the id as fake so
-    // nothing treats it like a real file path.
+    // that returns a(ny) string. Any string would mark it as claimed, the
+    // `\0` is just a convention marking the id as fake so nothing treats
+    // it like a real file path.
     resolveId(id) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
     // Same first-hit search again, but over the resolved id, not the
-    // original one - this is why it checks RESOLVED_ENTRY_MODULE_ID.
+    // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
