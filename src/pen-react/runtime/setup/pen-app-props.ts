@@ -9,7 +9,7 @@ import type { PenAppProps } from '../renderer/App'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'
 import { ErrorFallback } from '../renderer/components/ErrorBoundary'
-import { createDefaultExportMap } from './module-mapper'
+import { createDefaultExportMap } from './default-export-map'
 
 type AppModules = {
   page: Record<string, Module<PageComponent>>
