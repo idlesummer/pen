@@ -1,13 +1,9 @@
-import type { Matcher } from '@/pen-core'
-import type { ComponentMap } from './types/component-map'
+import type { RouterProps } from './Router'
 import { NavigationProvider } from '../navigation/NavigationProvider'
 import { Router } from './Router'
 
 /** Props for the root Pen app component. */
-type PenAppProps = {
-  matcher: Matcher
-  componentMap: ComponentMap
-}
+type PenAppProps = RouterProps
 
 /** Root component that provides navigation and renders the matched route. */
 export function PenApp({ matcher, componentMap }: PenAppProps) {
