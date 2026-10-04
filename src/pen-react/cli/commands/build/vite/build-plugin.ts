@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { BUILD_ENTRY } from '@/pen-react/cli/constants'
 import { discoverRoutes } from '@/pen-react/runtime'
-import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
+import entryAppSource from '../../vite/templates/entry-app.tsx.txt' with { type: 'text' }
 
 const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
