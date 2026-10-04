@@ -25,9 +25,11 @@ export function pen(appDir: string): Plugin {
   return {
     name: 'pen',
 
+    // Only runs this plugin's other hooks for the SSR environment, not the client one.
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
+    // Supplies the Vite config needed to bundle the entry module for Node.
     config() {
       return {
         ssr: { noExternal: [PACKAGE_NAME] },  // Bundle pen's runtime instead of leaving it external
@@ -54,6 +56,7 @@ export function pen(appDir: string): Plugin {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
+    // Discovers the app's routes, validates them, and reports any errors before the build continues.
     async buildStart() {
       // existsSync/ssrGlob are plain Node fs calls - Vite's own root option
       // doesn't reach them, so root is read explicitly and joined by hand
