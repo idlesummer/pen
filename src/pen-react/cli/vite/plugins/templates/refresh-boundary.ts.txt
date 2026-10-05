@@ -8,10 +8,10 @@ globalThis.$RefreshSig$ = globalThis.RefreshRuntime.createSignatureFunctionForTr
 globalThis.$RefreshReg$ = __prev_Reg__
 globalThis.$RefreshSig$ = __prev_Sig__
 if (import.meta.hot) {
-  import(/* @vite-ignore */ import.meta.url).then((currentExports) => {
+  import(/* @vite-ignore */ import.meta.url).then((prevExports) => {
     import.meta.hot.accept((nextExports) => {
       if (!nextExports) return
-      const invalidateMessage = globalThis.RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(currentExports, nextExports)
+      const invalidateMessage = globalThis.RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(prevExports, nextExports)
       if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage)
     })
   })
