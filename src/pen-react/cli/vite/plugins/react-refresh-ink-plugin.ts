@@ -58,31 +58,26 @@ export function penReactRefreshInk(): Plugin {
       globalThis.RefreshRuntime = {
         ...RefreshRuntime,
 
-        getRefreshReg: (filename: string) => {
+        getRefreshReg: (filename) => {
           return (type, id) => RefreshRuntime.register(type, `${filename} ${id}`)
         },
         // Checks whether a module can be refreshed in place
         validateRefreshBoundaryAndEnqueueUpdate: (prevExports, nextExports) => {
+          const prevExportKeys = Object.keys(prevExports)
+          const nextExportKeys = Object.keys(nextExports)
 
-          // Export removed: an importer may still use it
-          if (Object.keys(prevExports).some(key => !(key in nextExports)))
+          if (prevExportKeys.some(key => !(key in nextExports)))  // Export removed: an importer may still use it
             return 'Could not Fast Refresh (export removed)'
-
-          // New export: importers need to see it
-          if (Object.keys(nextExports).some(key => !(key in prevExports)))
+          if (nextExportKeys.some(key => !(key in prevExports)))  // New export: importers need to see it
             return 'Could not Fast Refresh (new export)'
 
-          // Non-component exports must retain the same value
-          const incompatibleExport = Object.keys(nextExports).find(key => {
-            const isComponent = RefreshRuntime.isLikelyComponentType(nextExports[key])
-            const isUnchanged = prevExports[key] === nextExports[key]
-            return !isComponent && !isUnchanged
-          })
-          if (incompatibleExport)
+          const incompatibleExport = nextExportKeys.find(key =>
+            !RefreshRuntime.isLikelyComponentType(nextExports[key]) &&
+            prevExports[key] === nextExports[key],
+          )
+          if (incompatibleExport) // Non-component exports must retain the same value
             return `Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`
-
-          // Safe: re-render the changed components with their new code, keeping hook state.
-          RefreshRuntime.performReactRefresh()
+          RefreshRuntime.performReactRefresh()  // Re-render changed components with their new code, keeping hook state
         },
       }
     },
