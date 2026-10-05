@@ -50,7 +50,8 @@ export function penReactRefreshInk(): Plugin {
       RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)
       globalThis.$RefreshReg$ = () => {}
 
-      // Temporary no-op until the transformed module installs the real tracker
+      // Temporary no-op until the transformed module installs the real tracker -
+      // cast because it's a stub, not real logic, so it doesn't need the exact overloaded shape
       globalThis.$RefreshSig$ = (() => (type => type)) as typeof globalThis.$RefreshSig$
 
       // Plugin-specific helpers not provided by react-refresh/runtime
