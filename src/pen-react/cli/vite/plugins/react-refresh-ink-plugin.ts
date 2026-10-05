@@ -3,53 +3,25 @@ import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
-// $RefreshReg$/$RefreshSig$/RefreshRuntime are declared ambiently in
-// ./templates/refresh-boundary.d.ts - shared with refresh-boundary.ts.txt,
-// which can't see declarations made inside this file (see that file's notes).
+type OxcSourceMap = Awaited<ReturnType<typeof transformWithOxc>>['map']
 
-type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
-
-// Lives in its own file (rather than another template literal here) so the
-// IDE can type-check it against the declare global block above, the same
-// way entry-app.tsx.txt gets checked against vite/client's import.meta.glob
-// types. Its two tokens stand in for values only known per-transform: the
-// filename sits inside a real string literal (quotes already in the
-// template, like entry-app.tsx.txt's __PEN_APP_DIR__); the module's own code
-// can't be typed at all, so it's a whole-line comment swapped out wholesale.
+// Filename is escaped for insertion into the template's string literal
 const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
-// Save/restore of the globals is safe only because dev.js does ONE
-// runner.import() - Vite evaluates modules one at a time, so nothing else
-// touches $RefreshReg$ mid-module. Concurrent imports would break that.
-//
-// Header must be PREPENDED so the $RefreshSig$ assignment lands above OXC's
-// `var _s = $RefreshSig$()`, else _s captures the no-op and signatures break.
-// Footer: import this module's own current exports, then self-accept and let
-// the runtime compare them with the incoming ones; if it isn't a clean
-// refresh boundary, invalidate so the update bubbles to importers. (The
-// official plugin does the self-import through RefreshRuntime.__hmr_import;
-// here it must be in the module so Vite's runner handles it.)
-//
-// Sourcemap: the header is a whole-line insertion above the code, so the
-// only change to OXC's map is shifting every generated line down by the
-// header's line count - i.e. one ';' (the mappings line separator) per
-// header line. headerLines counts the newlines up to where `code` lands in
-// `boundary` (safe since `code` is real module source, never a substring of
-// the fixed boilerplate around it). The header MUST end exactly on a newline
-// (no trailing spaces), else line-1 columns shift too. If the wrap ever edits
-// the middle of the code, this shortcut breaks: use magic-string + remapping.
-function createRefreshBoundary({ code, map: oxcMap }: TransformResult, filename: string) {
-  // slice(1, -1) strips JSON.stringify's own quotes - the template already
-  // supplies them around the token, so this only needs the escaped inner text.
+/** Wraps transformed code with the React Refresh runtime and adjusts its
+ *  sourcemap for the added header. */
+function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string) {
   const escapedFilename = JSON.stringify(filename).slice(1, -1)
-  const boundary = refreshBoundarySource
+  const wrappedCode = refreshBoundarySource
     .replace(REFRESH_FILENAME_TOKEN, escapedFilename)
     .replace(REFRESH_CODE_TOKEN, code)
 
-  const headerLines = boundary.slice(0, boundary.indexOf(code)).split('\n').length - 1
+  // The wrapper only adds lines before the original code, so shift OXC's
+  // mappings by the number of newlines before the code
+  const headerLines = wrappedCode.slice(0, wrappedCode.indexOf(code)).split('\n').length - 1
   const map = oxcMap ? { ...oxcMap, mappings: ';'.repeat(headerLines) + oxcMap.mappings } : oxcMap
-  return { code: boundary, map }
+  return { code: wrappedCode, map }
 }
 
 /**
@@ -70,66 +42,50 @@ export function penReactRefreshInk(): Plugin {
       return environment.name === 'ssr'
     },
 
-    // Transformed modules call $RefreshReg$/$RefreshSig$ during evaluation, so
-    // the globals must exist first. configureServer finishes before any import.
+    // Transformed modules use these globals during evaluation, so the
+    // globals must exist first. configureServer finishes before any import
     configureServer() {
-      // @types/react-refresh types this as browser-only (Window), but the
-      // function itself just looks for/creates __REACT_DEVTOOLS_GLOBAL_HOOK__
-      // on whatever object it's given - Node's globalThis works the same way.
+
+      // @types/react-refresh only accepts Window, but the runtime works with globalThis
       RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)
       globalThis.$RefreshReg$ = () => {}
-      // Placeholder until a module's header (see createRefreshBoundary) installs
-      // the real signature tracker - never called with 0 args itself, so the
-      // official dual-overload type (0-arg or 4-arg) doesn't fit; cast past it.
-      globalThis.$RefreshSig$ = (() => (type: unknown) => type) as typeof globalThis.$RefreshSig$
 
-      // getRefreshReg and validateRefreshBoundaryAndEnqueueUpdate aren't in
-      // react-refresh/runtime - this plugin adds them to its own copy of the
-      // runtime, same as the official plugin does.
+      // Temporary no-op until the transformed module installs the real tracker
+      globalThis.$RefreshSig$ = (() => (type => type)) as typeof globalThis.$RefreshSig$
+
+      // Plugin-specific helpers not provided by react-refresh/runtime
       globalThis.RefreshRuntime = {
         ...RefreshRuntime,
 
         getRefreshReg: (filename: string) => {
-          return (type: unknown, id: string) => RefreshRuntime.register(type, `${filename} ${id}`)
+          return (type, id) => RefreshRuntime.register(type, `${filename} ${id}`)
         },
+        // Checks whether a module can be refreshed in place
+        validateRefreshBoundaryAndEnqueueUpdate: (prevExports, nextExports) => {
 
-        // Decides whether a re-run module can be refreshed in place or must pass the update
-        // up to its importers. Called from each module's footer (see createRefreshBoundary):
-        //   prevExports exports of the version that was running
-        //   nextExports exports of the version that just loaded
-        // Returns a message when the module can't be refreshed in place (the footer then calls
-        // import.meta.hot.invalidate(message), so Vite re-runs the importers); returns nothing
-        // after refreshing. A port of the official check, minus its ignore-list hook, compound
-        // components and debounce (the official one queues the refresh; this one runs it now).
-        validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) => {
-          // 1. An export disappeared: an importer may still use it.
+          // Export removed: an importer may still use it
           if (Object.keys(prevExports).some(key => !(key in nextExports)))
             return 'Could not Fast Refresh (export removed)'
 
-          // 2. An export appeared: importers need to see it.
+          // New export: importers need to see it
           if (Object.keys(nextExports).some(key => !(key in prevExports)))
             return 'Could not Fast Refresh (new export)'
 
-          // 3. Every export must be a component, or a non-component whose value is unchanged
-          //    (e.g. `export const label = 'v1'`). Compared with !==, so a changed value, or a
-          //    new object/array/function (each run creates one), counts as changed.
-          const incompatible = Object.keys(nextExports).find(key =>
-            !RefreshRuntime.isLikelyComponentType(nextExports[key]) && prevExports[key] !== nextExports[key])
-          if (incompatible)
-            return `Could not Fast Refresh ("${incompatible}" export is incompatible)`
+          // Non-component exports must retain the same value
+          const incompatibleExport = Object.keys(nextExports).find(key => {
+            const isComponent = RefreshRuntime.isLikelyComponentType(nextExports[key])
+            const isUnchanged = prevExports[key] === prevExports[key]
+            return !isComponent && !isUnchanged
+          })
+          if (incompatibleExport)
+            return `Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`
 
-          // 4. Safe: re-render the changed components with their new code, keeping hook state.
-          //    The new versions were already registered by this run's $RefreshReg$ calls.
+          // Safe: re-render the changed components with their new code, keeping hook state.
           RefreshRuntime.performReactRefresh()
         },
       }
     },
-
-    // The id filter is a dumb regex match with no virtual-module awareness
-    // (unlike @rollup/pluginutils's createFilter, it doesn't skip \0-prefixed
-    // ids on its own) - RESOLVED_ENTRY_MODULE_ID also ends in .tsx, so it has
-    // to be excluded explicitly, or dev-plugin.ts's already-transformed entry
-    // module would get reprocessed here.
+    // Exclude virtual modules since the .tsx filter would otherwise match them
     transform: {
       filter: {
         id: {
@@ -149,7 +105,7 @@ export function penReactRefreshInk(): Plugin {
         // a real boundary instead of being swallowed here. Map flows through.
         if (!result.code.includes('$RefreshReg$('))
           return { code: result.code, map: result.map }
-        return createRefreshBoundary(result, filename)
+        return createRefreshBoundary(result.code, result.map, filename)
       },
     },
   }
