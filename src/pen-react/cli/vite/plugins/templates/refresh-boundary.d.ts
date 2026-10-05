@@ -1,16 +1,8 @@
 /// <reference types="vite/client" />
 
-// Ambient (no import/export of its own) so declare var takes effect without
-// a declare global wrapper - see react-refresh-ink-plugin.ts's own notes on
-// that. Lives here, next to the plugin, rather than under templates/ - these
-// globals are the plugin's own runtime contract, not template-loading
-// mechanics like templates.d.ts's *.tsx.txt/*.ts.txt wildcards.
-//
-// templates/refresh-boundary.ts.txt references this file by path directly,
-// since the IDE opens it as an orphan file with no view of declarations made
-// elsewhere in the project otherwise - a path reference resolves per-file
-// regardless. Also carries vite/client's import.meta.hot types for the same
-// reason.
+// Ambient declarations for globals installed by the React Refresh plugin.
+// Referenced by refresh-boundary.ts.txt so the template is type-checked
+// independently.
 
 /** Globals installed by react-refresh-ink-plugin.ts's dev server, read by refresh-boundary.ts.txt at runtime. */
 // eslint-disable-next-line no-var -- declare var, not declare global, is what makes this ambient file take effect
