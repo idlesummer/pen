@@ -70,7 +70,7 @@ export function penReactRefreshInk(): Plugin {
 
           const incompatibleExport = nextExportKeys.find(key =>
             !RefreshRuntime.isLikelyComponentType(nextExports[key]) &&
-            prevExports[key] === nextExports[key],
+            prevExports[key] !== nextExports[key],
           )
           if (incompatibleExport) // Non-component exports must retain the same value
             return `Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`
