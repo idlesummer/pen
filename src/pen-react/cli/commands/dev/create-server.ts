@@ -2,6 +2,7 @@ import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { penDev } from '../../vite/plugins/dev-plugin'
+import { penReactRefreshInk } from '../../vite/plugins/react-refresh-ink-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
@@ -15,7 +16,10 @@ export function createPenDevServer(appDir: string) {
   return createServer({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
-    plugins: [penDev(appDir)],
+    plugins: [
+      penDev(appDir),
+      penReactRefreshInk(),
+    ],
     server: {
       middlewareMode: true,  // don't open an HTTP server
       ws: false,  // no HMR socket; the ssr environment's HMR is in-process
