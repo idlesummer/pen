@@ -6,7 +6,7 @@ export default defineConfig({
   entry: {
     index: 'src/pen-react/index.ts',        // Library API
     internal: 'src/pen-react/internal.ts',  // Framework-internal API
-    bin: 'src/pen-react/bin.ts',            // CLI executable entry
+    bin: 'src/pen-cli/bin.ts',              // CLI executable entry
   },
 
   // Output options
