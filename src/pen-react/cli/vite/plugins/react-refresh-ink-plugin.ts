@@ -10,17 +10,17 @@ const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
-function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string) {
+function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string): { code: string, map: OxcSourceMap } {
   const escapedFilename = JSON.stringify(filename).slice(1, -1)
   const wrappedCode = refreshBoundarySource
     .replace(REFRESH_FILENAME_TOKEN, escapedFilename)
     .replace(REFRESH_CODE_TOKEN, code)
 
-  // The wrapper only adds lines before the original code, so shift OXC's
-  // mappings by the number of newlines before the code
-  const headerLines = wrappedCode.slice(0, wrappedCode.indexOf(code)).split('\n').length - 1
-  const map = oxcMap ? { ...oxcMap, mappings: ';'.repeat(headerLines) + oxcMap.mappings } : oxcMap
-  return { code: wrappedCode, map }
+  if (oxcMap) { // Shift OXC's mappings by the wrapper's added lines
+    const headerLines = wrappedCode.slice(0, wrappedCode.indexOf(code)).split('\n').length - 1
+    oxcMap.mappings = ';'.repeat(headerLines) + oxcMap.mappings
+  }
+  return { code: wrappedCode, map: oxcMap }
 }
 
 /**
