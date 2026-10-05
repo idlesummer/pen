@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
+import type { AnyFn } from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 type OxcSourceMap = Awaited<ReturnType<typeof transformWithOxc>>['map']
@@ -8,6 +9,20 @@ type OxcSourceMap = Awaited<ReturnType<typeof transformWithOxc>>['map']
 // Filename is escaped for insertion into the template's string literal
 const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
+
+// Installed before any module's own header runs, and restored after every
+// one (see __prev_Sig__ in refresh-boundary.ts.txt) - the steady-state value
+// between refresh boundaries, not a one-off throwaway, so it carries the
+// exact overloaded shape createSignatureFunctionForTransform's real return
+// type requires, rather than casting past a mismatched single-signature
+// arrow function: callable with zero args (collects custom hooks - no-op
+// here, nothing is tracking signatures outside a transformed module), or
+// with a type to tag (returns it unchanged).
+function noopRefreshSig(): void
+function noopRefreshSig<T>(type: T, key: string, forceReset?: boolean, getCustomHooks?: () => AnyFn[]): T
+function noopRefreshSig<T>(type?: T): T | void {
+  return type
+}
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its
  *  sourcemap for the added header. */
@@ -51,7 +66,7 @@ export function penReactRefreshInk(): Plugin {
       globalThis.$RefreshReg$ = () => {}
 
       // Temporary no-op until the transformed module installs the real tracker
-      globalThis.$RefreshSig$ = (() => (type => type)) as typeof globalThis.$RefreshSig$
+      globalThis.$RefreshSig$ = () => noopRefreshSig
 
       // Plugin-specific helpers not provided by react-refresh/runtime
       globalThis.RefreshRuntime = {
@@ -74,7 +89,7 @@ export function penReactRefreshInk(): Plugin {
           // Non-component exports must retain the same value
           const incompatibleExport = Object.keys(nextExports).find(key => {
             const isComponent = RefreshRuntime.isLikelyComponentType(nextExports[key])
-            const isUnchanged = prevExports[key] === prevExports[key]
+            const isUnchanged = prevExports[key] === nextExports[key]
             return !isComponent && !isUnchanged
           })
           if (incompatibleExport)
