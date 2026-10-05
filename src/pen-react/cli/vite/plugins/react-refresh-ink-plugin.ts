@@ -3,21 +3,9 @@ import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
-/** Globals installed by the plugin's dev server. */
-declare global {
-  var $RefreshReg$: undefined |
-    ((type: unknown, id: string) => void)
-
-  var $RefreshSig$: undefined |
-    (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>)
-
-  var RefreshRuntime: undefined |
-    (typeof import('react-refresh/runtime') & {
-      getRefreshReg: (filename: string) => (type: unknown, id: string) => void
-      validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
-        string | undefined
-    })
-}
+// $RefreshReg$/$RefreshSig$/RefreshRuntime are declared ambiently in
+// ./templates/refresh-boundary.d.ts - shared with refresh-boundary.ts.txt,
+// which can't see declarations made inside this file (see that file's notes).
 
 type TransformResult = Awaited<ReturnType<typeof transformWithOxc>>
 
