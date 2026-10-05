@@ -15,6 +15,7 @@ export const devCommand = defineCommand({
 
     // Headless server driven by a module runner instead of an HTTP server
     // or browser - it serves the terminal program's own entry module.
+    // const { createPenDevServer } = await import('./create-server')
     const server = await createPenDevServer(APP_DIR)
 
     // Diagnostics are already reported through Vite's own logger by the

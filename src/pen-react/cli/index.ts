@@ -1,8 +1,5 @@
 import { defineCommand, runMain } from 'citty'
 import { CLI_NAME, DESCRIPTION, VERSION } from '@/lib/constants'
-import { buildCommand } from './commands/build'
-import { devCommand } from './commands/dev'
-import { startCommand } from './commands/start'
 
 const main = defineCommand({
   meta: {
@@ -10,13 +7,27 @@ const main = defineCommand({
     version: VERSION,
     description: DESCRIPTION,
   },
+  // Lazily load subcommands so unused command modules aren't imported
   subCommands: {
-    build: buildCommand,
-    dev: devCommand,
-    start: startCommand,
+    build: async () => {
+      const { buildCommand } = await import('./commands/build')
+      return buildCommand
+    },
+    dev: async () => {
+      // react-refresh/runtime reads NODE_ENV at import time, so set it here before
+      // importing the dev command to ensure it loads its development version
+      process.env.NODE_ENV = 'development'
+      const { devCommand } = await import('./commands/dev')
+      return devCommand
+    },
+    start: async () => {
+      const { startCommand } = await import('./commands/start')
+      return startCommand
+    },
   },
 })
 
+/** Runs the Pen CLI. */
 export function run() {
   runMain(main)
 }
