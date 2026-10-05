@@ -5,15 +5,13 @@ import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { t
 
 type OxcSourceMap = Awaited<ReturnType<typeof transformWithOxc>>['map']
 
-// Filename is escaped for insertion into the template's string literal
 const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
 function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string): { code: string, map: OxcSourceMap } {
-  const escapedFilename = JSON.stringify(filename).slice(1, -1)
   const wrappedCode = refreshBoundarySource
-    .replace(REFRESH_FILENAME_TOKEN, escapedFilename)
+    .replace(REFRESH_FILENAME_TOKEN, JSON.stringify(filename))
     .replace(REFRESH_CODE_TOKEN, code)
 
   if (oxcMap) { // Shift OXC's mappings by the wrapper's added lines

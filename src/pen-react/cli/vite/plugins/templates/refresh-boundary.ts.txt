@@ -5,7 +5,7 @@
 const RefreshRuntime = globalThis.RefreshRuntime!
 const __prev_Reg__ = globalThis.$RefreshReg$
 const __prev_Sig__ = globalThis.$RefreshSig$
-globalThis.$RefreshReg$ = RefreshRuntime.getRefreshReg('__PEN_REFRESH_FILENAME__')
+globalThis.$RefreshReg$ = RefreshRuntime.getRefreshReg(__PEN_REFRESH_FILENAME__)
 globalThis.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform
 
 // __PEN_REFRESH_CODE__
