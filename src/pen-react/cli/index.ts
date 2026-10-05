@@ -14,15 +14,10 @@ const main = defineCommand({
       return buildCommand
     },
     dev: async () => {
-      // react-refresh/runtime reads NODE_ENV at import time, so set it here before
-      // importing the dev command to ensure it loads its development version
+      // react-refresh/runtime reads NODE_ENV at import time, so set it before
+      // importing the dev command. Ink reads DEV when render() runs, so it only
+      // needs to be set before running the app entry module.
       process.env.NODE_ENV = 'development'
-      // Ink only registers its reconciler with the React DevTools global hook -
-      // the mechanism Fast Refresh uses to find the mounted tree - when DEV is
-      // the literal string 'true' (see ink's Instance constructor). Read at
-      // render() call time, not import time, so unlike NODE_ENV above this
-      // doesn't need to precede the dynamic import - it just needs to be set
-      // before the entry module's render() call, which is always later.
       process.env.DEV = 'true'
       const { devCommand } = await import('./commands/dev')
       return devCommand
