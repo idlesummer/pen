@@ -22,7 +22,6 @@ export function penBuild(appDir: string): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-
     // Supplies the Vite config needed to bundle the entry module for Node
     config() {
       return {
@@ -36,7 +35,6 @@ export function penBuild(appDir: string): Plugin {
         },
       }
     },
-
     // Vite tries each plugin's resolveId in turn and stops at the first one
     // that returns any string. Any string marks it as claimed - the `\0`
     // is just a convention marking the id as fake so nothing treats it
@@ -45,14 +43,12 @@ export function penBuild(appDir: string): Plugin {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
-
     // Same first-hit search again, but over the resolved id, not the
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
     },
-
     // Discovers the app's routes, validates them, and reports any errors before the build continues
     async buildStart() {
       // existsSync is a plain Node fs call - Vite's own root option doesn't
