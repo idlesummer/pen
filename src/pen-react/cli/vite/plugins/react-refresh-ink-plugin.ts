@@ -9,8 +9,7 @@ type OxcSourceMap = Awaited<ReturnType<typeof transformWithOxc>>['map']
 const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
-/** Wraps transformed code with the React Refresh runtime and adjusts its
- *  sourcemap for the added header. */
+/** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
 function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string) {
   const escapedFilename = JSON.stringify(filename).slice(1, -1)
   const wrappedCode = refreshBoundarySource
@@ -41,7 +40,6 @@ export function penReactRefreshInk(): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-
     // Transformed modules use these globals during evaluation, so the
     // globals must exist first. configureServer finishes before any import
     configureServer() {
@@ -50,14 +48,13 @@ export function penReactRefreshInk(): Plugin {
       RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)
       globalThis.$RefreshReg$ = () => {}
 
-      // Temporary no-op until the transformed module installs the real tracker -
-      // cast because it's a stub, not real logic, so it doesn't need the exact overloaded shape
+      // Temporary no-op until the transformed module installs the real tracker
+      // Cast because it's not real logic, so it doesn't need the exact overloaded shape
       globalThis.$RefreshSig$ = (() => (type => type)) as typeof globalThis.$RefreshSig$
 
       // Plugin-specific helpers not provided by react-refresh/runtime
       globalThis.RefreshRuntime = {
         ...RefreshRuntime,
-
         getRefreshReg: (filename) => {
           return (type, id) => RefreshRuntime.register(type, `${filename} ${id}`)
         },
@@ -94,7 +91,7 @@ export function penReactRefreshInk(): Plugin {
         const result = await transformWithOxc(code, filename, {
           jsx: {
             development: true, // jsxDEV + source locations; refresh needs it
-            refresh: true,     // emit $RefreshReg$/$RefreshSig$ calls inline
+            refresh: true,     // to emit $RefreshReg$/$RefreshSig$ calls inline
           },
         })
         // No $RefreshReg$( call means no components - skip wrap so updates bubble to
