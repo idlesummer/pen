@@ -3,16 +3,17 @@ import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
-// Filename is escaped for insertion into the template's double-quoted string literal
-const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
+// Includes its own quotes, so the whole quoted literal in the template gets
+// replaced by JSON.stringify's own quoted, escaped output - no dependency on
+// the two files agreeing on which quote character wraps the token.
+const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
 function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transformWithOxc>>, filename: string) {
-  const escapedFilename = JSON.stringify(filename).slice(1, -1)
   const code = transformed.code
   transformed.code = refreshBoundarySource
-    .replace(REFRESH_FILENAME_TOKEN, escapedFilename)
+    .replace(REFRESH_FILENAME_TOKEN, JSON.stringify(filename))
     .replace(REFRESH_CODE_TOKEN, code)
 
   if (transformed.map) { // Shift OXC's mappings by the wrapper's added lines
