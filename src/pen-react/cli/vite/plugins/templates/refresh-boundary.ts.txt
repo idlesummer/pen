@@ -6,11 +6,10 @@
 // global of that name declared in refresh-boundary.d.ts - this file has no
 // static import/export, so some tools treat its top-level declarations as
 // global script scope rather than module scope.
-const refresh = globalThis.RefreshRuntime!
 const __prev_Reg__ = globalThis.$RefreshReg$
 const __prev_Sig__ = globalThis.$RefreshSig$
-globalThis.$RefreshReg$ = refresh.getRefreshReg("__PEN_REFRESH_FILENAME__")
-globalThis.$RefreshSig$ = refresh.createSignatureFunctionForTransform
+globalThis.$RefreshReg$ = globalThis.RefreshRuntime!.getRefreshReg("__PEN_REFRESH_FILENAME__")
+globalThis.$RefreshSig$ = globalThis.RefreshRuntime!.createSignatureFunctionForTransform
 
 // __PEN_REFRESH_CODE__
 
@@ -20,7 +19,7 @@ if (import.meta.hot) {
   import(/* @vite-ignore */ import.meta.url).then((prevExports) => {
     import.meta.hot!.accept((nextExports) => {
       if (!nextExports) return
-      const invalidateMessage = refresh.validateRefreshBoundaryAndEnqueueUpdate(
+      const invalidateMessage = globalThis.RefreshRuntime!.validateRefreshBoundaryAndEnqueueUpdate(
         prevExports,
         nextExports,
       )
