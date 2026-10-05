@@ -22,9 +22,8 @@ declare var $RefreshSig$: undefined |
   (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>)
 
 // eslint-disable-next-line no-var -- see above
-declare var RefreshRuntime: undefined |
-  (typeof import('react-refresh/runtime') & {
-    getRefreshReg: (filename: string) => (type: unknown, id: string) => void
-    validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
-      string | undefined
-  })
+declare var RefreshRuntime: undefined | (typeof import('react-refresh/runtime') & {
+  getRefreshReg: (filename: string) => (type: unknown, id: string) => void
+  validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
+    string | undefined
+})
