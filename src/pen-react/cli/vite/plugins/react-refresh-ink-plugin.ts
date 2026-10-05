@@ -3,33 +3,30 @@ import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
-type OxcSourceMap = Awaited<ReturnType<typeof transformWithOxc>>['map']
-
 // Filename is escaped for insertion into the template's double-quoted string literal
 const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
-function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string) {
+function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transformWithOxc>>, filename: string) {
   const escapedFilename = JSON.stringify(filename).slice(1, -1)
-  const wrappedCode = refreshBoundarySource
+  const code = transformed.code
+  transformed.code = refreshBoundarySource
     .replace(REFRESH_FILENAME_TOKEN, escapedFilename)
     .replace(REFRESH_CODE_TOKEN, code)
 
-  if (oxcMap) { // Shift OXC's mappings by the wrapper's added lines
-    const headerLines = wrappedCode.slice(0, wrappedCode.indexOf(code)).split('\n').length - 1
-    oxcMap.mappings = ';'.repeat(headerLines) + oxcMap.mappings
+  if (transformed.map) { // Shift OXC's mappings by the wrapper's added lines
+    const headerLines = transformed.code.slice(0, transformed.code.indexOf(code)).split('\n').length - 1
+    transformed.map.mappings = ';'.repeat(headerLines) + transformed.map.mappings
   }
-  return { code: wrappedCode, map: oxcMap }
+  return transformed
 }
 
-/**
- * Installs React Fast Refresh for Ink: an OXC transform that instruments
- * component modules with $RefreshReg$/$RefreshSig$ calls, and a runtime
- * bootstrap (in configureServer) that those calls resolve to.
+/** Installs React Fast Refresh for Ink: an OXC transform that instruments
+ *  component modules with $RefreshReg$/$RefreshSig$ calls, and a runtime
+ *  bootstrap (in configureServer) that those calls resolve to.
  *
- * Dev-only - Fast Refresh has no meaning during a one-shot `pen build`.
- */
+ *  Dev-only - Fast Refresh has no meaning during a one-shot `pen build`. */
 export function penReactRefreshInk(): Plugin {
   return {
     name: 'pen:react-refresh-ink',
@@ -88,15 +85,15 @@ export function penReactRefreshInk(): Plugin {
       },
       async handler(code, id) {
         const filename = id.split('?')[0]!
-        const result = await transformWithOxc(code, filename, {
+        const transformed = await transformWithOxc(code, filename, {
           jsx: {
             development: true, // jsxDEV + source locations; refresh needs it
             refresh: true,     // to emit $RefreshReg$/$RefreshSig$ calls inline
           },
         })
-        return result.code.includes('$RefreshReg$(')  // Skip modules without $RefreshReg$ so updates bubble to a real boundary
-          ? createRefreshBoundary(result.code, result.map, filename)
-          : { code: result.code, map: result.map }
+        return transformed.code.includes('$RefreshReg$(')  // Skip modules without $RefreshReg$ so updates bubble to a real boundary
+          ? createRefreshBoundary(transformed, filename)
+          : transformed
       },
     },
   }
