@@ -1,18 +1,26 @@
 /// <reference types="vite/client" />
 
+// Non-null: by the time any transformed module runs, configureServer has
+// already set these - the declared type keeps | undefined honest for
+// anything that might read them before that, which isn't this file.
 const __prev_Reg__ = globalThis.$RefreshReg$
 const __prev_Sig__ = globalThis.$RefreshSig$
-globalThis.$RefreshReg$ = globalThis.RefreshRuntime.getRefreshReg('__PEN_REFRESH_FILENAME__')
-globalThis.$RefreshSig$ = globalThis.RefreshRuntime.createSignatureFunctionForTransform
+globalThis.$RefreshReg$ = globalThis.RefreshRuntime!.getRefreshReg('__PEN_REFRESH_FILENAME__')
+globalThis.$RefreshSig$ = globalThis.RefreshRuntime!.createSignatureFunctionForTransform
 // __PEN_REFRESH_CODE__
 globalThis.$RefreshReg$ = __prev_Reg__
 globalThis.$RefreshSig$ = __prev_Sig__
-if (import.meta.hot) {
+
+// Narrowing a property access like import.meta.hot doesn't survive into a
+// nested closure - capturing it in a const local does, since a const can't
+// be reassigned out from under the narrowing.
+const hot = import.meta.hot
+if (hot) {
   import(/* @vite-ignore */ import.meta.url).then((prevExports) => {
-    import.meta.hot.accept((nextExports) => {
+    hot.accept((nextExports) => {
       if (!nextExports) return
-      const invalidateMessage = globalThis.RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate(prevExports, nextExports)
-      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage)
+      const invalidateMessage = globalThis.RefreshRuntime!.validateRefreshBoundaryAndEnqueueUpdate(prevExports, nextExports)
+      if (invalidateMessage) hot.invalidate(invalidateMessage)
     })
   })
 }
