@@ -3,9 +3,6 @@ import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
-// Includes its own quotes, so the whole quoted literal in the template gets
-// replaced by JSON.stringify's own quoted, escaped output - no dependency on
-// the two files agreeing on which quote character wraps the token.
 const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
