@@ -27,9 +27,3 @@ declare var RefreshRuntime: undefined | (typeof import('react-refresh/runtime') 
   validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
     string | undefined
 })
-
-// Not a real global - react-refresh-ink-plugin.ts replaces this token with a
-// JSON.stringify'd string literal before the file ever runs. Declared only
-// so the bare identifier in refresh-boundary.ts.txt type-checks as a string.
-// eslint-disable-next-line no-var -- see above
-declare var __PEN_REFRESH_FILENAME__: string
