@@ -3,7 +3,7 @@ import { join, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { defineCommand } from 'citty'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { ENTRY_FILE, OUT_DIR } from '@/pen-react/cli/constants'
+import { ENTRY_FILE, OUT_DIR } from '@/pen-cli/constants'
 
 export const startCommand = defineCommand({
   meta: {
