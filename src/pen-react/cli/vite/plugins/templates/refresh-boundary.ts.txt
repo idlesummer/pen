@@ -12,8 +12,10 @@ if (import.meta.hot) {
   import(/* @vite-ignore */ import.meta.url).then((prevExports) => {
     import.meta.hot!.accept((nextExports) => {
       if (!nextExports) return
-      const invalidateMessage = globalThis.RefreshRuntime!.validateRefreshBoundaryAndEnqueueUpdate(prevExports, nextExports)
-
+      const invalidateMessage = globalThis.RefreshRuntime!.validateRefreshBoundaryAndEnqueueUpdate(
+        prevExports,
+        nextExports,
+      )
       if (invalidateMessage)
         import.meta.hot!.invalidate(invalidateMessage)
     })
