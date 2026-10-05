@@ -24,6 +24,8 @@ Routes:
   ├─ broken/
   │  ├─ error
   │  └─ page
+  ├─ counter/
+  │  └─ page
   ├─ layout
   ├─ default
   └─ page
