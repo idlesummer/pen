@@ -9,13 +9,8 @@ export const devCommand = defineCommand({
     description: 'Start the pen development server',
   },
   run: async () => {
-    // React/Ink read this at module-init, inside the module runner's own
-    // import of the entry module below - must be set before that happens.
-    process.env.NODE_ENV = 'development'
-
     // Headless server driven by a module runner instead of an HTTP server
     // or browser - it serves the terminal program's own entry module.
-    // const { createPenDevServer } = await import('./create-server')
     const server = await createPenDevServer(APP_DIR)
 
     // Diagnostics are already reported through Vite's own logger by the
