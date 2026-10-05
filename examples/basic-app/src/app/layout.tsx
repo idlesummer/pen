@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useRouter, usePathname } from '@idlesummer/pen'
 
@@ -36,7 +36,6 @@ export default function RootLayout({ children }: PropsWithChildren) {
   const router = useRouter()
   const pathname = usePathname()
 
-  useEffect(() => console.log(FILE_TREE), [])
   useInput((input, key) => {
     if (key.return) {
       router.push(value)
@@ -50,6 +49,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
 
   return (
     <Box flexDirection="column">
+      <Text>{FILE_TREE}</Text>
       <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
         <Text>Current path: {pathname}</Text>
         <Text>Browser url: {value}</Text>
