@@ -9,7 +9,7 @@ const REFRESH_FILENAME_TOKEN = '__PEN_REFRESH_FILENAME__'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
-function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string): { code: string, map: OxcSourceMap } {
+function createRefreshBoundary(code: string, oxcMap: OxcSourceMap, filename: string) {
   const wrappedCode = refreshBoundarySource
     .replace(REFRESH_FILENAME_TOKEN, JSON.stringify(filename))
     .replace(REFRESH_CODE_TOKEN, code)
@@ -92,11 +92,9 @@ export function penReactRefreshInk(): Plugin {
             refresh: true,     // to emit $RefreshReg$/$RefreshSig$ calls inline
           },
         })
-        // No $RefreshReg$( call means no components - skip wrap so updates bubble to
-        // a real boundary instead of being swallowed here. Map flows through.
-        if (!result.code.includes('$RefreshReg$('))
-          return { code: result.code, map: result.map }
-        return createRefreshBoundary(result.code, result.map, filename)
+        return result.code.includes('$RefreshReg$(')  // Skip modules without $RefreshReg$ so updates bubble to a real boundary
+          ? createRefreshBoundary(result.code, result.map, filename)
+          : { code: result.code, map: result.map }
       },
     },
   }
