@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
 
 // `configureServer` initializes these before transformed modules run
+const RefeshRuntime = globalThis.RefreshRuntime!
 const __prev_Reg__ = globalThis.$RefreshReg$
 const __prev_Sig__ = globalThis.$RefreshSig$
-globalThis.$RefreshReg$ = globalThis.RefreshRuntime!.getRefreshReg('__PEN_REFRESH_FILENAME__')
-globalThis.$RefreshSig$ = globalThis.RefreshRuntime!.createSignatureFunctionForTransform
+globalThis.$RefreshReg$ = RefeshRuntime.getRefreshReg('__PEN_REFRESH_FILENAME__')
+globalThis.$RefreshSig$ = RefeshRuntime.createSignatureFunctionForTransform
 
 // __PEN_REFRESH_CODE__
 
@@ -14,7 +15,7 @@ if (import.meta.hot) {
   import(/* @vite-ignore */ import.meta.url).then((prevExports) => {
     import.meta.hot!.accept((nextExports) => {
       if (!nextExports) return
-      const invalidateMessage = globalThis.RefreshRuntime!.validateRefreshBoundaryAndEnqueueUpdate(
+      const invalidateMessage = RefeshRuntime.validateRefreshBoundaryAndEnqueueUpdate(
         prevExports,
         nextExports,
       )
