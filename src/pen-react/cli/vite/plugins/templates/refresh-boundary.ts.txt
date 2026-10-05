@@ -5,7 +5,9 @@ const __prev_Reg__ = globalThis.$RefreshReg$
 const __prev_Sig__ = globalThis.$RefreshSig$
 globalThis.$RefreshReg$ = globalThis.RefreshRuntime!.getRefreshReg('__PEN_REFRESH_FILENAME__')
 globalThis.$RefreshSig$ = globalThis.RefreshRuntime!.createSignatureFunctionForTransform
+
 // __PEN_REFRESH_CODE__
+
 globalThis.$RefreshReg$ = __prev_Reg__
 globalThis.$RefreshSig$ = __prev_Sig__
 if (import.meta.hot) {
