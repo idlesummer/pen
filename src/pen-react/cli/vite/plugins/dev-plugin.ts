@@ -22,7 +22,6 @@ export function penDev(appDir: string): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-
     // Vite tries each plugin's resolveId in turn and stops at the first one
     // that returns any string. Any string marks it as claimed - the `\0`
     // is just a convention marking the id as fake so nothing treats it
@@ -31,7 +30,6 @@ export function penDev(appDir: string): Plugin {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
-
     // Same first-hit search again, but over the resolved id, not the
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     //
@@ -46,7 +44,6 @@ export function penDev(appDir: string): Plugin {
         return { code, map }
       }
     },
-
     // Discovers the app's routes, validates them, and reports any errors before the server starts
     async buildStart() {
       // existsSync is a plain Node fs call - Vite's own root option doesn't
@@ -55,9 +52,8 @@ export function penDev(appDir: string): Plugin {
       if (!existsSync(join(projectDir, appDir)))
         this.error(`No such directory: '${appDir}'`)
 
-      const { diagnostics } = await discoverRoutes(projectDir, appDir)
-
       // Display diagnostics
+      const { diagnostics } = await discoverRoutes(projectDir, appDir)
       for (const { severity, message, files } of diagnostics)
         if (severity === 'warn')
           this.warn({ message, ids: files })
