@@ -22,10 +22,9 @@ export function penDev(appDir: string): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    // Vite tries each plugin's resolveId in turn and stops at the first one
-    // that returns any string. Any string marks it as claimed - the `\0`
-    // is just a convention marking the id as fake so nothing treats it
-    // like a real file path.
+    // Each plugin's resolveId is called and stops at the first one
+    // that returns any string. Any string marks it as claimed, the `\0`
+    // is just a convention marking the id as a virtual module.
     resolveId(id) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
