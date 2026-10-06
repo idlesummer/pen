@@ -28,7 +28,7 @@ export function createPenLogger(passthroughInfo = false): Logger {
     info(message) {
       const strippedMessage = stripVTControlCharacters(message)
       if (passthroughInfo)
-        return print(strippedMessage)
+        return print(pc.dim(strippedMessage))
 
       let match: RegExpMatchArray | null
 
