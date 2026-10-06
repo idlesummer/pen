@@ -2,7 +2,7 @@ import pc from 'picocolors'
 
 /** One-line startup banner, printed once before anything else. */
 export function banner(message: string) {
-  console.log(`\n${pc.bold('✒')} ${pc.bold(message)}\n`)
+  console.log(`\n${pc.bold('✒')}  ${pc.bold(message)}\n`)
 }
 
 /** Work that's starting (compiling a changed file). */
