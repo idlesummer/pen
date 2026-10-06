@@ -27,7 +27,7 @@ const SUPPRESSED_INFO = [
 // severity, not buried in routine info output.
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
-const INFO_READY = /^info: (Ready in .+)$/
+const INFO_READY = /^info: (Ready in .+)/
 
 /** Adapts Vite's logger to pen's terminal output. */
 export function createPenLogger(): Logger {
