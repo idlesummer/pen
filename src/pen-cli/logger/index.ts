@@ -12,7 +12,7 @@ function print(prefix: string, message: string) {
 
 /** One-line startup banner, printed once before anything else. */
 export function banner(message: string) {
-  console.log(`${pc.bold('✒')} ${pc.bold(message)}\n`)
+  console.log(`\n${pc.bold('✒')} ${pc.bold(message)}\n`)
 }
 
  /** Work that's starting (compiling a changed file). */
