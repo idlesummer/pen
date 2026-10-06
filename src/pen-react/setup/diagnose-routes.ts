@@ -57,7 +57,7 @@ export async function reportRouteDiagnostics(projectDir: string, appDir: string)
   const diagnostics = await diagnoseRoutes(projectDir, appDir)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
-    .map(d => `${d.message} (${d.files.join(', ')})`)
+    .map(d => d.message)  // Already includes a "  at <file>" line per file
 
   const error = diagnostics
     .filter(d => d.severity === 'error')
