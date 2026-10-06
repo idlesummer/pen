@@ -3,6 +3,7 @@ import { transformWithOxc } from 'vite'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
+import { CLI_NAME, VERSION } from '@/lib/constants'
 
 /**
  * Loads the app's route modules, compiles their paths, and validates the
@@ -45,13 +46,17 @@ export function penDev(appDir: string): Plugin {
     },
     // Discovers the app's routes, validates them, and reports any errors before the server starts
     async configureServer(server) {
+      // Prints banner
+      this.info(`${CLI_NAME} v${VERSION}`)
+
+      // Validates routes before starting the server
       const projectDir = server.config.root
       const { warnings, error } = await reportRouteDiagnostics(projectDir, appDir)
-      for (const message of warnings)
-        this.warn(message)
-      if (error)
-        this.error(error)
-      this.info(`Ready in ${Date.now() - startTime}ms\n`)
+      for (const message of warnings) this.warn(message)
+      if (error) this.error(error)
+
+      // Startup complete
+      this.info(`Ready in ${Date.now() - startTime}ms`)
     },
   }
 }
