@@ -57,22 +57,17 @@ export function penReactRefreshInk(): Plugin {
           const prevExportKeys = Object.keys(prevExports)
           const nextExportKeys = Object.keys(nextExports)
 
-          const fail = (message: string) => {
-            this.warn(message)
-            return message
-          }
-
           if (prevExportKeys.some(key => !(key in nextExports)))  // Export removed: an importer may still use it
-            return fail('Could not Fast Refresh (export removed)')
+            return 'Could not Fast Refresh (export removed)'
           if (nextExportKeys.some(key => !(key in prevExports)))  // New export: importers need to see it
-            return fail('Could not Fast Refresh (new export)')
+            return 'Could not Fast Refresh (new export)'
 
           const incompatibleExport = nextExportKeys.find(key =>
             !RefreshRuntime.isLikelyComponentType(nextExports[key]) &&
             prevExports[key] !== nextExports[key],
           )
           if (incompatibleExport) // Non-component exports must retain the same value
-            return fail(`Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`)
+            return `Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`
 
           RefreshRuntime.performReactRefresh()  // Re-render changed components with their new code, keeping hook state
         },
