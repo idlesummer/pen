@@ -1,6 +1,7 @@
 import type { Logger } from 'vite'
 import { stripVTControlCharacters } from 'node:util'
-import { print, warn, error } from './console'
+import pc from 'picocolors'
+import { error, event, print, ready, warn } from './console'
 
 // Vite messages already handled by pen or not useful in the terminal.
 // The module-runner's own "invalidate <path>: <reason>" duplicates the
@@ -14,7 +15,7 @@ import { print, warn, error } from './console'
 const SUPPRESSED_INFO = [
   /^connected\.$/,
   /^hot updated:/,
-  /^hmr update /,
+  // /^hmr update /,
   /^invalidate \S+:/,
   /^page reload /,
   /^program reload$/,
@@ -25,6 +26,8 @@ const SUPPRESSED_INFO = [
 // (see validateRefreshBoundaryAndEnqueueUpdate), so it belongs at warn
 // severity, not buried in routine info output.
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
+const HMR_UPDATE = /^hmr update (.+)$/
+const INFO_READY = /^info: (Ready in .+)$/
 
 /** Adapts Vite's logger to pen's terminal output. */
 export function createPenLogger(): Logger {
@@ -34,15 +37,23 @@ export function createPenLogger(): Logger {
 
   return {
     info(message) {
-      const stripped = stripVTControlCharacters(message)
-      const invalidate = HMR_INVALIDATE.exec(stripped)
-      if (invalidate) {
-        const [, path, reason] = invalidate
-        warn(reason ? `${reason} - ${path}` : path!)
-        return
+      const strippedMessage = stripVTControlCharacters(message)
+      let match: RegExpMatchArray | null
+
+      if ((match = strippedMessage.match(HMR_INVALIDATE))) {
+        const [, path, reason] = match
+        return warn(reason ? `${reason} ${pc.dim(path)}` : pc.dim(path!))
       }
-      if (!SUPPRESSED_INFO.some(pattern => pattern.test(stripped)))
-        print(message)
+      if ((match = strippedMessage.match(HMR_UPDATE))) {
+        const path = match[1]!
+        return event(`Updated ${pc.dim(path)}`)
+      }
+      if ((match = strippedMessage.match(INFO_READY))) {
+        const readyMessage = match[1]!
+        return ready(readyMessage)
+      }
+      if (!SUPPRESSED_INFO.some(pattern => pattern.test(strippedMessage)))
+        print(strippedMessage)
     },
     warn(message) {
       warned = true
