@@ -8,7 +8,17 @@ import { print, warn, error } from './console'
 // "hmr update <path>" fires on every accepted update, before success or
 // failure is known - not useful on its own, and a failure is already
 // reported by the invalidate rewrite below.
-const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/, /^hmr update /, /^invalidate \S+:/]
+// "page reload <file>" (server dispatching a full reload) and
+// "program reload" (the module runner acting on it) are the same decision
+// the invalidate rewrite already explains, just narrated mechanically.
+const SUPPRESSED_INFO = [
+  /^connected\.$/,
+  /^hot updated:/,
+  /^hmr update /,
+  /^invalidate \S+:/,
+  /^page reload /,
+  /^program reload$/,
+]
 
 // Vite's own announcement that it invalidated a module - <reason> is
 // actually our plugin's explanation for why Fast Refresh couldn't apply
