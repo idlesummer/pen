@@ -7,7 +7,7 @@ import type { Logger } from 'vite'
 import pc from 'picocolors'
 
 function print(prefix: string, message: string) {
-  console.log(`${prefix} ${message}\n`)
+  console.log(`${prefix} ${message}`)
 }
 
 /** Work that's starting (compiling a changed file). */
@@ -45,8 +45,8 @@ export function createPenLogger(): Logger {
 
   return {
     info(message) {
-      if (SUPPRESSED_INFO.some(pattern => pattern.test(message))) return
-      event(message)
+      if (!SUPPRESSED_INFO.some(pattern => pattern.test(message)))
+        event(message)
     },
     warn(message) {
       warned = true
@@ -60,7 +60,8 @@ export function createPenLogger(): Logger {
     },
     error(message, options) {
       warned = true
-      if (options?.error) loggedErrors.add(options.error)
+      if (options?.error)
+        loggedErrors.add(options.error)
       error(message)
     },
     clearScreen() {
