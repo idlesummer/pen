@@ -1,6 +1,7 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
+import { createPenLogger } from '@/pen-cli/log'
 import { penDev } from '../../plugins/dev-plugin'
 import { penReactRefreshInk } from '../../plugins/react-refresh-ink-plugin'
 
@@ -16,6 +17,8 @@ export function createPenDevServer(appDir: string) {
   return createServer({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
+    customLogger: createPenLogger(),
+    clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
       penDev(appDir),
       penReactRefreshInk(),
