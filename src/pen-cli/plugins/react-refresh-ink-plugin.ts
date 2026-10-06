@@ -73,7 +73,7 @@ export function penReactRefreshInk(): Plugin {
           const nextExportKeys = Object.keys(nextExports)
 
           const fail = (message: string) => {
-            if (pending) log.warn(`${message} - reloading ${relative(server.config.root, pending.file)}`)
+            if (pending) this.warn(`${message} - reloading ${relative(server.config.root, pending.file)}`)
             pending = undefined
             return message
           }
