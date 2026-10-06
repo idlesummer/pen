@@ -1,25 +1,7 @@
 import type { Logger } from 'vite'
 import { stripVTControlCharacters } from 'node:util'
 import pc from 'picocolors'
-import { banner, error, event, print, ready, warn } from './console'
-
-// Vite messages already handled by pen or not useful in the terminal.
-// The module-runner's own "invalidate <path>: <reason>" duplicates the
-// "hmr invalidate" line below once that's rewritten as a warning.
-// "hmr update <path>" fires on every accepted update, before success or
-// failure is known - not useful on its own, and a failure is already
-// reported by the invalidate rewrite below.
-// "page reload <file>" (server dispatching a full reload) and
-// "program reload" (the module runner acting on it) are the same decision
-// the invalidate rewrite already explains, just narrated mechanically.
-const SUPPRESSED_INFO = [
-  /^connected\.$/,
-  /^hot updated:/,
-  // /^hmr update /,
-  /^invalidate \S+:/,
-  /^page reload /,
-  /^program reload$/,
-]
+import { error, event, warn } from './console'
 
 // Vite's own announcement that it invalidated a module - <reason> is
 // actually our plugin's explanation for why Fast Refresh couldn't apply
@@ -27,8 +9,6 @@ const SUPPRESSED_INFO = [
 // severity, not buried in routine info output.
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
-  const INFO_BANNER = /^info: (Pen v.+)$/
-const INFO_READY = /^info: (Ready in .+)$/
 
 /** Adapts Vite's logger to pen's terminal output. */
 export function createPenLogger(): Logger {
@@ -49,16 +29,8 @@ export function createPenLogger(): Logger {
         const path = match[1]!
         return event(`Updated ${pc.dim(path)}`)
       }
-      if ((match = strippedMessage.match(INFO_READY))) {
-        const readyMessage = `${match[1]!}\n`
-        return ready(readyMessage)
-      }
-      if ((match = strippedMessage.match(INFO_BANNER))) {
-        const bannerMessage = `\n${match[1]!}\n`
-        return banner(bannerMessage)
-      }
-      if (!SUPPRESSED_INFO.some(pattern => pattern.test(strippedMessage)))
-        print(strippedMessage)
+      // Anything else Vite's own logger emits is internal noise pen's
+      // dev output doesn't show - dropped rather than printed as-is.
     },
     warn(message) {
       warned = true
