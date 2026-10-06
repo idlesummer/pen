@@ -22,7 +22,6 @@ export function createPenLogger(): Logger {
   return {
     info(message) {
       const stripped = stripVTControlCharacters(message)
-
       const invalidate = HMR_INVALIDATE.exec(stripped)
       if (invalidate) {
         const [, path, reason] = invalidate
