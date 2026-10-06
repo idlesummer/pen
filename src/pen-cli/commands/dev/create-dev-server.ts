@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { createPenLogger } from '@/pen-cli/log'
+import { createPenLogger } from '@/pen-cli/logger'
 import { penDev } from '../../plugins/dev-plugin'
 import { penReactRefreshInk } from '../../plugins/react-refresh-ink-plugin'
 
