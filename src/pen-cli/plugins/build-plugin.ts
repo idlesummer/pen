@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
-import { discoverRoutes } from '@/pen-react/setup'
+import { diagnoseRoutes } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /** Loads the app's route modules, compiles their paths, and validates the
@@ -54,9 +54,8 @@ export function penBuild(appDir: string): Plugin {
       if (!existsSync(join(projectDir, appDir)))
         this.error(`No such directory: '${appDir}'`)
 
-      const { diagnostics } = await discoverRoutes(projectDir, appDir)
-
       // Display diagnostics
+      const diagnostics = await diagnoseRoutes(projectDir, appDir)
       for (const { severity, message, files } of diagnostics)
         if (severity === 'warn')
           this.warn({ message, ids: files })
