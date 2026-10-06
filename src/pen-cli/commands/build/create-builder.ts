@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { createPenLogger } from '@/pen-cli/logger'
+import { createPenLogger } from '@/pen-cli/logger/adapter'
 import { penBuild } from '../../plugins/build-plugin'
 
 /** Creates a Vite builder configured with the `pen` plugin, ready to build
