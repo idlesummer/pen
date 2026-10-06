@@ -27,7 +27,7 @@ export function event(message: string) {
 
 /** Non-fatal - the app keeps running. */
 export function warn(message: string) {
-  console.log(pc.yellow('⚠'), message)
+  console.log(pc.yellow('▲'), message)
 }
 
 /** Fatal or user-facing error. */
