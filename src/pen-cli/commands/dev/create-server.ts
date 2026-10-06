@@ -1,8 +1,8 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { penDev } from '../../vite/plugins/dev-plugin'
-import { penReactRefreshInk } from '../../vite/plugins/react-refresh-ink-plugin'
+import { penDev } from '../../plugins/dev-plugin'
+import { penReactRefreshInk } from '../../plugins/react-refresh-ink-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
