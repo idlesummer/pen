@@ -1,9 +1,7 @@
 import type { Plugin } from 'vite'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
-import { diagnoseRoutes } from '@/pen-react/setup'
+import { reportRouteDiagnostics } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /** Loads the app's route modules, compiles their paths, and validates the
@@ -48,24 +46,12 @@ export function penBuild(appDir: string): Plugin {
     },
     // Discovers the app's routes, validates them, and reports any errors before the build continues
     async buildStart() {
-      // existsSync is a plain Node fs call - Vite's own root option doesn't
-      // reach it, so root is read explicitly and joined by hand
       const projectDir = this.environment.config.root
-      if (!existsSync(join(projectDir, appDir)))
-        this.error(`No such directory: '${appDir}'`)
-
-      // Display diagnostics
-      const diagnostics = await diagnoseRoutes(projectDir, appDir)
-      for (const { severity, message, files } of diagnostics)
-        if (severity === 'warn')
-          this.warn({ message, ids: files })
-
-      const errors = diagnostics.filter(d => d.severity === 'error')
-      if (errors.length) {
-        const message = errors.map(d => d.message).join('\n\n')
-        const ids = [...new Set(errors.flatMap(d => d.files))]
-        this.error({ message, ids })
-      }
+      const { warnings, error } = await reportRouteDiagnostics(projectDir, appDir)
+      for (const message of warnings)
+        this.warn(message)
+      if (error)
+        this.error(error)
     },
   }
 }
