@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty'
-import { APP_DIR, OUT_DIR } from '../../constants'
+import { APP_DIR, OUT_DIR } from '@/pen-cli/constants'
 import { createPenBuilder } from './create-builder'
 
 export const buildCommand = defineCommand({
