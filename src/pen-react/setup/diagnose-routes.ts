@@ -1,4 +1,4 @@
-import type { Module } from '@/pen-core'
+import type { Diagnostic, Module } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { ssrGlob } from '@/lib/ssr-glob'
@@ -20,7 +20,7 @@ type RouteModule = Module<RouteComponent>
  * @param appDir - App route directory relative to the project directory.
  * @returns Diagnostics produced while compiling and validating the routes.
  */
-export async function discoverRoutes(projectDir: string, appDir: string) {
+export async function diagnoseRoutes(projectDir: string, appDir: string): Promise<Diagnostic[]> {
   // Load modules and create component map
   const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, appDir)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
@@ -35,5 +35,5 @@ export async function discoverRoutes(projectDir: string, appDir: string) {
   // Collect additional runtime diagnostics
   diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
   diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
-  return { routeComponents, pageEndpoints, modulePaths, diagnostics }
+  return diagnostics
 }
