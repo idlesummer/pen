@@ -7,7 +7,7 @@ import type { Logger } from 'vite'
 import pc from 'picocolors'
 
 function print(prefix: string, message: string) {
-  process.stdout.write(`${prefix} ${message}\n`)
+  console.log(`${prefix} ${message}\n`)
 }
 
 /** Work that's starting (compiling a changed file). */
