@@ -13,6 +13,8 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * @param appDir - App route directory relative to the project root.
  */
 export function penDev(appDir: string): Plugin {
+  const startTime = Date.now()
+
   return {
     name: 'pen:dev',
 
@@ -49,6 +51,7 @@ export function penDev(appDir: string): Plugin {
         this.warn(message)
       if (error)
         this.error(error)
+      this.info(`Ready in ${Date.now() - startTime}ms\n`)
     },
   }
 }
