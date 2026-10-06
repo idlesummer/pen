@@ -13,7 +13,7 @@ export function createPenBuilder(appDir: string, outDir: string) {
   return createBuilder({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
-    customLogger: createPenLogger(),
+    customLogger: createPenLogger(true),
     plugins: [penBuild(appDir)],
     build: { outDir },
   })

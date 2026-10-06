@@ -1,7 +1,7 @@
 import type { Logger } from 'vite'
 import { stripVTControlCharacters } from 'node:util'
 import pc from 'picocolors'
-import { error, event, warn } from './console'
+import { error, event, print, warn } from './console'
 
 // Vite's own announcement that it invalidated a module - <reason> is
 // actually our plugin's explanation for why Fast Refresh couldn't apply
@@ -10,8 +10,16 @@ import { error, event, warn } from './console'
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
 
-/** Adapts Vite's logger to pen's terminal output. */
-export function createPenLogger(): Logger {
+/**
+ * Adapts Vite's logger to pen's terminal output.
+ *
+ * @param passthroughInfo - Print every info message verbatim instead of
+ * curating it. Dev needs the curated path to stay Ink-compatible and to
+ * rewrite HMR's own narration into pen's own warnings/events; build has no
+ * competing renderer and no HMR traffic, so Vite's own info output (its
+ * build banner, the size report, "built in Xms") can just show through.
+ */
+export function createPenLogger(passthroughInfo = false): Logger {
   const warnedMessages = new Set<string>()
   const loggedErrors = new WeakSet<object>()
   let warned = false
@@ -19,6 +27,9 @@ export function createPenLogger(): Logger {
   return {
     info(message) {
       const strippedMessage = stripVTControlCharacters(message)
+      if (passthroughInfo)
+        return print(strippedMessage)
+
       let match: RegExpMatchArray | null
 
       if ((match = strippedMessage.match(HMR_INVALIDATE))) {
