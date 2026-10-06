@@ -52,7 +52,9 @@ export function penBuild(appDir: string): Plugin {
       log.print('')
 
       const projectDir = this.environment.config.root
-      const { warnings, error } = await reportRouteDiagnostics(projectDir, appDir)
+      const { warnings, error, routes } = await reportRouteDiagnostics(projectDir, appDir)
+      for (const route of routes)
+        log.print(route)
       for (const message of warnings)
         this.warn(message)
       if (error)
