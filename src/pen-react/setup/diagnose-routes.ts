@@ -16,6 +16,7 @@ type RouteModule = Module<RouteComponent>
 type DiagnosticReport = {
   warnings: string[]
   error?: string
+  routes: string[]
 }
 
 /**
@@ -27,7 +28,7 @@ type DiagnosticReport = {
  * @param appDir - App route directory relative to the project directory.
  * @returns Diagnostics produced while compiling and validating the routes.
  */
-async function diagnoseRoutes(projectDir: string, appDir: string): Promise<Diagnostic[]> {
+async function diagnoseRoutes(projectDir: string, appDir: string): Promise<{ diagnostics: Diagnostic[]; modulePaths: string[] }> {
   // Load modules and create component map
   const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, appDir)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
@@ -42,7 +43,7 @@ async function diagnoseRoutes(projectDir: string, appDir: string): Promise<Diagn
   // Collect additional runtime diagnostics
   diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
   diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
-  return diagnostics
+  return { diagnostics, modulePaths }
 }
 
 /** Reports route compilation and validation diagnostics for the app directory.
@@ -52,9 +53,9 @@ async function diagnoseRoutes(projectDir: string, appDir: string): Promise<Diagn
  *  @returns A formatted summary of route diagnostics. */
 export async function reportRouteDiagnostics(projectDir: string, appDir: string): Promise<DiagnosticReport> {
   if (!existsSync(join(projectDir, appDir)))
-    return { warnings: [], error: `No such directory: '${appDir}'` }
+    return { warnings: [], error: `No such directory: '${appDir}'`, routes: [] }
 
-  const diagnostics = await diagnoseRoutes(projectDir, appDir)
+  const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir, appDir)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
     .map(d => d.message)  // Already includes a "  at <file>" line per file
@@ -64,5 +65,8 @@ export async function reportRouteDiagnostics(projectDir: string, appDir: string)
     .map(d => d.message)
     .join('\n\n') || undefined  // Works since empty strings are falsy
 
-  return { warnings, error }
+  // The two sentinel keys aren't real files - nothing to list
+  const routes = modulePaths.filter(path => path !== GLOBAL_DEFAULT && path !== GLOBAL_ERROR)
+
+  return { warnings, error, routes }
 }
