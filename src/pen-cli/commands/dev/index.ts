@@ -2,7 +2,7 @@ import { defineCommand } from 'citty'
 import { createServerModuleRunner } from 'vite'
 import { createPenDevServer } from './create-dev-server'
 import { APP_DIR } from '@/pen-cli/constants'
-import * as log from '@/pen-cli/log'
+import * as log from '@/pen-cli/logger'
 
 export const devCommand = defineCommand({
   meta: {

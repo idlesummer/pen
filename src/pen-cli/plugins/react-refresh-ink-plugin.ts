@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { relative } from 'node:path'
 import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
-import * as log from '@/pen-cli/log'
+import * as log from '@/pen-cli/logger'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
