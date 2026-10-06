@@ -1,7 +1,7 @@
 import type { Logger } from 'vite'
 import { stripVTControlCharacters } from 'node:util'
 import pc from 'picocolors'
-import { error, event, print, ready, warn } from './console'
+import { banner, error, event, print, ready, warn } from './console'
 
 // Vite messages already handled by pen or not useful in the terminal.
 // The module-runner's own "invalidate <path>: <reason>" duplicates the
@@ -27,6 +27,7 @@ const SUPPRESSED_INFO = [
 // severity, not buried in routine info output.
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
+const INFO_BANNER = /^info: (Pen v.+)$/
 const INFO_READY = /^info: (Ready in .+)$/
 
 /** Adapts Vite's logger to pen's terminal output. */
@@ -49,8 +50,12 @@ export function createPenLogger(): Logger {
         return event(`Updated ${pc.dim(path)}`)
       }
       if ((match = strippedMessage.match(INFO_READY))) {
-        const readyMessage = match[1]!
+        const readyMessage = `${match[1]!}\n`
         return ready(readyMessage)
+      }
+      if ((match = strippedMessage.match(INFO_BANNER))) {
+        const bannerMessage = `\n${match[1]!}\n`
+        return banner(bannerMessage)
       }
       if (!SUPPRESSED_INFO.some(pattern => pattern.test(strippedMessage)))
         print(strippedMessage)
