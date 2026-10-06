@@ -1,5 +1,5 @@
 import type { Logger } from 'vite'
-import { event, warn, error } from './console'
+import { print, warn, error } from './console'
 
 // Vite messages already handled by pen or not useful in the terminal.
 const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/]
@@ -13,7 +13,7 @@ export function createPenLogger(): Logger {
   return {
     info(message) {
       if (!SUPPRESSED_INFO.some(pattern => pattern.test(message)))
-        event(message)
+        print(message)
     },
     warn(message) {
       warned = true
