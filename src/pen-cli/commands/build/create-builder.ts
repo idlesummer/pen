@@ -1,6 +1,7 @@
 import { sep } from 'node:path'
 import { createBuilder } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
+import { createPenLogger } from '@/pen-cli/log'
 import { penBuild } from '../../plugins/build-plugin'
 
 /** Creates a Vite builder configured with the `pen` plugin, ready to build
@@ -12,6 +13,7 @@ export function createPenBuilder(appDir: string, outDir: string) {
   return createBuilder({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
+    customLogger: createPenLogger(),
     plugins: [penBuild(appDir)],
     build: { outDir },
   })
