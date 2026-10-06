@@ -6,38 +6,34 @@
 import type { Logger } from 'vite'
 import pc from 'picocolors'
 
-function print(prefix: string, message: string) {
-  console.log(`${prefix} ${message}`)
-}
-
 /** One-line startup banner, printed once before anything else. */
 export function banner(message: string) {
   console.log(`\n${pc.bold('✒')} ${pc.bold(message)}\n`)
 }
 
- /** Work that's starting (compiling a changed file). */
+/** Work that's starting (compiling a changed file). */
 export function wait(message: string) {
-  print(pc.cyan('○'), message)
+  console.log(pc.cyan('○'), message)
 }
 
 /** The dev server itself is up and about to serve the app. */
 export function ready(message: string) {
-  print(pc.green('✓'), message)
+  console.log(pc.green('✓'), message)
 }
 
 /** A unit of work (a Fast Refresh update) finished successfully. */
 export function event(message: string) {
-  print(pc.green('✓'), message)
+  console.log(pc.green('✓'), message)
 }
 
 /** Non-fatal - the app keeps running. */
 export function warn(message: string) {
-  print(pc.yellow('⚠'), message)
+  console.log(pc.yellow('⚠'), message)
 }
 
 /** Fatal or user-facing error. */
 export function error(message: string) {
-  print(pc.red('⨯'), message)
+  console.log(pc.red('⨯'), message)
 }
 
 // Vite-internal chatter that pen already reports itself in its own words
