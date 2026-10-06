@@ -12,6 +12,12 @@ import { validateAsyncPages, validateComponentExports } from './validate'
 /** The shape of a route module file. */
 type RouteModule = Module<RouteComponent>
 
+/** The result of compiling and validating the app's routes. */
+type RouteDiagnosis = {
+  diagnostics: Diagnostic[]
+  modulePaths: string[]
+}
+
 /** A formatted summary of route diagnostics. */
 type DiagnosticReport = {
   warnings: string[]
@@ -28,7 +34,7 @@ type DiagnosticReport = {
  * @param appDir - App route directory relative to the project directory.
  * @returns Diagnostics produced while compiling and validating the routes.
  */
-async function diagnoseRoutes(projectDir: string, appDir: string): Promise<{ diagnostics: Diagnostic[]; modulePaths: string[] }> {
+async function diagnoseRoutes(projectDir: string, appDir: string): Promise<RouteDiagnosis> {
   // Load modules and create component map
   const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, appDir)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
