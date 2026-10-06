@@ -10,6 +10,11 @@ function print(prefix: string, message: string) {
   console.log(`${prefix} ${message}`)
 }
 
+/** One-line startup banner, printed once before anything else. */
+export function banner(message: string) {
+  console.log(`${pc.bold('✒')} ${pc.bold(message)}\n`)
+}
+
  /** Work that's starting (compiling a changed file). */
 export function wait(message: string) {
   print(pc.cyan('○'), message)
