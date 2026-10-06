@@ -1,6 +1,8 @@
 import type { Plugin } from 'vite'
+import { relative } from 'node:path'
 import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
+import * as log from '@/pen-cli/log'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
@@ -37,7 +39,19 @@ export function penReactRefreshInk(): Plugin {
     },
     // Transformed modules use these globals during evaluation, so the
     // globals must exist first. configureServer finishes before any import
-    configureServer() {
+    configureServer(server) {
+      // Set by the watcher below, read and cleared once the matching
+      // refresh finishes - there's only ever one edit in flight at a time.
+      let pending: { file: string, start: number } | undefined
+
+      // handleHotUpdate isn't called in this headless/middlewareMode setup
+      // (confirmed empirically), so the raw chokidar watcher is the only
+      // reliable signal that a file changed.
+      server.watcher.on('change', (file) => {
+        if (!file.endsWith('.tsx')) return
+        pending = { file, start: Date.now() }
+        log.wait(`Compiling ${relative(server.config.root, file)}...`)
+      })
 
       // @types/react-refresh only accepts Window, but the runtime works with globalThis
       RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)
@@ -58,18 +72,29 @@ export function penReactRefreshInk(): Plugin {
           const prevExportKeys = Object.keys(prevExports)
           const nextExportKeys = Object.keys(nextExports)
 
+          const fail = (message: string) => {
+            if (pending) log.warn(`${message} - reloading ${relative(server.config.root, pending.file)}`)
+            pending = undefined
+            return message
+          }
+
           if (prevExportKeys.some(key => !(key in nextExports)))  // Export removed: an importer may still use it
-            return 'Could not Fast Refresh (export removed)'
+            return fail('Could not Fast Refresh (export removed)')
           if (nextExportKeys.some(key => !(key in prevExports)))  // New export: importers need to see it
-            return 'Could not Fast Refresh (new export)'
+            return fail('Could not Fast Refresh (new export)')
 
           const incompatibleExport = nextExportKeys.find(key =>
             !RefreshRuntime.isLikelyComponentType(nextExports[key]) &&
             prevExports[key] !== nextExports[key],
           )
           if (incompatibleExport) // Non-component exports must retain the same value
-            return `Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`
+            return fail(`Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`)
+
           RefreshRuntime.performReactRefresh()  // Re-render changed components with their new code, keeping hook state
+          if (pending) {
+            log.event(`Compiled ${relative(server.config.root, pending.file)} in ${Date.now() - pending.start}ms`)
+            pending = undefined
+          }
         },
       }
     },
