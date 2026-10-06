@@ -60,7 +60,7 @@ export function penDev(appDir: string): Plugin {
         throw new Error(error)
       }
 
-      log.ready(`Ready in ${Date.now() - startTime}ms`)
+      log.ready(`Ready in ${Date.now() - startTime}ms\n`)
     },
   }
 }
