@@ -1,24 +1,10 @@
-// commands/dev, commands/build, plugins/react-refresh-ink-plugin - all
-// report dev-server/build lifecycle events through this module, and
-// create-dev-server/create-builder install it as Vite's customLogger so
-// Vite's own messages (HMR, plugin this.warn()/this.error()) share it too.
-
 import type { Logger } from 'vite'
 import { event, warn, error } from './console'
 
-// Vite-internal chatter that pen already reports itself in its own words
-// (Ready/Compiled above) or that's just connection plumbing nobody needs to see.
-// Vite hands a customLogger the bare message - no "[vite] (ssr)" prefix or
-// timestamp, that's formatting its own default logger adds.
+// Vite messages already handled by pen or not useful in the terminal.
 const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/]
 
-/** A Vite `Logger` that routes Vite's own messages (HMR status, and any
- *  plugin's this.warn()/this.error()) through pen's own formatting instead
- *  of Vite's raw `[vite] ...` lines - the same seam Astro composes through.
- *
- *  Pass as `customLogger` alongside `clearScreen: false`, since Vite's
- *  default clear-on-change behavior would otherwise fight Ink for the
- *  terminal. */
+/** Adapts Vite's logger to pen's terminal output. */
 export function createPenLogger(): Logger {
   const warnedMessages = new Set<string>()
   const loggedErrors = new WeakSet<object>()
