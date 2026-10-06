@@ -1,9 +1,9 @@
 import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
+import { CLI_NAME, VERSION } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
-import { CLI_NAME, VERSION } from '@/lib/constants'
 
 /**
  * Loads the app's route modules, compiles their paths, and validates the
