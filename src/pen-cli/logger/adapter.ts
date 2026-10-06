@@ -5,7 +5,10 @@ import { print, warn, error } from './console'
 // Vite messages already handled by pen or not useful in the terminal.
 // The module-runner's own "invalidate <path>: <reason>" duplicates the
 // "hmr invalidate" line below once that's rewritten as a warning.
-const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/, /^invalidate \S+:/]
+// "hmr update <path>" fires on every accepted update, before success or
+// failure is known - not useful on its own, and a failure is already
+// reported by the invalidate rewrite below.
+const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/, /^hmr update /, /^invalidate \S+:/]
 
 // Vite's own announcement that it invalidated a module - <reason> is
 // actually our plugin's explanation for why Fast Refresh couldn't apply
