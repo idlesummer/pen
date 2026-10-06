@@ -1,8 +1,13 @@
 import pc from 'picocolors'
 
+/** Prints an unformatted message to the terminal. */
+export function print(message: string) {
+  console.log(message)
+}
+
 /** One-line startup banner, printed once before anything else. */
 export function banner(message: string) {
-  console.log(`\n${pc.bold('✒')}  ${pc.bold(message)}\n`)
+  console.log(`${pc.bold('✒')}  ${pc.bold(message)}`)
 }
 
 /** Work that's starting (compiling a changed file). */
