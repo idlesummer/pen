@@ -11,10 +11,12 @@ export const devCommand = defineCommand({
     description: 'Start the pen development server',
   },
   run: async () => {
+    log.print('')
     log.banner(`${CLI_NAME} ${VERSION}`)
-    const start = Date.now()
+    log.print('')
 
     // Headless Vite server for loading the app entry module
+    const start = Date.now()
     const server = await createPenDevServer(APP_DIR)
     const runner = createServerModuleRunner(server.environments.ssr!)
     log.ready(`Ready in ${Date.now() - start}ms`)
