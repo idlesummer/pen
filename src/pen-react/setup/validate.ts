@@ -1,7 +1,7 @@
 import type { Diagnostic, Endpoint } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import type { DefaultExportMap } from './default-export-map'
-import { createDiagnostic } from '@/pen-core'
+import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { isAsyncComponent } from '../renderer/components/PageComponent'
 
 /** Validates that every discovered module has a valid component default export. */
@@ -9,6 +9,10 @@ export function validateComponentExports(modulePaths: string[], routeComponents:
   const diagnostics: Diagnostic[] = []
 
   for (const path of modulePaths) {
+    // The framework's own built-in fallbacks, not a file the user wrote -
+    // nothing to validate, and their names get minified in the published build
+    if (path === GLOBAL_DEFAULT || path === GLOBAL_ERROR) continue
+
     const Content = routeComponents[path]! // Safe - modulePaths is a subset of components's keys
     if (typeof Content !== 'function') {
       diagnostics.push(createDiagnostic({
