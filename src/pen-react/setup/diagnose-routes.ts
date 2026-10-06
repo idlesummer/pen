@@ -11,10 +11,9 @@ import { validateAsyncPages, validateComponentExports } from './validate'
 type RouteModule = Module<RouteComponent>
 
 /**
- * Scans the app directory for route modules, compiles their paths, and
- * validates the resulting routes. Shared by `pen build` (once per build)
- * and `pen dev` (once per file add/delete) - each decides separately how
- * to report the returned diagnostics.
+ * Scans the app directory for route modules and collects diagnostics from
+ * route compilation and validation. Shared by `pen build` (once per build)
+ * and `pen dev` (once per file add/delete).
  *
  * @param projectDir - Project directory containing the app directory.
  * @param appDir - App route directory relative to the project directory.
