@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite'
+import pc from 'picocolors'
 import { CLI_NAME, PACKAGE_NAME, VERSION } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
@@ -54,7 +55,7 @@ export function penBuild(appDir: string): Plugin {
       const projectDir = this.environment.config.root
       const { warnings, error, routes } = await reportRouteDiagnostics(projectDir, appDir)
       for (const route of routes)
-        log.print(route)
+        log.print(`${pc.dim('•')} ${route}`)
       for (const message of warnings)
         this.warn(message)
       if (error)
