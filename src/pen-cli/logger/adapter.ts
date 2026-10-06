@@ -1,8 +1,17 @@
 import type { Logger } from 'vite'
+import { stripVTControlCharacters } from 'node:util'
 import { print, warn, error } from './console'
 
 // Vite messages already handled by pen or not useful in the terminal.
-const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/]
+// The module-runner's own "invalidate <path>: <reason>" duplicates the
+// "hmr invalidate" line below once that's rewritten as a warning.
+const SUPPRESSED_INFO = [/^connected\.$/, /^hot updated:/, /^invalidate \S+:/]
+
+// Vite's own announcement that it invalidated a module - <reason> is
+// actually our plugin's explanation for why Fast Refresh couldn't apply
+// (see validateRefreshBoundaryAndEnqueueUpdate), so it belongs at warn
+// severity, not buried in routine info output.
+const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 
 /** Adapts Vite's logger to pen's terminal output. */
 export function createPenLogger(): Logger {
@@ -12,7 +21,15 @@ export function createPenLogger(): Logger {
 
   return {
     info(message) {
-      if (!SUPPRESSED_INFO.some(pattern => pattern.test(message)))
+      const stripped = stripVTControlCharacters(message)
+
+      const invalidate = HMR_INVALIDATE.exec(stripped)
+      if (invalidate) {
+        const [, path, reason] = invalidate
+        warn(reason ? `${reason} - ${path}` : path!)
+        return
+      }
+      if (!SUPPRESSED_INFO.some(pattern => pattern.test(stripped)))
         print(message)
     },
     warn(message) {
