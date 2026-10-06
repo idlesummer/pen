@@ -1,8 +1,6 @@
 import type { Plugin } from 'vite'
-import { relative } from 'node:path'
 import { transformWithOxc } from 'vite'
 import * as RefreshRuntime from 'react-refresh/runtime'
-import * as log from '@/pen-cli/logger'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
@@ -39,20 +37,7 @@ export function penReactRefreshInk(): Plugin {
     },
     // Transformed modules use these globals during evaluation, so the
     // globals must exist first. configureServer finishes before any import
-    configureServer(server) {
-      // Set by the watcher below, read and cleared once the matching
-      // refresh finishes - there's only ever one edit in flight at a time.
-      let pending: { file: string, start: number } | undefined
-
-      // handleHotUpdate isn't called in this headless/middlewareMode setup
-      // (confirmed empirically), so the raw chokidar watcher is the only
-      // reliable signal that a file changed.
-      server.watcher.on('change', (file) => {
-        if (!file.endsWith('.tsx')) return
-        pending = { file, start: Date.now() }
-        log.wait(`Compiling ${relative(server.config.root, file)}...`)
-      })
-
+    configureServer() {
       // @types/react-refresh only accepts Window, but the runtime works with globalThis
       RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)
       globalThis.$RefreshReg$ = () => {}
@@ -73,8 +58,7 @@ export function penReactRefreshInk(): Plugin {
           const nextExportKeys = Object.keys(nextExports)
 
           const fail = (message: string) => {
-            if (pending) this.warn(`${message} - reloading ${relative(server.config.root, pending.file)}`)
-            pending = undefined
+            this.warn(message)
             return message
           }
 
@@ -91,10 +75,6 @@ export function penReactRefreshInk(): Plugin {
             return fail(`Could not Fast Refresh ("${incompatibleExport}" export is incompatible)`)
 
           RefreshRuntime.performReactRefresh()  // Re-render changed components with their new code, keeping hook state
-          if (pending) {
-            log.event(`Compiled ${relative(server.config.root, pending.file)} in ${Date.now() - pending.start}ms`)
-            pending = undefined
-          }
         },
       }
     },
