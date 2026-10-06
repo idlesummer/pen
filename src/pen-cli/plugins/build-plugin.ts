@@ -1,7 +1,8 @@
 import type { Plugin } from 'vite'
-import { PACKAGE_NAME } from '@/lib/constants'
+import { CLI_NAME, PACKAGE_NAME, VERSION } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
+import * as log from '@/pen-cli/logger/console'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /** Loads the app's route modules, compiles their paths, and validates the
@@ -46,6 +47,10 @@ export function penBuild(appDir: string): Plugin {
     },
     // Discovers the app's routes, validates them, and reports any errors before the build continues
     async buildStart() {
+      log.print('')
+      log.banner(`${CLI_NAME} v${VERSION}`)
+      log.print('')
+
       const projectDir = this.environment.config.root
       const { warnings, error } = await reportRouteDiagnostics(projectDir, appDir)
       for (const message of warnings)
