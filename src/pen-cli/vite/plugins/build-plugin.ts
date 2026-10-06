@@ -6,14 +6,12 @@ import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } 
 import { discoverRoutes } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
-/**
- * Loads the app's route modules, compiles their paths, and validates the
- * resulting routes before the build proceeds.
+/** Loads the app's route modules, compiles their paths, and validates the
+ *  resulting routes before the build proceeds.
  *
- * Runs only in the SSR environment.
+ *  Runs only in the SSR environment.
  *
- * @param appDir - App route directory relative to the project root.
- */
+ *  @param appDir - App route directory relative to the project root. */
 export function penBuild(appDir: string): Plugin {
   return {
     name: 'pen:build',
