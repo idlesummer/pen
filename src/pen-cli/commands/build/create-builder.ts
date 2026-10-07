@@ -22,12 +22,11 @@ import { penTypecheck } from '../../plugins/build-typecheck'
  * @param outDir - Build output directory relative to the project root.
  */
 export async function createPenBuilder(appDir: string, outDir: string) {
-  const root = findProjectRoot(process.cwd() + sep)
-
   log.print('')
   log.banner(`${CLI_NAME} v${VERSION}`)
   log.print('')
 
+  const root = findProjectRoot(process.cwd() + sep)
   const { warnings, error, routes } = await reportRouteDiagnostics(root, appDir)
   for (const route of routes)
     log.print(`${pc.dim('•')} ${route}`)
