@@ -1,14 +1,12 @@
 import type { Plugin } from 'vite'
-import pc from 'picocolors'
-import { CLI_NAME, PACKAGE_NAME, VERSION } from '@/lib/constants'
+import { PACKAGE_NAME } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
-import * as log from '@/pen-cli/logger/console'
-import { typeCheck } from '@/pen-cli/type-check'
-import { reportRouteDiagnostics } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
-/** Loads the app's route modules, compiles their paths, and validates the
- *  resulting routes before the build proceeds.
+/** Bundles the app's entry module for Node.
+ *
+ *  Route diagnostics and type checking run earlier, outside Vite's plugin
+ *  pipeline entirely - see create-builder.ts.
  *
  *  Runs only in the SSR environment.
  *
@@ -46,25 +44,6 @@ export function penBuild(appDir: string): Plugin {
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource.replaceAll(APP_DIR_TOKEN, appDir)
-    },
-    // Discovers the app's routes, validates them, and reports any errors before the build continues
-    async buildStart() {
-      log.print('')
-      log.banner(`${CLI_NAME} v${VERSION}`)
-      log.print('')
-
-      const projectDir = this.environment.config.root
-      const { warnings, error, routes } = await reportRouteDiagnostics(projectDir, appDir)
-      for (const route of routes)
-        log.print(`${pc.dim('•')} ${route}`)
-      for (const message of warnings)
-        this.warn(message)
-      if (error)
-        this.error(error)
-
-      const typeErrors = await typeCheck(projectDir)
-      if (typeErrors)
-        this.error(typeErrors)
     },
   }
 }
