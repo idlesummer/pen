@@ -5,9 +5,9 @@ import { CLI_NAME, VERSION } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
-import { typeCheck } from '@/pen-cli/type-check'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 import { penBuild } from '../../plugins/build-plugin'
+import { typeCheck } from '../../plugins/build-typecheck'
 
 /**
  * Creates a Vite builder configured with the `pen` plugin, ready to build
