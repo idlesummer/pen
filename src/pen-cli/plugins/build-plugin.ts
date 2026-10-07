@@ -2,8 +2,9 @@ import type { Plugin } from 'vite'
 import pc from 'picocolors'
 import { CLI_NAME, PACKAGE_NAME, VERSION } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
-import { reportRouteDiagnostics } from '@/pen-react/setup'
 import * as log from '@/pen-cli/logger/console'
+import { typeCheck } from '@/pen-cli/type-check'
+import { reportRouteDiagnostics } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /** Loads the app's route modules, compiles their paths, and validates the
@@ -53,6 +54,10 @@ export function penBuild(appDir: string): Plugin {
       log.print('')
 
       const projectDir = this.environment.config.root
+      const typeErrors = await typeCheck(projectDir)
+      if (typeErrors)
+        this.error(typeErrors)
+
       const { warnings, error, routes } = await reportRouteDiagnostics(projectDir, appDir)
       for (const route of routes)
         log.print(`${pc.dim('•')} ${route}`)
