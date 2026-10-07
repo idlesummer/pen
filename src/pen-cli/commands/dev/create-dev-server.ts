@@ -3,7 +3,7 @@ import { createServer } from 'vite'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import { penDev } from '@/pen-cli/plugins/dev-plugin'
-import { penReactRefreshInk } from '@/pen-cli/plugins/dev-react-refresh-ink-plugin'
+import { penReactRefreshInk } from '@/pen-cli/plugins/dev-refresh-ink-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
