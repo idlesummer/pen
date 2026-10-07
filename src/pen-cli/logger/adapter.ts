@@ -31,7 +31,6 @@ export function createPenLogger(passthroughInfo = false): Logger {
         return print(pc.dim(strippedMessage))
 
       let match: RegExpMatchArray | null
-
       if ((match = strippedMessage.match(HMR_INVALIDATE))) {
         const [, path, reason] = match
         return warn(reason ? `${reason} ${pc.dim(path)}` : pc.dim(path!))
