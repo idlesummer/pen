@@ -42,7 +42,10 @@ export async function createPenBuilder(appDir: string, outDir: string) {
     root,
     configFile: false,
     customLogger: createPenLogger(true),
-    plugins: [penTypecheck(), penBuild(appDir)],
+    plugins: [
+      penTypecheck(),
+      penBuild(appDir),
+    ],
     build: { outDir },
   })
 }
