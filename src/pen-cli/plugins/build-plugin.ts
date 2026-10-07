@@ -54,10 +54,6 @@ export function penBuild(appDir: string): Plugin {
       log.print('')
 
       const projectDir = this.environment.config.root
-      const typeErrors = await typeCheck(projectDir)
-      if (typeErrors)
-        this.error(typeErrors)
-
       const { warnings, error, routes } = await reportRouteDiagnostics(projectDir, appDir)
       for (const route of routes)
         log.print(`${pc.dim('•')} ${route}`)
@@ -65,6 +61,10 @@ export function penBuild(appDir: string): Plugin {
         this.warn(message)
       if (error)
         this.error(error)
+
+      const typeErrors = await typeCheck(projectDir)
+      if (typeErrors)
+        this.error(typeErrors)
     },
   }
 }
