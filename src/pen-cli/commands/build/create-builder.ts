@@ -28,8 +28,8 @@ export async function createPenBuilder(appDir: string, outDir: string) {
   log.banner(`${CLI_NAME} v${VERSION}`)
   log.print('')
 
-  const root = findProjectRoot(process.cwd() + sep)
-  const { warnings, error } = await reportRouteDiagnostics(root, appDir)
+  const projectDir = findProjectRoot(process.cwd() + sep)
+  const { warnings, error } = await reportRouteDiagnostics(projectDir, appDir)
   for (const message of warnings)
     log.warn(message)
   if (error) {
@@ -38,7 +38,7 @@ export async function createPenBuilder(appDir: string, outDir: string) {
   }
 
   return createBuilder({
-    root,
+    root: projectDir,
     configFile: false,
     plugins: [
       penTypecheck(),
