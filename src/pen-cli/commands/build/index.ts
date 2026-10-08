@@ -13,8 +13,9 @@ export const buildCommand = defineCommand({
     // The plugin handles both explicit Pen builds and user `vite build` calls.
     const builder = await createPenBuilder(APP_DIR, OUT_DIR)
 
-    // Printed last, right before Vite's own build banner takes over -
-    // diagnostics and typecheck failures above would have exited already.
+    // Printed right before Vite's own build banner takes over. Route
+    // diagnostics and typecheck both run after this, as the builder's own
+    // sequential buildStart plugins - see create-builder.ts.
     log.wait('Building app')
 
     await builder.build(builder.environments.ssr!)
