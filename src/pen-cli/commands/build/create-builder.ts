@@ -7,7 +7,7 @@ import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 import { penBuild } from '../../plugins/build-plugin'
-import { penTypecheck } from '../../plugins/build-typecheck'
+import { penTypecheck } from '../../plugins/typecheck'
 
 /**
  * Creates a Vite builder configured with the `pen` plugin, ready to build
@@ -16,7 +16,7 @@ import { penTypecheck } from '../../plugins/build-typecheck'
  * Route diagnostics run first, outside Vite entirely, since
  * reportRouteDiagnostics is shared with `pen dev` and isn't a Vite
  * concern. Type checking runs second, as the builder's own sequential
- * buildStart plugin - see build-typecheck.ts for why that's safe.
+ * buildStart plugin - see typecheck.ts for why that's safe.
  *
  * @param appDir - App route directory relative to the project root.
  * @param outDir - Build output directory relative to the project root.
