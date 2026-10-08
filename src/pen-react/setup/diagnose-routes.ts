@@ -2,7 +2,6 @@ import type { Diagnostic, Module } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { ROUTES_DIR } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'
@@ -29,8 +28,8 @@ type DiagnosticReport = {
 /** A diagnostic's message, with its files shown relative to the project
  *  root (app dir included) instead of the app dir alone - otherwise they
  *  look route-shaped but aren't actually openable from where the build runs. */
-function formatDiagnostic({ severity, rule, description, files }: Diagnostic): string {
-  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${ROUTES_DIR}/${file}`)].join('\n')
+function formatDiagnostic({ severity, rule, description, files }: Diagnostic, routesDir: string): string {
+  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${routesDir}/${file}`)].join('\n')
 }
 
 /**
@@ -39,11 +38,12 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic): s
  * and `pen dev` (once per file add/delete).
  *
  * @param projectDir - Project directory containing the app directory.
+ * @param routesDir - App route directory relative to the project directory.
  * @returns Diagnostics produced while compiling and validating the routes.
  */
-async function diagnoseRoutes(projectDir: string): Promise<RouteDiagnosis> {
+async function diagnoseRoutes(projectDir: string, routesDir: string): Promise<RouteDiagnosis> {
   // Load modules and create component map
-  const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir)
+  const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, routesDir)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
     [GLOBAL_DEFAULT]: DefaultFallback,
     [GLOBAL_ERROR]: ErrorFallback,
@@ -62,19 +62,20 @@ async function diagnoseRoutes(projectDir: string): Promise<RouteDiagnosis> {
 /** Reports route compilation and validation diagnostics for the app directory.
  *
  *  @param projectDir - Project directory containing the app directory.
+ *  @param routesDir - App route directory relative to the project directory.
  *  @returns A formatted summary of route diagnostics. */
-export async function reportRouteDiagnostics(projectDir: string): Promise<DiagnosticReport> {
-  if (!existsSync(join(projectDir, ROUTES_DIR)))
-    return { warnings: [], error: `No such directory: '${ROUTES_DIR}'`, routes: [] }
+export async function reportRouteDiagnostics(projectDir: string, routesDir: string): Promise<DiagnosticReport> {
+  if (!existsSync(join(projectDir, routesDir)))
+    return { warnings: [], error: `No such directory: '${routesDir}'`, routes: [] }
 
-  const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir)
+  const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir, routesDir)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
-    .map(d => formatDiagnostic(d))
+    .map(d => formatDiagnostic(d, routesDir))
 
   const error = diagnostics
     .filter(d => d.severity === 'error')
-    .map(d => formatDiagnostic(d))
+    .map(d => formatDiagnostic(d, routesDir))
     .join('\n\n') || undefined  // Works since empty strings are falsy
 
   // The two sentinel keys aren't real files - nothing to list

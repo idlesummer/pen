@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
-import { CLI_NAME, ROUTES_DIR, VERSION } from '@/lib/constants'
+import { CLI_NAME, VERSION } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
@@ -11,8 +11,10 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * resulting routes before the dev server starts serving requests.
  *
  * Runs only in the SSR environment.
+ *
+ * @param routesDir - App route directory relative to the project root.
  */
-export function penDev(): Plugin {
+export function penDev(routesDir: string): Plugin {
   const startTime = Date.now()
 
   return {
@@ -38,7 +40,7 @@ export function penDev(): Plugin {
     // has to hand back already-transformed code itself.
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = entryAppSource.replaceAll(APP_DIR_TOKEN, ROUTES_DIR)
+        const source = entryAppSource.replaceAll(APP_DIR_TOKEN, routesDir)
         const { code, map } = await transformWithOxc(source, ENTRY_MODULE_ID, { jsx: { development: true } })
         return { code, map }
       }
@@ -50,7 +52,7 @@ export function penDev(): Plugin {
       log.print('')
 
       const projectDir = server.config.root
-      const { warnings, error } = await reportRouteDiagnostics(projectDir)
+      const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir)
       for (const message of warnings)
         log.warn(message)
       if (error) {

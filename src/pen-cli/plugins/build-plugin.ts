@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import { PACKAGE_NAME, ROUTES_DIR } from '@/lib/constants'
+import { PACKAGE_NAME } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
@@ -8,8 +8,10 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  *  Route diagnostics and type checking run earlier, outside Vite's plugin
  *  pipeline entirely - see create-builder.ts.
  *
- *  Runs only in the SSR environment. */
-export function penBuild(): Plugin {
+ *  Runs only in the SSR environment.
+ *
+ *  @param routesDir - App route directory relative to the project root. */
+export function penBuild(routesDir: string): Plugin {
   return {
     name: 'pen:build',
 
@@ -41,7 +43,7 @@ export function penBuild(): Plugin {
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
-        return entryAppSource.replaceAll(APP_DIR_TOKEN, ROUTES_DIR)
+        return entryAppSource.replaceAll(APP_DIR_TOKEN, routesDir)
     },
   }
 }

@@ -20,9 +20,10 @@ import { penTypecheck } from '../../plugins/typecheck-plugin'
  * Vite's own stock logger handles its own messages. Pen never has to
  * track or react to anything Vite might say.
  *
+ * @param routesDir - App route directory relative to the project root.
  * @param outDir - Build output directory relative to the project root.
  */
-export async function createPenBuilder(outDir: string) {
+export async function createPenBuilder(routesDir: string, outDir: string) {
   log.print('')
   log.banner(`${CLI_NAME} v${VERSION}`)
   log.print('')
@@ -32,9 +33,9 @@ export async function createPenBuilder(outDir: string) {
     root: projectDir,
     configFile: false,
     plugins: [
-      penDiagnose(),
+      penDiagnose(routesDir),
       penTypecheck(),
-      penBuild(),
+      penBuild(routesDir),
     ],
     build: { outDir },
   })
