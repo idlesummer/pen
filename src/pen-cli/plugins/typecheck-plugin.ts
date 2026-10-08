@@ -1,6 +1,27 @@
 import type { Plugin } from 'vite'
 import { spawn } from 'node:child_process'
-import { resolveTsc } from '@/lib/resolve-tsc'
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
+
+/**
+ * Resolves the project's own locally installed `tsc` binary, so type
+ * checking always runs against the user's own TypeScript version and
+ * tsconfig - never a version pen itself depends on.
+ *
+ * @param projectDir - Project directory to resolve `typescript` from.
+ * @returns Path to the resolved `tsc` script, or `undefined` if the
+ * project has no `typescript` installed.
+ */
+function resolveTsc(projectDir: string): string | undefined {
+  try {
+    const require = createRequire(join(projectDir, 'package.json'))
+    const packageJsonPath = require.resolve('typescript/package.json')
+    return join(dirname(packageJsonPath), 'bin', 'tsc')
+  }
+  catch {
+    return undefined
+  }
+}
 
 /** Runs the project's own `tsc --noEmit` against its own tsconfig, so build
  *  errors come from the exact TypeScript version and config the editor
@@ -23,9 +44,6 @@ async function runTsc(projectDir: string): Promise<string | undefined> {
 
 /**
  * Type-checks the project before the real build starts.
- *
- * Exits directly on failure instead of going through `this.error()`,
- * which would otherwise wrap the message in rolldown's own stack trace.
  *
  * Runs only in the SSR environment. Marked `sequential` so a future
  * buildStart hook on another plugin can never silently race this one -
