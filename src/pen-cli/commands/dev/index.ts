@@ -1,8 +1,8 @@
 import { defineCommand } from 'citty'
 import { createServerModuleRunner } from 'vite'
-import { createPenDevServer } from './create-dev-server'
+import { APP_DIR_NAME } from '@/lib/constants'
 import { ENTRY_MODULE_ID } from '@/pen-cli/constants'
-import { resolveRoutesDir } from '@/pen-cli/resolve-routes-dir'
+import { createPenDevServer } from './create-dev-server'
 
 export const devCommand = defineCommand({
   meta: {
@@ -11,7 +11,7 @@ export const devCommand = defineCommand({
   },
   run: async () => {
     // Headless Vite server for loading the app entry module
-    const server = await createPenDevServer(resolveRoutesDir())
+    const server = await createPenDevServer(`src/${APP_DIR_NAME}`)
     const runner = createServerModuleRunner(server.environments.ssr!)
     await runner.import(ENTRY_MODULE_ID)
     await server.close()
