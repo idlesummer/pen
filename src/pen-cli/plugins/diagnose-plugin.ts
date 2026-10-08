@@ -24,12 +24,16 @@ export function penDiagnose(routesDir: string): Plugin {
     buildStart: {
       sequential: true,
       async handler() {
-        const { warnings, error } = await reportRouteDiagnostics(this.environment.config.root, routesDir)
+        const projectDir = this.environment.config.root
+        const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir)
+
+        // Print warnings
         for (const message of warnings)
           this.warn(message)
-        if (error) {
+
+        // Print errors
+        if (error)
           this.error(error)
-        }
       },
     },
   }
