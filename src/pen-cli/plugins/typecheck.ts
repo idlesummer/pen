@@ -32,7 +32,7 @@ function runTsc(projectDir: string): Promise<string | undefined> {
  */
 export function penTypecheck(): Plugin {
   return {
-    name: 'pen:build-typecheck',
+    name: 'pen:typecheck',
 
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
