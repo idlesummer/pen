@@ -27,9 +27,9 @@ export function penDiagnose(appDir: string): Plugin {
       async handler() {
         const { warnings, error } = await reportRouteDiagnostics(this.environment.config.root, appDir)
         for (const message of warnings)
-          this.warn(message)
+          log.warn(message)
         if (error) {
-          this.error(error)
+          log.error(error)
           process.exit(1)
         }
       },
