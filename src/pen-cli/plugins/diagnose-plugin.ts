@@ -15,9 +15,9 @@ import { reportRouteDiagnostics } from '@/pen-react/setup'
  *
  * @param appDir - App route directory relative to the project root.
  */
-export function penRouteDiagnostics(appDir: string): Plugin {
+export function penDiagnose(appDir: string): Plugin {
   return {
-    name: 'pen:route-diagnostics',
+    name: 'pen:diagnose',
 
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
