@@ -1,6 +1,6 @@
 import { sep } from 'node:path'
 import { createBuilder } from 'vite'
-import { CLI_NAME, VERSION } from '@/lib/constants'
+import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
 import * as log from '@/pen-cli/logger/console'
 import { penBuild } from '../../plugins/build-plugin'
@@ -20,15 +20,16 @@ import { penTypecheck } from '../../plugins/typecheck-plugin'
  * Vite's own stock logger handles its own messages. Pen never has to
  * track or react to anything Vite might say.
  *
- * @param routesDir - App route directory relative to the project root.
+ * @param srcDir - Directory containing the app directory, relative to the project root.
  * @param outDir - Build output directory relative to the project root.
  */
-export async function createPenBuilder(routesDir: string, outDir: string) {
+export async function createPenBuilder(srcDir: string, outDir: string) {
   log.print('')
   log.banner(`${CLI_NAME} v${VERSION}`)
   log.print('')
 
   const projectDir = findProjectRoot(process.cwd() + sep)
+  const routesDir = `${srcDir}/${APP_DIR_NAME}`
   return createBuilder({
     root: projectDir,
     configFile: false,

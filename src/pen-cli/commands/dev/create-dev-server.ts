@@ -1,5 +1,6 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
+import { APP_DIR_NAME } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import { penDev } from '@/pen-cli/plugins/dev-plugin'
@@ -12,8 +13,9 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *  browser, no client environment - driving a Node/terminal program
  *  through a module runner instead.
  *
- *  @param routesDir - App route directory relative to the project root. */
-export function createPenDevServer(routesDir: string) {
+ *  @param srcDir - Directory containing the app directory, relative to the project root. */
+export function createPenDevServer(srcDir: string) {
+  const routesDir = `${srcDir}/${APP_DIR_NAME}`
   return createServer({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
