@@ -9,13 +9,6 @@ import { ErrorFallback } from '../renderer/components/ErrorBoundary'
 import { createDefaultExportMap } from './default-export-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
-/** A diagnostic's message, with its files shown relative to the project
- *  root (app dir included) instead of the app dir alone - otherwise they
- *  look route-shaped but aren't actually openable from where the build runs. */
-function formatDiagnostic({ severity, rule, description, files }: Diagnostic, appDir: string): string {
-  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${appDir}/${file}`)].join('\n')
-}
-
 /** The shape of a route module file. */
 type RouteModule = Module<RouteComponent>
 
@@ -30,6 +23,13 @@ type DiagnosticReport = {
   warnings: string[]
   error?: string
   routes: string[]
+}
+
+/** A diagnostic's message, with its files shown relative to the project
+ *  root (app dir included) instead of the app dir alone - otherwise they
+ *  look route-shaped but aren't actually openable from where the build runs. */
+function formatDiagnostic({ severity, rule, description, files }: Diagnostic, appDir: string): string {
+  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${appDir}/${file}`)].join('\n')
 }
 
 /**
