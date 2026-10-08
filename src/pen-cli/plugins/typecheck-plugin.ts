@@ -6,15 +6,17 @@ import { resolveTsc } from '@/lib/resolve-tsc'
  *  errors come from the exact TypeScript version and config the editor
  *  already uses. Returns its diagnostic output on failure, or `undefined`
  *  if it passed or the project has no TypeScript installed. */
-function runTsc(projectDir: string): Promise<string | undefined> {
+async function runTsc(projectDir: string): Promise<string | undefined> {
   const tscPath = resolveTsc(projectDir)
-  if (!tscPath) return Promise.resolve(undefined)
+  if (!tscPath) return
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const child = spawn(process.execPath, [tscPath, '--noEmit', '--pretty'], { cwd: projectDir })
+
     let output = ''
-    child.stdout.on('data', (chunk: Buffer) => output += chunk)
-    child.stderr.on('data', (chunk: Buffer) => output += chunk)
+
+    child.stdout.on('data', chunk => output += chunk)
+    child.stderr.on('data', chunk => output += chunk)
     child.on('close', code => resolve(code === 0 ? undefined : output))
   })
 }
