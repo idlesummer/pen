@@ -1,6 +1,5 @@
 import { defineCommand } from 'citty'
-import { OUT_DIR } from '../../constants'
-import * as log from '../../logger/console'
+import { OUT_DIR } from '@/pen-cli/constants'
 import { createPenBuilder } from './create-builder'
 
 export const buildCommand = defineCommand({
@@ -12,12 +11,6 @@ export const buildCommand = defineCommand({
     // Build with Pen's default Vite config, targeting the SSR environment only.
     // The plugin handles both explicit Pen builds and user `vite build` calls.
     const builder = await createPenBuilder('src', OUT_DIR)
-
-    // Printed right before Vite's own build banner takes over. Route
-    // diagnostics and typecheck both run after this, as the builder's own
-    // sequential buildStart plugins - see create-builder.ts.
-    log.wait('Building app')
-
     await builder.build(builder.environments.ssr!)
   },
 })

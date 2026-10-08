@@ -1,5 +1,7 @@
 import { Text } from 'ink'
 
+// const text: number = 'hello'
+
 export default function RootPage() {
   return (
     <>
