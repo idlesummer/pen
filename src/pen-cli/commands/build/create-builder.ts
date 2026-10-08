@@ -3,9 +3,9 @@ import { createBuilder } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
 import * as log from '@/pen-cli/logger/console'
-import { penBuild } from '../../plugins/build-plugin'
-import { penDiagnose } from '../../plugins/diagnose-plugin'
-import { penTypecheck } from '../../plugins/typecheck-plugin'
+import { penBuild } from '@/pen-cli/plugins/build-plugin'
+import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
+import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
 
 /**
  * Creates a Vite builder configured with the `pen` plugin, ready to build
@@ -24,12 +24,10 @@ import { penTypecheck } from '../../plugins/typecheck-plugin'
  * @param outDir - Build output directory relative to the project root.
  */
 export async function createPenBuilder(srcDir: string, outDir: string) {
-  log.print('')
-  log.banner(`${CLI_NAME} v${VERSION}`)
-  log.print('')
-
   const projectDir = findProjectRoot(process.cwd() + sep)
   const routesDir = `${srcDir}/${APP_DIR_NAME}`
+  log.banner(`${CLI_NAME} v${VERSION}`)
+
   return createBuilder({
     root: projectDir,
     configFile: false,
