@@ -3,7 +3,6 @@ import { createBuilder } from 'vite'
 import pc from 'picocolors'
 import { CLI_NAME, VERSION } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
-import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 import { penBuild } from '../../plugins/build-plugin'
@@ -17,6 +16,10 @@ import { penTypecheck } from '../../plugins/typecheck-plugin'
  * reportRouteDiagnostics is shared with `pen dev` and isn't a Vite
  * concern. Type checking runs second, as the builder's own sequential
  * buildStart plugin - see typecheck-plugin.ts for why that's safe.
+ *
+ * No customLogger here - build has no Ink terminal to protect, so
+ * Vite's own stock logger handles its own messages. Pen never has to
+ * track or react to anything Vite might say.
  *
  * @param appDir - App route directory relative to the project root.
  * @param outDir - Build output directory relative to the project root.
@@ -40,7 +43,6 @@ export async function createPenBuilder(appDir: string, outDir: string) {
   return createBuilder({
     root,
     configFile: false,
-    customLogger: createPenLogger(true),
     plugins: [
       penTypecheck(),
       penBuild(appDir),
