@@ -4,7 +4,7 @@ import { CLI_NAME, VERSION } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
 import * as log from '@/pen-cli/logger/console'
 import { penBuild } from '../../plugins/build-plugin'
-import { penRouteDiagnostics } from '../../plugins/route-diagnostics-plugin'
+import { penDiagnose } from '../../plugins/diagnose-plugin'
 import { penTypecheck } from '../../plugins/typecheck-plugin'
 
 /**
@@ -13,8 +13,8 @@ import { penTypecheck } from '../../plugins/typecheck-plugin'
  *
  * Route diagnostics and type checking both run as the builder's own
  * sequential buildStart plugins, diagnostics first since they're cheaper -
- * see route-diagnostics-plugin.ts and typecheck-plugin.ts for why that's
- * safe and ordered.
+ * see diagnose-plugin.ts and typecheck-plugin.ts for why that's safe and
+ * ordered.
  *
  * No customLogger here - build has no Ink terminal to protect, so
  * Vite's own stock logger handles its own messages. Pen never has to
@@ -33,7 +33,7 @@ export async function createPenBuilder(appDir: string, outDir: string) {
     root: projectDir,
     configFile: false,
     plugins: [
-      penRouteDiagnostics(appDir),
+      penDiagnose(appDir),
       penTypecheck(),
       penBuild(appDir),
     ],
