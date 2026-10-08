@@ -14,6 +14,14 @@ export const VERSION = __VERSION__
 // Framework metadata
 export const CLI_NAME = __PACKAGE_NAME__.split('/')?.[1] ?? __PACKAGE_NAME__
 
+// Routes always live in a folder literally named 'app' - never
+// user-configurable, same as Next.js's own app/ convention.
+export const APP_DIR_NAME = 'app'
+
+// The directory containing APP_DIR_NAME. Also fixed today, but kept
+// separate from the folder name above since they're different concerns.
+export const SRC_DIR = 'src'
+
 // Shared by pen-cli (commands/build, commands/dev) and pen-react/setup,
-// lib/ssr-glob - a fixed convention, never user-configurable.
-export const APP_DIR = 'src/app'
+// lib/ssr-glob - the app directory relative to the project root.
+export const APP_DIR = `${SRC_DIR}/${APP_DIR_NAME}`
