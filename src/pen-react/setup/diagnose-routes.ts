@@ -9,6 +9,13 @@ import { ErrorFallback } from '../renderer/components/ErrorBoundary'
 import { createDefaultExportMap } from './default-export-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
+/** A diagnostic's message, with its files shown relative to the project
+ *  root (app dir included) instead of the app dir alone - otherwise they
+ *  look route-shaped but aren't actually openable from where the build runs. */
+function formatDiagnostic({ severity, rule, description, files }: Diagnostic, appDir: string): string {
+  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${appDir}/${file}`)].join('\n')
+}
+
 /** The shape of a route module file. */
 type RouteModule = Module<RouteComponent>
 
@@ -64,11 +71,11 @@ export async function reportRouteDiagnostics(projectDir: string, appDir: string)
   const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir, appDir)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
-    .map(d => d.message)  // Already includes a "  at <file>" line per file
+    .map(d => formatDiagnostic(d, appDir))
 
   const error = diagnostics
     .filter(d => d.severity === 'error')
-    .map(d => d.message)
+    .map(d => formatDiagnostic(d, appDir))
     .join('\n\n') || undefined  // Works since empty strings are falsy
 
   // The two sentinel keys aren't real files - nothing to list
