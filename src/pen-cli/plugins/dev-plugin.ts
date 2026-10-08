@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
-import { APP_DIR, CLI_NAME, VERSION } from '@/lib/constants'
+import { CLI_NAME, ROUTES_DIR, VERSION } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
@@ -38,7 +38,7 @@ export function penDev(): Plugin {
     // has to hand back already-transformed code itself.
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = entryAppSource.replaceAll(APP_DIR_TOKEN, APP_DIR)
+        const source = entryAppSource.replaceAll(APP_DIR_TOKEN, ROUTES_DIR)
         const { code, map } = await transformWithOxc(source, ENTRY_MODULE_ID, { jsx: { development: true } })
         return { code, map }
       }

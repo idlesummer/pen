@@ -2,7 +2,7 @@ import type { Diagnostic, Module } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { APP_DIR } from '@/lib/constants'
+import { ROUTES_DIR } from '@/lib/constants'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 import { DefaultFallback } from '../renderer/components/DefaultBoundary'
@@ -30,7 +30,7 @@ type DiagnosticReport = {
  *  root (app dir included) instead of the app dir alone - otherwise they
  *  look route-shaped but aren't actually openable from where the build runs. */
 function formatDiagnostic({ severity, rule, description, files }: Diagnostic): string {
-  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${APP_DIR}/${file}`)].join('\n')
+  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${ROUTES_DIR}/${file}`)].join('\n')
 }
 
 /**
@@ -64,8 +64,8 @@ async function diagnoseRoutes(projectDir: string): Promise<RouteDiagnosis> {
  *  @param projectDir - Project directory containing the app directory.
  *  @returns A formatted summary of route diagnostics. */
 export async function reportRouteDiagnostics(projectDir: string): Promise<DiagnosticReport> {
-  if (!existsSync(join(projectDir, APP_DIR)))
-    return { warnings: [], error: `No such directory: '${APP_DIR}'`, routes: [] }
+  if (!existsSync(join(projectDir, ROUTES_DIR)))
+    return { warnings: [], error: `No such directory: '${ROUTES_DIR}'`, routes: [] }
 
   const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir)
   const warnings = diagnostics
