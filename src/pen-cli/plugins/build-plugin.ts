@@ -5,8 +5,7 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /** Bundles the app's entry module for Node.
  *
- *  Route diagnostics and type checking run earlier, outside Vite's plugin
- *  pipeline entirely - see create-builder.ts. Runs only in the SSR environment.
+ *  Runs only in the SSR environment.
  *
  *  @param routesDir - App route directory relative to the project root. */
 export function penBuild(routesDir: string): Plugin {
