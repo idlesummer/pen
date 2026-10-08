@@ -1,5 +1,6 @@
 import { defineCommand } from 'citty'
 import { APP_DIR, OUT_DIR } from '../../constants'
+import * as log from '../../logger/console'
 import { createPenBuilder } from './create-builder'
 
 export const buildCommand = defineCommand({
@@ -12,8 +13,10 @@ export const buildCommand = defineCommand({
     // The plugin handles both explicit Pen builds and user `vite build` calls.
     const builder = await createPenBuilder(APP_DIR, OUT_DIR)
 
-    // Diagnostics are already reported through Vite's own logger by the
-    // time a failure reaches here - nothing left to print.
+    // Printed last, right before Vite's own build banner takes over -
+    // diagnostics and typecheck failures above would have exited already.
+    log.wait('Building app')
+
     await builder.build(builder.environments.ssr!)
   },
 })
