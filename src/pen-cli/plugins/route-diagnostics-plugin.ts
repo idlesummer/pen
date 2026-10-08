@@ -1,0 +1,38 @@
+import type { Plugin } from 'vite'
+import * as log from '@/pen-cli/logger/console'
+import { reportRouteDiagnostics } from '@/pen-react/setup'
+
+/**
+ * Discovers the app's routes, validates them, and reports any errors or
+ * warnings before the real build starts.
+ *
+ * Exits directly on failure instead of going through `this.error()`,
+ * which would otherwise wrap the message in rolldown's own stack trace.
+ *
+ * Runs only in the SSR environment. Marked `sequential` and ordered before
+ * typecheck-plugin.ts in the builder's plugin array - diagnostics are
+ * cheaper, so they should fail fast before paying for a `tsc` run.
+ *
+ * @param appDir - App route directory relative to the project root.
+ */
+export function penRouteDiagnostics(appDir: string): Plugin {
+  return {
+    name: 'pen:route-diagnostics',
+
+    applyToEnvironment(environment) {
+      return environment.name === 'ssr'
+    },
+    buildStart: {
+      sequential: true,
+      async handler() {
+        const { warnings, error } = await reportRouteDiagnostics(this.environment.config.root, appDir)
+        for (const message of warnings)
+          log.warn(message)
+        if (error) {
+          log.error(error)
+          process.exit(1)
+        }
+      },
+    },
+  }
+}
