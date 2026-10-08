@@ -1,7 +1,7 @@
 import { globSync } from 'node:fs'
 import { join } from 'node:path'
 import { createServer, normalizePath } from 'vite'
-import { APP_DIR } from './constants'
+import { ROUTES_DIR } from './constants'
 
 /**
  * Imports every route module through Vite's transform pipeline.
@@ -17,8 +17,8 @@ export async function ssrGlob<T>(projectDir: string): Promise<Array<[string, T]>
     server: { middlewareMode: true },
   })
   try {
-    const paths = globSync('**/*.tsx', { cwd: join(projectDir, APP_DIR) }).map(normalizePath).sort()
-    const modules = paths.map(async path => [path, await server.ssrLoadModule(`/${APP_DIR}/${path}`)] as [string, T])
+    const paths = globSync('**/*.tsx', { cwd: join(projectDir, ROUTES_DIR) }).map(normalizePath).sort()
+    const modules = paths.map(async path => [path, await server.ssrLoadModule(`/${ROUTES_DIR}/${path}`)] as [string, T])
     return await Promise.all(modules)
   }
   finally {

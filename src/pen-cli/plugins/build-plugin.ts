@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import { APP_DIR, PACKAGE_NAME } from '@/lib/constants'
+import { PACKAGE_NAME, ROUTES_DIR } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
@@ -41,7 +41,7 @@ export function penBuild(): Plugin {
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
-        return entryAppSource.replaceAll(APP_DIR_TOKEN, APP_DIR)
+        return entryAppSource.replaceAll(APP_DIR_TOKEN, ROUTES_DIR)
     },
   }
 }
