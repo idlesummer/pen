@@ -29,7 +29,6 @@ export async function createPenBuilder(appDir: string, outDir: string) {
   log.print('')
 
   const projectDir = findProjectRoot(process.cwd() + sep)
-
   return createBuilder({
     root: projectDir,
     configFile: false,
