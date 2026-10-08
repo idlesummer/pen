@@ -11,10 +11,8 @@ import { reportRouteDiagnostics } from '@/pen-react/setup'
  * Runs only in the SSR environment. Marked `sequential` and ordered before
  * typecheck-plugin.ts in the builder's plugin array - diagnostics are
  * cheaper, so they should fail fast before paying for a `tsc` run.
- *
- * @param appDir - App route directory relative to the project root.
  */
-export function penDiagnose(appDir: string): Plugin {
+export function penDiagnose(): Plugin {
   return {
     name: 'pen:diagnose',
 
@@ -24,7 +22,7 @@ export function penDiagnose(appDir: string): Plugin {
     buildStart: {
       sequential: true,
       async handler() {
-        const { warnings, error } = await reportRouteDiagnostics(this.environment.config.root, appDir)
+        const { warnings, error } = await reportRouteDiagnostics(this.environment.config.root)
         for (const message of warnings)
           this.warn(message)
         if (error) {

@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty'
-import { APP_DIR, OUT_DIR } from '../../constants'
+import { OUT_DIR } from '../../constants'
 import * as log from '../../logger/console'
 import { createPenBuilder } from './create-builder'
 
@@ -11,7 +11,7 @@ export const buildCommand = defineCommand({
   run: async () => {
     // Build with Pen's default Vite config, targeting the SSR environment only.
     // The plugin handles both explicit Pen builds and user `vite build` calls.
-    const builder = await createPenBuilder(APP_DIR, OUT_DIR)
+    const builder = await createPenBuilder(OUT_DIR)
 
     // Printed right before Vite's own build banner takes over. Route
     // diagnostics and typecheck both run after this, as the builder's own

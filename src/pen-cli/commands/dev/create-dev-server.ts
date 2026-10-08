@@ -12,15 +12,15 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *  browser, no client environment - driving a Node/terminal program
  *  through a module runner instead.
  *
- *  @param appDir - App route directory relative to the project root. */
-export function createPenDevServer(appDir: string) {
+ */
+export function createPenDevServer() {
   return createServer({
     root: findProjectRoot(process.cwd() + sep),
     configFile: false,
     customLogger: createPenLogger(),
     clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
-      penDev(appDir),
+      penDev(),
       penReactRefreshInk(),
     ],
     server: {

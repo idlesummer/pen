@@ -13,3 +13,7 @@ export const VERSION = __VERSION__
 
 // Framework metadata
 export const CLI_NAME = __PACKAGE_NAME__.split('/')?.[1] ?? __PACKAGE_NAME__
+
+// Shared by pen-cli (commands/build, commands/dev) and pen-react/setup,
+// lib/ssr-glob - a fixed convention, never user-configurable.
+export const APP_DIR = 'src/app'

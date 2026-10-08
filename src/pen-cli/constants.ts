@@ -1,6 +1,3 @@
-// commands/build, commands/dev - both default to this app directory
-export const APP_DIR = 'src/app'
-
 // commands/build (writes here), commands/start (reads from here) - both
 // need to agree on where build output lives
 export const OUT_DIR = '.pen/dist'
