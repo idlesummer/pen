@@ -1,5 +1,4 @@
 import type { Plugin } from 'vite'
-import * as log from '@/pen-cli/logger/console'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 
 /**
@@ -27,10 +26,9 @@ export function penDiagnose(appDir: string): Plugin {
       async handler() {
         const { warnings, error } = await reportRouteDiagnostics(this.environment.config.root, appDir)
         for (const message of warnings)
-          log.warn(message)
+          this.warn(message)
         if (error) {
-          log.error(error)
-          process.exit(1)
+          this.error(error)
         }
       },
     },
