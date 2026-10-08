@@ -1,7 +1,6 @@
 import type { Plugin } from 'vite'
 import { spawn } from 'node:child_process'
 import { resolveTsc } from '@/lib/resolve-tsc'
-import * as log from '@/pen-cli/logger/console'
 
 /** Runs the project's own `tsc --noEmit` against its own tsconfig, so build
  *  errors come from the exact TypeScript version and config the editor
@@ -39,12 +38,11 @@ export function penTypecheck(): Plugin {
     },
     buildStart: {
       sequential: true,
+
       async handler() {
-        const typeErrors = await runTsc(this.environment.config.root)
-        if (typeErrors) {
-          log.error(typeErrors)
-          process.exit(1)
-        }
+        const projectDir = this.environment.config.root
+        const typeErrors = await runTsc(projectDir)
+        if (typeErrors) this.error(typeErrors)
       },
     },
   }
