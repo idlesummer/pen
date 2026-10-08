@@ -1,6 +1,5 @@
 import { sep } from 'node:path'
 import { createBuilder } from 'vite'
-import pc from 'picocolors'
 import { CLI_NAME, VERSION } from '@/lib/constants'
 import { findProjectRoot } from '@/lib/find-project-root'
 import * as log from '@/pen-cli/logger/console'
@@ -30,9 +29,7 @@ export async function createPenBuilder(appDir: string, outDir: string) {
   log.print('')
 
   const root = findProjectRoot(process.cwd() + sep)
-  const { warnings, error, routes } = await reportRouteDiagnostics(root, appDir)
-  for (const route of routes)
-    log.print(`${pc.dim('•')} ${route}`)
+  const { warnings, error } = await reportRouteDiagnostics(root, appDir)
   for (const message of warnings)
     log.warn(message)
   if (error) {
