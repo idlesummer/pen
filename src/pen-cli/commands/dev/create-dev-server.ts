@@ -1,9 +1,9 @@
 import { createServer } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
-import { loadPenConfig } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
+import { penConfig } from '@/pen-cli/plugins/config-plugin'
 import { penDev } from '@/pen-cli/plugins/dev-plugin'
 import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
 import type { PluginOptions } from '@/pen-cli/plugins/plugin-options'
@@ -17,18 +17,16 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *  through a module runner instead.
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
-export async function createPenDevServer(srcDir: string) {
+export function createPenDevServer(srcDir: string) {
   const projectDir = findPackageDir(process.cwd())
   if (!projectDir) {
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
 
-  const penConfig = await loadPenConfig(projectDir, 'serve')
   const options: PluginOptions = {
     routesDir: `${srcDir}/${APP_DIR_NAME}`,
     startTime: Date.now(),
-    ink: penConfig.ink,
   }
   log.banner(`${CLI_NAME} v${VERSION}`)
 
@@ -38,6 +36,7 @@ export async function createPenDevServer(srcDir: string) {
     customLogger: createPenLogger(),
     clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
+      penConfig(options),
       penDiagnose(options),
       penDev(options),
       penReactRefreshInk(),

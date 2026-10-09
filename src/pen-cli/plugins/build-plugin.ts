@@ -6,8 +6,12 @@ import type { PluginOptions } from './plugin-options'
 
 /** Bundles the app's entry module for Node.
  *
- *  Runs only in the SSR environment. */
-export function penBuild({ routesDir, ink }: PluginOptions): Plugin {
+ *  Runs only in the SSR environment. `ink` is read lazily off `options`
+ *  inside `load()` rather than destructured here, since pen:config's
+ *  `config` hook (which populates it) hasn't necessarily run yet at the
+ *  time this factory itself is called. */
+export function penBuild(options: PluginOptions): Plugin {
+  const { routesDir } = options
   return {
     name: 'pen:build',
 
@@ -41,7 +45,7 @@ export function penBuild({ routesDir, ink }: PluginOptions): Plugin {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource
           .replaceAll(APP_DIR_TOKEN, routesDir)
-          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(ink ?? {}))
+          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.ink ?? {}))
     },
   }
 }
