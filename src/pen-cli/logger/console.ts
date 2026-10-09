@@ -1,18 +1,8 @@
 import pc from 'picocolors'
 
-/** Prints an unformatted message to the terminal. */
-export function print(message: string) {
-  console.log(message)
-}
-
 /** One-line startup banner, printed once before anything else. */
 export function banner(message: string) {
   console.log('\n' + pc.bold(pc.bgBlueBright(message)))
-}
-
-/** Work that's starting (compiling a changed file). */
-export function wait(message: string) {
-  console.log(pc.cyan('○'), message)
 }
 
 /** The dev server itself is up and about to serve the app. */
