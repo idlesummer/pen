@@ -1,7 +1,7 @@
 import { use } from 'react'
 import { NavigationContext } from '../NavigationProvider'
 
-/** Returns navigation actions - push, replace, back, forward.
+/** Returns navigation actions - push, replace, back, forward, refresh.
  *
  *  Doesn't subscribe to navigation state, so calling this never triggers a re-render.
  *

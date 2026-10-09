@@ -25,6 +25,7 @@ export class NavigationStore {
       replace: this.replaceUrl.bind(this),
       back:    this.goBack.bind(this),
       forward: this.goForward.bind(this),
+      refresh: this.refreshRoute.bind(this),
     }
   }
 
@@ -60,6 +61,11 @@ export class NavigationStore {
   private goForward() {
     if (this.navigation.forward())
       this.emit()
+  }
+
+  private refreshRoute() {
+    this.navigation.refresh()
+    this.emit()
   }
 
   /* Internal helpers */

@@ -1,7 +1,7 @@
 import type { Matcher } from '@/pen-core/runtime'
 import type { ComponentMap } from './types/component-map'
 import { useMemo } from 'react'
-import { usePathname } from '../navigation/hooks/use-pathname'
+import { useNavigate } from '../navigation/hooks/use-navigate'
 import { renderMatch } from './render'
 
 export type RouterProps = {
@@ -14,12 +14,17 @@ export type RouterProps = {
  *
  *  The memo is load-bearing: async pages create promises while building the
  *  tree, and use() needs those same promises on Suspense retries. Rebuilding
- *  the tree on unrelated re-renders would create new promises indefinitely. */
+ *  the tree on unrelated re-renders would create new promises indefinitely.
+ *
+ *  `revision` is in the deps so `router.refresh()` rebuilds the tree even
+ *  though it leaves the pathname untouched. */
 export function Router({ matcher, componentMap }: RouterProps) {
-  const pathname = usePathname()
+  const { history, position, revision } = useNavigate()
+  const pathname = history[position]!.url
   return useMemo(() => {
     const match = matcher(pathname)
     const tree = renderMatch(match, componentMap)
     return tree
-  }, [pathname, matcher, componentMap])
+    // eslint-disable-next-line @eslint-react/exhaustive-deps -- revision is a cache-busting sentinel for refresh(), not read in the body
+  }, [pathname, revision, matcher, componentMap])
 }

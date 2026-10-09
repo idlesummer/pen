@@ -6,11 +6,13 @@ type NavigationHistory = {
 type NavigationSnapshot = {
   history: Readonly<NavigationHistory[]>
   position: number
+  revision: number
 }
 
 /** Manages navigation history and exposes its current state. */
 export class Navigation {
   private position = 0
+  private revision = 0
   private history: NavigationHistory[]
 
   constructor(initialUrl: string) {
@@ -22,7 +24,8 @@ export class Navigation {
   getSnapshot(): NavigationSnapshot {
     const history = this.history
     const position = this.position
-    return { history, position }
+    const revision = this.revision
+    return { history, position, revision }
   }
 
   /* Navigation Actions */
@@ -44,5 +47,11 @@ export class Navigation {
   /** Returns whether it actually moved, so the store knows whether to notify. */
   forward(): boolean {
     return this.position < this.history.length-1 && (this.position++, true)
+  }
+
+  /** Bumps the revision without touching history, so the current route
+   *  re-renders in place. */
+  refresh() {
+    this.revision++
   }
 }
