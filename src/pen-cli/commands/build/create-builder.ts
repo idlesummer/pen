@@ -5,7 +5,6 @@ import { findProjectRoot } from '@/lib/find-project-root'
 import * as log from '@/pen-cli/logger/console'
 import { penBuild } from '@/pen-cli/plugins/build-plugin'
 import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
-import { penLogTransformed } from '@/pen-cli/plugins/log-transformed-plugin'
 import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
 
 /**
@@ -36,7 +35,6 @@ export async function createPenBuilder(srcDir: string, outDir: string) {
       penDiagnose(routesDir),
       penTypecheck(),
       penBuild(routesDir),
-      penLogTransformed(projectDir),
     ],
     build: { outDir },
   })
