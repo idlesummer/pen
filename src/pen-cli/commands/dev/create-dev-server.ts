@@ -19,7 +19,10 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
 export function createPenDevServer(srcDir: string) {
   const projectDir = findProjectRoot(process.cwd() + sep)
-  const options: PluginOptions = { routesDir: `${srcDir}/${APP_DIR_NAME}`, startTime: Date.now() }
+  const options: PluginOptions = {
+    routesDir: `${srcDir}/${APP_DIR_NAME}`,
+    startTime: Date.now(),
+  }
   log.banner(`${CLI_NAME} v${VERSION}`)
 
   return createServer({
