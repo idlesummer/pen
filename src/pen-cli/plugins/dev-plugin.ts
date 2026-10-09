@@ -52,7 +52,6 @@ export function penDev(routesDir: string): Plugin {
     },
     buildStart: {
       sequential: true,
-
       handler() {
         log.ready(`Ready in ${Date.now() - startTime}ms\n`)
       },
