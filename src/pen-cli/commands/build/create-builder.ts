@@ -9,22 +9,20 @@ import { penConfig } from '@/pen-cli/plugins/config-plugin'
 import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
 import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
 
-/**
- * Creates a Vite builder configured with the `pen` plugin, ready to build
- * the app's SSR environment.
+/** Creates a Vite builder configured with the `pen` plugin, ready to build
+ *  the app's SSR environment.
  *
- * Route diagnostics and type checking both run as the builder's own
- * sequential buildStart plugins, diagnostics first since they're cheaper -
- * see diagnose-plugin.ts and typecheck-plugin.ts for why that's safe and
- * ordered.
+ *  Route diagnostics and type checking both run as the builder's own
+ *  sequential buildStart plugins, diagnostics first since they're cheaper -
+ *  see diagnose-plugin.ts and typecheck-plugin.ts for why that's safe and
+ *  ordered.
  *
- * No customLogger here - build has no Ink terminal to protect, so
- * Vite's own stock logger handles its own messages. Pen never has to
- * track or react to anything Vite might say.
+ *  No customLogger here - build has no Ink terminal to protect, so
+ *  Vite's own stock logger handles its own messages. Pen never has to
+ *  track or react to anything Vite might say.
  *
- * @param srcDir - Directory containing the app directory, relative to the project root.
- * @param outDir - Build output directory relative to the project root.
- */
+ *  @param srcDir - Directory containing the app directory, relative to the project root.
+ *  @param outDir - Build output directory relative to the project root. */
 export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBuilder> {
   log.banner(`${CLI_NAME} v${VERSION}`)
 
