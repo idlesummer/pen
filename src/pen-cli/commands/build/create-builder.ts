@@ -3,9 +3,9 @@ import type { PluginOptions } from '@/pen-cli/plugins/plugin-options'
 import { createBuilder } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
-import { loadPenConfig } from '@/pen-cli/config'
 import * as log from '@/pen-cli/logger/console'
 import { penBuild } from '@/pen-cli/plugins/build-plugin'
+import { penConfig } from '@/pen-cli/plugins/config-plugin'
 import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
 import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
 
@@ -25,7 +25,7 @@ import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
  * @param srcDir - Directory containing the app directory, relative to the project root.
  * @param outDir - Build output directory relative to the project root.
  */
-export async function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBuilder> {
+export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBuilder> {
   log.banner(`${CLI_NAME} v${VERSION}`)
 
   const projectDir = findPackageDir(process.cwd())
@@ -33,16 +33,15 @@ export async function createPenBuilder(srcDir: string, outDir: string): Promise<
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-  const penConfig = await loadPenConfig(projectDir, 'build')
   const options: PluginOptions = {
     routesDir: `${srcDir}/${APP_DIR_NAME}`,
-    ink: penConfig.ink,
   }
 
   return createBuilder({
     root: projectDir,
     configFile: false,
     plugins: [
+      penConfig(options),
       penDiagnose(options),
       penTypecheck(),
       penBuild(options),
