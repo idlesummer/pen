@@ -5,23 +5,15 @@ import { loadConfigFromFile } from 'vite'
 import * as log from '@/pen-cli/logger/console'
 
 /**
- * The subset of Ink's own `render()` options that make sense from a static
- * config file - plain booleans/numbers only. Streams (`stdout`/`stdin`/
- * `stderr`) and callbacks (`onRender`) aren't included since they can't
- * survive being read from `pen.config.ts` and substituted into the app's
- * bundled entry module as a JSON literal.
+ * Ink's own `render()` options, forwarded as-is for now.
+ *
+ * Not every field survives being read from `pen.config.ts` and substituted
+ * into the app's bundled entry module as a JSON literal - streams
+ * (`stdout`/`stdin`/`stderr`) and the `onRender` callback won't work.
+ * Deliberately not narrowed to the JSON-safe subset yet - revisit once it's
+ * clearer which fields are actually worth exposing.
  */
-export type PenInkOptions = Pick<RenderOptions,
-  | 'debug'
-  | 'exitOnCtrlC'
-  | 'patchConsole'
-  | 'isScreenReaderEnabled'
-  | 'maxFps'
-  | 'incrementalRendering'
-  | 'concurrent'
-  | 'interactive'
-  | 'alternateScreen'
->
+export type PenInkOptions = RenderOptions
 
 /** Settings read from the project's `pen.config.ts`. */
 export interface PenConfig {
@@ -35,10 +27,13 @@ export function defineConfig(config: PenConfig): PenConfig {
   return config
 }
 
-const CONFIG_FILENAMES = ['pen.config.ts', 'pen.config.js', 'pen.config.mjs']
+const CONFIG_FILENAME = 'pen.config.ts'
 
 /**
- * Loads the project's `pen.config.ts` (or `.js`/`.mjs`), if one exists.
+ * Loads the project's `pen.config.ts`, if one exists.
+ *
+ * `.ts` only - pen is a TypeScript-first framework, so there's no `.js`/
+ * `.mjs` fallback to support.
  *
  * Reuses Vite's own config loader (esbuild-transpiled, so plain TS syntax
  * works with no project tsconfig involved) instead of hand-rolling one -
@@ -53,16 +48,15 @@ const CONFIG_FILENAMES = ['pen.config.ts', 'pen.config.js', 'pen.config.mjs']
  * @param command - Matches Vite's own `ConfigEnv.command` so the loader behaves consistently.
  */
 export async function loadPenConfig(projectDir: string, command: 'build' | 'serve'): Promise<PenConfig> {
-  const configFile = CONFIG_FILENAMES.find(name => existsSync(join(projectDir, name)))
-  if (!configFile) return {}
+  if (!existsSync(join(projectDir, CONFIG_FILENAME))) return {}
 
   try {
     const mode = command === 'build' ? 'production' : 'development'
-    const result = await loadConfigFromFile({ command, mode }, configFile, projectDir)
+    const result = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir)
     return (result?.config ?? {}) as PenConfig
   }
   catch (err) {
-    log.error(`Failed to load ${configFile}: ${err instanceof Error ? err.message : String(err)}`)
+    log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : String(err)}`)
     process.exit(1)
   }
 }
