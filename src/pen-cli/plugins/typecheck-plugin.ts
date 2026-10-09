@@ -1,44 +1,50 @@
 import type { Plugin } from 'vite'
-import { spawn } from 'node:child_process'
 import { createRequire } from 'node:module'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 
 /**
- * Resolves the project's own locally installed `tsc` binary, so type
- * checking always runs against the user's own TypeScript version and
+ * Resolves the project's own locally installed `typescript` package, so
+ * type checking always runs against the user's own TypeScript version and
  * tsconfig - never a version pen itself depends on.
  *
  * @param projectDir - Project directory to resolve `typescript` from.
- * @returns Path to the resolved `tsc` script, or `undefined` if the
+ * @returns The resolved `typescript` module, or `undefined` if the
  * project has no `typescript` installed.
  */
-function resolveTsc(projectDir: string): string | undefined {
+async function resolveTypescript(projectDir: string): Promise<typeof import('typescript') | undefined> {
   try {
     const require = createRequire(join(projectDir, 'package.json'))
-    const packageJsonPath = require.resolve('typescript/package.json')
-    return join(dirname(packageJsonPath), 'bin', 'tsc')
+    const tsPath = require.resolve('typescript')
+    const module: { default: typeof import('typescript') } = await import(tsPath)
+    return module.default
   }
   catch {
     return undefined
   }
 }
 
-/** Runs the project's own `tsc --noEmit` against its own tsconfig, so build
- *  errors come from the exact TypeScript version and config the editor
- *  already uses. Returns its diagnostic output on failure, or `undefined`
- *  if it passed or the project has no TypeScript installed. */
-async function runTsc(projectDir: string): Promise<string | undefined> {
-  const tscPath = resolveTsc(projectDir)
-  if (!tscPath) return
+/** Type-checks the project using the resolved TypeScript's own compiler
+ *  API, so errors come from the exact TypeScript version and config the
+ *  editor already uses. Returns formatted diagnostic output on failure,
+ *  or `undefined` if it passed or the project has no TypeScript installed. */
+async function runTypecheck(projectDir: string): Promise<string | undefined> {
+  const ts = await resolveTypescript(projectDir)
+  if (!ts) return
 
-  return new Promise(resolve => {
-    const child = spawn(process.execPath, [tscPath, '--noEmit', '--pretty'], { cwd: projectDir })
+  const configPath = ts.findConfigFile(projectDir, ts.sys.fileExists, 'tsconfig.json')
+  if (!configPath) return
 
-    let output = ''
+  const { config } = ts.readConfigFile(configPath, ts.sys.readFile)
+  const { fileNames, options, errors: configErrors } = ts.parseJsonConfigFileContent(config, ts.sys, projectDir)
 
-    child.stdout.on('data', chunk => output += chunk)
-    child.stderr.on('data', chunk => output += chunk)
-    child.on('close', code => resolve(code === 0 ? undefined : output))
+  const program = ts.createProgram(fileNames, options)
+  const diagnostics = [...configErrors, ...ts.getPreEmitDiagnostics(program)]
+  if (diagnostics.length === 0) return
+
+  return ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+    getCurrentDirectory: () => projectDir,
+    getCanonicalFileName: file => file,
+    getNewLine: () => '\n',
   })
 }
 
@@ -61,7 +67,7 @@ export function penTypecheck(): Plugin {
 
       async handler() {
         const projectDir = this.environment.config.root
-        const typeErrors = await runTsc(projectDir)
+        const typeErrors = await runTypecheck(projectDir)
         if (typeErrors) this.error(typeErrors)
       },
     },
