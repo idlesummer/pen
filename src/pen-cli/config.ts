@@ -14,8 +14,10 @@ export type PenConfig = {
 const CONFIG_FILENAME = 'pen.config.ts'
 
 /** `ink` defaults applied when the project's config omits them. */
-const DEFAULT_INK_OPTIONS: InkRenderOptions = {
-  maxFps: 75,
+const DEFAULT_PEN_CONFIG: PenConfig = {
+  ink: {
+    maxFps: 75,
+  },
 }
 
 /** Type-checks config objects and provides editor autocomplete. */
@@ -34,13 +36,13 @@ export function defineConfig(config: PenConfig): PenConfig {
  *  @returns The loaded config, merged over defaults. */
 export async function loadPenConfig(projectDir: string, command: 'build' | 'serve'): Promise<PenConfig> {
   if (!existsSync(join(projectDir, CONFIG_FILENAME)))
-    return { ink: DEFAULT_INK_OPTIONS }
+    return DEFAULT_PEN_CONFIG
 
   try {
     const mode = command === 'build' ? 'production' : 'development'
     const file = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir)
     const config = (file?.config ?? {}) as PenConfig
-    return { ink: { ...DEFAULT_INK_OPTIONS, ...config.ink } }
+    return { ...DEFAULT_PEN_CONFIG, ...config }
   }
   catch (err) {
     log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err}`)
