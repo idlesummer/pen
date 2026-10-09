@@ -9,7 +9,7 @@ const WINDOWS_EXTENDED_PREFIX = '\\\\?\\'
  *
  *  @param startDir - Directory to start searching from. Must end with a trailing separator.
  *  @returns The package directory, or `startDir` if none is found. */
-export function findProjectRoot(startDir: string): string {
+export function findPackageDir(startDir: string): string {
   const packageJsonPath = findPackageJSON('.', pathToFileURL(startDir))
   const root = packageJsonPath ? dirname(packageJsonPath) : startDir
 
