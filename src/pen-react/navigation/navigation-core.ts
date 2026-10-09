@@ -6,13 +6,13 @@ type NavigationHistory = {
 type NavigationSnapshot = {
   history: Readonly<NavigationHistory[]>
   position: number
-  revision: number
+  refreshes: number
 }
 
 /** Manages navigation history and exposes its current state. */
 export class Navigation {
   private position = 0
-  private revision = 0
+  private refreshes = 0
   private history: NavigationHistory[]
 
   constructor(initialUrl: string) {
@@ -24,8 +24,8 @@ export class Navigation {
   getSnapshot(): NavigationSnapshot {
     const history = this.history
     const position = this.position
-    const revision = this.revision
-    return { history, position, revision }
+    const refreshes = this.refreshes
+    return { history, position, refreshes }
   }
 
   /* Navigation Actions */
@@ -49,9 +49,9 @@ export class Navigation {
     return this.position < this.history.length-1 && (this.position++, true)
   }
 
-  /** Bumps the revision without touching history, so the current route
+  /** Bumps the refresh count without touching history, so the current route
    *  re-renders in place. */
   refresh() {
-    this.revision++
+    this.refreshes++
   }
 }
