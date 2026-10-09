@@ -1,7 +1,7 @@
 import type { RenderOptions as InkRenderOptions } from 'ink'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { loadConfigFromFile } from 'vite'
+import { loadConfigFromFile, mergeConfig } from 'vite'
 import * as log from '@/pen-cli/logger/console'
 
 /** Settings read from the project's `pen.config.ts`. */
@@ -42,7 +42,7 @@ export async function loadPenConfig(projectDir: string, command: 'build' | 'serv
     const mode = command === 'build' ? 'production' : 'development'
     const file = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir)
     const config = (file?.config ?? {}) as PenConfig
-    return { ...DEFAULT_PEN_CONFIG, ...config }
+    return mergeConfig(DEFAULT_PEN_CONFIG, config)
   }
   catch (err) {
     log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err}`)
