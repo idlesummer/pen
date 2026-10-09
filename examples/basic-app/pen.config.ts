@@ -1,6 +1,6 @@
-import { definePenConfig } from '@idlesummer/pen'
+import { defineConfig } from '@idlesummer/pen'
 
-export default definePenConfig({
+export default defineConfig({
   ink: {
     maxFps: 60,
   },
