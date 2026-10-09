@@ -1,20 +1,14 @@
 import type { Plugin } from 'vite'
-import { reportRouteDiagnostics } from '@/pen-react/setup'
 import type { PluginOptions } from './plugin-options'
+import { reportRouteDiagnostics } from '@/pen-react/setup'
 
-/**
- * Discovers the app's routes, validates them, and reports any errors or
- * warnings before the real build starts.
+/** Discovers and validates the app's routes before typechecking and bundling.
  *
- * Runs only in the SSR environment. Marked `sequential` and ordered before
- * typecheck-plugin.ts in the builder's plugin array - diagnostics are
- * cheaper, so they should fail fast before paying for a `tsc` run.
+ *  Runs only in the SSR environment. Marked `sequential` and ordered before
+ *  `penTypecheck` so route errors fail fast before the more expensive `tsc` run.
  *
- * `perEnvironmentStartEndDuringDev` is needed for dev specifically: Vite
- * only fires buildStart for the client environment there by default, for
- * backward compatibility - without this, this plugin's buildStart would
- * never run at all when reused on the dev server.
- */
+ *  `perEnvironmentStartEndDuringDev` is required because Vite otherwise only
+ *  invokes `buildStart` for the client environment during development. */
 export function penDiagnose({ routesDir }: PluginOptions): Plugin {
   return {
     name: 'pen:diagnose',
