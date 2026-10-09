@@ -1,4 +1,4 @@
-import type { PenInkOptions } from '@/pen-react/config'
+import type { PenInkOptions } from '@/pen-cli/config'
 
 /** Shared construction options for pen's own Vite plugins. */
 export type PluginOptions = {
