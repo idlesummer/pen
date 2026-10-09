@@ -16,8 +16,11 @@ export function findPackageDir(cwd: string): string | undefined {
   try {
     const base = pathToFileURL(cwd + sep) // allowed since extra trailing separators are collapsed
     const packageJsonPath = findPackageJSON('.', base)
-    const packageDir = packageJsonPath && dirname(packageJsonPath)
-    return packageDir?.replace(WINDOWS_EXTENDED_PREFIX, '') // since the func can return Windows extended-length paths
+
+    if (packageJsonPath?.endsWith(sep + 'package.json')) {
+      const packageDir = dirname(packageJsonPath)
+      return packageDir.replace(WINDOWS_EXTENDED_PREFIX, '') // since the func can return Windows extended-length paths
+    }
   }
   catch {
     // return undefined
