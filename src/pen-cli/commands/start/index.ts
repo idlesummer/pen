@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { join, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { defineCommand } from 'citty'
-import { findPackageDir } from '@/lib/find-project-root'
+import { findPackageDir } from '@/lib/find-package-dir'
 import { ENTRY_FILE, OUT_DIR } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 
