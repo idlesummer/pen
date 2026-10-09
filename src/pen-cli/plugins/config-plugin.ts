@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
-import { loadPenConfig } from '@/pen-cli/config'
 import type { PluginOptions } from './plugin-options'
+import { loadPenConfig } from '@/pen-cli/config'
 
 /**
  * Loads the project's `pen.config.ts` and writes its `ink` options onto the
