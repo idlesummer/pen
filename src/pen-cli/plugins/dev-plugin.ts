@@ -50,7 +50,7 @@ export function penDev({ routesDir, startTime }: PluginOptions): Plugin {
     buildStart: {
       sequential: true,
       handler() {
-        log.ready(`ready in ${Date.now() - startTime!}ms\n`)
+        log.ready(`ready in ${Date.now() - startTime!}ms`)
       },
     },
   }
