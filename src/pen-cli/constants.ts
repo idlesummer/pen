@@ -11,3 +11,4 @@ export const ENTRY_FILE = 'main.js'
 export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 export const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 export const APP_DIR_TOKEN = '__PEN_APP_DIR__'
+export const INK_OPTIONS_TOKEN = '__PEN_INK_OPTIONS__'

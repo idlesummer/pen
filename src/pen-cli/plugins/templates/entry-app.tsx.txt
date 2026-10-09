@@ -29,5 +29,5 @@ const { matcher, componentMap } = createPenAppProps({
   error: errorModules,
   default: defaultModules,
 })
-const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, { maxFps: 75 })
+const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, { maxFps: 75, ...__PEN_INK_OPTIONS__ })
 await waitUntilExit()
