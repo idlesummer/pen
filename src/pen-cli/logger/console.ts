@@ -7,7 +7,7 @@ export function banner(message: string) {
 
 /** The dev server itself is up and about to serve the app. */
 export function ready(message: string) {
-  console.log(pc.green('✓' + message))
+  console.log(pc.green('✓ ' + message))
 }
 
 /** A unit of work (a Fast Refresh update) finished successfully. */
