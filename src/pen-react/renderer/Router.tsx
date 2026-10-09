@@ -25,6 +25,6 @@ export function Router({ matcher, componentMap }: RouterProps) {
     const match = matcher(pathname)
     const tree = renderMatch(match, componentMap)
     return tree
-    // eslint-disable-next-line @eslint-react/exhaustive-deps -- revision is a cache-busting sentinel for refresh(), not read in the body
+    // eslint-disable-next-line @eslint-react/exhaustive-deps
   }, [pathname, revision, matcher, componentMap])
 }
