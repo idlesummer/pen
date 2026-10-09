@@ -13,12 +13,17 @@ export type PenConfig = {
 /** Project config filename. */
 const CONFIG_FILENAME = 'pen.config.ts'
 
+/** `ink` defaults applied when the project's config omits them. */
+const DEFAULT_INK_OPTIONS: InkRenderOptions = {
+  maxFps: 75,
+}
+
 /** Type-checks config objects and provides editor autocomplete. */
 export function defineConfig(config: PenConfig): PenConfig {
   return config
 }
 
-/** Loads `pen.config.ts` if present.
+/** Loads `pen.config.ts` if present, merged over pen's own defaults.
  *
  *  Uses Vite's esbuild-based loader for TypeScript without requiring a
  *  project tsconfig. Vite's config type is not enforced by the loader.
@@ -26,15 +31,16 @@ export function defineConfig(config: PenConfig): PenConfig {
  *
  *  @param projectDir - Project root.
  *  @param command - Vite-compatible command.
- *  @returns The loaded config, or an empty object if no config exists. */
+ *  @returns The loaded config, merged over defaults. */
 export async function loadPenConfig(projectDir: string, command: 'build' | 'serve'): Promise<PenConfig> {
   if (!existsSync(join(projectDir, CONFIG_FILENAME)))
-    return {}
+    return { ink: DEFAULT_INK_OPTIONS }
 
   try {
     const mode = command === 'build' ? 'production' : 'development'
     const file = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir)
-    return (file?.config ?? {}) as PenConfig
+    const config = (file?.config ?? {}) as PenConfig
+    return { ink: { ...DEFAULT_INK_OPTIONS, ...config.ink } }
   }
   catch (err) {
     log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err}`)
