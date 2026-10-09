@@ -16,15 +16,16 @@ export type RouterProps = {
  *  tree, and use() needs those same promises on Suspense retries. Rebuilding
  *  the tree on unrelated re-renders would create new promises indefinitely.
  *
- *  `revision` is in the deps so `router.refresh()` rebuilds the tree even
- *  though it leaves the pathname untouched. */
+ *  `refreshes` is in the deps so `router.refresh()` rebuilds the tree even
+ *  though it leaves the pathname untouched, and keys the Fragment so the
+ *  rebuilt subtree remounts instead of just re-rendering in place. */
 export function Router({ matcher, componentMap }: RouterProps) {
-  const { history, position, revision } = useNavigate()
+  const { history, position, refreshes } = useNavigate()
   const pathname = history[position]!.url
 
   return useMemo(() => {
     const match = matcher(pathname)
     const tree = renderMatch(match, componentMap)
-    return <Fragment key={revision}>{tree}</Fragment>
-  }, [pathname, revision, matcher, componentMap])
+    return <Fragment key={refreshes}>{tree}</Fragment>
+  }, [pathname, refreshes, matcher, componentMap])
 }
