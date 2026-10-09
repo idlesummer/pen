@@ -9,11 +9,17 @@ import { reportRouteDiagnostics } from '@/pen-react/setup'
  * typecheck-plugin.ts in the builder's plugin array - diagnostics are
  * cheaper, so they should fail fast before paying for a `tsc` run.
  *
+ * `perEnvironmentStartEndDuringDev` is needed for dev specifically: Vite
+ * only fires buildStart for the client environment there by default, for
+ * backward compatibility - without this, this plugin's buildStart would
+ * never run at all when reused on the dev server.
+ *
  * @param routesDir - App route directory relative to the project root.
  */
 export function penDiagnose(routesDir: string): Plugin {
   return {
     name: 'pen:diagnose',
+    perEnvironmentStartEndDuringDev: true,
 
     applyToEnvironment(environment) {
       return environment.name === 'ssr'

@@ -5,6 +5,7 @@ import { findProjectRoot } from '@/lib/find-project-root'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
 import { penDev } from '@/pen-cli/plugins/dev-plugin'
+import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
 import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
@@ -26,6 +27,7 @@ export function createPenDevServer(srcDir: string) {
     customLogger: createPenLogger(),
     clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
+      penDiagnose(routesDir),
       penDev(routesDir),
       penReactRefreshInk(),
     ],
