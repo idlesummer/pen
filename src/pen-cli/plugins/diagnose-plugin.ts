@@ -25,7 +25,6 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
     },
     buildStart: {
       sequential: true,
-
       async handler() {
         const projectDir = this.environment.config.root
         const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir)
