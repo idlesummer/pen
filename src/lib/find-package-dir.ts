@@ -7,12 +7,12 @@ const WINDOWS_EXTENDED_PREFIX = '\\\\?\\'
 
 /** Finds the nearest package.json from `startDir`.
  *
- *  @param startDir - Directory to start searching from. Must end with a trailing separator.
+ *  @param cwd - Directory to start searching from. Must end with a trailing separator.
  *  @returns The package directory, or `startDir` if none is found. */
-export function findPackageDir(startDir: string): string {
-  const packageJsonPath = findPackageJSON('.', pathToFileURL(startDir))
-  const root = packageJsonPath ? dirname(packageJsonPath) : startDir
+export function findPackageDir(cwd: string): string {
+  const packageJsonPath = findPackageJSON('.', pathToFileURL(cwd))
+  const packageDir = packageJsonPath ? dirname(packageJsonPath) : cwd
 
   // findPackageJSON can return Windows extended-length paths.
-  return root.replace(WINDOWS_EXTENDED_PREFIX, '')
+  return packageDir.replace(WINDOWS_EXTENDED_PREFIX, '')
 }
