@@ -17,7 +17,7 @@ import type { PluginOptions } from './plugin-options'
  * diagnose-plugin.ts - without it, this plugin's buildStart (and the
  * "Ready" print in it) would never run on the dev server's SSR environment.
  */
-export function penDev({ routesDir, startTime = Date.now() }: PluginOptions): Plugin {
+export function penDev({ routesDir, startTime=Date.now() }: PluginOptions): Plugin {
   return {
     name: 'pen:dev',
     perEnvironmentStartEndDuringDev: true,
