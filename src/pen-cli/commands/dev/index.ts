@@ -13,18 +13,15 @@ export const devCommand = defineCommand({
     // Headless Vite server for loading the app entry module
     const server = await createPenDevServer('src')
     const runner = createServerModuleRunner(server.environments.ssr!)
-
     try {
       await runner.import(ENTRY_MODULE_ID)
     }
     catch (err) {
       // Route diagnostics fail with a clean, already-formatted message -
       // anything else is unexpected and keeps its full stack trace.
-      if (err instanceof Error && 'plugin' in err) {
-        log.error(err.message)
-        process.exit(1)
-      }
-      throw err
+      if (!(err instanceof Error) || !('plugin' in err)) throw err
+      log.error(err.message)
+      process.exit(1)
     }
     await server.close()
   },
