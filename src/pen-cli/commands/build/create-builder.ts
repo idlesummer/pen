@@ -33,9 +33,8 @@ export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBu
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-  const options: PluginOptions = {
-    routesDir: `${srcDir}/${APP_DIR_NAME}`,
-  }
+  const routesDir = `${srcDir}/${APP_DIR_NAME}`
+  const options: PluginOptions = { routesDir }
 
   return createBuilder({
     root: projectDir,
