@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
-import { findPackageDir } from '@/lib/find-project-root'
+import { findPackageDir } from '@/lib/find-package-dir'
 import { loadPenConfig } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
