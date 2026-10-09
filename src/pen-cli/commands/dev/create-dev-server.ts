@@ -18,17 +18,16 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
 export function createPenDevServer(srcDir: string) {
+  log.banner(`${CLI_NAME} v${VERSION}`)
+
   const projectDir = findPackageDir(process.cwd())
   if (!projectDir) {
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-
-  const options: PluginOptions = {
-    routesDir: `${srcDir}/${APP_DIR_NAME}`,
-    startTime: Date.now(),
-  }
-  log.banner(`${CLI_NAME} v${VERSION}`)
+  const routesDir = `${srcDir}/${APP_DIR_NAME}`
+  const startTime = Date.now()
+  const options: PluginOptions = { routesDir, startTime }
 
   return createServer({
     root: projectDir,
