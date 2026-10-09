@@ -5,6 +5,7 @@ import { findProjectRoot } from '@/lib/find-project-root'
 import * as log from '@/pen-cli/logger/console'
 import { penBuild } from '@/pen-cli/plugins/build-plugin'
 import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
+import type { PluginOptions } from '@/pen-cli/plugins/plugin-options'
 import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
 
 /**
@@ -25,16 +26,16 @@ import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
  */
 export async function createPenBuilder(srcDir: string, outDir: string) {
   const projectDir = findProjectRoot(process.cwd() + sep)
-  const routesDir = `${srcDir}/${APP_DIR_NAME}`
+  const options: PluginOptions = { routesDir: `${srcDir}/${APP_DIR_NAME}` }
   log.banner(`${CLI_NAME} v${VERSION}`)
 
   return createBuilder({
     root: projectDir,
     configFile: false,
     plugins: [
-      penDiagnose(routesDir),
+      penDiagnose(options),
       penTypecheck(),
-      penBuild(routesDir),
+      penBuild(options),
     ],
     build: { outDir },
   })

@@ -1,5 +1,6 @@
 import type { Plugin } from 'vite'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
+import type { PluginOptions } from './plugin-options'
 
 /**
  * Discovers the app's routes, validates them, and reports any errors or
@@ -13,10 +14,8 @@ import { reportRouteDiagnostics } from '@/pen-react/setup'
  * only fires buildStart for the client environment there by default, for
  * backward compatibility - without this, this plugin's buildStart would
  * never run at all when reused on the dev server.
- *
- * @param routesDir - App route directory relative to the project root.
  */
-export function penDiagnose(routesDir: string): Plugin {
+export function penDiagnose({ routesDir }: PluginOptions): Plugin {
   return {
     name: 'pen:diagnose',
     perEnvironmentStartEndDuringDev: true,

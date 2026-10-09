@@ -3,6 +3,7 @@ import { transformWithOxc } from 'vite'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
+import type { PluginOptions } from './plugin-options'
 
 /**
  * Loads the app's virtual entry module, which renders the dev server's
@@ -15,12 +16,8 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * `perEnvironmentStartEndDuringDev` is needed for the same reason as in
  * diagnose-plugin.ts - without it, this plugin's buildStart (and the
  * "Ready" print in it) would never run on the dev server's SSR environment.
- *
- * @param routesDir - App route directory relative to the project root.
- * @param startTime - When the dev server started, as from `Date.now()` -
- * used to report how long it took to get ready.
  */
-export function penDev(routesDir: string, startTime: number): Plugin {
+export function penDev({ routesDir, startTime = Date.now() }: PluginOptions): Plugin {
   return {
     name: 'pen:dev',
     perEnvironmentStartEndDuringDev: true,
