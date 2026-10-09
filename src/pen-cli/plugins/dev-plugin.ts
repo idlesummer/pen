@@ -2,14 +2,19 @@ import type { Plugin } from 'vite'
 import { transformWithOxc } from 'vite'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
-import { reportRouteDiagnostics } from '@/pen-react/setup'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /**
- * Loads the app's route modules, compiles their paths, and validates the
- * resulting routes before the dev server starts serving requests.
+ * Loads the app's virtual entry module, which renders the dev server's
+ * live Ink UI.
  *
- * Runs only in the SSR environment.
+ * Runs only in the SSR environment. Marked `sequential` and ordered after
+ * diagnose-plugin.ts in the dev server's plugin array, so "Ready" only
+ * prints once route diagnostics have passed - see diagnose-plugin.ts.
+ *
+ * `perEnvironmentStartEndDuringDev` is needed for the same reason as in
+ * diagnose-plugin.ts - without it, this plugin's buildStart (and the
+ * "Ready" print in it) would never run on the dev server's SSR environment.
  *
  * @param routesDir - App route directory relative to the project root.
  */
@@ -18,6 +23,7 @@ export function penDev(routesDir: string): Plugin {
 
   return {
     name: 'pen:dev',
+    perEnvironmentStartEndDuringDev: true,
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
@@ -44,18 +50,12 @@ export function penDev(routesDir: string): Plugin {
         return { code, map }
       }
     },
-    // Discovers the app's routes, validates them, and reports any errors before the server starts
-    async configureServer(server) {
-      const projectDir = server.config.root
-      const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir)
-      for (const message of warnings)
-        log.warn(message)
-      if (error) {
-        log.error(error)
-        throw new Error(error)
-      }
+    buildStart: {
+      sequential: true,
 
-      log.ready(`Ready in ${Date.now() - startTime}ms\n`)
+      handler() {
+        log.ready(`Ready in ${Date.now() - startTime}ms\n`)
+      },
     },
   }
 }

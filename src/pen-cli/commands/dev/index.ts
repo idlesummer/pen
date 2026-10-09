@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty'
 import { createServerModuleRunner } from 'vite'
 import { ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import * as log from '@/pen-cli/logger/console'
 import { createPenDevServer } from './create-dev-server'
 
 export const devCommand = defineCommand({
@@ -12,7 +13,19 @@ export const devCommand = defineCommand({
     // Headless Vite server for loading the app entry module
     const server = await createPenDevServer('src')
     const runner = createServerModuleRunner(server.environments.ssr!)
-    await runner.import(ENTRY_MODULE_ID)
+
+    try {
+      await runner.import(ENTRY_MODULE_ID)
+    }
+    catch (err) {
+      // Route diagnostics fail with a clean, already-formatted message -
+      // anything else is unexpected and keeps its full stack trace.
+      if (err instanceof Error && 'plugin' in err) {
+        log.error(err.message)
+        process.exit(1)
+      }
+      throw err
+    }
     await server.close()
   },
 })
