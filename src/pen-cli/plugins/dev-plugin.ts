@@ -1,7 +1,7 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './plugin-options'
 import { transformWithOxc } from 'vite'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
@@ -17,7 +17,7 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * diagnose-plugin.ts - without it, this plugin's buildStart (and the
  * "Ready" print in it) would never run on the dev server's SSR environment.
  */
-export function penDev({ routesDir, startTime }: PluginOptions): Plugin {
+export function penDev({ routesDir, startTime, ink }: PluginOptions): Plugin {
   return {
     name: 'pen:dev',
     perEnvironmentStartEndDuringDev: true,
@@ -42,7 +42,9 @@ export function penDev({ routesDir, startTime }: PluginOptions): Plugin {
     // has to hand back already-transformed code itself.
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = entryAppSource.replaceAll(APP_DIR_TOKEN, routesDir)
+        const source = entryAppSource
+          .replaceAll(APP_DIR_TOKEN, routesDir)
+          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(ink ?? {}))
         const { code, map } = await transformWithOxc(source, ENTRY_MODULE_ID, { jsx: { development: true } })
         return { code, map }
       }
