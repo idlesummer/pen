@@ -25,6 +25,8 @@ import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
  * @param outDir - Build output directory relative to the project root.
  */
 export async function createPenBuilder(srcDir: string, outDir: string) {
+  log.banner(`${CLI_NAME} v${VERSION}`)
+
   const projectDir = findPackageDir(process.cwd())
   if (!projectDir) {
     log.error('Could not find a package.json from the current directory.')
@@ -35,7 +37,6 @@ export async function createPenBuilder(srcDir: string, outDir: string) {
     routesDir: `${srcDir}/${APP_DIR_NAME}`,
     ink: penConfig.ink,
   }
-  log.banner(`${CLI_NAME} v${VERSION}`)
 
   return createBuilder({
     root: projectDir,
