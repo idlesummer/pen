@@ -1,18 +1,13 @@
-import type { RenderOptions } from 'ink'
+import type { RenderOptions as InkRenderOptions } from 'ink'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { loadConfigFromFile } from 'vite'
 import * as log from '@/pen-cli/logger/console'
 
-/** Ink's render options, forwarded as-is.
- *  Streams and `onRender` aren't JSON-safe when passed through the bundled
- *  entry, but the type isn't narrowed until the supported subset is clear. */
-export type PenInkOptions = RenderOptions
-
 /** Settings read from the project's `pen.config.ts`. */
 export type PenConfig = {
   /** Options forwarded to Ink's own `render()` call. */
-  ink?: PenInkOptions
+  ink?: InkRenderOptions
 }
 
 /** Project config filename. */
