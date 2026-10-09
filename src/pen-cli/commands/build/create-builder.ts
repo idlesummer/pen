@@ -30,7 +30,6 @@ export async function createPenBuilder(srcDir: string, outDir: string) {
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-
   const penConfig = await loadPenConfig(projectDir, 'build')
   const options: PluginOptions = {
     routesDir: `${srcDir}/${APP_DIR_NAME}`,
