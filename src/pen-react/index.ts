@@ -1,5 +1,5 @@
 export { defineConfig } from '@/pen-cli/config'
-export type { PenConfig, PenInkOptions } from '@/pen-cli/config'
+export type { PenConfig } from '@/pen-cli/config'
 export { ErrorBoundary } from './renderer'
 export type { ErrorComponentProps, ErrorComponent } from './renderer'
 export { DefaultBoundary, notFound, DefaultSignal } from './renderer'
