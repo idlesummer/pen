@@ -17,6 +17,7 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
 export function createPenDevServer(srcDir: string) {
+  const startTime = Date.now()
   const projectDir = findProjectRoot(process.cwd() + sep)
   const routesDir = `${srcDir}/${APP_DIR_NAME}`
   log.banner(`${CLI_NAME} v${VERSION}`)
@@ -28,7 +29,7 @@ export function createPenDevServer(srcDir: string) {
     clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
       penDiagnose(routesDir),
-      penDev(routesDir),
+      penDev(routesDir, startTime),
       penReactRefreshInk(),
     ],
     server: {

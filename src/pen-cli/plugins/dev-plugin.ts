@@ -17,10 +17,10 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * "Ready" print in it) would never run on the dev server's SSR environment.
  *
  * @param routesDir - App route directory relative to the project root.
+ * @param startTime - When the dev server started, as from `Date.now()` -
+ * used to report how long it took to get ready.
  */
-export function penDev(routesDir: string): Plugin {
-  const startTime = Date.now()
-
+export function penDev(routesDir: string, startTime: number): Plugin {
   return {
     name: 'pen:dev',
     perEnvironmentStartEndDuringDev: true,
