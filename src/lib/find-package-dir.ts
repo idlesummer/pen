@@ -15,10 +15,10 @@ const WINDOWS_EXTENDED_PREFIX = '\\\\?\\'
 export function findPackageDir(cwd: string): string | undefined {
   try {
     const base = pathToFileURL(cwd + sep) // allowed since extra trailing separators are collapsed
-    const packageJsonPath = findPackageJSON('.', base)
+    const packagePath = findPackageJSON('.', base)
 
-    if (packageJsonPath?.endsWith(sep + 'package.json')) {
-      const packageDir = dirname(packageJsonPath)
+    if (packagePath?.endsWith(sep + 'package.json')) {
+      const packageDir = dirname(packagePath)
       return packageDir.replace(WINDOWS_EXTENDED_PREFIX, '') // since the func can return Windows extended-length paths
     }
   }
