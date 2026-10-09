@@ -4,51 +4,37 @@ import { join } from 'node:path'
 import { loadConfigFromFile } from 'vite'
 import * as log from '@/pen-cli/logger/console'
 
-/**
- * Ink's own `render()` options, forwarded as-is for now.
- *
- * Not every field survives being read from `pen.config.ts` and substituted
- * into the app's bundled entry module as a JSON literal - streams
- * (`stdout`/`stdin`/`stderr`) and the `onRender` callback won't work.
- * Deliberately not narrowed to the JSON-safe subset yet - revisit once it's
- * clearer which fields are actually worth exposing.
- */
+/** Ink's render options, forwarded as-is.
+ *  Streams and `onRender` aren't JSON-safe when passed through the bundled
+ *  entry, but the type isn't narrowed until the supported subset is clear. */
 export type PenInkOptions = RenderOptions
 
 /** Settings read from the project's `pen.config.ts`. */
-export interface PenConfig {
+export type PenConfig = {
   /** Options forwarded to Ink's own `render()` call. */
   ink?: PenInkOptions
 }
 
-/** Identity helper for authoring `pen.config.ts` - gives the config object
- *  type-checking and editor autocomplete, same as Vite/Vitest's `defineConfig`. */
+/** Project config filename. */
+const CONFIG_FILENAME = 'pen.config.ts'
+
+/** Type-checks config objects and provides editor autocomplete. */
 export function defineConfig(config: PenConfig): PenConfig {
   return config
 }
 
-const CONFIG_FILENAME = 'pen.config.ts'
-
-/**
- * Loads the project's `pen.config.ts`, if one exists.
+/** Loads `pen.config.ts` if present.
  *
- * `.ts` only - pen is a TypeScript-first framework, so there's no `.js`/
- * `.mjs` fallback to support.
+ *  Uses Vite's esbuild-based loader for TypeScript without requiring a
+ *  project tsconfig. Vite's config type is not enforced by the loader.
+ *  Load errors are reported without citty's raw stack trace.
  *
- * Reuses Vite's own config loader (esbuild-transpiled, so plain TS syntax
- * works with no project tsconfig involved) instead of hand-rolling one -
- * its return type is `UserConfig`, Vite's own shape, but the loader itself
- * doesn't actually validate against it, so it works unmodified for pen's
- * own config shape too.
- *
- * A broken config file is the user's own, expected, actionable mistake -
- * reported with a clean message instead of citty's raw stack trace.
- *
- * @param projectDir - Project root to look for the config file in.
- * @param command - Matches Vite's own `ConfigEnv.command` so the loader behaves consistently.
- */
+ *  @param projectDir - Project root.
+ *  @param command - Vite-compatible command.
+ *  @returns The loaded config, or an empty object if no config exists. */
 export async function loadPenConfig(projectDir: string, command: 'build' | 'serve'): Promise<PenConfig> {
-  if (!existsSync(join(projectDir, CONFIG_FILENAME))) return {}
+  if (!existsSync(join(projectDir, CONFIG_FILENAME)))
+    return {}
 
   try {
     const mode = command === 'build' ? 'production' : 'development'
