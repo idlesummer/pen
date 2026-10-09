@@ -31,5 +31,5 @@ const { matcher, componentMap } = createPenAppProps({
 })
 
 // @ts-ignore replaced by codegen
-const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, { maxFps: 75, ...__PEN_INK_OPTIONS__ })
+const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
