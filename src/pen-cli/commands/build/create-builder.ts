@@ -1,13 +1,10 @@
 import type { ViteBuilder } from 'vite'
-import type { PluginOptions } from '@/pen-cli/plugins/plugin-options'
+import type { PluginOptions } from '@/pen-cli/plugins'
 import { createBuilder } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
 import * as log from '@/pen-cli/logger/console'
-import { penBuild } from '@/pen-cli/plugins/build-plugin'
-import { penConfig } from '@/pen-cli/plugins/config-plugin'
-import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
-import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
+import { penBuild, penConfig, penDiagnose, penTypecheck } from '@/pen-cli/plugins'
 
 /** Creates a Vite builder configured with the `pen` plugin, ready to build
  *  the app's SSR environment.
