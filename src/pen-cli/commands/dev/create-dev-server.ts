@@ -6,6 +6,7 @@ import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
 import { penDev } from '@/pen-cli/plugins/dev-plugin'
 import { penDiagnose } from '@/pen-cli/plugins/diagnose-plugin'
+import type { PluginOptions } from '@/pen-cli/plugins/plugin-options'
 import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
@@ -17,9 +18,8 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
 export function createPenDevServer(srcDir: string) {
-  const startTime = Date.now()
   const projectDir = findProjectRoot(process.cwd() + sep)
-  const routesDir = `${srcDir}/${APP_DIR_NAME}`
+  const options: PluginOptions = { routesDir: `${srcDir}/${APP_DIR_NAME}`, startTime: Date.now() }
   log.banner(`${CLI_NAME} v${VERSION}`)
 
   return createServer({
@@ -28,8 +28,8 @@ export function createPenDevServer(srcDir: string) {
     customLogger: createPenLogger(),
     clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
-      penDiagnose(routesDir),
-      penDev(routesDir, startTime),
+      penDiagnose(options),
+      penDev(options),
       penReactRefreshInk(),
     ],
     server: {

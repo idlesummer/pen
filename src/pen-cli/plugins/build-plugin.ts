@@ -2,13 +2,12 @@ import type { Plugin } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
+import type { PluginOptions } from './plugin-options'
 
 /** Bundles the app's entry module for Node.
  *
- *  Runs only in the SSR environment.
- *
- *  @param routesDir - App route directory relative to the project root. */
-export function penBuild(routesDir: string): Plugin {
+ *  Runs only in the SSR environment. */
+export function penBuild({ routesDir }: PluginOptions): Plugin {
   return {
     name: 'pen:build',
 
