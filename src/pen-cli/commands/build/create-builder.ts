@@ -1,3 +1,4 @@
+import type { ViteBuilder } from 'vite'
 import type { PluginOptions } from '@/pen-cli/plugins/plugin-options'
 import { createBuilder } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
@@ -24,7 +25,7 @@ import { penTypecheck } from '@/pen-cli/plugins/typecheck-plugin'
  * @param srcDir - Directory containing the app directory, relative to the project root.
  * @param outDir - Build output directory relative to the project root.
  */
-export async function createPenBuilder(srcDir: string, outDir: string) {
+export async function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBuilder> {
   log.banner(`${CLI_NAME} v${VERSION}`)
 
   const projectDir = findPackageDir(process.cwd())
