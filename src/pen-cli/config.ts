@@ -42,7 +42,7 @@ export async function loadPenConfig(projectDir: string, command: 'build' | 'serv
     return (file?.config ?? {}) as PenConfig
   }
   catch (err) {
-    log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : String(err)}`)
+    log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err}`)
     process.exit(1)
   }
 }
