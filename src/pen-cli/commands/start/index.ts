@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { join, sep } from 'node:path'
+import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { defineCommand } from 'citty'
 import { findPackageDir } from '@/lib/find-package-dir'
@@ -12,9 +12,15 @@ export const startCommand = defineCommand({
     description: 'Run the app built by `pen build`',
   },
   run: async () => {
+    const projectDir = findPackageDir(process.cwd())
+    if (!projectDir) {
+      log.error('Could not find a package.json from the current directory.')
+      process.exit(1)
+    }
+
     // Run the built entry in-process so Ink gets the real stdin/stdout.
     // Resolve from the project root so `pen start` works from subdirectories.
-    const entryPath = join(findPackageDir(process.cwd() + sep), OUT_DIR, ENTRY_FILE)
+    const entryPath = join(projectDir, OUT_DIR, ENTRY_FILE)
     if (!existsSync(entryPath)) {
       log.error(`No build found at '${OUT_DIR}' - run \`pen build\` first.`)
       process.exit(1)
