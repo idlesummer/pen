@@ -3,15 +3,12 @@ import type { Plugin } from 'vite'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
 
-/**
- * Resolves the project's own locally installed `typescript` package, so
- * type checking always runs against the user's own TypeScript version and
- * tsconfig - never a version pen itself depends on.
+/** Resolves the project's own locally installed `typescript` package, so
+ *  type checking always runs against the user's own TypeScript version and
+ *  tsconfig - never a version pen itself depends on.
  *
- * @param projectDir - Project directory to resolve `typescript` from.
- * @returns The resolved `typescript` module, or `undefined` if the
- * project has no `typescript` installed.
- */
+ *  @param projectDir - Project directory to resolve `typescript` from.
+ *  @returns The resolved typescript module, or `undefined` if the project has no typescript installed. */
 async function resolveTypescript(projectDir: string): Promise<typeof import('typescript') | undefined> {
   try {
     const require = createRequire(join(projectDir, 'package.json'))
