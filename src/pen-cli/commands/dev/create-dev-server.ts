@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { createServer } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
-import { findProjectRoot } from '@/lib/find-project-root'
+import { findPackageDir } from '@/lib/find-project-root'
 import { loadPenConfig } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
@@ -19,7 +19,7 @@ import { penReactRefreshInk } from '@/pen-cli/plugins/refresh-ink-plugin'
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
 export async function createPenDevServer(srcDir: string) {
-  const projectDir = findProjectRoot(process.cwd() + sep)
+  const projectDir = findPackageDir(process.cwd() + sep)
   const penConfig = await loadPenConfig(projectDir, 'serve')
   const options: PluginOptions = {
     routesDir: `${srcDir}/${APP_DIR_NAME}`,
