@@ -1,6 +1,6 @@
 import type { Matcher } from '@/pen-core/runtime'
 import type { ComponentMap } from './types/component-map'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { useNavigate } from '../navigation/hooks/use-navigate'
 import { renderMatch } from './render'
 
@@ -21,10 +21,10 @@ export type RouterProps = {
 export function Router({ matcher, componentMap }: RouterProps) {
   const { history, position, revision } = useNavigate()
   const pathname = history[position]!.url
+
   return useMemo(() => {
     const match = matcher(pathname)
     const tree = renderMatch(match, componentMap)
-    return tree
-    // eslint-disable-next-line @eslint-react/exhaustive-deps
+    return <Fragment key={revision}>{tree}</Fragment>
   }, [pathname, revision, matcher, componentMap])
 }
