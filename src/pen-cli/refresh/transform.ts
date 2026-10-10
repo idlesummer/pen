@@ -41,8 +41,7 @@ function createRefreshBoundary(transformed: TransformResult, filename: string) {
  *  @param filename - Path of the file, used for diagnostics, sourcemaps and refresh registration IDs.
  *  @param code - Source code of the component file.
  *  @param options - `reactCompiler` runs React Compiler; `refresh` enables Fast Refresh.
- *  @returns The transform result, with the sourcemap adjusted if the module was wrapped.
- *  @throws On a fatal transform error. */
+ *  @returns The transform result, with the sourcemap adjusted if the module was wrapped. */
 export async function transformInkComponent(filename: string, code: string, options?: TransformOptions): Promise<TransformResult> {
   const transformed = await transform(filename, code, {
     reactCompiler: options?.reactCompiler ?? false, // react compiler is opt-in
