@@ -51,8 +51,6 @@ export async function transformInkComponent(filename: string, code: string, opti
       refresh: options?.refresh,
     },
   })
-  if (transformed.fatal)
-    throw new Error(transformed.errors.map(e => e.message).join('\n'))
   return options?.refresh && transformed.code.includes('$RefreshReg$(')
     ? createRefreshBoundary(transformed, filename)
     : transformed
