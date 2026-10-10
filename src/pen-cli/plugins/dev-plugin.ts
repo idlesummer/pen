@@ -49,10 +49,11 @@ export function penDev(options: PluginOptions): Plugin {
         const source = entryAppSource
           .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.ink ?? {}))
+
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
-          reactCompiler: false,  // oxc-transform-react defaults this to true when omitted
-          sourcemap: true,  // transformWithOxc generated one by default; this doesn't
+          reactCompiler: false,  // since oxc-transform-react defaults to true
+          sourcemap: true,  // transformWithOxc generates one by default
         })
         if (transformed.fatal)
           this.error(transformed.errors.map(e => e.message).join('\n'))
