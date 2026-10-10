@@ -6,13 +6,13 @@ import * as log from '@/pen-cli/logger/console'
 
 /** Settings read from the project's `pen.config.ts`. */
 export type PenConfig = {
-  /** Options forwarded to Ink's own `render()` call. */
-  ink?: InkRenderOptions
   /** Whether to run React Compiler over the app's components.
    *
    *  Experimental and off by default - see oxc-transform-react's own
    *  README before enabling it. */
   reactCompiler?: boolean
+  /** Options forwarded to Ink's own `render()` call. */
+  ink?: InkRenderOptions
 }
 
 /** Project config filename. */
