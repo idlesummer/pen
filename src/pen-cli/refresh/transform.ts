@@ -2,8 +2,11 @@ import type { TransformResult } from 'oxc-transform-react'
 import { transform } from 'oxc-transform-react'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
+/** Options for {@link transformInkComponent}. */
 export type TransformOptions = {
+  /** Runs React Compiler before the JSX transform. @default false */
   reactCompiler?: boolean
+  /** Enables Fast Refresh; otherwise emits production JSX. @default false */
   refresh?: boolean
 }
 
@@ -24,12 +27,21 @@ function createRefreshBoundary(transformed: TransformResult, filename: string) {
   return transformed
 }
 
-/** Transforms one Ink component file: optionally React Compiler, then JSX -
- *  with Fast Refresh instrumentation when `refresh` is on, production JSX
- *  otherwise. Throws on a fatal transform error. */
+/** Transforms an Ink component file, with optional React Fast Refresh support.
+ *
+ *  Compiles JSX and optionally runs React Compiler. With `refresh` on, it emits
+ *  Fast Refresh instrumentation and wraps modules that contain components in a
+ *  refresh boundary. `installRefreshRuntime` must be called first. With
+ *  `refresh` off, it emits production JSX.
+ *
+ *  @param filename - Path of the file, used for diagnostics, sourcemaps and refresh registration IDs.
+ *  @param code - Source code of the component file.
+ *  @param options - `reactCompiler` runs React Compiler; `refresh` enables Fast Refresh.
+ *  @returns The transform result, with the sourcemap adjusted if the module was wrapped.
+ *  @throws On a fatal transform error. */
 export async function transformInkComponent(filename: string, code: string, options?: TransformOptions): Promise<TransformResult> {
   const transformed = await transform(filename, code, {
-    reactCompiler: options?.reactCompiler,
+    reactCompiler: options?.reactCompiler ?? false, // react compiler is opt-in
     jsx: {
       development: options?.refresh,
       refresh: options?.refresh,
