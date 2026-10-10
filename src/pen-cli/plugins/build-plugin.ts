@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { PACKAGE_NAME } from '@/lib/constants'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
-import type { PluginOptions } from './plugin-options'
+import type { PluginOptions } from './types/plugin-options'
 
 /** Bundles the app's entry module for Node.
  *

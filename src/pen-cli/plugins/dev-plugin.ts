@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './plugin-options'
+import type { PluginOptions } from './types/plugin-options'
 import { transformWithOxc } from 'vite'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
