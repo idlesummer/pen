@@ -11,9 +11,9 @@ import { transform } from 'oxc-transform-react'
  *  compiler-off) build path unaffected.
  *
  *  No Fast Refresh here - that's a dev-only concept, see refresh-plugin.ts. */
-export function penReactCompilerBuild(options: PluginOptions): Plugin {
+export function penReactCompiler(options: PluginOptions): Plugin {
   return {
-    name: 'pen:react-compiler-build',
+    name: 'pen:react-compiler',
     enforce: 'pre',
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
