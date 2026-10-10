@@ -20,10 +20,10 @@ const CONFIG_FILENAME = 'pen.config.ts'
 
 /** Defaults applied when the project's config omits them. */
 const DEFAULT_PEN_CONFIG: PenConfig = {
+  reactCompiler: false,
   ink: {
     maxFps: 75,
   },
-  reactCompiler: false,
 }
 
 /** Type-checks config objects and provides editor autocomplete. */
