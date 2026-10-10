@@ -2,14 +2,12 @@ import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { installRefreshRuntime, transformInkComponent } from '@/pen-cli/refresh'
 
-/** Transforms the app's component modules for both `pen dev` and `pen build`.
+/** Transforms component modules for dev and build.
  *
- *  In dev, always applies Fast Refresh instrumentation. In build, only
- *  transforms at all when `options.reactCompiler` is on - otherwise it
- *  returns nothing so Rolldown's own default JSX/TS transform handles the
- *  file exactly as before, leaving the default (compiler-off) build path
- *  unaffected. Reads `options.reactCompiler` lazily because the config
- *  hook may not have run yet when this factory itself is called. */
+ *  Dev always enables Fast Refresh; build only transforms when React
+ *  Compiler is enabled, preserving Rolldown's default behavior otherwise.
+ *  Reads `options.reactCompiler` lazily because the config hook may not
+ *  have run when this plugin is created. */
 export function penTransform(options: PluginOptions): Plugin {
   return {
     name: 'pen:transform',
