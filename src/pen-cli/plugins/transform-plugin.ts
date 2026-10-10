@@ -17,12 +17,9 @@ export function penTransform(options: PluginOptions): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    // Transformed modules use these globals during evaluation, so the
-    // globals must exist first. configureServer finishes before any import.
-    // Vite's build lifecycle never calls configureServer at all, so this is
-    // a no-op during `pen build` without needing its own isDev check.
+    // configureServer runs before imports in dev and isn't called during builds
     configureServer() {
-      installRefreshRuntime()
+      installRefreshRuntime() // Transformed modules need these globals before evaluation
     },
     // Exclude virtual modules since the .tsx filter would otherwise match them
     transform: {
