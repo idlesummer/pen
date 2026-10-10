@@ -4,7 +4,7 @@ import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
-import { penConfig, penDev, penDiagnose, penReactRefreshInk } from '@/pen-cli/plugins'
+import { penConfig, penDev, penDiagnose, penTransform } from '@/pen-cli/plugins'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
@@ -35,7 +35,7 @@ export function createPenDevServer(srcDir: string) {
       penConfig(options),
       penDiagnose(options),
       penDev(options),
-      penReactRefreshInk(options),
+      penTransform(options),
     ],
     server: {
       middlewareMode: true,  // don't open an HTTP server

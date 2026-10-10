@@ -26,7 +26,7 @@ function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transform>
  *  Also enables React Compiler when `options.reactCompiler` is set.
  *  Reads the option lazily because the config hook may not have run yet.
  *  Used for dev only, not used during builds. */
-export function penReactRefreshInk(options: PluginOptions): Plugin {
+export function penTransform(options: PluginOptions): Plugin {
   return {
     name: 'pen:react-refresh-ink',
     enforce: 'pre',
