@@ -3,6 +3,10 @@ type NavigationHistory = {
   searchParams?: unknown
 }
 
+/** Caps how many entries `history` can grow to - without this, a
+ *  long-running session that pushes often would grow it forever. */
+const HISTORY_LIMIT = 500
+
 type NavigationSnapshot = {
   history: Readonly<NavigationHistory[]>
   position: number
@@ -33,6 +37,12 @@ export class Navigation {
   push(url: string, searchParams?: unknown) {
     this.history.splice(this.position+1, Infinity, { url, searchParams })
     this.position++
+
+    const overflow = this.history.length - HISTORY_LIMIT
+    if (overflow > 0) {
+      this.history.splice(0, overflow)
+      this.position -= overflow
+    }
   }
 
   replace(url: string, searchParams?: unknown) {
