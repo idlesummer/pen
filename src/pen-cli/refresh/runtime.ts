@@ -25,8 +25,10 @@ function createGlobalRefreshRuntime(): typeof globalThis.RefreshRuntime {
 }
 
 /** Installs the React Refresh runtime globals that transformed modules read
- *  at evaluation time ($RefreshReg$, $RefreshSig$, RefreshRuntime). Call this
- *  once, before any transformed module is ever evaluated. */
+ *  at evaluation time ($RefreshReg$, $RefreshSig$, RefreshRuntime).
+ *
+ *  Call before the React renderer (Ink) or any transformed module is loaded,
+ *  e.g. from the dev plugin's `configureServer`. Later calls are no-ops. */
 export function installRefreshRuntime() {
   if (globalThis.RefreshRuntime)  // already isntalled
   RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)  // react-refresh accepts Window, but it also works with globalThis
