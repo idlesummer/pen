@@ -1,13 +1,14 @@
 import type { Plugin } from 'vite'
-import { transformWithOxc } from 'vite'
+import { transform } from 'oxc-transform-react'
 import * as RefreshRuntime from 'react-refresh/runtime'
 import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
+import type { PluginOptions } from './plugin-options'
 
 const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
-function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transformWithOxc>>, filename: string) {
+function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transform>>, filename: string) {
   const code = transformed.code
   transformed.code = refreshBoundarySource
     .replace(REFRESH_FILENAME_TOKEN, JSON.stringify(filename))
@@ -24,8 +25,15 @@ function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transformW
  *  component modules with $RefreshReg$/$RefreshSig$ calls, and a runtime
  *  bootstrap (in configureServer) that those calls resolve to.
  *
+ *  Also runs React Compiler when `options.reactCompiler` is enabled, since
+ *  oxc-transform-react applies it before the JSX/refresh transforms in the
+ *  same pass. `reactCompiler` is read lazily off `options` inside the
+ *  transform handler rather than destructured here, for the same reason as
+ *  `ink` in build-plugin.ts/dev-plugin.ts: pen:config's `config` hook (which
+ *  populates it) hasn't necessarily run yet when this factory is called.
+ *
  *  Dev-only - Fast Refresh has no meaning during a one-shot `pen build`. */
-export function penReactRefreshInk(): Plugin {
+export function penReactRefreshInk(options: PluginOptions): Plugin {
   return {
     name: 'pen:react-refresh-ink',
     enforce: 'pre',
@@ -83,12 +91,16 @@ export function penReactRefreshInk(): Plugin {
       },
       async handler(code, id) {
         const filename = id.split('?')[0]!
-        const transformed = await transformWithOxc(code, filename, {
+        const transformed = await transform(filename, code, {
+          reactCompiler: options.reactCompiler ?? false,
           jsx: {
             development: true, // jsxDEV + source locations; refresh needs it
             refresh: true,     // to emit $RefreshReg$/$RefreshSig$ calls inline
           },
         })
+        if (transformed.fatal)
+          this.error(transformed.errors.map(e => e.message).join('\n'))
+
         return transformed.code.includes('$RefreshReg$(')  // Skip modules without $RefreshReg$ so updates bubble to a real boundary
           ? createRefreshBoundary(transformed, filename)
           : transformed

@@ -8,16 +8,22 @@ import * as log from '@/pen-cli/logger/console'
 export type PenConfig = {
   /** Options forwarded to Ink's own `render()` call. */
   ink?: InkRenderOptions
+  /** Whether to run React Compiler over the app's components.
+   *
+   *  Experimental and off by default - see oxc-transform-react's own
+   *  README before enabling it. */
+  reactCompiler?: boolean
 }
 
 /** Project config filename. */
 const CONFIG_FILENAME = 'pen.config.ts'
 
-/** `ink` defaults applied when the project's config omits them. */
+/** Defaults applied when the project's config omits them. */
 const DEFAULT_PEN_CONFIG: PenConfig = {
   ink: {
     maxFps: 75,
   },
+  reactCompiler: false,
 }
 
 /** Type-checks config objects and provides editor autocomplete. */

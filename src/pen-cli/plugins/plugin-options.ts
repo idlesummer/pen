@@ -8,4 +8,6 @@ export type PluginOptions = {
   startTime?: number
   /** Ink render() options read from the project's pen.config.ts. */
   ink?: RenderOptions
+  /** Whether to run React Compiler over the app's components. */
+  reactCompiler?: boolean
 }

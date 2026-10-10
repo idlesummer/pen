@@ -35,7 +35,7 @@ export function createPenDevServer(srcDir: string) {
       penConfig(options),
       penDiagnose(options),
       penDev(options),
-      penReactRefreshInk(),
+      penReactRefreshInk(options),
     ],
     server: {
       middlewareMode: true,  // don't open an HTTP server
