@@ -36,7 +36,7 @@ export function penTransform(options: PluginOptions): Plugin {
 
         const filename = id.split('?')[0]!
         const transformed = await transformInkComponent(filename, code, {
-          reactCompiler: !!options.reactCompiler,
+          reactCompiler: options.reactCompiler ?? false,
           refresh: isDev,
         })
         if (transformed.fatal)
