@@ -31,50 +31,45 @@ export class NavigationStore {
 
   /* Store interface */
 
-  /** Registers a listener and returns a function to remove it - the shape
-   *  React's useSyncExternalStore expects for its subscribe argument. */
+  /** Matches the subscribe shape useSyncExternalStore expects. */
   private subscribeListeners(listener: () => void) {
     this.listeners.add(listener)
     const unsubscribe = () => this.listeners.delete(listener)
     return unsubscribe
   }
 
-  /** Returns the cached snapshot instead of building a new one, so
-   *  useSyncExternalStore sees a stable reference between emits. */
+  /** Cached, so the reference stays stable between emits. */
   private getNavigationSnapshot() {
     return this.snapshot
   }
 
   /* Navigation actions */
 
-  /** Pushes a new history entry and notifies listeners. */
+  /** Pushes and notifies. */
   private pushUrl(url: string, searchParams?: unknown) {
     this.navigation.push(url, searchParams)
     this.emit()
   }
 
-  /** Replaces the current history entry and notifies listeners. */
+  /** Replaces and notifies. */
   private replaceUrl(url: string, searchParams?: unknown) {
     this.navigation.replace(url, searchParams)
     this.emit()
   }
 
-  /** Only notifies when history actually moved, since being at the start
-   *  already makes this a no-op. */
+  /** Only notifies if it actually moved. */
   private goBack() {
     if (this.navigation.back())
       this.emit()
   }
 
-  /** Only notifies when history actually moved, since being at the end
-   *  already makes this a no-op. */
+  /** Only notifies if it actually moved. */
   private goForward() {
     if (this.navigation.forward())
       this.emit()
   }
 
-  /** Bumps the refresh count and notifies, so the current route re-renders
-   *  in place without changing history. */
+  /** Bumps the refresh count and notifies. */
   private refreshRoute() {
     this.navigation.refresh()
     this.emit()
@@ -82,7 +77,7 @@ export class NavigationStore {
 
   /* Internal helpers */
 
-  /** Refreshes the cached snapshot, then notifies every subscribed listener. */
+  /** Refreshes the snapshot, then notifies listeners. */
   private emit() {
     this.snapshot = this.navigation.getSnapshot()
     this.listeners.forEach(listener => listener())
