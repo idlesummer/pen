@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import type { PluginOptions } from './plugin-options'
 import { transform } from 'oxc-transform-react'
 import * as RefreshRuntime from 'react-refresh/runtime'
-import refreshBoundarySource from './templates/refresh-boundary.ts.txt' with { type: 'text' }
+import refreshBoundarySource from '../refresh-ink/templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 const REFRESH_FILENAME_TOKEN = '"__PEN_REFRESH_FILENAME__"'
 const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
