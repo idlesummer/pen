@@ -41,12 +41,12 @@ export default function RootLayout({ children }: PropsWithChildren) {
       router.push(value)
       setValue('')
     }
-    else if (!key.ctrl && !key.meta)
-      setValue(current => current + input)
     else if (key.backspace || key.delete)
       setValue(current => current.slice(0, -1))
     else if (key.ctrl && input === 'r')
       router.refresh()
+    else if (!key.ctrl && !key.meta)
+      setValue(current => current + input)
   })
 
   return (
