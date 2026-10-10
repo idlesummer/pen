@@ -16,12 +16,16 @@ const REFRESH_CODE_TOKEN = '// __PEN_REFRESH_CODE__'
 /** Wraps transformed code with the React Refresh runtime and adjusts its sourcemap for the added header. */
 function createRefreshBoundary(transformed: TransformResult, filename: string) {
   const code = transformed.code
+  const filenameLiteral = JSON.stringify(filename)
+
+  // Callbacks avoid `$` patterns (`$$`, `$&`) in the code being interpreted as replacement syntax
   transformed.code = refreshBoundarySource
-    .replace(REFRESH_FILENAME_TOKEN, JSON.stringify(filename))
-    .replace(REFRESH_CODE_TOKEN, code)
+    .replace(REFRESH_FILENAME_TOKEN, () => filenameLiteral)
+    .replace(REFRESH_CODE_TOKEN, () => code)
 
   if (transformed.map) {
-    const headerLines = transformed.code.slice(0, transformed.code.indexOf(code)).split('\n').length - 1
+    const header = refreshBoundarySource.split(REFRESH_CODE_TOKEN)[0]!
+    const headerLines = header.split('\n').length - 1
     transformed.map.mappings = ';'.repeat(headerLines) + transformed.map.mappings
   }
   return transformed
