@@ -29,7 +29,7 @@ export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBu
     process.exit(1)
   }
   const routesDir = `${srcDir}/${APP_DIR_NAME}`
-  const options: PluginOptions = { routesDir }
+  const options: PluginOptions = { startTime: 0, routesDir }
 
   return createBuilder({
     root: projectDir,
