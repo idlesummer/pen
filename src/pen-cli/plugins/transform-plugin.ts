@@ -2,16 +2,18 @@ import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { installRefreshRuntime, transformInkComponent } from '@/pen-cli/refresh'
 
-/** Enables React Fast Refresh for Ink during development.
+/** Transforms the app's component modules for both `pen dev` and `pen build`.
  *
- *  Also enables React Compiler when `options.reactCompiler` is set.
- *  Reads the option lazily because the config hook may not have run yet.
- *  Used for dev only, not used during builds. */
+ *  In dev, always applies Fast Refresh instrumentation. In build, only
+ *  transforms at all when `options.reactCompiler` is on - otherwise it
+ *  returns nothing so Rolldown's own default JSX/TS transform handles the
+ *  file exactly as before, leaving the default (compiler-off) build path
+ *  unaffected. Reads `options.reactCompiler` lazily because the config
+ *  hook may not have run yet when this factory itself is called. */
 export function penTransform(options: PluginOptions): Plugin {
   return {
-    name: 'pen:react-refresh-ink',
+    name: 'pen:transform',
     enforce: 'pre',
-    apply: 'serve',
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
@@ -33,10 +35,14 @@ export function penTransform(options: PluginOptions): Plugin {
         },
       },
       async handler(code, id) {
+        const isDev = this.environment.mode === 'dev'
+        if (!isDev && !options.reactCompiler)
+          return  // build, compiler off: let Rolldown's default transform handle it
+
         const filename = id.split('?')[0]!
         const transformed = await transformInkComponent(filename, code, {
           reactCompiler: !!options.reactCompiler,
-          refresh: true,
+          refresh: isDev,
         })
         if (transformed.fatal)
           this.error(transformed.errors.map(e => e.message).join('\n'))
