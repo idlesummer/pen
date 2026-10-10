@@ -28,6 +28,7 @@ function createGlobalRefreshRuntime(): typeof globalThis.RefreshRuntime {
  *  at evaluation time ($RefreshReg$, $RefreshSig$, RefreshRuntime). Call this
  *  once, before any transformed module is ever evaluated. */
 export function installRefreshRuntime() {
+  if (globalThis.RefreshRuntime)  // already isntalled
   RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)  // react-refresh accepts Window, but it also works with globalThis
   globalThis.$RefreshReg$ = () => {}
   globalThis.$RefreshSig$ = (() => (type => type)) as typeof globalThis.$RefreshSig$  // temp until transformed module installs the real tracker
