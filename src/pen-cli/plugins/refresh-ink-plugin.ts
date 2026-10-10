@@ -21,18 +21,11 @@ function createRefreshBoundary(transformed: Awaited<ReturnType<typeof transform>
   return transformed
 }
 
-/** Installs React Fast Refresh for Ink: an OXC transform that instruments
- *  component modules with $RefreshReg$/$RefreshSig$ calls, and a runtime
- *  bootstrap (in configureServer) that those calls resolve to.
+/** Enables React Fast Refresh for Ink during development.
  *
- *  Also runs React Compiler when `options.reactCompiler` is enabled, since
- *  oxc-transform-react applies it before the JSX/refresh transforms in the
- *  same pass. `reactCompiler` is read lazily off `options` inside the
- *  transform handler rather than destructured here, for the same reason as
- *  `ink` in build-plugin.ts/dev-plugin.ts: pen:config's `config` hook (which
- *  populates it) hasn't necessarily run yet when this factory is called.
- *
- *  Dev-only - Fast Refresh has no meaning during a one-shot `pen build`. */
+ *  Also enables React Compiler when `options.reactCompiler` is set.
+ *  Reads the option lazily because the config hook may not have run yet.
+ *  Used for dev only, not used during builds. */
 export function penReactRefreshInk(options: PluginOptions): Plugin {
   return {
     name: 'pen:react-refresh-ink',
@@ -92,7 +85,7 @@ export function penReactRefreshInk(options: PluginOptions): Plugin {
       async handler(code, id) {
         const filename = id.split('?')[0]!
         const transformed = await transform(filename, code, {
-          reactCompiler: options.reactCompiler ?? false,
+          reactCompiler: !!options.reactCompiler,
           jsx: {
             development: true, // jsxDEV + source locations; refresh needs it
             refresh: true,     // to emit $RefreshReg$/$RefreshSig$ calls inline
@@ -100,7 +93,6 @@ export function penReactRefreshInk(options: PluginOptions): Plugin {
         })
         if (transformed.fatal)
           this.error(transformed.errors.map(e => e.message).join('\n'))
-
         return transformed.code.includes('$RefreshReg$(')  // Skip modules without $RefreshReg$ so updates bubble to a real boundary
           ? createRefreshBoundary(transformed, filename)
           : transformed
