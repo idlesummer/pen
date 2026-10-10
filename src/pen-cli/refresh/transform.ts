@@ -51,7 +51,7 @@ export async function transformInkComponent(filename: string, code: string, opti
       refresh: options?.refresh,
     },
   })
-  return options?.refresh && transformed.code.includes('$RefreshReg$(')
+  return options?.refresh && transformed.code.includes('$RefreshReg$(') // good enough heuristic
     ? createRefreshBoundary(transformed, filename)
     : transformed
 }
