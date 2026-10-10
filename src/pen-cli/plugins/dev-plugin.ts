@@ -22,7 +22,6 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * hasn't necessarily run yet at the time this factory itself is called.
  */
 export function penDev(options: PluginOptions): Plugin {
-  const { routesDir, startTime } = options
   return {
     name: 'pen:dev',
     perEnvironmentStartEndDuringDev: true,
@@ -48,7 +47,7 @@ export function penDev(options: PluginOptions): Plugin {
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const source = entryAppSource
-          .replaceAll(APP_DIR_TOKEN, routesDir)
+          .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.ink ?? {}))
         const { code, map } = await transformWithOxc(source, ENTRY_MODULE_ID, { jsx: { development: true } })
         return { code, map }
@@ -57,7 +56,7 @@ export function penDev(options: PluginOptions): Plugin {
     buildStart: {
       sequential: true,
       handler() {
-        log.ready(`ready in ${Date.now() - startTime!}ms`)
+        log.ready(`ready in ${Date.now() - options.startTime}ms`)
       },
     },
   }
