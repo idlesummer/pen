@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './plugin-options'
+import type { PluginOptions } from './types/plugin-options'
 import { loadPenConfig } from '@/pen-cli/config'
 
 /**

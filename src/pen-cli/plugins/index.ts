@@ -1,4 +1,4 @@
-export type { PluginOptions } from './plugin-options'
+export type { PluginOptions } from './types/plugin-options'
 export { penBuild } from './build-plugin'
 export { penConfig } from './config-plugin'
 export { penDev } from './dev-plugin'

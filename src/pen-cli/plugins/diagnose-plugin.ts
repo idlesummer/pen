@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './plugin-options'
+import type { PluginOptions } from './types/plugin-options'
 import { reportRouteDiagnostics } from '@/pen-react/setup'
 
 /** Discovers and validates the app's routes before typechecking and bundling.

@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './plugin-options'
+import type { PluginOptions } from './types/plugin-options'
 import { installRefreshRuntime, transformInkComponent } from '@/pen-cli/refresh'
 
 /** Enables React Fast Refresh for Ink during development.

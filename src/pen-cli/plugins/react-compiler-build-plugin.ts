@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import { transform } from 'oxc-transform-react'
-import type { PluginOptions } from './plugin-options'
+import type { PluginOptions } from './types/plugin-options'
 
 /** Runs React Compiler over the app's component modules during `pen build`,
  *  when `options.reactCompiler` is enabled.
