@@ -4,7 +4,7 @@ import { createBuilder } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
 import * as log from '@/pen-cli/logger/console'
-import { penBuild, penConfig, penDiagnose, penReactCompilerBuild, penTypecheck } from '@/pen-cli/plugins'
+import { penBuild, penConfig, penDiagnose, penTransform, penTypecheck } from '@/pen-cli/plugins'
 
 /** Creates a Vite builder configured with the `pen` plugin, ready to build
  *  the app's SSR environment.
@@ -38,7 +38,7 @@ export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBu
       penConfig(options),
       penDiagnose(options),
       penTypecheck(),
-      penReactCompilerBuild(options),
+      penTransform(options),
       penBuild(options),
     ],
     build: { outDir },
