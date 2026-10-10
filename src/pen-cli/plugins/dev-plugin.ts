@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
-import { transformWithOxc } from 'vite'
+import { transform } from 'oxc-transform-react'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
@@ -49,8 +49,14 @@ export function penDev(options: PluginOptions): Plugin {
         const source = entryAppSource
           .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.ink ?? {}))
-        const { code, map } = await transformWithOxc(source, ENTRY_MODULE_ID, { jsx: { development: true } })
-        return { code, map }
+        const transformed = await transform(ENTRY_MODULE_ID, source, {
+          jsx: { development: true },
+          reactCompiler: false,  // oxc-transform-react defaults this to true when omitted
+          sourcemap: true,  // transformWithOxc generated one by default; this doesn't
+        })
+        if (transformed.fatal)
+          this.error(transformed.errors.map(e => e.message).join('\n'))
+        return transformed
       }
     },
     buildStart: {
