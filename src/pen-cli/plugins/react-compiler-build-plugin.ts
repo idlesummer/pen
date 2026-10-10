@@ -29,9 +29,8 @@ export function penReactCompilerBuild(options: PluginOptions): Plugin {
         },
       },
       async handler(code, id) {
-        if (!options.reactCompiler)
-          return  // let Rolldown's own default transform handle it
-
+        if (!options.reactCompiler) // let Rolldown's own default transform handle it
+          return
         const filename = id.split('?')[0]!
         const transformed = await transform(filename, code, {
           reactCompiler: true,
@@ -39,7 +38,6 @@ export function penReactCompilerBuild(options: PluginOptions): Plugin {
         })
         if (transformed.fatal)
           this.error(transformed.errors.map(e => e.message).join('\n'))
-
         return transformed
       },
     },
