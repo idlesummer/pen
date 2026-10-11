@@ -3,7 +3,7 @@ import type { PluginOptions } from './types/plugin-options'
 import { loadPenConfig } from '@/pen-cli/config'
 
 /** Loads the project's `pen.config.ts` and writes its settings onto the
- *  shared `options` object, for penBuild/penDev/penReactRefreshInk to read later.
+ *  shared `options` object, for penBuild/penDev/penRefresh/penReactCompiler to read later.
  *
  *  Uses Vite's own `config` hook instead of a param passed in at
  *  construction time - it already hands over everything loadPenConfig
