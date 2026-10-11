@@ -9,10 +9,6 @@ const main = defineCommand({
   },
   // Lazily load subcommands so unused command modules aren't imported
   subCommands: {
-    create: async () => {
-      const { createCommand } = await import('./commands/create')
-      return createCommand
-    },
     build: async () => {
       const { buildCommand } = await import('./commands/build')
       return buildCommand
