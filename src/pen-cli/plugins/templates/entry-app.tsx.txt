@@ -1,3 +1,4 @@
+/* global __PEN_INK_OPTIONS__ */
 /// <reference types="vite/client" />
 /// <reference path="./templates.d.ts" />
 
