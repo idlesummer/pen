@@ -4,10 +4,10 @@ import { Navigation } from './navigation-core'
 type NavigationActions = {
   /** @param url - URL to navigate to.
    *  @param searchParams - Optional params for the new entry. */
-  push(url: string, searchParams?: unknown): void
+  push<T>(url: string, searchParams?: T): void
   /** @param url - URL to navigate to.
    *  @param searchParams - Optional params for the replaced entry. */
-  replace(url: string, searchParams?: unknown): void
+  replace<T>(url: string, searchParams?: T): void
   /** Moves back one entry, if possible. */
   back(): void
   /** Moves forward one entry, if possible. */
