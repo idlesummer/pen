@@ -20,5 +20,7 @@ export default defineConfig({
     __PACKAGE_NAME__: JSON.stringify(pkg.name),
     __DESCRIPTION__: JSON.stringify(pkg.description),
     __VERSION__: JSON.stringify(pkg.version),
+    __INK_VERSION__: JSON.stringify(pkg.peerDependencies.ink),
+    __REACT_VERSION__: JSON.stringify(pkg.peerDependencies.react),
   },
 })
