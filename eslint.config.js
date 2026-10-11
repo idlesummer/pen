@@ -69,12 +69,20 @@ export default defineConfig(
     // service always treats unknown extensions as plain TS - so parse these
     // standalone (no type info) and tell the parser directly whether to
     // expect JSX instead of inferring it from the (non-standard) extension.
+    // They also reference ambient .d.ts files stripped out at scaffold time -
+    // not a real import for the triple-slash rule to flag.
     files: ['**/*.ts.txt', '**/*.tsx.txt'],
+    plugins: { local: noUndefExceptTokens },
     languageOptions: {
       parserOptions: {
         projectService: false,
         project: false,
       },
+    },
+    rules: {
+      '@typescript-eslint/triple-slash-reference': 'off',
+      'no-undef': 'off',
+      'local/no-undef-except-tokens': 'error',
     },
   },
   {
@@ -83,22 +91,6 @@ export default defineConfig(
       parserOptions: {
         ecmaFeatures: { jsx: true },
       },
-    },
-  },
-  {
-    // Templates reference ambient .d.ts files stripped out at scaffold time -
-    // not a real import the rule below can see.
-    files: ['**/*.ts.txt', '**/*.tsx.txt'],
-    rules: {
-      '@typescript-eslint/triple-slash-reference': 'off',
-    },
-  },
-  {
-    files: ['**/*.ts.txt', '**/*.tsx.txt'],
-    plugins: { local: noUndefExceptTokens },
-    rules: {
-      'no-undef': 'off',
-      'local/no-undef-except-tokens': 'error',
     },
   },
 )
