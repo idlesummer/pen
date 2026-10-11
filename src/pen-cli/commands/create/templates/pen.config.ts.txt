@@ -1,5 +1,4 @@
-/// <reference types="./templates.d.ts" />
-
+/// <reference path="./templates.d.ts" />
 import { defineConfig } from '__PEN_PACKAGE_NAME__'
 
 export default defineConfig({
