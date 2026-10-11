@@ -36,7 +36,7 @@ export default defineConfig(
     // Custom rule overrides
     rules: {
       '@eslint-react/no-missing-key': 'warn',
-      // bans <Foo>x casts in favor of x as Foo, so forcing jsx mode below never changes their meaning
+      // bans <Foo>x casts in favor of x as Foo, so .ts.txt templates can be linted as if they were .tsx
       '@typescript-eslint/consistent-type-assertions': 'error',
       'comma-dangle': ['warn', 'always-multiline'],
       'eol-last': ['warn', 'always'],
