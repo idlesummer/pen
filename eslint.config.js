@@ -36,6 +36,7 @@ export default defineConfig(
     // Custom rule overrides
     rules: {
       '@eslint-react/no-missing-key': 'warn',
+      '@typescript-eslint/consistent-type-assertions': 'error', // bans <Foo>x casts in favor of x as Foo, so forcing jsx mode below never changes their meaning
       'comma-dangle': ['warn', 'always-multiline'],
       'eol-last': ['warn', 'always'],
       'object-curly-spacing': ['warn', 'always'],
@@ -51,19 +52,12 @@ export default defineConfig(
       parserOptions: {
         projectService: false,
         project: false,
+        ecmaFeatures: { jsx: true },
       },
     },
     rules: {
       // The `/// <reference>` targets are stripped at scaffold time, so skip
       '@typescript-eslint/triple-slash-reference': 'off',
-    },
-  },
-  {
-    files: ['**/*.tsx.txt'],
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
     },
   },
 )
