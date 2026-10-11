@@ -14,6 +14,7 @@ export const createCommand = defineCommand({
       type: 'positional',
       description: 'Directory to create the project in (default: current directory)',
       valueHint: 'directory',
+      required: false,
     },
   },
   run: async ({ args }) => {
