@@ -18,8 +18,9 @@ export type PenConfig = {
 /** Project config filename. */
 const CONFIG_FILENAME = 'pen.config.ts'
 
-/** Defaults applied when the project's config omits them. */
-const DEFAULT_PEN_CONFIG: PenConfig = {
+/** Defaults applied when the project's config omits them, and the initial
+ *  value of `PluginOptions.config` before `pen:config`'s hook replaces it. */
+export const DEFAULT_PEN_CONFIG: PenConfig = {
   reactCompiler: false,
   ink: {
     maxFps: 75,

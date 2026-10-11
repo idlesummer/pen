@@ -17,9 +17,9 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  * diagnose-plugin.ts - without it, this plugin's buildStart (and the
  * "Ready" print in it) would never run on the dev server's SSR environment.
  *
- * `ink` is read lazily off `options` inside `load()` rather than
- * destructured here, since pen:config's `config` hook (which populates it)
- * hasn't necessarily run yet at the time this factory itself is called.
+ * `options.config` is read lazily inside `load()` rather than destructured
+ * here, since pen:config's `config` hook replaces it with the real
+ * settings sometime after this factory itself is called.
  */
 export function penDev(options: PluginOptions): Plugin {
   return {
@@ -48,7 +48,7 @@ export function penDev(options: PluginOptions): Plugin {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const source = entryAppSource
           .replaceAll(APP_DIR_TOKEN, options.routesDir)
-          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.ink ?? {}))
+          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
 
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
