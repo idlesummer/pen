@@ -44,12 +44,8 @@ export default defineConfig(
     },
   },
   {
-    // Template files aren't part of any tsconfig project, and the project
-    // service always treats unknown extensions as plain TS - so parse these
-    // standalone (no type info) and tell the parser directly whether to
-    // expect JSX instead of inferring it from the (non-standard) extension.
-    // They also reference ambient .d.ts files stripped out at scaffold time -
-    // not a real import for the triple-slash rule to flag.
+    // Templates aren't in any tsconfig project, and the project service parses unknown
+    // extensions as plain TS. So parse standalone (no type info) and set JSX explicitly
     files: ['**/*.ts.txt', '**/*.tsx.txt'],
     languageOptions: {
       parserOptions: {
@@ -58,6 +54,7 @@ export default defineConfig(
       },
     },
     rules: {
+      // The `/// <reference>` targets are stripped at scaffold time, so skip
       '@typescript-eslint/triple-slash-reference': 'off',
     },
   },
