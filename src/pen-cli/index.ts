@@ -13,6 +13,10 @@ const main = defineCommand({
       const { buildCommand } = await import('./commands/build')
       return buildCommand
     },
+    create: async () => {
+      const { createCommand } = await import('./commands/create')
+      return createCommand
+    },
     dev: async () => {
       // react-refresh/runtime reads NODE_ENV at import time, so set it before
       // importing the dev command. Ink reads DEV when render() runs, so it only

@@ -1,0 +1,9 @@
+/// <reference types="./templates.d.ts" />
+
+import { defineConfig } from '__PEN_PACKAGE_NAME__'
+
+export default defineConfig({
+  ink: {
+    maxFps: 120,
+  }
+})

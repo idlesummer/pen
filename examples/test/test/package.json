@@ -1,0 +1,16 @@
+{
+  "name": "test",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pen dev",
+    "build": "pen build",
+    "start": "pen start"
+  },
+  "dependencies": {
+    "@idlesummer/pen": "^0.3.1",
+    "ink": "^7.1.1",
+    "react": "^19.2.8"
+  }
+}
