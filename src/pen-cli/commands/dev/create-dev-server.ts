@@ -2,6 +2,7 @@ import type { PluginOptions } from '@/pen-cli/plugins'
 import { createServer } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
+import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
 import { penConfig, penDev, penDiagnose, penRefresh } from '@/pen-cli/plugins'
@@ -24,7 +25,7 @@ export function createPenDevServer(srcDir: string) {
   }
   const routesDir = `${srcDir}/${APP_DIR_NAME}`
   const startTime = Date.now()
-  const options: PluginOptions = { routesDir, startTime }
+  const options: PluginOptions = { routesDir, startTime, config: DEFAULT_PEN_CONFIG }
 
   return createServer({
     root: projectDir,

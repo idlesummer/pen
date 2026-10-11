@@ -3,7 +3,7 @@ import type { PluginOptions } from './types/plugin-options'
 import { transform } from 'oxc-transform-react'
 
 /** Runs React Compiler over the app's component modules during `pen build`,
- *  when `options.reactCompiler` is enabled.
+ *  when `options.config.reactCompiler` is enabled.
  *
  *  Only intercepts a `.tsx` file once the compiler is actually on - with it
  *  off, the handler returns nothing so Rolldown's own default JSX/TS
@@ -29,7 +29,7 @@ export function penReactCompiler(options: PluginOptions): Plugin {
         },
       },
       async handler(code, id) {
-        if (!options.reactCompiler) // let Rolldown's own default transform handle it
+        if (!options.config.reactCompiler) // let Rolldown's own default transform handle it
           return
         const filename = id.split('?')[0]!
         const transformed = await transform(filename, code, {

@@ -4,8 +4,9 @@ import { installRefreshRuntime, transformInkComponent } from '@/pen-cli/refresh'
 
 /** Enables React Fast Refresh for Ink during development.
  *
- *  Also enables React Compiler when `options.reactCompiler` is set.
- *  Reads the option lazily because the config hook may not have run yet.
+ *  Also enables React Compiler when `options.config.reactCompiler` is set.
+ *  Reads it lazily since pen:config's hook replaces `options.config` with
+ *  the real settings sometime after this factory itself is called.
  *  Used for dev only, not used during builds. */
 export function penRefresh(options: PluginOptions): Plugin {
   return {
@@ -33,7 +34,7 @@ export function penRefresh(options: PluginOptions): Plugin {
       async handler(code, id) {
         const filename = id.split('?')[0]!
         const transformed = await transformInkComponent(filename, code, {
-          reactCompiler: options.reactCompiler ?? false,
+          reactCompiler: options.config.reactCompiler,
           refresh: true,
         })
         if (transformed.fatal)

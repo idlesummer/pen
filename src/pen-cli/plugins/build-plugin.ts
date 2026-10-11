@@ -6,10 +6,10 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /** Bundles the app's entry module for Node.
  *
- *  Runs only in the SSR environment. `ink` is read lazily off `options`
+ *  Runs only in the SSR environment. `options.config` is read lazily
  *  inside `load()` rather than destructured here, since pen:config's
- *  `config` hook (which populates it) hasn't necessarily run yet at the
- *  time this factory itself is called. */
+ *  `config` hook replaces it with the real settings sometime after this
+ *  factory itself is called. */
 export function penBuild(options: PluginOptions): Plugin {
   const { routesDir } = options
   return {
@@ -45,7 +45,7 @@ export function penBuild(options: PluginOptions): Plugin {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource
           .replaceAll(APP_DIR_TOKEN, routesDir)
-          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.ink ?? {}))
+          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
     },
   }
 }

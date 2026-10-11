@@ -3,6 +3,7 @@ import type { PluginOptions } from '@/pen-cli/plugins'
 import { createBuilder } from 'vite'
 import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
+import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
 import * as log from '@/pen-cli/logger/console'
 import { penBuild, penConfig, penDiagnose, penReactCompiler, penTypecheck } from '@/pen-cli/plugins'
 
@@ -29,7 +30,7 @@ export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBu
     process.exit(1)
   }
   const routesDir = `${srcDir}/${APP_DIR_NAME}`
-  const options: PluginOptions = { startTime: 0, routesDir }
+  const options: PluginOptions = { startTime: 0, routesDir, config: DEFAULT_PEN_CONFIG }
 
   return createBuilder({
     root: projectDir,

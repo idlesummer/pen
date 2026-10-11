@@ -2,25 +2,23 @@ import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { loadPenConfig } from '@/pen-cli/config'
 
-/** Loads the project's `pen.config.ts` and writes its settings onto the
- *  shared `options` object, for penBuild/penDev/penRefresh/penReactCompiler to read later.
+/** Loads the project's `pen.config.ts` and replaces `options.config` with
+ *  it, for penBuild/penDev/penRefresh/penReactCompiler to read later.
  *
  *  Uses Vite's own `config` hook instead of a param passed in at
  *  construction time - it already hands over everything loadPenConfig
  *  needs (`config.root`, `env.command`), and it's guaranteed to finish
  *  before any environment-level hook (resolveId/load) ever runs, so
- *  `options.ink`/`options.reactCompiler` are always populated by the time
- *  their consumers read them.
+ *  `options.config` always holds the real settings by the time their
+ *  consumers read it.
  *
- * @param options - Shared plugin options to write settings onto once loaded. */
+ * @param options - Shared plugin options to replace `config` on once loaded. */
 export function penConfig(options: PluginOptions): Plugin {
   return {
     name: 'pen:config',
 
     async config(config, env) {
-      const penConfig = await loadPenConfig(config.root!, env.command)
-      options.ink = penConfig.ink
-      options.reactCompiler = penConfig.reactCompiler
+      options.config = await loadPenConfig(config.root!, env.command)
     },
   }
 }
