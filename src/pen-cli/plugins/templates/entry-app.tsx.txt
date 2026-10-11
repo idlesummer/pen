@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-/// <reference types="./templates.d.ts" />
+/// <reference path="./templates.d.ts" />
 
 import type {
   Module,
