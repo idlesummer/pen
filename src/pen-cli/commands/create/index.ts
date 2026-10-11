@@ -26,8 +26,12 @@ export const createCommand = defineCommand({
       process.exit(1)
     }
     const projectName = isCurrentDir ? basename(process.cwd()) : args.name
+    const message = isCurrentDir
+      ? 'npm install && npx pen dev'
+      : `cd ${args.name} && npm install && npx pen dev`
+
     await createProjectScaffold(targetDir, projectName)
     log.ready(`Created ${args.name}`)
-    log.event(isCurrentDir ? `cd ${args.name} && ` : '' + 'npm install && npx pen dev')
+    log.event(message)
   },
 })
