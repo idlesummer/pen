@@ -20,18 +20,18 @@ export const createCommand = defineCommand({
   run: async ({ args }) => {
     const isCurrentDir = args.name === '.'
     const targetDir = join(process.cwd(), args.name)
+    const projectName = isCurrentDir ? basename(process.cwd()) : args.name
 
     if (isCurrentDir ? readdirSync(targetDir).length > 0 : existsSync(targetDir)) {
-      log.error(`'${args.name}' already exists.`)
+      log.error(`'${projectName}' already exists.`)
       process.exit(1)
     }
-    const projectName = isCurrentDir ? basename(process.cwd()) : args.name
     const message = isCurrentDir
       ? 'npm install && npx pen dev'
-      : `cd ${args.name} && npm install && npx pen dev`
+      : `cd ${projectName} && npm install && npx pen dev`
 
     await createProjectScaffold(targetDir, projectName)
-    log.ready(`Created ${args.name}`)
+    log.ready(`Created '${projectName}'`)
     log.event(message)
   },
 })
