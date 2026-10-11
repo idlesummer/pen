@@ -12,7 +12,7 @@ const PACKAGE_NAME_TOKEN = '__PEN_PACKAGE_NAME__'
 const PACKAGE_VERSION_TOKEN = '__PEN_VERSION__'
 const INK_VERSION_TOKEN = '__INK_VERSION__'
 const REACT_VERSION_TOKEN = '__REACT_VERSION__'
-const REFERENCE_DIRECTIVE = /^\/\/\/.*\r?\n/
+const REFERENCE_DIRECTIVE = /^\/\/\/.*\r?\n(?:\r?\n)?/
 
 function createPackageJson(projectName: string) {
   return packageTemplate
