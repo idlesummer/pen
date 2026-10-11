@@ -11,7 +11,6 @@ import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
  *  `config` hook replaces it with the real settings sometime after this
  *  factory itself is called. */
 export function penBuild(options: PluginOptions): Plugin {
-  const routesDir = options.routesDir
   return {
     name: 'pen:build',
 
@@ -44,7 +43,7 @@ export function penBuild(options: PluginOptions): Plugin {
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return entryAppSource
-          .replaceAll(APP_DIR_TOKEN, routesDir)
+          .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
     },
   }
