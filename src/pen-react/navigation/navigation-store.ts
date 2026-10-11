@@ -1,5 +1,21 @@
 import { Navigation } from './navigation-core'
 
+/** Actions returned to consumers via useRouter(). */
+type NavigationActions = {
+  /** @param url - URL to navigate to.
+   *  @param searchParams - Optional params for the new entry. */
+  push(url: string, searchParams?: unknown): void
+  /** @param url - URL to navigate to.
+   *  @param searchParams - Optional params for the replaced entry. */
+  replace(url: string, searchParams?: unknown): void
+  /** Moves back one entry, if possible. */
+  back(): void
+  /** Moves forward one entry, if possible. */
+  forward(): void
+  /** Re-renders the current route without changing history. */
+  refresh(): void
+}
+
 /** Stateful store around {@link Navigation}.
  *  The class owns its store state, while bound fields form the public interface
  *  so consumers can pass them directly without invoking or binding methods. */
@@ -8,10 +24,12 @@ export class NavigationStore {
   private navigation
   private snapshot
 
-  /** Public store interface. */
+  /** @param listener - Called after any navigation action.
+   *  @returns A function that unsubscribes the listener. */
   readonly subscribe
+  /** @returns The current navigation snapshot. */
   readonly getSnapshot
-  readonly actions
+  readonly actions: NavigationActions
 
   constructor(initialUrl: string) {
     this.listeners = new Set<() => void>()
