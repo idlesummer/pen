@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="./templates.d.ts" />
 
 import type {
   Module,
@@ -30,6 +31,5 @@ const { matcher, componentMap } = createPenAppProps({
   default: defaultModules,
 })
 
-// @ts-expect-error replaced by codegen
 const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
