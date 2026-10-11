@@ -16,17 +16,17 @@ const REFERENCE_DIRECTIVE = /^\/\/\/.*\n/
 
 function createPackageJson(projectName: string) {
   return packageTemplate
-    .replaceAll(PROJECT_NAME_TOKEN, projectName)
-    .replaceAll(PACKAGE_NAME_TOKEN, PACKAGE_NAME)
-    .replaceAll(PACKAGE_VERSION_TOKEN, VERSION)
-    .replaceAll(INK_VERSION_TOKEN, INK_VERSION)
-    .replaceAll(REACT_VERSION_TOKEN, REACT_VERSION)
+    .replaceAll(PROJECT_NAME_TOKEN, () => projectName)
+    .replaceAll(PACKAGE_NAME_TOKEN, () => PACKAGE_NAME)
+    .replaceAll(PACKAGE_VERSION_TOKEN, () => VERSION)
+    .replaceAll(INK_VERSION_TOKEN, () => INK_VERSION)
+    .replaceAll(REACT_VERSION_TOKEN, () => REACT_VERSION)
 }
 
 function createPenConfig() {
   return configTemplate
-    .replace(REFERENCE_DIRECTIVE, '')
-    .replaceAll(PACKAGE_NAME_TOKEN, PACKAGE_NAME)
+    .replace(REFERENCE_DIRECTIVE, () => '')
+    .replaceAll(PACKAGE_NAME_TOKEN, () => PACKAGE_NAME)
 }
 
 /** Writes a fresh pen project's files into `targetDir`. */
