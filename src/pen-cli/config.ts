@@ -38,6 +38,10 @@ export function defineConfig(config: PenConfig): PenConfig {
  *  project tsconfig. Vite's config type is not enforced by the loader.
  *  Load errors are reported without citty's raw stack trace.
  *
+ *  The default loader ('bundle') writes a temporary file under
+ *  node_modules/.vite-temp to import the compiled config - 'runner' loads
+ *  it through Vite's own module runner instead, entirely in memory.
+ *
  *  @param projectDir - Project root.
  *  @param command - Vite-compatible command.
  *  @returns The loaded config, merged over defaults. */
@@ -47,7 +51,8 @@ export async function loadPenConfig(projectDir: string, command: 'build' | 'serv
 
   try {
     const mode = command === 'build' ? 'production' : 'development'
-    const file = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir)
+    const configLoader = 'runner'
+    const file = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir, undefined, undefined, configLoader)
     const config = (file?.config ?? {}) as PenConfig
     return mergeConfig(DEFAULT_PEN_CONFIG, config)
   }
