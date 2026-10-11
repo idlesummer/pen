@@ -3,6 +3,27 @@ import eslintJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import { defineConfig } from 'eslint/config'
 
+// Same check as core no-undef, except __LIKE_THIS__ names are codegen
+// placeholders substituted into templates before they ever run - not real
+// identifiers - so they're exempt instead of allowlisted one by one.
+const TOKEN_PATTERN = /^__[A-Z0-9_]+__$/
+const noUndefExceptTokens = {
+  rules: {
+    'no-undef-except-tokens': {
+      create(context) {
+        return {
+          'Program:exit'(node) {
+            for (const ref of context.sourceCode.getScope(node).through) {
+              if (!TOKEN_PATTERN.test(ref.identifier.name))
+                context.report({ node: ref.identifier, message: `'${ref.identifier.name}' is not defined.` })
+            }
+          },
+        }
+      },
+    },
+  },
+}
+
 export default defineConfig(
   {
     ignores: ['**/.*/**', 'dist'],
@@ -73,14 +94,11 @@ export default defineConfig(
     },
   },
   {
-    // __PEN_INK_OPTIONS__ is a codegen placeholder substituted into source
-    // as a bare expression, not a real identifier - the rest of __PEN_*__
-    // live inside string literals and need no such declaration.
-    files: ['src/pen-cli/plugins/templates/entry-app.tsx.txt'],
-    languageOptions: {
-      globals: {
-        __PEN_INK_OPTIONS__: 'readonly',
-      },
+    files: ['**/*.ts.txt', '**/*.tsx.txt'],
+    plugins: { local: noUndefExceptTokens },
+    rules: {
+      'no-undef': 'off',
+      'local/no-undef-except-tokens': 'error',
     },
   },
 )
