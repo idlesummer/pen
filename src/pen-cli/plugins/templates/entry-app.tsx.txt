@@ -15,24 +15,24 @@ import { PenApp, createPenAppProps } from '@idlesummer/pen/internal'
 // Vite's `import.meta.glob` needs literal arguments (anything else silently matches nothing),
 // so there's one typed glob per role. The leading './' keeps `base` scoping active.
 const page = import.meta.glob<Module<PageComponent>>('./**/page.tsx', {
-  eager: true,
   base: './__PEN_APP_DIR__',
+  eager: true,
 })
 const layout = import.meta.glob<Module<LayoutComponent>>('./**/layout.tsx', {
-  eager: true,
   base: './__PEN_APP_DIR__',
+  eager: true,
 })
 const loading = import.meta.glob<Module<LoadingComponent>>('./**/loading.tsx', {
-  eager: true,
   base: './__PEN_APP_DIR__',
+  eager: true,
 })
 const error = import.meta.glob<Module<ErrorComponent>>('./**/error.tsx', {
-  eager: true,
   base: './__PEN_APP_DIR__',
+  eager: true,
 })
 const default_ = import.meta.glob<Module<DefaultComponent>>('./**/default.tsx', {
-  eager: true,
   base: './__PEN_APP_DIR__',
+  eager: true,
 })
 
 // ── Main entry point ─────────────────────────────────────────────────────
