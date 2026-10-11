@@ -15,21 +15,14 @@ import { PenApp, createPenAppProps } from '@idlesummer/pen/internal'
 // Each glob is typed by module role, so no runtime classification is needed.
 // The leading './' matters: without it, Vite skips base-relative scoping
 // entirely and falls back to scanning from the project root instead.
-const pageModules = import.meta.glob<Module<PageComponent>>('./**/page.tsx', { eager: true, base: './__PEN_APP_DIR__' })
-const layoutModules = import.meta.glob<Module<LayoutComponent>>('./**/layout.tsx', { eager: true, base: './__PEN_APP_DIR__' })
-const loadingModules = import.meta.glob<Module<LoadingComponent>>('./**/loading.tsx', { eager: true, base: './__PEN_APP_DIR__' })
-const errorModules = import.meta.glob<Module<ErrorComponent>>('./**/error.tsx', { eager: true, base: './__PEN_APP_DIR__' })
-const defaultModules = import.meta.glob<Module<DefaultComponent>>('./**/default.tsx', { eager: true, base: './__PEN_APP_DIR__' })
+const page = import.meta.glob<Module<PageComponent>>('./**/page.tsx', { eager: true, base: './__PEN_APP_DIR__' })
+const layout = import.meta.glob<Module<LayoutComponent>>('./**/layout.tsx', { eager: true, base: './__PEN_APP_DIR__' })
+const loading = import.meta.glob<Module<LoadingComponent>>('./**/loading.tsx', { eager: true, base: './__PEN_APP_DIR__' })
+const error = import.meta.glob<Module<ErrorComponent>>('./**/error.tsx', { eager: true, base: './__PEN_APP_DIR__' })
+const default_ = import.meta.glob<Module<DefaultComponent>>('./**/default.tsx', { eager: true, base: './__PEN_APP_DIR__' })
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-const { matcher, componentMap } = createPenAppProps({
-  page: pageModules,
-  layout: layoutModules,
-  loading: loadingModules,
-  error: errorModules,
-  default: defaultModules,
-})
-
+const { matcher, componentMap } = createPenAppProps({ page, layout, loading, error, default: default_ })
 const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
