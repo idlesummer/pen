@@ -36,7 +36,8 @@ export default defineConfig(
     // Custom rule overrides
     rules: {
       '@eslint-react/no-missing-key': 'warn',
-      '@typescript-eslint/consistent-type-assertions': 'error', // bans <Foo>x casts in favor of x as Foo, so forcing jsx mode below never changes their meaning
+      // bans <Foo>x casts in favor of x as Foo, so forcing jsx mode below never changes their meaning
+      '@typescript-eslint/consistent-type-assertions': 'error',
       'comma-dangle': ['warn', 'always-multiline'],
       'eol-last': ['warn', 'always'],
       'object-curly-spacing': ['warn', 'always'],
