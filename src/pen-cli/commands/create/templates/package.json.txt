@@ -1,0 +1,16 @@
+{
+  "name": "__PEN_PROJECT_NAME__",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pen build",
+    "dev": "pen dev",
+    "start": "pen start"
+  },
+  "dependencies": {
+    "__PEN_PACKAGE_NAME__": "__PEN_VERSION__",
+    "ink": "__INK_VERSION__",
+    "react": "__REACT_VERSION"
+  }
+}
