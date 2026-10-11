@@ -1,0 +1,5 @@
+import { Text } from 'ink'
+
+export default function RootPage() {
+  return <Text>Hello World</Text>
+}
