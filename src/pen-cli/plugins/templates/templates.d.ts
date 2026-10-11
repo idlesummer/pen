@@ -4,5 +4,4 @@ declare module '*.tsx.txt' {
   export default content
 }
 
-import type { RenderOptions } from 'ink'
-declare const __PEN_INK_OPTIONS__: RenderOptions
+declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
