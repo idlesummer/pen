@@ -30,6 +30,6 @@ const { matcher, componentMap } = createPenAppProps({
   default: defaultModules,
 })
 
-// @ts-ignore replaced by codegen
+// @ts-expect-error replaced by codegen
 const { waitUntilExit } = render(<PenApp matcher={matcher} componentMap={componentMap} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
