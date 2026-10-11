@@ -3,27 +3,6 @@ import eslintJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import { defineConfig } from 'eslint/config'
 
-// Same check as core no-undef, except __LIKE_THIS__ names are codegen
-// placeholders substituted into templates before they ever run - not real
-// identifiers - so they're exempt instead of allowlisted one by one.
-const TOKEN_PATTERN = /^__[A-Z0-9_]+__$/
-const noUndefExceptTokens = {
-  rules: {
-    'no-undef-except-tokens': {
-      create(context) {
-        return {
-          'Program:exit'(node) {
-            for (const ref of context.sourceCode.getScope(node).through) {
-              if (!TOKEN_PATTERN.test(ref.identifier.name))
-                context.report({ node: ref.identifier, message: `'${ref.identifier.name}' is not defined.` })
-            }
-          },
-        }
-      },
-    },
-  },
-}
-
 export default defineConfig(
   {
     ignores: ['**/.*/**', 'dist'],
@@ -72,7 +51,6 @@ export default defineConfig(
     // They also reference ambient .d.ts files stripped out at scaffold time -
     // not a real import for the triple-slash rule to flag.
     files: ['**/*.ts.txt', '**/*.tsx.txt'],
-    plugins: { local: noUndefExceptTokens },
     languageOptions: {
       parserOptions: {
         projectService: false,
@@ -81,8 +59,6 @@ export default defineConfig(
     },
     rules: {
       '@typescript-eslint/triple-slash-reference': 'off',
-      'no-undef': 'off',
-      'local/no-undef-except-tokens': 'error',
     },
   },
   {
