@@ -38,6 +38,8 @@ const default_ = import.meta.glob<Module<DefaultComponent>>('./**/default.tsx', 
 
 const penAppProps = createPenAppProps({ page, layout, loading, error, default: default_ })
 
+// __PEN_STRIP_START__
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
+// __PEN_STRIP_END__
 const { waitUntilExit } = render(<PenApp {...penAppProps} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()

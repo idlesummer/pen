@@ -1,9 +1,9 @@
 import type { TransformResult } from 'oxc-transform-react'
 import { transform } from 'oxc-transform-react'
-import { stripReferenceDirectives } from '@/lib/strip-reference-directives'
+import { stripCodegenArtifacts } from '@/lib/strip-codegen-artifacts'
 import refreshBoundaryTemplate from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
-const refreshBoundarySource = stripReferenceDirectives(refreshBoundaryTemplate)
+const refreshBoundarySource = stripCodegenArtifacts(refreshBoundaryTemplate)
 
 /** Options for {@link transformInkComponent}. */
 export type TransformOptions = {
