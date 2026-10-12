@@ -8,7 +8,7 @@ export default defineConfig(
     ignores: ['**/.*/**', 'dist'],
   },
   {
-    files: ['**/*.{js,ts,jsx,tsx}', '**/*.tsx.txt', '**/*.ts.txt'],
+    files: ['**/*.{js,ts,jsx,tsx}', '**/*.tsx.txt', '**/*.ts.txt', '**/*.js.txt'],
 
     // Extend recommended rule sets from:
     // 1. ESLint JS's recommended rules
@@ -48,7 +48,7 @@ export default defineConfig(
   {
     // Templates aren't in any tsconfig project, and the project service parses unknown
     // extensions as plain TS. So parse standalone (no type info) and set JSX explicitly
-    files: ['**/*.ts.txt', '**/*.tsx.txt'],
+    files: ['**/*.ts.txt', '**/*.tsx.txt', '**/*.js.txt'],
     languageOptions: {
       parserOptions: {
         projectService: false,

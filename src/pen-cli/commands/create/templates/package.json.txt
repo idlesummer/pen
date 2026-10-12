@@ -6,7 +6,8 @@
   "scripts": {
     "build": "pen build",
     "dev": "pen dev",
-    "start": "pen start"
+    "start": "pen start",
+    "lint": "eslint"
   },
   "dependencies": {
     "@types/node": "__TYPES_NODE_VERSION__",
@@ -16,6 +17,7 @@
     "react": "__REACT_VERSION__"
   },
   "devDependencies": {
+    "eslint": "__ESLINT_VERSION__",
     "typescript": "__TYPESCRIPT_VERSION__"
   },
   "engines": {
