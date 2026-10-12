@@ -1,10 +1,10 @@
 import { defineCommand, runMain } from 'citty'
-import { CLI_NAME, DESCRIPTION, VERSION } from '@/lib/constants'
+import { DESCRIPTION, PEN_VERSION } from '@/lib/constants'
 
 const main = defineCommand({
   meta: {
-    name: CLI_NAME,
-    version: VERSION,
+    name: 'pen',
+    version: PEN_VERSION,
     description: DESCRIPTION,
   },
   // Lazily load subcommands so unused command modules aren't imported

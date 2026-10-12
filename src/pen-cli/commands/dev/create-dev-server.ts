@@ -1,6 +1,6 @@
 import type { PluginOptions } from '@/pen-cli/plugins'
 import { createServer } from 'vite'
-import { APP_DIR_NAME, CLI_NAME, VERSION } from '@/lib/constants'
+import { PEN_VERSION } from '@/lib/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
 import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
@@ -16,14 +16,14 @@ import { penConfig, penDev, penDiagnose, penRefresh } from '@/pen-cli/plugins'
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
 export function createPenDevServer(srcDir: string) {
-  log.banner(`${CLI_NAME} v${VERSION}`)
+  log.banner(`pen v${PEN_VERSION}`)
 
   const projectDir = findPackageDir(process.cwd())
   if (!projectDir) {
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-  const routesDir = `${srcDir}/${APP_DIR_NAME}`
+  const routesDir = `${srcDir}/app`
   const startTime = Date.now()
   const options: PluginOptions = { routesDir, startTime, config: DEFAULT_PEN_CONFIG }
 
