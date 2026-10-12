@@ -6,6 +6,12 @@ import { findDefaultOwner } from '../route/route-tree'
 import { createPositionEndpoints } from './position-endpoints'
 import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
+type PositionTreeResult = {
+  positionTree: PositionNode
+  positions: Set<PositionNode>
+  conflicts: PositionConflicts[]
+}
+
 // ── traversal ────────────────────────────────────────────────────────────
 
 /** Traversal-only bookkeeping */
@@ -70,7 +76,7 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
 
 // ── build ────────────────────────────────────────────────────────────────
 
-export function createPositionTree(routeTree: RouteNode): { positionTree: PositionNode, positions: Set<PositionNode>, conflicts: PositionConflicts[] } {
+export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
   const positionTree: PositionNode = {
     urlDepth: 0,
     dynamicCount: 0,
