@@ -9,7 +9,7 @@
     "start": "pen start"
   },
   "dependencies": {
-    "__PEN_PACKAGE_NAME__": "^__PEN_VERSION__",
+    "@idlesummer/pen": "^__PEN_VERSION__",
     "ink": "__INK_VERSION__",
     "react": "__REACT_VERSION__"
   }
