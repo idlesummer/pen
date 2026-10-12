@@ -1,9 +1,12 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { transform } from 'oxc-transform-react'
+import { stripReferenceDirectives } from '@/lib/strip-reference-directives'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
-import entryAppSource from './templates/entry-app.tsx.txt' with { type: 'text' }
+import entryAppTemplate from './templates/entry-app.tsx.txt' with { type: 'text' }
+
+const entryAppSource = stripReferenceDirectives(entryAppTemplate)
 
 /**
  * Loads the app's virtual entry module, which renders the dev server's

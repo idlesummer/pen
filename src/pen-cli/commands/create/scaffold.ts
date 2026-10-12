@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { PACKAGE_NAME, VERSION, INK_VERSION, REACT_VERSION } from '@/lib/constants'
+import { stripReferenceDirectives } from '@/lib/strip-reference-directives'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import pageTemplate from './templates/page.tsx.txt' with { type: 'text' }
 import packageTemplate from './templates/package.json.txt' with { type: 'text' }
@@ -12,7 +13,6 @@ const PACKAGE_NAME_TOKEN = '__PEN_PACKAGE_NAME__'
 const PACKAGE_VERSION_TOKEN = '__PEN_VERSION__'
 const INK_VERSION_TOKEN = '__INK_VERSION__'
 const REACT_VERSION_TOKEN = '__REACT_VERSION__'
-const REFERENCE_DIRECTIVE = /^\/\/\/.*\r?\n(?:\r?\n)?/
 
 function createPackageJson(projectName: string) {
   return packageTemplate
@@ -24,8 +24,7 @@ function createPackageJson(projectName: string) {
 }
 
 function createPenConfig() {
-  return configTemplate
-    .replace(REFERENCE_DIRECTIVE, () => '')
+  return stripReferenceDirectives(configTemplate)
     .replaceAll(PACKAGE_NAME_TOKEN, () => PACKAGE_NAME)
 }
 
