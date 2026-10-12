@@ -2,7 +2,7 @@ import type { RouteNode } from '@/pen-core/compiler/route'
 import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findDefaultOwner } from '../route/route-tree'
+import { createConflicts, trackOwnership } from './position-ownership'
 import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
 type PositionTreeResult = {
@@ -44,10 +44,6 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
   if (isDynamicOrCatchall(type))
     position.param = route.segment
   return position
-}
-
-function createConflicts(): PositionConflicts {
-  return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
@@ -96,23 +92,9 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
     fallbackFrameOf: new Map<Frame, Frame>(),
   }
   traverse(routeTree, {
-    visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
+    visit: (route) => {
       const position = context.positionOf.get(route)!
-      const defaultOwnerOf = context.defaultOwnerOf
-      // A real default always beats an implicit one at the boundary
-      const defaultOwner = findDefaultOwner(route)
-      if (!defaultOwnerOf.has(position) || defaultOwner.modules.default)
-        defaultOwnerOf.set(position, defaultOwner)
-
-      // Several folders can climb to the same real default without
-      // conflicting - only distinct owners count as competing claims.
-      const conflictsOf = state.conflictsOf
-      if (defaultOwner.modules.default)
-        conflictsOf.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
-
-      if (!route.modules.page) return // after this, route is a page owner
-      context.pageOwnerOf.getOrInsert(position, route)
-      conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
+      trackOwnership(route, position, context, state.conflictsOf)
     },
     expand: route => expandChildren(route, state),
     attach: (childRoute, parentRoute) => {
