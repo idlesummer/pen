@@ -1,5 +1,4 @@
 import { defineConfig } from 'tsdown'
-import pkg from './package.json' with { type: 'json' }
 
 export default defineConfig({
   // Entry points
@@ -14,16 +13,4 @@ export default defineConfig({
   sourcemap: true,  // Source maps for debugging
   clean: true,      // Remove dist/ before build
   minify: true,     // Minify the emitted JavaScript
-
-  // Build-time constant injection
-  define: {
-    __PACKAGE_NAME__: JSON.stringify(pkg.name),
-    __DESCRIPTION__: JSON.stringify(pkg.description),
-    __VERSION__: JSON.stringify(pkg.version),
-    __INK_VERSION__: JSON.stringify(pkg.peerDependencies.ink),
-    __REACT_VERSION__: JSON.stringify(pkg.peerDependencies.react),
-    __TYPES_NODE_VERSION__: JSON.stringify(pkg.devDependencies['@types/node']),
-    __TYPES_REACT_VERSION__: JSON.stringify(pkg.devDependencies['@types/react']),
-    __TYPESCRIPT_VERSION__: JSON.stringify(pkg.devDependencies.typescript),
-  },
 })

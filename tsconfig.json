@@ -11,7 +11,8 @@
 
     // Path Mapping
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/package.json": ["./package.json"]
     },
 
     // Stricter Typechecking Options
