@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { PACKAGE_NAME, VERSION, INK_VERSION, REACT_VERSION } from '@/lib/constants'
-import { stripReferenceDirectives } from '@/lib/strip-reference-directives'
+import { stripCodegenArtifacts } from '@/lib/strip-codegen-artifacts'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import pageTemplate from './templates/page.tsx.txt' with { type: 'text' }
 import packageTemplate from './templates/package.json.txt' with { type: 'text' }
@@ -24,7 +24,7 @@ function createPackageJson(projectName: string) {
 }
 
 function createPenConfig() {
-  return stripReferenceDirectives(configTemplate)
+  return stripCodegenArtifacts(configTemplate)
     .replaceAll(PACKAGE_NAME_TOKEN, () => PACKAGE_NAME)
 }
 
