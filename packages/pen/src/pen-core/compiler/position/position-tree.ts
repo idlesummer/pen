@@ -44,11 +44,11 @@ function createConflicts(): PositionConflicts {
   return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
 }
 
-/** Gets or creates the position for a route folder.
- *  Groups reuse their parent's position; other folders create their own. */
+/** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
 function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
   const parentPosition = context.positionOf.get(parentRoute)!
   const conflictsOf = state.conflictsOf
+
   switch (route.type) {
     default: // group
       return parentPosition
