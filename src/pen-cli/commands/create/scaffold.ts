@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { PEN_VERSION, INK_VERSION, REACT_VERSION, TYPES_NODE_VERSION, TYPES_REACT_VERSION, TYPESCRIPT_VERSION } from '@/lib/constants'
+import { PEN_VERSION, INK_VERSION, REACT_VERSION, TYPES_NODE_VERSION, TYPES_REACT_VERSION, TYPESCRIPT_VERSION } from '@/constants'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import pageTemplate from './templates/page.tsx.txt' with { type: 'text' }
 import packageTemplate from './templates/package.json.txt' with { type: 'text' }
