@@ -1,7 +1,7 @@
-// __PEN_STRIP_START__
+// #region strip
 /// <reference types="vite/client" />
 /// <reference path="../globals.d.ts" />
-// __PEN_STRIP_END__
+// #endregion
 
 // `configureServer` initializes these before transformed modules run
 const __prev_Reg__ = globalThis.$RefreshReg$
