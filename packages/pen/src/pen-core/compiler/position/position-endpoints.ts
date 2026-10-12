@@ -58,8 +58,10 @@ function createFallback(defaultOwner: RouteNode, contentPath: string, context: P
   return endpoint
 }
 
-/** Creates a position's page endpoint, if any, and its fallback. Requires every position's frame ancestors to be complete. */
-function createPositionEndpoints(position: PositionNode, context: PositionContext): PositionEndpoints {
+/** Creates a position's page endpoint, if any, and its fallback. Requires the
+ *  whole position tree to already exist - frame ancestors, slots, and default
+ *  owners all come from a context built across the full tree, not just one branch. */
+export function createPositionEndpoints(position: PositionNode, context: PositionContext): PositionEndpoints {
   const pageOwner = context.pageOwnerOf.get(position)
   const pageContent = pageOwner?.modules.page
   const endpoint = pageContent ? createEndpoint(pageOwner, pageContent, context) : undefined
@@ -68,15 +70,4 @@ function createPositionEndpoints(position: PositionNode, context: PositionContex
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
   const fallback = createFallback(defaultOwner, defaultContent, context)
   return { endpoint, fallback }
-}
-
-/** Resolves every position's endpoint and fallback in place. Requires the whole
- *  position tree to already exist - frame ancestors, slots, and default owners
- *  all come from a context built across the full tree, not just one branch. */
-export function resolvePositionEndpoints(positions: Set<PositionNode>, context: PositionContext) {
-  for (const position of positions) {
-    const { endpoint, fallback } = createPositionEndpoints(position, context)
-    position.endpoint = endpoint
-    position.fallback = fallback
-  }
 }
