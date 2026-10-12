@@ -1,7 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { PACKAGE_NAME, VERSION, INK_VERSION, REACT_VERSION } from '@/lib/constants'
-import { stripCodegenArtifacts } from '@/lib/strip-codegen-artifacts'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import pageTemplate from './templates/page.tsx.txt' with { type: 'text' }
 import packageTemplate from './templates/package.json.txt' with { type: 'text' }
@@ -13,6 +12,10 @@ const PACKAGE_NAME_TOKEN = '__PEN_PACKAGE_NAME__'
 const PACKAGE_VERSION_TOKEN = '__PEN_VERSION__'
 const INK_VERSION_TOKEN = '__INK_VERSION__'
 const REACT_VERSION_TOKEN = '__REACT_VERSION__'
+// pen.config.ts.txt imports itself by its real name (a self-reference, so
+// the template type-checks on its own with no ambient declaration needed) -
+// substituted here instead of a fake placeholder, in case of a fork.
+const PEN_IMPORT_SPECIFIER = "'@idlesummer/pen'"
 
 function createPackageJson(projectName: string) {
   return packageTemplate
@@ -24,8 +27,8 @@ function createPackageJson(projectName: string) {
 }
 
 function createPenConfig() {
-  return stripCodegenArtifacts(configTemplate)
-    .replaceAll(PACKAGE_NAME_TOKEN, () => PACKAGE_NAME)
+  return configTemplate
+    .replace(PEN_IMPORT_SPECIFIER, () => `'${PACKAGE_NAME}'`)
 }
 
 /** Writes a fresh pen project's files into `targetDir`. */

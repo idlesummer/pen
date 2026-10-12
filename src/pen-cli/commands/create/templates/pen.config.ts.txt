@@ -1,8 +1,4 @@
-// #region codegen
-/// <reference path="./templates.d.ts" />
-// #endregion
-
-import { defineConfig } from '__PEN_PACKAGE_NAME__'
+import { defineConfig } from '@idlesummer/pen'
 
 export default defineConfig({
   ink: {
