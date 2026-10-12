@@ -1,5 +1,6 @@
 import type { RouteNode } from '../route'
 import type { Endpoint, PositionConflicts, PositionNode } from './position'
+import { resolvePositionEndpoints } from './position-endpoints'
 import { createPositionTree } from './position-tree'
 
 export type PositionTreeData = {
@@ -41,7 +42,8 @@ function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
 }
 
 export function createPositionTreeData(routeTree: RouteNode): PositionTreeData {
-  const { positionTree, positions, conflicts } = createPositionTree(routeTree)
+  const { positionTree, positions, conflicts, context } = createPositionTree(routeTree)
+  resolvePositionEndpoints(positions, context)
   const modulePaths = getModulePaths(positions)
   const pageEndpoints = getPageEndpoints(positions)
   return { positionTree, conflicts, modulePaths, pageEndpoints }

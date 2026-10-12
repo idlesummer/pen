@@ -3,13 +3,13 @@ import type { Frame, PositionConflicts, PositionContext, PositionNode } from './
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner } from '../route/route-tree'
-import { createPositionEndpoints } from './position-endpoints'
 import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
 type PositionTreeResult = {
   positionTree: PositionNode
   positions: Set<PositionNode>
   conflicts: PositionConflicts[]
+  context: PositionContext
 }
 
 // ── traversal ────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
   const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(type),
     dynamicCount: parent.dynamicCount + +isDynamicOrCatchall(type),
-    fallback: undefined as never, //* filled by setEndpoints, once every position exists
+    fallback: undefined as never, //* filled by resolvePositionEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(type))
     position.param = route.segment
@@ -124,11 +124,6 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
       positions.add(childPosition)
     },
   })
-  for (const position of positions) {
-    const { endpoint, fallback } = createPositionEndpoints(position, context)
-    position.endpoint = endpoint
-    position.fallback = fallback
-  }
   const conflicts = [...state.conflictsOf.values()]
-  return { positionTree, positions, conflicts }
+  return { positionTree, positions, conflicts, context }
 }
