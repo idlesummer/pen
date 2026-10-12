@@ -7,16 +7,20 @@
 
 /** Installed by runtime.ts's installRefreshRuntime(), read here and by refresh-boundary.ts.txt at runtime. */
 // eslint-disable-next-line no-var -- declare var, not declare global, is what makes this ambient file take effect
-declare var $RefreshReg$: undefined |
-  ((type: unknown, id: string) => void)
+declare var $RefreshReg$:
+| ((type: unknown, id: string) => void)
+  | undefined
 
 // eslint-disable-next-line no-var -- see above
-declare var $RefreshSig$: undefined |
-  (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>)
+declare var $RefreshSig$:
+  | (() => ReturnType<typeof import('react-refresh/runtime').createSignatureFunctionForTransform>)
+  | undefined
 
 // eslint-disable-next-line no-var -- see above
-declare var RefreshRuntime: undefined | (typeof import('react-refresh/runtime') & {
-  getRefreshReg: (filename: string) => (type: unknown, id: string) => void
-  validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
-    string | undefined
-})
+declare var RefreshRuntime:
+  | (typeof import('react-refresh/runtime') & {
+    getRefreshReg: (filename: string) => (type: unknown, id: string) => void
+    validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
+      string | undefined
+    })
+  | undefined
