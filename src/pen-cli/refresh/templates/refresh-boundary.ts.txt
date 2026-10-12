@@ -1,4 +1,4 @@
-// #region strip
+// #region codegen
 /// <reference types="vite/client" />
 /// <reference path="../globals.d.ts" />
 // #endregion
