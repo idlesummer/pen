@@ -1,6 +1,14 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { PEN_VERSION, INK_VERSION, REACT_VERSION, ESLINT_VERSION, TYPES_NODE_VERSION, TYPES_REACT_VERSION, TYPESCRIPT_VERSION } from '@/constants'
+import {
+  PEN_VERSION,
+  INK_VERSION,
+  REACT_VERSION,
+  ESLINT_VERSION,
+  TYPES_NODE_VERSION,
+  TYPES_REACT_VERSION,
+  TYPESCRIPT_VERSION,
+} from '@/constants'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import eslintConfigTemplate from './templates/eslint.config.js.txt' with { type: 'text' }
 import pageTemplate from './templates/page.tsx.txt' with { type: 'text' }
@@ -29,10 +37,17 @@ function createPackageJson(projectName: string) {
     .replaceAll(TYPESCRIPT_VERSION_TOKEN, () => TYPESCRIPT_VERSION)
 }
 
-/** Writes a fresh pen project's files into `targetDir`. */
+/** Creates a fresh Pen project scaffold in `targetDir`.
+*
+*   Writes the project configuration files and initial page, using `name`
+*   as the package name in `package.json`.
+*
+*   @param targetDir - Directory to create the project files in.
+*   @param name - Project name used as the package name. */
 export async function createProjectScaffold(targetDir: string, name: string) {
   await Promise.all([
-    mkdir(join(targetDir, 'src/app'), { recursive: true }).then(() => writeFile(join(targetDir, 'src/app/page.tsx'), pageTemplate)),
+    mkdir(join(targetDir, 'src/app'), { recursive: true })
+      .then(() => writeFile(join(targetDir, 'src/app/page.tsx'), pageTemplate)),
     writeFile(join(targetDir, 'package.json'), createPackageJson(name)),
     writeFile(join(targetDir, 'tsconfig.json'), tsconfigTemplate),
     writeFile(join(targetDir, '.gitignore'), gitignoreTemplate),
