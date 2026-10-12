@@ -1,6 +1,6 @@
-// Matches authoring-only blocks marked `// #region strip`.
+// Matches authoring-only blocks marked `// #region codegen`.
 // Using editor regions enables folding in supported editors.
-const STRIP_BLOCK = /\/\/ #region strip.*\r?\n[\s\S]*?\/\/ #endregion.*\r?\n?/g
+const STRIP_BLOCK = /\/\/ #region codegen.*\r?\n[\s\S]*?\/\/ #endregion.*\r?\n?/g
 
 /** Removes authoring-only blocks from a codegen template.
  *
