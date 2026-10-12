@@ -1,7 +1,7 @@
 import type { ViteBuilder } from 'vite'
 import type { PluginOptions } from '@/pen-cli/plugins'
 import { createBuilder } from 'vite'
-import { PEN_VERSION } from '@/lib/constants'
+import { PEN_VERSION } from '@/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
 import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
 import * as log from '@/pen-cli/logger/console'

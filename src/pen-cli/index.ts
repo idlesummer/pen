@@ -1,5 +1,5 @@
 import { defineCommand, runMain } from 'citty'
-import { DESCRIPTION, PEN_VERSION } from '@/lib/constants'
+import { DESCRIPTION, PEN_VERSION } from '@/constants'
 
 const main = defineCommand({
   meta: {
