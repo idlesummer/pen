@@ -1,6 +1,4 @@
-/* global __PEN_INK_OPTIONS__ */
 /// <reference types="vite/client" />
-/// <reference path="./entry-app.d.ts" />
 
 import type {
   Module,
@@ -39,5 +37,7 @@ const default_ = import.meta.glob<Module<DefaultComponent>>('./**/default.tsx', 
 // ── Main entry point ─────────────────────────────────────────────────────
 
 const penAppProps = createPenAppProps({ page, layout, loading, error, default: default_ })
+
+declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 const { waitUntilExit } = render(<PenApp {...penAppProps} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
