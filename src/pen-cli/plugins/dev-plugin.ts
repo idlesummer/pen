@@ -6,8 +6,6 @@ import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODUL
 import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.tsx.txt' with { type: 'text' }
 
-const entryAppSource = stripReferenceDirectives(entryAppTemplate)
-
 /**
  * Loads the app's virtual entry module, which renders the dev server's
  * live Ink UI.
@@ -49,7 +47,7 @@ export function penDev(options: PluginOptions): Plugin {
     // has to hand back already-transformed code itself.
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = entryAppSource
+        const source = stripReferenceDirectives(entryAppTemplate)
           .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
 
