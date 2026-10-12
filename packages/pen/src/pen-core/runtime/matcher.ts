@@ -1,4 +1,4 @@
-import type { Endpoint, PositionNode } from '../compiler/position/position-node'
+import type { Endpoint, PositionNode } from '../compiler/position/position'
 import { traverse } from '@/lib/traverse'
 
 export type ParamEntries = ReadonlyArray<readonly [name: string, value: string | string[]]>

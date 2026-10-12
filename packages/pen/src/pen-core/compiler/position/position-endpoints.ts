@@ -1,13 +1,18 @@
-import type { RouteNode } from '../route/route-tree'
-import type { Endpoint, Frame, PositionContext, PositionNode } from './position-node'
-import { compactMapAncestors } from '../route/route-tree'
+import type { RouteNode } from '@/pen-core/compiler/route'
+import type { Endpoint, Frame, PositionContext, PositionNode } from './position'
+import { compactMapAncestors } from '@/pen-core/compiler/route'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '../route/route-module'
 import { isBoundary } from '../route/route-segment'
+
+type PositionEndpoints = {
+  endpoint?: Endpoint
+  fallback: Endpoint
+}
 
 // ── frames ───────────────────────────────────────────────────────────────
 
 /** Creates a folder's Frame, or undefined if it wraps nothing.
- *  Memoised by folder so shared ancestry reuses the same Frame reference. */
+ *  Memoised by route folder so shared ancestry reuses the same Frame reference. */
 function createFrame(routeNode: RouteNode, context: PositionContext): Frame | undefined {
   const frameOf = context.frameOf
   if (frameOf.has(routeNode))
@@ -34,40 +39,34 @@ function createFallbackFrame(frame: Frame): Frame {
 
 // ── endpoints ───────────────────────────────────────────────────────────
 
-/** Flattens a folder's ancestry into the chain that wraps it - the walk the
- *  render stage would otherwise repeat on every navigation. */
+/** Creates a page endpoint with its precomputed wrapper chain and parameter count. */
 function createEndpoint(pageOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
   const paramCount = context.positionOf.get(pageOwner)!.dynamicCount
   return { frames, contentPath, paramCount }
 }
 
+/** Creates a fallback endpoint, removing the innermost frame's default. Drops the frame if it doesn't contribute. */
 function createFallback(defaultOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
   const endpoint = createEndpoint(defaultOwner, contentPath, context)
-  const frames = endpoint.frames
-  const lastFrame = frames[frames.length-1]
-  if (!lastFrame) // undefined last frame means list is empty
-    return endpoint
+  const lastFrame = endpoint.frames.pop() // pop on empty array returns undefined
 
-  // The innermost frame renders the fallback itself, so remove its default.
-  // If the default was its only contribution, drop the frame; slots still count.
-  const fallbackFrameOf = context.fallbackFrameOf
-  if (lastFrame.layout || lastFrame.loading || lastFrame.error || lastFrame.slots)
-    frames[frames.length-1] = fallbackFrameOf.getOrInsertComputed(lastFrame, createFallbackFrame)
-  else
-    frames.pop()
+  if (lastFrame && (lastFrame.layout || lastFrame.loading || lastFrame.error || lastFrame.slots)) {
+    const fallbackFrame = context.fallbackFrameOf.getOrInsertComputed(lastFrame, createFallbackFrame)
+    endpoint.frames.push(fallbackFrame) // replace the current frame with a fallback version of that same frame
+  }
   return endpoint
 }
 
 /** Resolves one position's page (if it has one) and fallback (always) - safe
  *  to call once every folder's frame and page ownership is known. */
-export function setEndpoints(position: PositionNode, context: PositionContext) {
+export function createPositionEndpoints(position: PositionNode, context: PositionContext): PositionEndpoints {
   const pageOwner = context.pageOwnerOf.get(position)
   const pageContent = pageOwner?.modules.page
-  if (pageContent)
-    position.endpoint = createEndpoint(pageOwner, pageContent, context)
+  const endpoint = pageContent ? createEndpoint(pageOwner, pageContent, context) : undefined
 
   const defaultOwner = context.defaultOwnerOf.get(position)!  // always set; worst case, a boundary
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
-  position.fallback = createFallback(defaultOwner, defaultContent, context)
+  const fallback = createFallback(defaultOwner, defaultContent, context)
+  return { endpoint, fallback }
 }

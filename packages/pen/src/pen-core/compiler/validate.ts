@@ -1,5 +1,5 @@
 import type { RouteNode } from './route/route-tree'
-import type { PositionConflicts } from './position/position-node'
+import type { PositionConflicts } from './position/position'
 import type { Diagnostic } from './diagnostic'
 import { createDiagnostic } from './diagnostic'
 import { forEach, getRouteSource } from './route/route-tree'
