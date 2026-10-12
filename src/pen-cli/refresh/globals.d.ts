@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
 
-// Ambient declarations for globals installed by the React Refresh plugin.
-// Referenced by refresh-boundary.ts.txt so the template is type-checked
-// independently.
+// Ambient declarations for the React Refresh globals installRefreshRuntime()
+// installs. runtime.ts gets these for free as a real .ts file; the
+// refresh-boundary.ts.txt template needs the explicit reference below since
+// it's a .txt file invisible to the compiler otherwise.
 
-/** Globals installed by react-refresh-ink-plugin.ts's dev server, read by refresh-boundary.ts.txt at runtime. */
+/** Installed by runtime.ts's installRefreshRuntime(), read here and by refresh-boundary.ts.txt at runtime. */
 // eslint-disable-next-line no-var -- declare var, not declare global, is what makes this ambient file take effect
 declare var $RefreshReg$: undefined |
   ((type: unknown, id: string) => void)
