@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { VERSION, INK_VERSION, REACT_VERSION } from '@/lib/constants'
+import { PEN_VERSION, INK_VERSION, REACT_VERSION } from '@/lib/constants'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import pageTemplate from './templates/page.tsx.txt' with { type: 'text' }
 import packageTemplate from './templates/package.json.txt' with { type: 'text' }
@@ -15,7 +15,7 @@ const REACT_VERSION_TOKEN = '__REACT_VERSION__'
 function createPackageJson(projectName: string) {
   return packageTemplate
     .replaceAll(PEN_PROJECT_NAME_TOKEN, () => projectName)
-    .replaceAll(PEN_VERSION_TOKEN, () => VERSION)
+    .replaceAll(PEN_VERSION_TOKEN, () => PEN_VERSION)
     .replaceAll(INK_VERSION_TOKEN, () => INK_VERSION)
     .replaceAll(REACT_VERSION_TOKEN, () => REACT_VERSION)
 }
