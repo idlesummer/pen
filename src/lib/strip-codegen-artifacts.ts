@@ -1,12 +1,14 @@
-// Matches a `// __PEN_STRIP_START__` ... `// __PEN_STRIP_END__` block -
-// every template gathers its triple-slash directives, declares, and any
-// other authoring-only content into one of these, usually at its head.
-const STRIP_BLOCK = /\/\/ __PEN_STRIP_START__[\s\S]*?\/\/ __PEN_STRIP_END__\r?\n?/g
+// Matches a `// #region strip` ... `// #endregion` block - the "strip"
+// label disambiguates it from an ordinary folding region nobody wants
+// removed. Reusing #region/#endregion (over a custom marker) means
+// editors that support region folding (e.g. VS Code) collapse these
+// for free while authoring the template.
+const STRIP_BLOCK = /\/\/ #region strip.*\r?\n[\s\S]*?\/\/ #endregion.*\r?\n?/g
 
-/** Strips `// __PEN_STRIP_START__` / `// __PEN_STRIP_END__` blocks from a
- *  codegen template: authoring-only content (triple-slash directives,
- *  declares) its own editor/lint tooling needs but that shouldn't appear
- *  in the generated output.
+/** Strips `// #region strip` / `// #endregion` blocks from a codegen
+ *  template: authoring-only content (triple-slash directives, declares)
+ *  its own editor/lint tooling needs but that shouldn't appear in the
+ *  generated output.
  *
  *  @param source - Template source.
  *  @returns `source` with every such block removed, and the blank line
