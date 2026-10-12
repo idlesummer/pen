@@ -40,11 +40,6 @@ export function penDev(options: PluginOptions): Plugin {
     },
     // Same first-hit search again, but over the resolved id, not the
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
-    //
-    // Vite's built-in TS/JSX transform refuses any `\0`-prefixed id by
-    // design (createFilter: `if (id.includes('\0')) return false`), so
-    // nothing else will ever strip this source's TypeScript/JSX - load()
-    // has to hand back already-transformed code itself.
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const source = stripReferenceDirectives(entryAppTemplate)
