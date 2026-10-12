@@ -1,5 +1,5 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
-import type { PositionConflicts, PositionContext, PositionNode } from './position'
+import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner } from '../route/route-tree'
@@ -21,7 +21,7 @@ type TraversalState = {
 }
 
 /** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
-function expand(route: RouteNode, state: TraversalState): RouteNode[] {
+function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
   if (route.type === 'catchall') return []
   const isSlotNested = route.type === 'slot' || state.slotDescendants.has(route)
   const children: RouteNode[] = []
@@ -83,14 +83,17 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
     fallback: undefined as never, //* Must be populated later
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order
-  const state: TraversalState = { conflictsOf: new Map(), slotDescendants: new Set() }
+  const state: TraversalState = {
+    conflictsOf: new Map<PositionNode, PositionConflicts>(),
+    slotDescendants: new Set<RouteNode>(),
+  }
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
-    pageOwnerOf: new Map(),
-    defaultOwnerOf: new Map(),
-    slotsOf: new Map(),
-    frameOf: new Map(),
-    fallbackFrameOf: new Map(),
+    pageOwnerOf: new Map<PositionNode, RouteNode>(),
+    defaultOwnerOf: new Map<PositionNode, RouteNode>(),
+    slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
+    frameOf: new Map<RouteNode, Frame>(),
+    fallbackFrameOf: new Map<Frame, Frame>(),
   }
   traverse(routeTree, {
     visit: (route) => { // the folder's own contribution: does it own this position's page, and/or its default?
@@ -111,10 +114,11 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
       context.pageOwnerOf.getOrInsert(position, route)
       conflictsOf.getOrInsertComputed(position, createConflicts).pages.push(route)
     },
-    expand: route => expand(route, state),
+    expand: route => expandChildren(route, state),
     attach: (childRoute, parentRoute) => {
       if (parentRoute.type === 'slot' || state.slotDescendants.has(parentRoute))
         state.slotDescendants.add(childRoute)
+
       const childPosition = getOrCreatePosition(childRoute, parentRoute, state, context)
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
