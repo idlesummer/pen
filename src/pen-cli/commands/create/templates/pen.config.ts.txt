@@ -1,5 +1,7 @@
 // #region codegen
-/// <reference path="./templates.d.ts" />
+declare module '__PEN_PACKAGE_NAME__' {
+  export { defineConfig } from '@idlesummer/pen'
+}
 // #endregion
 
 import { defineConfig } from '__PEN_PACKAGE_NAME__'
