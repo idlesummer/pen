@@ -19,8 +19,7 @@ declare var $RefreshSig$:
 // eslint-disable-next-line no-var -- see above
 declare var RefreshRuntime:
   | (typeof import('react-refresh/runtime') & {
-    getRefreshReg: (filename: string) => (type: unknown, id: string) => void
-    validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) =>
-      string | undefined
+      getRefreshReg: (filename: string) => (type: unknown, id: string) => void
+      validateRefreshBoundaryAndEnqueueUpdate: (prevExports: Record<string, unknown>, nextExports: Record<string, unknown>) => string | undefined
     })
   | undefined
