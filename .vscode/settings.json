@@ -1,0 +1,9 @@
+{
+  "files.associations": {
+    "*.ts.txt": "typescript",
+    "*.tsx.txt": "typescriptreact",
+    "*.js.txt": "javascript",
+    "*.json.txt": "jsonc",
+    "*.gitignore.txt": "ignore"
+  }
+}
