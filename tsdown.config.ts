@@ -7,7 +7,6 @@ export default defineConfig({
     internal: 'src/internal.ts',      // Framework-internal API
     bin: 'src/pen-cli/bin.ts',        // CLI executable entry
   },
-
   // Output options
   dts: true,        // Generate typescript declaration files
   sourcemap: true,  // Source maps for debugging
