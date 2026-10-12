@@ -1,4 +1,6 @@
+// __PEN_STRIP_START__
 /// <reference path="./templates.d.ts" />
+// __PEN_STRIP_END__
 
 import { defineConfig } from '__PEN_PACKAGE_NAME__'
 
