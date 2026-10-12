@@ -1,29 +1,32 @@
 export type SegmentType =
   | 'static'    // "blog"        -> literal URL segment
-  | 'dynamic'   // "[id]"        -> binds one URL segment
-  | 'catchall'  // "[...slug]"   -> binds one-or-more, must be last
-  | 'group'     // "(marketing)" -> invisible in URL, real in render tree
+  | 'dynamic'   // "[id]"        -> captures one URL segment
+  | 'catchall'  // "[...slug]"   -> captures one-or-more, must be last
+  | 'group'     // "(marketing)" -> invisible in URL
   | 'slot'      // "@modal"      -> parallel route pane
-  | 'root'      // the app root - its own type, so boundary checks are one field read
+  | 'root'      // app/          -> root app folder
   | 'malformed' // anything illegal
 
-const IDENT = /^[A-Za-z_$][A-Za-z0-9_$]*$/  // A valid JavaScript identifier - used to validate param names like "id" in "[id]"
+type Segment = {
+  type: SegmentType;
+  segment: string
+}
+
+const IDENT = /^[A-Za-z_$][A-Za-z0-9_$]*$/  // A valid JavaScript identifier used for param names like "id" in "[id]"
 const CATCHALL_PATTERN = /^\[\.\.\.(.+)\]$/ // [...param] - catch-all (one or more segments)
 const DYNAMIC_PATTERN = /^\[(.+)\]$/        // [param] - dynamic (exactly one segment)
-const GROUP_PATTERN = /^\((.+)\)$/          // (label) - route group: invisible in the URL
+const GROUP_PATTERN = /^\((.+)\)$/          // (label) - route group
 const STRAY_BRACKET_PATTERN = /[[\]()@]/    // A name containing stray brackets is malformed
 
-/**
- * Parses a folder name into its route segment type and value.
+/** Parses a folder name into its route segment type and value.
  *
- * The app root is represented by an empty name and receives the `root` type.
- * Invalid route syntax receives the `malformed` type with a diagnostic value
- * in `segment`.
+ *  The app root is represented by an empty name and receives the `root` type.
+ *  Invalid route syntax receives the `malformed` type with a diagnostic value
+ *  in `segment`.
  *
- * @param name - The folder name to parse.
- * @returns The parsed segment type and value.
- */
-export function createSegment(name: string): { type: SegmentType; segment: string } {
+ *  @param name - The folder name to parse.
+ *  @returns The parsed segment type and value. */
+export function createSegment(name: string): Segment {
   let match: RegExpMatchArray | null
 
   if (!name) // if name is empty string
@@ -42,8 +45,7 @@ export function createSegment(name: string): { type: SegmentType; segment: strin
   if ((match = name.match(GROUP_PATTERN)))
     return { type: 'group', segment: match[1]! }
 
-  // @name - named slot / parallel route
-  if (name.startsWith('@'))
+  if (name.startsWith('@')) // if slot
     return name.length > 1
       ? { type: 'slot', segment: name.slice(1) }
       : { type: 'malformed', segment: 'empty slot name' }

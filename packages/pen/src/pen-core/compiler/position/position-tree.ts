@@ -1,9 +1,9 @@
-import type { RouteNode } from '../route/route-tree'
-import type { Endpoint, Frame, PositionConflicts, PositionContext, PositionNode } from './position-node'
+import type { RouteNode } from '@/pen-core/compiler/route'
+import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner } from '../route/route-tree'
-import { setEndpoints } from './position-tree-endpoints'
+import { createPositionEndpoints } from './position-endpoints'
 import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
 // ── traversal ────────────────────────────────────────────────────────────
@@ -16,15 +16,13 @@ type TraversalState = {
 
 /** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
 function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
-  if (route.type === 'catchall')
-    return []
+  if (route.type === 'catchall') return []
   const isSlotNested = route.type === 'slot' || state.slotDescendants.has(route)
   const children: RouteNode[] = []
 
-  for (const child of route.children) {
+  for (const child of route.children)
     if (child.type !== 'malformed' && !(child.type === 'slot' && isSlotNested))
       children.push(child)
-  }
   return children
 }
 
@@ -70,42 +68,9 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: Tr
   }
 }
 
-// ── modules ──────────────────────────────────────────────────────────────
-
-/** Every module reachable from the compiled tree.
- *  Uses the flat positions list so slot subtrees are included. */
-function getModulePaths(positions: Iterable<PositionNode>): string[] {
-  const modules = new Set<string>()
-  for (const position of positions) {
-    for (const endpoint of [position.endpoint, position.fallback]) {
-      if (!endpoint) continue
-      modules.add(endpoint.contentPath)
-      for (const { layout, loading, error, default: _default } of endpoint.frames) {
-        if (layout)   modules.add(layout)
-        if (loading)  modules.add(loading)
-        if (error)    modules.add(error)
-        if (_default) modules.add(_default)
-      }
-    }
-  }
-  return [...modules].sort()
-}
-
-/** Every real page endpoint in the tree - excludes fallback endpoints, since
- *  those render a sentinel (GLOBAL_DEFAULT/GLOBAL_ERROR), never a real
- *  page.tsx a page author could have declared async. */
-function getPageEndpoints(positions: Iterable<PositionNode>): Endpoint[] {
-  const endpoints: Endpoint[] = []
-  for (const position of positions) {
-    if (position.endpoint)
-      endpoints.push(position.endpoint)
-  }
-  return endpoints
-}
-
 // ── build ────────────────────────────────────────────────────────────────
 
-export function createPositionTree(routeTree: RouteNode): [PositionNode, PositionConflicts[], string[], Endpoint[]] {
+export function createPositionTree(routeTree: RouteNode): { positionTree: PositionNode, positions: Set<PositionNode>, conflicts: PositionConflicts[] } {
   const positionTree: PositionNode = {
     urlDepth: 0,
     dynamicCount: 0,
@@ -153,8 +118,11 @@ export function createPositionTree(routeTree: RouteNode): [PositionNode, Positio
       positions.add(childPosition)
     },
   })
-  for (const position of positions)
-    setEndpoints(position, context)
-
-  return [positionTree, [...state.conflictsOf.values()], getModulePaths(positions), getPageEndpoints(positions)]
+  for (const position of positions) {
+    const { endpoint, fallback } = createPositionEndpoints(position, context)
+    position.endpoint = endpoint
+    position.fallback = fallback
+  }
+  const conflicts = [...state.conflictsOf.values()]
+  return { positionTree, positions, conflicts }
 }
