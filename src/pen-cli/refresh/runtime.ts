@@ -31,7 +31,7 @@ function createGlobalRefreshRuntime(): typeof globalThis.RefreshRuntime {
  *  e.g. from the dev plugin's `configureServer`. Later calls are no-ops. */
 export function installRefreshRuntime() {
   if (globalThis.RefreshRuntime) return // already installed
-  RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Window)  // react-refresh accepts Window, but it also works with globalThis
+  RefreshRuntime.injectIntoGlobalHook(globalThis as unknown as Parameters<typeof RefreshRuntime.injectIntoGlobalHook>[0])  // typed as Window, but it also works with globalThis
   globalThis.$RefreshReg$ = () => {}
   globalThis.$RefreshSig$ = (() => (type => type)) as typeof globalThis.$RefreshSig$  // temp until transformed module installs the real tracker
   globalThis.RefreshRuntime = createGlobalRefreshRuntime()
