@@ -30,9 +30,7 @@ function getModulePaths(positions: Set<PositionNode>): string[] {
   return [...modules].sort()
 }
 
-/** Every real page endpoint in the tree - excludes fallback endpoints, since
- *  those render a sentinel (GLOBAL_DEFAULT/GLOBAL_ERROR), never a real
- *  page.tsx a page author could have declared async. */
+/** Collects real page endpoints, excluding fallbacks that render sentinels. */
 function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
   const endpoints: Endpoint[] = []
   for (const position of positions)
