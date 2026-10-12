@@ -7,15 +7,15 @@ import packageTemplate from './templates/package.json.txt' with { type: 'text' }
 import tsconfigTemplate from './templates/tsconfig.json.txt' with { type: 'text' }
 import gitignoreTemplate from './templates/.gitignore.txt' with { type: 'text' }
 
-const PROJECT_NAME_TOKEN = '__PEN_PROJECT_NAME__'
-const PACKAGE_VERSION_TOKEN = '__PEN_VERSION__'
+const PEN_PROJECT_NAME_TOKEN = '__PEN_PROJECT_NAME__'
+const PEN_VERSION_TOKEN = '__PEN_VERSION__'
 const INK_VERSION_TOKEN = '__INK_VERSION__'
 const REACT_VERSION_TOKEN = '__REACT_VERSION__'
 
 function createPackageJson(projectName: string) {
   return packageTemplate
-    .replaceAll(PROJECT_NAME_TOKEN, () => projectName)
-    .replaceAll(PACKAGE_VERSION_TOKEN, () => VERSION)
+    .replaceAll(PEN_PROJECT_NAME_TOKEN, () => projectName)
+    .replaceAll(PEN_VERSION_TOKEN, () => VERSION)
     .replaceAll(INK_VERSION_TOKEN, () => INK_VERSION)
     .replaceAll(REACT_VERSION_TOKEN, () => REACT_VERSION)
 }
