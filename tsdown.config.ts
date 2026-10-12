@@ -22,5 +22,8 @@ export default defineConfig({
     __VERSION__: JSON.stringify(pkg.version),
     __INK_VERSION__: JSON.stringify(pkg.peerDependencies.ink),
     __REACT_VERSION__: JSON.stringify(pkg.peerDependencies.react),
+    __TYPES_NODE_VERSION__: JSON.stringify(pkg.devDependencies['@types/node']),
+    __TYPES_REACT_VERSION__: JSON.stringify(pkg.devDependencies['@types/react']),
+    __TYPESCRIPT_VERSION__: JSON.stringify(pkg.devDependencies.typescript),
   },
 })
