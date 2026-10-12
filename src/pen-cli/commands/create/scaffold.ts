@@ -22,9 +22,8 @@ function createPackageJson(projectName: string) {
 
 /** Writes a fresh pen project's files into `targetDir`. */
 export async function createProjectScaffold(targetDir: string, name: string) {
-  await mkdir(join(targetDir, 'src/app'), { recursive: true })
   await Promise.all([
-    writeFile(join(targetDir, 'src/app/page.tsx'), pageTemplate),
+    mkdir(join(targetDir, 'src/app'), { recursive: true }).then(() => writeFile(join(targetDir, 'src/app/page.tsx'), pageTemplate)),
     writeFile(join(targetDir, 'package.json'), createPackageJson(name)),
     writeFile(join(targetDir, 'tsconfig.json'), tsconfigTemplate),
     writeFile(join(targetDir, '.gitignore'), gitignoreTemplate),
