@@ -9,8 +9,16 @@
     "start": "pen start"
   },
   "dependencies": {
+    "@types/node": "__TYPES_NODE_VERSION__",
+    "@types/react": "__TYPES_REACT_VERSION__",
     "@idlesummer/pen": "^__PEN_VERSION__",
     "ink": "__INK_VERSION__",
     "react": "__REACT_VERSION__"
+  },
+  "devDependencies": {
+    "typescript": "__TYPESCRIPT_VERSION__"
+  },
+  "engines": {
+    "node": ">=26"
   }
 }
