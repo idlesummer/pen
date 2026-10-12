@@ -29,7 +29,13 @@ function createPackageJson(projectName: string) {
     .replaceAll(TYPESCRIPT_VERSION_TOKEN, () => TYPESCRIPT_VERSION)
 }
 
-/** Writes a fresh pen project's files into `targetDir`. */
+/** Creates a fresh Pen project scaffold in `targetDir`.
+*
+*   Writes the project configuration files and initial page, using `name`
+*   as the package name in `package.json`.
+*
+*   @param targetDir - Directory to create the project files in.
+*   @param name - Project name used as the package name. */
 export async function createProjectScaffold(targetDir: string, name: string) {
   await Promise.all([
     mkdir(join(targetDir, 'src/app'), { recursive: true })
