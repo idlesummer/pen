@@ -1,4 +1,4 @@
-/* eslint-disable no-var -- declare var, not declare global, is what makes this ambient file take effect */
+/* eslint-disable no-var */
 /// <reference types="vite/client" />
 
 // Ambient declarations for the React Refresh globals installRefreshRuntime()
