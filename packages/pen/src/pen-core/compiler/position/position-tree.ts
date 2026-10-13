@@ -21,7 +21,7 @@ type TraversalState = {
 }
 
 /** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
-function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
+function expand(route: RouteNode, state: TraversalState): RouteNode[] {
   if (route.type === 'catchall') return []
   const isSlotNested = route.type === 'slot' || state.slotDescendants.has(route)
   const children: RouteNode[] = []
@@ -96,7 +96,7 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
       const position = context.positionOf.get(route)!
       trackOwnership(route, position, context, state.conflictsOf)
     },
-    expand: route => expandChildren(route, state),
+    expand: route => expand(route, state),
     attach: (childRoute, parentRoute) => {
       if (parentRoute.type === 'slot' || state.slotDescendants.has(parentRoute))
         state.slotDescendants.add(childRoute)
