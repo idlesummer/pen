@@ -19,13 +19,13 @@ type PositionTreeResult = {
  *  position-related. */
 function findSlotDescendants(routeTree: RouteNode): Set<RouteNode> {
   const descendants = new Set<RouteNode>()
-
-  function walk(route: RouteNode, insideSlot: boolean) {
-    if (insideSlot) descendants.add(route)
-    for (const child of route.children)
-      walk(child, insideSlot || route.type === 'slot')
-  }
-  walk(routeTree, false)
+  traverse(routeTree, {
+    expand: route => route.children,
+    attach: (childRoute, parentRoute) => {
+      if (parentRoute.type === 'slot' || descendants.has(parentRoute))
+        descendants.add(childRoute)
+    },
+  })
   return descendants
 }
 
