@@ -14,16 +14,25 @@ type PositionTreeResult = {
 
 // ── traversal ────────────────────────────────────────────────────────────
 
-/** Traversal-only bookkeeping */
-type TraversalState = {
-  conflictsOf: Map<PositionNode, PositionConflicts>
-  slotDescendants: Set<RouteNode> // folders sitting within a slot subtree
+/** Every folder nested inside a slot subtree - computed once, up front, since
+ *  it's purely a function of route-tree shape and doesn't depend on anything
+ *  position-related. */
+function findSlotDescendants(routeTree: RouteNode): Set<RouteNode> {
+  const descendants = new Set<RouteNode>()
+
+  function walk(route: RouteNode, insideSlot: boolean) {
+    if (insideSlot) descendants.add(route)
+    for (const child of route.children)
+      walk(child, insideSlot || route.type === 'slot')
+  }
+  walk(routeTree, false)
+  return descendants
 }
 
 /** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
-function expandChildren(route: RouteNode, state: TraversalState): RouteNode[] {
+function expandChildren(route: RouteNode, slotDescendants: Set<RouteNode>): RouteNode[] {
   if (route.type === 'catchall') return []
-  const isSlotNested = route.type === 'slot' || state.slotDescendants.has(route)
+  const isSlotNested = route.type === 'slot' || slotDescendants.has(route)
   const children: RouteNode[] = []
 
   for (const child of route.children)
@@ -47,9 +56,8 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, state: TraversalState, context: PositionContext): PositionNode {
+function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, conflictsOf: Map<PositionNode, PositionConflicts>, context: PositionContext): PositionNode {
   const parentPosition = context.positionOf.get(parentRoute)!
-  const conflictsOf = state.conflictsOf
 
   switch (route.type) {
     default: // group
@@ -79,10 +87,8 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
     fallback: undefined as never, //* Must be populated later
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order
-  const state: TraversalState = {
-    conflictsOf: new Map<PositionNode, PositionConflicts>(),
-    slotDescendants: new Set<RouteNode>(),
-  }
+  const slotDescendants = findSlotDescendants(routeTree)
+  const conflictsOf = new Map<PositionNode, PositionConflicts>()
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
@@ -94,18 +100,15 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
   traverse(routeTree, {
     visit: (route) => {
       const position = context.positionOf.get(route)!
-      trackOwnership(route, position, context, state.conflictsOf)
+      trackOwnership(route, position, context, conflictsOf)
     },
-    expand: route => expandChildren(route, state),
+    expand: route => expandChildren(route, slotDescendants),
     attach: (childRoute, parentRoute) => {
-      if (parentRoute.type === 'slot' || state.slotDescendants.has(parentRoute))
-        state.slotDescendants.add(childRoute)
-
-      const childPosition = getOrCreatePosition(childRoute, parentRoute, state, context)
+      const childPosition = getOrCreatePosition(childRoute, parentRoute, conflictsOf, context)
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
     },
   })
-  const conflicts = [...state.conflictsOf.values()]
+  const conflicts = [...conflictsOf.values()]
   return { positionTree, positions, conflicts, context }
 }
