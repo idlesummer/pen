@@ -4,7 +4,12 @@ import { dict } from '@/lib/dict'
 import { findDefaultOwner } from '../route/route-tree'
 
 export function createConflicts(): PositionConflicts {
-  return { pages: [], defaults: new Set(), dynamics: dict(), catchalls: [] }
+  return {
+    pages: [],
+    defaults: new Set<RouteNode>(),
+    dynamics: dict<RouteNode>(),
+    catchalls: [],
+  }
 }
 
 /** Records a folder's ownership claim at its position - does it own the page
