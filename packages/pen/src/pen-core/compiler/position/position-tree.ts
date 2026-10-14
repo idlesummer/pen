@@ -2,7 +2,7 @@ import type { RouteNode } from '@/pen-core/compiler/route'
 import type { Frame, PositionClaims, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { createConflicts, trackOwnership } from './position-ownership'
+import { createClaims, trackOwnership } from './position-ownership'
 import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
 type PositionTreeResult = {
@@ -56,24 +56,23 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, claimsOf: Map<PositionNode, PositionClaims>, context: PositionContext): PositionNode {
+function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, context: PositionContext): [child: PositionNode, parent: PositionNode, type?: ('dynamics' | 'catchalls')] {
   const parentPosition = context.positionOf.get(parentRoute)!
 
   switch (route.type) {
     default: // group
-      return parentPosition
+      return [parentPosition, parentPosition]
     case 'static':
       parentPosition.statics ??= dict<PositionNode>()
-      return parentPosition.statics[route.segment] ??= createPositionNode(route, parentPosition)
+      return [parentPosition.statics[route.segment] ??= createPositionNode(route, parentPosition), parentPosition]
     case 'dynamic':
-      claimsOf.getOrInsertComputed(parentPosition, createConflicts).dynamics.push(route)
-      return parentPosition.dynamic ??= createPositionNode(route, parentPosition)
+      return [parentPosition.dynamic ??= createPositionNode(route, parentPosition), parentPosition, 'dynamics']
     case 'catchall':
-      claimsOf.getOrInsertComputed(parentPosition, createConflicts).catchalls.push(route)
-      return parentPosition.catchall ??= createPositionNode(route, parentPosition)
+      return [parentPosition.catchall ??= createPositionNode(route, parentPosition), parentPosition, 'catchalls']
     case 'slot': {
-      const slotDict = context.slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
-      return slotDict[route.segment] ??= createPositionNode(route, parentPosition)
+      const slotsOf = context.slotsOf
+      const slotDict = slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
+      return [slotDict[route.segment] ??= createPositionNode(route, parentPosition), parentPosition]
     }
   }
 }
@@ -104,7 +103,11 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
     },
     expand: route => expandChildren(route, slotDescendants),
     attach: (childRoute, parentRoute) => {
-      const childPosition = getOrCreatePosition(childRoute, parentRoute, claimsOf, context)
+      const [childPosition, parentPosition, claimType] = getOrCreatePosition(childRoute, parentRoute, context)
+      if (claimType) {
+        const claims = claimsOf.getOrInsertComputed(parentPosition, createClaims)
+        claims[claimType].push(childRoute) // add to claims if dynamic/catchall
+      }
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
     },
