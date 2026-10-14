@@ -1,1 +1,1 @@
-export { createPositionTreeData } from './position-tree-data'
+export { createPositionTree } from './position-tree'
