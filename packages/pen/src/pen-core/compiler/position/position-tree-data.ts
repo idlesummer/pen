@@ -1,12 +1,12 @@
 import type { RouteNode } from '../route'
-import type { Endpoint, PositionClaims, PositionNode } from './position'
+import type { Endpoint, PositionConflicts, PositionNode } from './position'
 import { createPositionEndpoints } from './position-endpoints'
 import { createPositionTree } from './position-tree'
 
 export type PositionTreeData = {
   positionTree: PositionNode
   modulePaths: string[]
-  conflicts: PositionClaims[]
+  conflicts: PositionConflicts[]
   pageEndpoints: Endpoint[]
 }
 
