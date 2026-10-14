@@ -1,5 +1,5 @@
 import type { RouteNode } from './route/route-tree'
-import type { PositionConflicts } from './position/position'
+import type { PositionClaims } from './position/position'
 import type { Diagnostic } from './diagnostic'
 import { createDiagnostic } from './diagnostic'
 import { forEach, getRouteSource } from './route/route-tree'
@@ -100,7 +100,7 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
  *  positions, which is why the build collects them as it goes. Route nodes are
  *  kept here rather than on the search node precisely so a diagnostic can name
  *  a file - a position has no file to name. */
-export function validateConflicts(conflicts: PositionConflicts[]): Diagnostic[] {
+export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const { pages, defaults, catchalls, dynamics } of conflicts) {

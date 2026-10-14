@@ -1,5 +1,5 @@
 export type { RouteNode } from './route/route-tree'
-export type { Endpoint, Frame, PositionConflicts, PositionNode } from './position/position'
+export type { Endpoint, Frame, PositionClaims, PositionNode } from './position/position'
 export type { CompiledRoutes } from './compiler'
 export type { Diagnostic } from './diagnostic'
 export type { Module, ModuleRole } from './route/route-module'

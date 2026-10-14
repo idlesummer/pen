@@ -1,5 +1,5 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
-import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position'
+import type { Frame, PositionClaims, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createConflicts, trackOwnership } from './position-ownership'
@@ -8,7 +8,7 @@ import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 type PositionTreeResult = {
   positionTree: PositionNode
   positions: Set<PositionNode>
-  conflicts: PositionConflicts[]
+  conflicts: PositionClaims[]
   context: PositionContext
 }
 
@@ -56,7 +56,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, conflictsOf: Map<PositionNode, PositionConflicts>, context: PositionContext): PositionNode {
+function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, conflictsOf: Map<PositionNode, PositionClaims>, context: PositionContext): PositionNode {
   const parentPosition = context.positionOf.get(parentRoute)!
 
   switch (route.type) {
@@ -88,7 +88,7 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order
   const slotDescendants = findSlotDescendants(routeTree)
-  const conflictsOf = new Map<PositionNode, PositionConflicts>()
+  const conflictsOf = new Map<PositionNode, PositionClaims>()
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
