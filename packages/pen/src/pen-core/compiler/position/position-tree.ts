@@ -1,11 +1,19 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
-import type { Frame, PositionClaims, PositionContext, PositionNode } from './position'
+import type { Endpoint, Frame, PositionClaims, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
+import { createPositionEndpoints } from './position-endpoints'
 import { createClaims, trackOwnership } from './position-ownership'
 import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 
-type PositionTreeResult = {
+export type PositionTreeData = {
+  positionTree: PositionNode
+  modulePaths: string[]
+  conflicts: PositionClaims[]
+  pageEndpoints: Endpoint[]
+}
+
+type PositionSkeleton = {
   positionTree: PositionNode
   positions: Set<PositionNode>
   conflicts: PositionClaims[]
@@ -48,7 +56,7 @@ function createPosition(route: RouteNode, parent: PositionNode): PositionNode {
   const position: PositionNode = {
     urlDepth: parent.urlDepth + +isUrlConsuming(routeType),
     dynamicCount: parent.dynamicCount + +isDynamicOrCatchall(routeType),
-    fallback: undefined as never, //* filled by resolvePositionEndpoints, once every position exists
+    fallback: undefined as never, //* filled by createPositionEndpoints, once every position exists
   }
   if (isDynamicOrCatchall(routeType))
     position.param = route.segment
@@ -72,7 +80,36 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): [child
 
 // ── build ────────────────────────────────────────────────────────────────
 
-export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
+/** Collects all unique module paths used by the position tree's endpoints and frames, including slots. */
+function getModulePaths(positions: Set<PositionNode>): string[] {
+  const modules = new Set<string>()
+
+  for (const position of positions) {
+    for (const endpoint of [position.endpoint, position.fallback]) {
+      if (!endpoint) continue
+
+      modules.add(endpoint.contentPath)
+      for (const { layout, loading, error, default: default_ } of endpoint.frames) {
+        if (layout)   modules.add(layout)
+        if (loading)  modules.add(loading)
+        if (error)    modules.add(error)
+        if (default_) modules.add(default_)
+      }
+    }
+  }
+  return [...modules].sort()
+}
+
+/** Collects real page endpoints, excluding fallbacks that render sentinels. */
+function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
+  const endpoints: Endpoint[] = []
+  for (const position of positions)
+    if (position.endpoint)
+      endpoints.push(position.endpoint)
+  return endpoints
+}
+
+function createPositionSkeleton(routeTree: RouteNode): PositionSkeleton {
   const positionTree: PositionNode = {
     urlDepth: 0,
     dynamicCount: 0,
@@ -107,4 +144,16 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
   })
   const conflicts = [...claimsOf.values()]
   return { positionTree, positions, conflicts, context }
+}
+
+export function createPositionTree(routeTree: RouteNode): PositionTreeData {
+  const { positionTree, positions, conflicts, context } = createPositionSkeleton(routeTree)
+  for (const position of positions) {
+    const { endpoint, fallback } = createPositionEndpoints(position, context)
+    position.endpoint = endpoint
+    position.fallback = fallback
+  }
+  const modulePaths = getModulePaths(positions)
+  const pageEndpoints = getPageEndpoints(positions)
+  return { positionTree, conflicts, modulePaths, pageEndpoints }
 }

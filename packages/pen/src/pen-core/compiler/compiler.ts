@@ -2,7 +2,7 @@ import type { Diagnostic } from './diagnostic'
 import type { Endpoint, PositionNode } from './position/position'
 import { createRouteTree } from './route/route-tree'
 import { validateConflicts, validateRouteTree } from './validate'
-import { createPositionTreeData } from './position'
+import { createPositionTree } from './position'
 
 export type CompiledRoutes = {
   /** The compiled artifact - the only thing that outlives this call. */
@@ -23,7 +23,7 @@ export type CompiledRoutes = {
  */
 export function compileApp(filePaths: string[]): CompiledRoutes {
   const routeTree = createRouteTree(filePaths)
-  const { positionTree, conflicts, modulePaths, pageEndpoints } = createPositionTreeData(routeTree)
+  const { positionTree, conflicts, modulePaths, pageEndpoints } = createPositionTree(routeTree)
   const diagnostics = validateRouteTree(routeTree)
   diagnostics.push(...validateConflicts(conflicts))
 
