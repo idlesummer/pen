@@ -109,6 +109,17 @@ function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
   return endpoints
 }
 
+function createPositionContext(routeTree: RouteNode, positionTree: PositionNode): PositionContext {
+  return {
+    positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
+    pageOwnerOf: new Map<PositionNode, RouteNode>(),
+    defaultOwnerOf: new Map<PositionNode, RouteNode>(),
+    slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
+    frameOf: new Map<RouteNode, Frame>(),
+    fallbackFrameOf: new Map<Frame, Frame>(),
+  }
+}
+
 function createPositionSkeleton(routeTree: RouteNode): PositionSkeleton {
   const positionTree: PositionNode = {
     urlDepth: 0,
@@ -118,14 +129,7 @@ function createPositionSkeleton(routeTree: RouteNode): PositionSkeleton {
   const positions = new Set([positionTree]) // every position node, in depth-first order
   const slotDescendants = findSlotDescendants(routeTree)
   const claimsOf = new Map<PositionNode, PositionClaims>()
-  const context: PositionContext = {
-    positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
-    pageOwnerOf: new Map<PositionNode, RouteNode>(),
-    defaultOwnerOf: new Map<PositionNode, RouteNode>(),
-    slotsOf: new Map<RouteNode, Record<string, PositionNode>>(),
-    frameOf: new Map<RouteNode, Frame>(),
-    fallbackFrameOf: new Map<Frame, Frame>(),
-  }
+  const context = createPositionContext(routeTree, positionTree)
   traverse(routeTree, {
     visit: (route) => {
       const position = context.positionOf.get(route)!
