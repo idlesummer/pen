@@ -1,5 +1,5 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
-import type { Frame, PositionClaims, PositionContext, PositionNode } from './position'
+import type { Frame, PositionConflicts, PositionContext, PositionNode } from './position'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { createConflicts, trackOwnership } from './position-ownership'
@@ -8,7 +8,7 @@ import { isDynamicOrCatchall, isUrlConsuming } from '../route/route-segment'
 type PositionTreeResult = {
   positionTree: PositionNode
   positions: Set<PositionNode>
-  conflicts: PositionClaims[]
+  conflicts: PositionConflicts[]
   context: PositionContext
 }
 
@@ -56,7 +56,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, conflictsOf: Map<PositionNode, PositionClaims>, context: PositionContext): PositionNode {
+function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, claimsOf: Map<PositionNode, PositionConflicts>, context: PositionContext): PositionNode {
   const parentPosition = context.positionOf.get(parentRoute)!
 
   switch (route.type) {
@@ -66,10 +66,10 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, conflicts
       parentPosition.statics ??= dict<PositionNode>()
       return parentPosition.statics[route.segment] ??= createPositionNode(route, parentPosition)
     case 'dynamic':
-      conflictsOf.getOrInsertComputed(parentPosition, createConflicts).dynamics.push(route)
+      claimsOf.getOrInsertComputed(parentPosition, createConflicts).dynamics[route.segment] ??= route
       return parentPosition.dynamic ??= createPositionNode(route, parentPosition)
     case 'catchall':
-      conflictsOf.getOrInsertComputed(parentPosition, createConflicts).catchalls.push(route)
+      claimsOf.getOrInsertComputed(parentPosition, createConflicts).catchalls.push(route)
       return parentPosition.catchall ??= createPositionNode(route, parentPosition)
     case 'slot': {
       const slotDict = context.slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
@@ -88,7 +88,7 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
   }
   const positions = new Set([positionTree]) // every position node, in depth-first order
   const slotDescendants = findSlotDescendants(routeTree)
-  const conflictsOf = new Map<PositionNode, PositionClaims>()
+  const claimsOf = new Map<PositionNode, PositionConflicts>()
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]), // seeded, so every child can read its parent's
     pageOwnerOf: new Map<PositionNode, RouteNode>(),
@@ -100,15 +100,15 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
   traverse(routeTree, {
     visit: (route) => {
       const position = context.positionOf.get(route)!
-      trackOwnership(route, position, context, conflictsOf)
+      trackOwnership(route, position, context, claimsOf)
     },
     expand: route => expandChildren(route, slotDescendants),
     attach: (childRoute, parentRoute) => {
-      const childPosition = getOrCreatePosition(childRoute, parentRoute, conflictsOf, context)
+      const childPosition = getOrCreatePosition(childRoute, parentRoute, claimsOf, context)
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
     },
   })
-  const conflicts = [...conflictsOf.values()]
+  const conflicts = [...claimsOf.values()]
   return { positionTree, positions, conflicts, context }
 }
