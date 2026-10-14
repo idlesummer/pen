@@ -35,7 +35,7 @@ export type PositionNode = {
 }
 
 /** Tracks route conflicts after collapsing route groups. */
-export type PositionConflicts = {
+export type PositionClaims = {
   pages: RouteNode[]                  // every folder claiming a page at this position
   defaults: Set<RouteNode>            // every distinct folder whose real default reaches here
   dynamics: Record<string, RouteNode> // param name -> the folder that claimed it
