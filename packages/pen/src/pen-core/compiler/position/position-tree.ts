@@ -56,7 +56,7 @@ function createPositionNode(route: RouteNode, parent: PositionNode): PositionNod
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, context: PositionContext): [child: PositionNode, parent: PositionNode, type?: ('dynamics' | 'catchalls')] {
+function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, context: PositionContext): [child: PositionNode, parent: PositionNode, type?: 'dynamics' | 'catchalls'] {
   const parentPosition = context.positionOf.get(parentRoute)!
 
   switch (route.type) {
