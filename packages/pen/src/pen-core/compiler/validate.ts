@@ -105,7 +105,7 @@ export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
         rule: 'duplicate-default-route',
         severity: 'error',
         description: 'multiple defaults resolve to the same URL pattern',
-        files: [...defaults].map(getRouteSource),
+        files: [...distinctDefaults].map(getRouteSource),
       }))
     }
     if (catchalls.length > 1) {
