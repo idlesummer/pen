@@ -30,7 +30,7 @@ function findSlotDescendants(routeTree: RouteNode): Set<RouteNode> {
 }
 
 /** Skips malformed folders, stops at catch-alls, and prevents nested slots. */
-function expandChildren(route: RouteNode, slotDescendants: Set<RouteNode>): RouteNode[] {
+function expand(route: RouteNode, slotDescendants: Set<RouteNode>): RouteNode[] {
   if (route.type === 'catchall') return []
   const isSlotNested = route.type === 'slot' || slotDescendants.has(route)
   const children: RouteNode[] = []
@@ -43,37 +43,30 @@ function expandChildren(route: RouteNode, slotDescendants: Set<RouteNode>): Rout
 
 // ── positions ────────────────────────────────────────────────────────────
 
-function createPositionNode(route: RouteNode, parent: PositionNode): PositionNode {
-  const type = route.type
+function createPosition(route: RouteNode, parent: PositionNode): PositionNode {
+  const routeType = route.type
   const position: PositionNode = {
-    urlDepth: parent.urlDepth + +isUrlConsuming(type),
-    dynamicCount: parent.dynamicCount + +isDynamicOrCatchall(type),
+    urlDepth: parent.urlDepth + +isUrlConsuming(routeType),
+    dynamicCount: parent.dynamicCount + +isDynamicOrCatchall(routeType),
     fallback: undefined as never, //* filled by resolvePositionEndpoints, once every position exists
   }
-  if (isDynamicOrCatchall(type))
+  if (isDynamicOrCatchall(routeType))
     position.param = route.segment
   return position
 }
 
 /** Gets or creates the position for a route folder. Groups reuse their parent's position; other folders create their own. */
-function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, context: PositionContext): [child: PositionNode, parent: PositionNode, type?: 'dynamics' | 'catchalls'] {
+function getOrCreatePosition(route: RouteNode, context: PositionContext): [child: PositionNode, type?: 'dynamics' | 'catchalls'] {
+  const parentRoute = route.parent!
   const parentPosition = context.positionOf.get(parentRoute)!
+  const slotsOf = context.slotsOf
 
   switch (route.type) {
-    default: // group
-      return [parentPosition, parentPosition]
-    case 'static':
-      parentPosition.statics ??= dict<PositionNode>()
-      return [parentPosition.statics[route.segment] ??= createPositionNode(route, parentPosition), parentPosition]
-    case 'dynamic':
-      return [parentPosition.dynamic ??= createPositionNode(route, parentPosition), parentPosition, 'dynamics']
-    case 'catchall':
-      return [parentPosition.catchall ??= createPositionNode(route, parentPosition), parentPosition, 'catchalls']
-    case 'slot': {
-      const slotsOf = context.slotsOf
-      const slotDict = slotsOf.getOrInsertComputed(parentRoute, dict<PositionNode>)
-      return [slotDict[route.segment] ??= createPositionNode(route, parentPosition), parentPosition]
-    }
+    default:         return [parentPosition]  // group
+    case 'static':   return [(parentPosition.statics ??= dict())[route.segment] ??= createPosition(route, parentPosition)]
+    case 'dynamic':  return [parentPosition.dynamic ??= createPosition(route, parentPosition), 'dynamics']
+    case 'catchall': return [parentPosition.catchall ??= createPosition(route, parentPosition), 'catchalls']
+    case 'slot':     return [slotsOf.getOrInsertComputed(parentRoute, dict)[route.segment] ??= createPosition(route, parentPosition)]
   }
 }
 
@@ -101,12 +94,12 @@ export function createPositionTree(routeTree: RouteNode): PositionTreeResult {
       const position = context.positionOf.get(route)!
       trackOwnership(route, position, context, claimsOf)
     },
-    expand: route => expandChildren(route, slotDescendants),
-    attach: (childRoute, parentRoute) => {
-      const [childPosition, parentPosition, claimType] = getOrCreatePosition(childRoute, parentRoute, context)
+    expand: route => expand(route, slotDescendants),
+    attach: (childRoute) => {
+      const [childPosition, claimType] = getOrCreatePosition(childRoute, context)
       if (claimType) {
-        const claims = claimsOf.getOrInsertComputed(parentPosition, createClaims)
-        claims[claimType].push(childRoute) // add to claims if dynamic/catchall
+        const parentPosition = context.positionOf.get(childRoute.parent!)!
+        claimsOf.getOrInsertComputed(parentPosition, createClaims)[claimType].push(childRoute) // add to claims if dynamic/catchall
       }
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
