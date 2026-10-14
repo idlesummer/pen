@@ -34,12 +34,12 @@ export type PositionNode = {
   fallback: Endpoint    // default fallback endpoint  for failed matches
 }
 
-/** Tracks route conflicts after collapsing route groups. */
+/** Tracks route conflicts of a position after collapsing route groups. */
 export type PositionClaims = {
-  pages: RouteNode[]                  // every folder claiming a page at this position
-  defaults: Set<RouteNode>            // every distinct folder whose real default reaches here
-  dynamics: Record<string, RouteNode> // param name -> the folder that claimed it
-  catchalls: RouteNode[]              // every catch-all opened here
+  pages: RouteNode[]      // routes with a page collapsed into this position
+  defaults: RouteNode[]   // default-owning ancestors found by routes collapsed into this position
+  dynamics: RouteNode[]   // dynamic routes collapsed into this position
+  catchalls: RouteNode[]  // catchall routes collapsed into this position
 }
 
 /** Build-time context shared by traversal and endpoint resolution.
