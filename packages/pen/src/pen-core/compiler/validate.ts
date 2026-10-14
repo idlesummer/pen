@@ -4,22 +4,18 @@ import type { Diagnostic } from './diagnostic'
 import { createDiagnostic } from './diagnostic'
 import { forEach, getRouteSource } from './route/route-tree'
 
-/** The file a page-conflict diagnostic should name. A folder can own several
- *  modules, so the generic source is not good enough here - the page is what
- *  is actually in conflict. A catch-all folder need not own a page, hence the
- *  fallback. */
+/** Prefer the page as the diagnostic source or fall back to the route source when absent. */
 function pageSource(routeNode: RouteNode): string {
   return routeNode.modules.page ?? getRouteSource(routeNode)
 }
 
-/** The nearest ancestor that is itself a slot, if any. */
+/** The nearest ancestor that is a slot. */
 function findSlotAncestor(routeNode: RouteNode): RouteNode | undefined {
   for (let node = routeNode.parent; node; node = node.parent)
     if (node.type === 'slot') return node
 }
 
-/** A param name used twice on one path - the inner binding would shadow the
- *  outer, so neither route can be read unambiguously. */
+/** Finds a repeated param name along a route path. */
 function findRepeatedParam(routeNode: RouteNode): string | undefined {
   const names = new Set<string>()
   for (let node: RouteNode | undefined = routeNode; node; node = node.parent) {
@@ -32,9 +28,8 @@ function findRepeatedParam(routeNode: RouteNode): string | undefined {
   }
 }
 
-/** Intrinsic issues: everything decidable from one folder and its ancestry.
- *  Reads the route tree and changes nothing, so it can run before or after
- *  compiling - the tree it inspects is the same either way. */
+/** Intrinsic issues: decidable from a folder and its ancestry alone.
+ *  Read-only, so validation can run before or after compilation. */
 export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
@@ -53,9 +48,7 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
       diagnostics.push(createDiagnostic({
         rule: 'non-terminal-catchall',
         severity: 'warn',
-        description:
-          `"${routeNode.path}" is a catch-all route and must be terminal, ` +
-          'but has routes nested beneath it that can never be reached',
+        description: `"${routeNode.path}" is a catch-all route, which can't contain nested routes`,
         files: [getRouteSource(routeNode)],
       }))
     }
@@ -65,9 +58,7 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
         diagnostics.push(createDiagnostic({
           rule: 'nested-slot',
           severity: 'error',
-          description:
-            `"${routeNode.path}" is a slot nested inside slot "${slotAncestor.path}" ` +
-            '- slot subtrees are terminal and can\'t declare further slots',
+          description: `"${routeNode.path}" is nested inside slot "${slotAncestor.path}", but slot subtrees can't contain slots`,
           files: [getRouteSource(routeNode)],
         }))
       }
@@ -85,10 +76,7 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
       diagnostics.push(createDiagnostic({
         rule: 'slot-without-layout',
         severity: 'error',
-        description:
-          `"${routeNode.path}" has a slot but no layout.tsx of its own to render it into ` +
-          '- a slot is only ever rendered as a prop passed to a layout, so without one ' +
-          'its content can never appear, no matter what matches inside it',
+        description: `"${routeNode.path}" has a slot but no layout.tsx to render it`,
         files: [getRouteSource(routeNode)],
       }))
     }
@@ -96,10 +84,8 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
   return diagnostics
 }
 
-/** Relational issues: only visible once folders have collapsed onto shared
- *  positions, which is why the build collects them as it goes. Route nodes are
- *  kept here rather than on the search node precisely so a diagnostic can name
- *  a file - a position has no file to name. */
+/** Relational issues: only visible after folders collapse onto shared
+ *  positions. Keep route nodes so diagnostics can identify source files. */
 export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
@@ -112,7 +98,9 @@ export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
         files: pages.map(pageSource),
       }))
     }
-    if (defaults.size > 1) {
+
+    const distinctDefaults = new Set(defaults)
+    if (distinctDefaults.size > 1) {
       diagnostics.push(createDiagnostic({
         rule: 'duplicate-default-route',
         severity: 'error',
@@ -128,13 +116,13 @@ export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
         files: catchalls.map(pageSource),
       }))
     }
-    const paramNames = Object.keys(dynamics)
-    if (paramNames.length > 1) {
+    const paramNames = new Set(dynamics.map(r => r.segment))
+    if (paramNames.size > 1) {
       diagnostics.push(createDiagnostic({
         rule: 'param-name-clash',
         severity: 'error',
-        description: `two routes disagree on what to call the same URL parameter: ${paramNames.join(' vs ')}`,
-        files: Object.values(dynamics).map(getRouteSource),
+        description: `two routes disagree on what to call the same URL parameter: ${[...paramNames].map(n => `"${n}"`).join(' vs ')}`,
+        files: dynamics.map(getRouteSource),
       }))
     }
   }

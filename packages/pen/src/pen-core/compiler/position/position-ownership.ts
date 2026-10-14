@@ -1,15 +1,9 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { PositionClaims, PositionContext, PositionNode } from './position'
-import { dict } from '@/lib/dict'
 import { findDefaultOwner } from '../route/route-tree'
 
 export function createConflicts(): PositionClaims {
-  return {
-    pages: [],
-    defaults: new Set<RouteNode>(),
-    dynamics: dict<RouteNode>(),
-    catchalls: [],
-  }
+  return { pages: [], defaults: [], dynamics: [], catchalls: [] }
 }
 
 /** Records a folder's ownership claim at its position - does it own the page
@@ -25,7 +19,7 @@ export function trackOwnership(route: RouteNode, position: PositionNode, context
   // Several folders can climb to the same real default without
   // conflicting - only distinct owners count as competing claims.
   if (defaultOwner.modules.default)
-    conflictsOf.getOrInsertComputed(position, createConflicts).defaults.add(defaultOwner)
+    conflictsOf.getOrInsertComputed(position, createConflicts).defaults.push(defaultOwner)
 
   if (!route.modules.page) return // after this, route is a page owner
   context.pageOwnerOf.getOrInsert(position, route)

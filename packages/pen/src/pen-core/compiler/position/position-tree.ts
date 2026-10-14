@@ -66,7 +66,7 @@ function getOrCreatePosition(route: RouteNode, parentRoute: RouteNode, conflicts
       parentPosition.statics ??= dict<PositionNode>()
       return parentPosition.statics[route.segment] ??= createPositionNode(route, parentPosition)
     case 'dynamic':
-      conflictsOf.getOrInsertComputed(parentPosition, createConflicts).dynamics[route.segment] ??= route
+      conflictsOf.getOrInsertComputed(parentPosition, createConflicts).dynamics.push(route)
       return parentPosition.dynamic ??= createPositionNode(route, parentPosition)
     case 'catchall':
       conflictsOf.getOrInsertComputed(parentPosition, createConflicts).catchalls.push(route)
