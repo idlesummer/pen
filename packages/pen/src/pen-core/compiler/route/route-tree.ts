@@ -96,3 +96,18 @@ export function compactMapAncestors<T>(route: RouteNode, fn: (node: RouteNode) =
   }
   return values
 }
+
+/** Every folder nested inside a slot subtree - computed once, up front, since
+ *  it's purely a function of route-tree shape and doesn't depend on anything
+ *  position-related. */
+export function findSlotDescendants(routeTree: RouteNode): Set<RouteNode> {
+  const descendants = new Set<RouteNode>()
+  traverse(routeTree, {
+    expand: route => route.children,
+    attach: (childRoute, parentRoute) => {
+      if (parentRoute.type === 'slot' || descendants.has(parentRoute))
+        descendants.add(childRoute)
+    },
+  })
+  return descendants
+}
