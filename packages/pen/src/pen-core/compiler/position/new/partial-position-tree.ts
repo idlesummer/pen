@@ -91,12 +91,12 @@ export function createPartialPositionTree(routeTree: RouteNode) {
         return route.children.filter(child => isTraversable(child, slotDescendants))
       return []
     },
-    attach: (childRoute) => {
+    attach: (childRoute, parentRoute) => {
       const childPosition = getOrCreatePosition(childRoute, context)
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
 
-      const parentPosition = context.positionOf.get(childRoute.parent!)!
+      const parentPosition = context.positionOf.get(parentRoute)!
       addDynamicOrCatchallClaim(claimsOf, parentPosition, childRoute)
     },
   })
