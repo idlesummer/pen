@@ -5,6 +5,7 @@ import { traverse } from '@/lib/traverse'
 import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
 import { addClaims, addDynamicOrCatchallClaim } from './position-claims'
+import { createOwnership, addOwnership } from './position-ownership'
 
 type PartialPositionNode = {
   urlDepth: number      // url segments consumed to reach this position
@@ -18,26 +19,14 @@ type PartialPositionNode = {
 
 type PositionContext = {
   positionOf: Map<RouteNode, PartialPositionNode>              // route -> the position it belongs to
-  pageOwnerOf: Map<PartialPositionNode, RouteNode>
-  defaultOwnerOf: Map<PartialPositionNode, RouteNode>
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>> // route -> its declared slots, by name
 }
 
 function createPositionContext(routeTree: RouteNode, positionTree: PartialPositionNode): PositionContext {
   return {
     positionOf: new Map([[routeTree, positionTree]]),
-    pageOwnerOf: new Map<PartialPositionNode, RouteNode>(),
-    defaultOwnerOf: new Map<PartialPositionNode, RouteNode>(),
     slotsOf: new Map<RouteNode, Record<string, PartialPositionNode>>(),
   }
-}
-
-/** Resolves this position's real default/page owner (single-owner semantics). */
-function addOwnership(context: PositionContext, route: RouteNode, defaultOwner: RouteNode, position: PartialPositionNode) {
-  if (defaultOwner.modules.default || !context.defaultOwnerOf.has(position))
-    context.defaultOwnerOf.set(position, defaultOwner)
-  if (route.modules.page) // there should be only one page owner
-    context.pageOwnerOf.getOrInsert(position, route)
 }
 
 function isTraversable(route: RouteNode, slotDescendants: Set<RouteNode>) {
@@ -77,6 +66,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
   const positions = new Set([positionTree])
   const context = createPositionContext(routeTree, positionTree)
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
+  const ownership = createOwnership<PartialPositionNode>()
   const slotDescendants = findSlotDescendants(routeTree)
 
   traverse(routeTree, {
@@ -84,7 +74,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
       addClaims(claimsOf, position, route, defaultOwner)
-      addOwnership(context, route, defaultOwner, position)
+      addOwnership(ownership, route, defaultOwner, position)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
@@ -101,5 +91,5 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     },
   })
   const conflicts = [...claimsOf.values()]
-  return [positionTree, positions, conflicts, context]
+  return [positionTree, positions, conflicts, ownership]
 }
