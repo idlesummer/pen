@@ -4,7 +4,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
-import { createClaims, setClaims, setDynamicOrCatchallClaim } from './position-claims'
+import { addClaims, createClaims } from './position-claims'
 
 type PartialPositionNode = {
   urlDepth: number      // url segments consumed to reach this position
@@ -77,6 +77,14 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
   }
 }
 
+/** Resolves this position's real default/page owner (single-owner semantics). */
+function resolveOwnership(route: RouteNode, position: PartialPositionNode, defaultOwner: RouteNode, context: PositionContext) {
+  if (defaultOwner.modules.default || !context.defaultOwnerOf.has(position))
+    context.defaultOwnerOf.set(position, defaultOwner)
+  if (route.modules.page) // there should be only one page owner
+    context.pageOwnerOf.getOrInsert(position, route)
+}
+
 export function createPartialPositionTree(routeTree: RouteNode) {
   const positionTree: PartialPositionNode = { urlDepth: 0, dynamicCount: 0 }
   const positions = new Set([positionTree])
@@ -89,12 +97,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
       const claims = claimsOf.getOrInsertComputed(position, createClaims)
-      setClaims(claims, route, defaultOwner)
-
-      if (defaultOwner.modules.default || !context.defaultOwnerOf.has(position))
-        context.defaultOwnerOf.set(position, defaultOwner)
-      if (route.modules.page) // there should be only one page owner
-        context.pageOwnerOf.getOrInsert(position, route)
+      addClaims(claims, route, defaultOwner)
+      resolveOwnership(route, position, defaultOwner, context)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
@@ -106,9 +110,11 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
 
-      const parentPosition = context.positionOf.get(childRoute.parent!)!
-      const claims = claimsOf.get(parentPosition)!
-      setDynamicOrCatchallClaim(claims, childRoute)
+      if (childRoute.type === 'dynamic' || childRoute.type === 'catchall') {
+        const parentPosition = context.positionOf.get(childRoute.parent!)!
+        const claims = claimsOf.get(parentPosition)!
+        claims[childRoute.type].push(childRoute)
+      }
     },
   })
   const conflicts = [...claimsOf.values()]
