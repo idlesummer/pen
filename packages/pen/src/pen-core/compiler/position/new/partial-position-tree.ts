@@ -4,7 +4,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
-import { addClaims, createClaims } from './position-claims'
+import { addClaims, addDynamicOrCatchallClaim } from './position-claims'
 
 type PartialPositionNode = {
   urlDepth: number      // url segments consumed to reach this position
@@ -83,8 +83,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     visit: (route) => {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
-      const claims = claimsOf.getOrInsertComputed(position, createClaims)
-      addClaims(claims, route, defaultOwner)
+      addClaims(claimsOf, position, route, defaultOwner)
       addOwnership(context, route, defaultOwner, position)
     },
     expand: (route) => {
@@ -97,11 +96,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
 
-      if (childRoute.type === 'dynamic' || childRoute.type === 'catchall') {
-        const parentPosition = context.positionOf.get(childRoute.parent!)!
-        const claims = claimsOf.get(parentPosition)!
-        claims[childRoute.type].push(childRoute)
-      }
+      const parentPosition = context.positionOf.get(childRoute.parent!)!
+      addDynamicOrCatchallClaim(claimsOf, parentPosition, childRoute)
     },
   })
   const conflicts = [...claimsOf.values()]
