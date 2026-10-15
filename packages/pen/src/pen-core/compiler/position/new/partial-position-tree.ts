@@ -2,7 +2,7 @@ import type { RouteNode } from '@/pen-core/compiler/route'
 import type { PositionClaims } from './position-claims'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findDefaultOwner } from '@/pen-core/compiler/route/route-tree'
+import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
 import { addClaims, createClaims } from './position-claims'
 
@@ -30,19 +30,6 @@ function createPartialPositionContext(routeTree: RouteNode, positionTree: Partia
     defaultOwnerOf: new Map<PartialPositionNode, RouteNode>(),
     slotsOf: new Map<RouteNode, Record<string, PartialPositionNode>>(),
   }
-}
-
-/** Every folder nested inside a slot subtree. */
-function findSlotDescendants(routeTree: RouteNode): Set<RouteNode> {
-  const descendants = new Set<RouteNode>()
-  traverse(routeTree, {
-    expand: route => route.children,
-    attach: (childRoute, parentRoute) => {
-      if (parentRoute.type === 'slot' || descendants.has(parentRoute))
-        descendants.add(childRoute)
-    },
-  })
-  return descendants
 }
 
 function isTraversable(route: RouteNode, slotDescendants: Set<RouteNode>) {
