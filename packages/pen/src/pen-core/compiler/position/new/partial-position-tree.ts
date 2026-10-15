@@ -23,13 +23,21 @@ type PositionContext = {
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>> // route -> its declared slots, by name
 }
 
-function createPartialPositionContext(routeTree: RouteNode, positionTree: PartialPositionNode): PositionContext {
+function createPositionContext(routeTree: RouteNode, positionTree: PartialPositionNode): PositionContext {
   return {
     positionOf: new Map([[routeTree, positionTree]]),
     pageOwnerOf: new Map<PartialPositionNode, RouteNode>(),
     defaultOwnerOf: new Map<PartialPositionNode, RouteNode>(),
     slotsOf: new Map<RouteNode, Record<string, PartialPositionNode>>(),
   }
+}
+
+/** Resolves this position's real default/page owner (single-owner semantics). */
+function addOwnership(context: PositionContext, route: RouteNode, defaultOwner: RouteNode, position: PartialPositionNode) {
+  if (defaultOwner.modules.default || !context.defaultOwnerOf.has(position))
+    context.defaultOwnerOf.set(position, defaultOwner)
+  if (route.modules.page) // there should be only one page owner
+    context.pageOwnerOf.getOrInsert(position, route)
 }
 
 function isTraversable(route: RouteNode, slotDescendants: Set<RouteNode>) {
@@ -64,19 +72,11 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
   }
 }
 
-/** Resolves this position's real default/page owner (single-owner semantics). */
-function addOwnership(context: PositionContext, route: RouteNode, defaultOwner: RouteNode, position: PartialPositionNode) {
-  if (defaultOwner.modules.default || !context.defaultOwnerOf.has(position))
-    context.defaultOwnerOf.set(position, defaultOwner)
-  if (route.modules.page) // there should be only one page owner
-    context.pageOwnerOf.getOrInsert(position, route)
-}
-
 export function createPartialPositionTree(routeTree: RouteNode) {
   const positionTree: PartialPositionNode = { urlDepth: 0, dynamicCount: 0 }
   const positions = new Set([positionTree])
+  const context = createPositionContext(routeTree, positionTree)
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
-  const context = createPartialPositionContext(routeTree, positionTree)
   const slotDescendants = findSlotDescendants(routeTree)
 
   traverse(routeTree, {
