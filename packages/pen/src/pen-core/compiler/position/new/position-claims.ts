@@ -22,6 +22,6 @@ export function addClaims<P>(claimsOf: Map<P, PositionClaims>, position: P, rout
 
 /** Records a dynamic/catchall route's naming claim at its parent's position. */
 export function addDynamicOrCatchallClaim<P>(claimsOf: Map<P, PositionClaims>, parentPosition: P, route: RouteNode) {
-  if (route.type !== 'dynamic' && route.type !== 'catchall') return
-  claimsOf.get(parentPosition)![route.type].push(route)
+  if (route.type === 'dynamic' || route.type === 'catchall')
+    claimsOf.get(parentPosition)![route.type].push(route)
 }
