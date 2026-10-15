@@ -48,7 +48,7 @@ function findSlotDescendants(routeTree: RouteNode): Set<RouteNode> {
 function isTraversable(route: RouteNode, slotDescendants: Set<RouteNode>) {
   if (route.type === 'malformed') return false
   if (route.type !== 'slot') return true
-  return route.parent!.type === 'slot' && !slotDescendants.has(route.parent!)
+  return route.parent!.type !== 'slot' && !slotDescendants.has(route.parent!)
 }
 
 function createPosition(route: RouteNode, parent: PartialPositionNode): PartialPositionNode {
@@ -106,7 +106,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
 
-      const parentPosition = context.positionOf.get(childRoute)!
+      const parentPosition = context.positionOf.get(childRoute.parent!)!
       const claims = claimsOf.get(parentPosition)!
       setDynamicOrCatchallClaim(claims, childRoute)
     },
