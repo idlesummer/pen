@@ -65,7 +65,7 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
 }
 
 /** Resolves this position's real default/page owner (single-owner semantics). */
-function resolveOwnership(route: RouteNode, position: PartialPositionNode, defaultOwner: RouteNode, context: PositionContext) {
+function addOwnership(context: PositionContext, route: RouteNode, defaultOwner: RouteNode, position: PartialPositionNode) {
   if (defaultOwner.modules.default || !context.defaultOwnerOf.has(position))
     context.defaultOwnerOf.set(position, defaultOwner)
   if (route.modules.page) // there should be only one page owner
@@ -85,7 +85,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
       const claims = claimsOf.getOrInsertComputed(position, createClaims)
       addClaims(claims, route, defaultOwner)
-      resolveOwnership(route, position, defaultOwner, context)
+      addOwnership(context, route, defaultOwner, position)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
