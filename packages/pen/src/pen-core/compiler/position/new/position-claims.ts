@@ -11,17 +11,16 @@ export function createClaims(): PositionClaims {
   return { page: [], default: [], dynamic: [], catchall: [] }
 }
 
-/** Records this route's page/default ownership claim at its position. */
-export function addClaims<P>(claimsOf: Map<P, PositionClaims>, position: P, route: RouteNode, defaultOwner: RouteNode) {
-  const claims = claimsOf.getOrInsertComputed(position, createClaims)
+/** Records this route's page/default ownership claim. */
+export function addClaims(claims: PositionClaims, route: RouteNode, defaultOwner: RouteNode) {
   if (defaultOwner.modules.default) // records the position's explicit default owners
     claims.default.push(defaultOwner)
   if (route.modules.page)     // records a position's page owner
     claims.page.push(route)  // if there's multiple, it's recorded here
 }
 
-/** Records a dynamic/catchall route's naming claim at its parent's position. */
-export function addDynamicOrCatchallClaim<P>(claimsOf: Map<P, PositionClaims>, parentPosition: P, route: RouteNode) {
+/** Records a dynamic/catchall route's naming claim at its parent's claims. */
+export function addDynamicOrCatchallClaim(claims: PositionClaims, route: RouteNode) {
   if (route.type === 'dynamic' || route.type === 'catchall')
-    claimsOf.get(parentPosition)![route.type].push(route)
+    claims[route.type].push(route)
 }

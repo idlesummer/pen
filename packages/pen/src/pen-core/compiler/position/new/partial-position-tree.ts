@@ -4,7 +4,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
-import { addClaims, addDynamicOrCatchallClaim } from './position-claims'
+import { createClaims, addClaims, addDynamicOrCatchallClaim } from './position-claims'
 import { createOwnership, addOwnership } from './position-ownership'
 
 type PartialPositionNode = {
@@ -73,7 +73,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     visit: (route) => {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
-      addClaims(claimsOf, position, route, defaultOwner)
+      const claims = claimsOf.getOrInsertComputed(position, createClaims)
+      addClaims(claims, route, defaultOwner)
       addOwnership(ownership, route, defaultOwner, position)
     },
     expand: (route) => {
@@ -87,7 +88,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       positions.add(childPosition)
 
       const parentPosition = context.positionOf.get(parentRoute)!
-      addDynamicOrCatchallClaim(claimsOf, parentPosition, childRoute)
+      addDynamicOrCatchallClaim(claimsOf.get(parentPosition)!, childRoute)
     },
   })
   const conflicts = [...claimsOf.values()]
