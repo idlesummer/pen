@@ -1,4 +1,4 @@
-import type { RouteNode } from '@/pen-core/compiler/route/route-tree'
+import type { RouteNode } from '@/pen-core/compiler/route'
 
 export type Ownership = {
   page?: RouteNode
