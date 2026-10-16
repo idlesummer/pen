@@ -76,19 +76,19 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
       addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
       addOwnership(ownershipOf.getOrInsertComputed(position, createOwnership), route, defaultOwner)
+
+      if (route.parent) // root has no parent to stake a dynamic/catchall claim against
+        addDynamicOrCatchallClaim(claimsOf.get(context.positionOf.get(route.parent)!)!, route)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
         return route.children.filter(child => isTraversable(child, slotDescendants))
       return []
     },
-    attach: (childRoute, parentRoute) => {
+    attach: (childRoute) => {
       const childPosition = getOrCreatePosition(childRoute, context)
       context.positionOf.set(childRoute, childPosition)
       positions.add(childPosition)
-
-      const parentPosition = context.positionOf.get(parentRoute)!
-      addDynamicOrCatchallClaim(claimsOf.get(parentPosition)!, childRoute)
     },
   })
   const conflicts = [...claimsOf.values()]
