@@ -16,6 +16,7 @@ export type RouteNode = {
   segment: string
   path: string
   modules: ModulePaths
+  defaultOwner: RouteNode  // this folder's own nearest real default - itself, if explicit/boundary, else the nearest ancestor that is
   // Tree
   parent?: RouteNode
   children: RouteNode[]
@@ -36,7 +37,7 @@ function isModuleFilePath(path: string): boolean {
 }
 
 function createRouteNode(name: string, path: string): RouteNode {
-  return { name, ...createSegment(name), path, modules: {}, children: [] }
+  return { name, ...createSegment(name), path, modules: {}, children: [], defaultOwner: undefined as never }
 }
 
 /** Builds the route tree from a file list. Private folders (`_lib`) are erased.
@@ -61,6 +62,10 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
+
+  forEach(routeTree, (route) => {
+    route.defaultOwner = (route.modules.default || isBoundary(route.type)) ? route : route.parent!.defaultOwner
+  })
   return routeTree
 }
 
@@ -75,14 +80,6 @@ export function forEach(root: RouteNode, visit: (routeNode: RouteNode) => void) 
  *  a folder doesn't have its own module. */
 export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modules)[0] ?? routeNode.path
-}
-
-/** Finds the nearest route that owns a default or acts as a fallback boundary,
- *  starting with this route and walking up its ancestors. */
-export function findNearestDefaultOwner(route: RouteNode): RouteNode {
-  for (let node = route; ; node = node.parent!)
-    if (node.modules.default || isBoundary(node.type))
-      return node
 }
 
 /** Compact maps a route node and its ancestors using a function. */
