@@ -3,12 +3,12 @@ import type { PositionClaims } from './position-claims'
 import type { Ownership } from './position-ownership'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
+import { findDefaultOwner } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
 import { createClaims, addClaims } from './position-claims'
 import { createOwnership, addOwnership } from './position-ownership'
 
-type PartialPositionNode = {
+export type PartialPositionNode = {
   urlDepth: number      // url segments consumed to reach this position
   dynamicCount: number  // dynamic/catchall segments from root to here
   param?: string        // dynamic param/s captured at this position, only for dynamic/catch-all
@@ -26,14 +26,16 @@ type PositionContext = {
 function createPositionContext(routeTree: RouteNode, positionTree: PartialPositionNode): PositionContext {
   return {
     positionOf: new Map([[routeTree, positionTree]]),
-    slotsOf: new Map<RouteNode, Record<string, PartialPositionNode>>(),
+    slotsOf: new Map(),
   }
 }
 
-function isTraversable(route: RouteNode, slotDescendants: Set<RouteNode>) {
+function isTraversable(route: RouteNode) {
   if (route.type === 'malformed') return false
   if (route.type !== 'slot') return true
-  return route.parent!.type !== 'slot' && !slotDescendants.has(route.parent!)
+  for (let ancestor = route.parent; ancestor; ancestor = ancestor.parent)
+    if (ancestor.type === 'slot') return false
+  return true
 }
 
 function createPosition(route: RouteNode, parent: PartialPositionNode): PartialPositionNode {
@@ -66,9 +68,9 @@ export function createPartialPositionTree(routeTree: RouteNode) {
   const positionTree: PartialPositionNode = { urlDepth: 0, dynamicCount: 0 }
   const positions = new Set([positionTree])
   const context = createPositionContext(routeTree, positionTree)
+
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
   const ownershipOf = new Map<PartialPositionNode, Ownership>()
-  const slotDescendants = findSlotDescendants(routeTree)
 
   traverse(routeTree, {
     visit: (route) => {
@@ -78,9 +80,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
     },
     expand: (route) => {
-      if (route.type !== 'catchall')
-        return route.children.filter(child => isTraversable(child, slotDescendants))
-      return []
+      return route.type === 'catchall' ? [] :
+        route.children.filter(child => isTraversable(child))
     },
     attach: (childRoute) => {
       const childPosition = getOrCreatePosition(childRoute, context)
