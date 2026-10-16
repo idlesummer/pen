@@ -1,6 +1,6 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { PositionClaims, PositionContext, PositionNode } from './position'
-import { findDefaultOwner } from '../route/route-tree'
+import { findNearestDefaultOwner } from '../route/route-tree'
 
 export function createClaims(): PositionClaims {
   return { pages: [], defaults: [], dynamics: [], catchalls: [] }
@@ -12,7 +12,7 @@ export function createClaims(): PositionClaims {
 export function trackOwnership(route: RouteNode, position: PositionNode, context: PositionContext, claimsOf: Map<PositionNode, PositionClaims>) {
   const defaultOwnerOf = context.defaultOwnerOf
   // A real default always beats an implicit one at the boundary
-  const defaultOwner = findDefaultOwner(route)
+  const defaultOwner = findNearestDefaultOwner(route)
   if (!defaultOwnerOf.has(position) || defaultOwner.modules.default)
     defaultOwnerOf.set(position, defaultOwner)
 
