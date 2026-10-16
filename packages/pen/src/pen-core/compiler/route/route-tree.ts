@@ -77,8 +77,8 @@ export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modules)[0] ?? routeNode.path
 }
 
-/** This route's nearest default-owning route. Itself, if it has one/is a
- *  boundary, or the nearest ancestor that does. */
+/** Finds the nearest route that owns a default or acts as a fallback boundary,
+ *  starting with this route and walking up its ancestors. */
 export function findDefaultOwner(route: RouteNode): RouteNode {
   for (let node = route; ; node = node.parent!)
     if (node.modules.default || isBoundary(node.type))
