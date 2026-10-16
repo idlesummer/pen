@@ -11,7 +11,7 @@ export function createClaims(): PositionClaims {
 export function trackOwnership(route: RouteNode, position: PositionNode, context: PositionContext, claimsOf: Map<PositionNode, PositionClaims>) {
   const defaultOwnerOf = context.defaultOwnerOf
   // A real default always beats an implicit one at the boundary
-  const defaultOwner = route.defaultOwner
+  const defaultOwner = route.fallback
   if (!defaultOwnerOf.has(position) || defaultOwner.modules.default)
     defaultOwnerOf.set(position, defaultOwner)
 
