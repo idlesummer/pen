@@ -12,11 +12,11 @@ export function createClaims(): PositionClaims {
 }
 
 /** Records this route's page/default ownership claim. */
-export function addClaims(claims: PositionClaims, route: RouteNode, defaultOwner: RouteNode) {
-  if (defaultOwner.modules.default) // records the position's explicit default owners
-    claims.default.push(defaultOwner)
+export function addPageAndDefaultClaims(claims: PositionClaims, route: RouteNode, defaultOwner: RouteNode) {
   if (route.modules.page)     // records a position's page owner
     claims.page.push(route)  // if there's multiple, it's recorded here
+  if (defaultOwner.modules.default) // records the position's explicit default owners
+    claims.default.push(defaultOwner)
 }
 
 /** Records a dynamic/catchall route's naming claim at its parent's claims. */
