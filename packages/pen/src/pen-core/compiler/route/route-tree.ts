@@ -77,8 +77,8 @@ export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modules)[0] ?? routeNode.path
 }
 
-/** This folder's own nearest real default. Itself, if it has one/is a boundary,
- *  or the nearest ancestor that does. */
+/** This route's nearest default-owning route. Itself, if it has one/is a
+ *  boundary, or the nearest ancestor that does. */
 export function findDefaultOwner(route: RouteNode): RouteNode {
   for (let node = route; ; node = node.parent!)
     if (node.modules.default || isBoundary(node.type))
