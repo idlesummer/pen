@@ -71,7 +71,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (route) => {
       const position = context.positionOf.get(route)!
-      const defaultOwner = route.fallback
+      const defaultOwner = route.defaultFallback
       addOwnership(ownershipOf.getOrInsert(position, {}), route, defaultOwner)
       addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
     },

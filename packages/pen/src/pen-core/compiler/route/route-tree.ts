@@ -16,7 +16,7 @@ export type RouteNode = {
   segment: string
   path: string
   modules: ModulePaths
-  fallback: RouteNode  // this folder's own nearest real default - itself, if explicit/boundary, else the nearest ancestor that is
+  defaultFallback: RouteNode  // this folder's own nearest real default - itself, if explicit/boundary, else the nearest ancestor that is
   // Tree
   parent?: RouteNode
   children: RouteNode[]
@@ -37,7 +37,7 @@ function isModuleFilePath(path: string): boolean {
 }
 
 function createRouteNode(name: string, path: string): RouteNode {
-  return { name, ...createSegment(name), path, modules: {}, children: [], fallback: undefined as never }
+  return { name, ...createSegment(name), path, modules: {}, children: [], defaultFallback: undefined as never }
 }
 
 /** Builds the route tree from a file list. Private folders (`_lib`) are erased.
@@ -63,7 +63,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     },
   })
   forEach(routeTree, (route) => {
-    route.fallback = (route.modules.default || isBoundary(route.type)) ? route : route.parent!.fallback
+    route.defaultFallback = (route.modules.default || isBoundary(route.type)) ? route : route.parent!.defaultFallback
   })
   return routeTree
 }
