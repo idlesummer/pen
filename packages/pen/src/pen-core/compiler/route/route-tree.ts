@@ -62,7 +62,6 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
-
   forEach(routeTree, (route) => {
     route.defaultOwner = (route.modules.default || isBoundary(route.type)) ? route : route.parent!.defaultOwner
   })
