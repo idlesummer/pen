@@ -17,6 +17,7 @@ export type PartialPositionNode = {
   catchall?: PartialPositionNode
 }
 
+/** Context needed by position-tree construction to track route-to-position mappings and declared slots. */
 type PositionContext = {
   positionOf: Map<RouteNode, PartialPositionNode>              // route -> the position it belongs to
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>> // route -> its declared slots, by name
@@ -56,6 +57,7 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
   }
 }
 
+/** Represents a URL position in the route tree before rendering information is attached. */
 export function createPartialPositionTree(routeTree: RouteNode) {
   const positionTree: PartialPositionNode = { urlDepth: 0, dynamicCount: 0 }
   const positions = new Set([positionTree])
