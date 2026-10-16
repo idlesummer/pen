@@ -1,11 +1,11 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { PositionClaims } from './position-claims'
-import type { Ownership } from './position-ownership'
+import type { PositionOwnership } from './position-ownership'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner, isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route'
 import { createClaims, addClaims } from './position-claims'
-import { createOwnership, addOwnership } from './position-ownership'
+import { addOwnership } from './position-ownership'
 
 export type PartialPositionNode = {
   urlDepth: number      // url segments consumed to reach this position
@@ -66,13 +66,13 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     slotsOf: new Map(),
   }
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
-  const ownershipOf = new Map<PartialPositionNode, Ownership>()
+  const ownershipOf = new Map<PartialPositionNode, PositionOwnership>()
 
   traverse(routeTree, {
     visit: (route) => {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
-      addOwnership(ownershipOf.getOrInsertComputed(position, createOwnership), route, defaultOwner)
+      addOwnership(ownershipOf.getOrInsert(position, {}), route, defaultOwner)
       addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
     },
     expand: (route) => {
