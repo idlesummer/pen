@@ -74,10 +74,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     visit: (route) => {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
-      const claims = claimsOf.getOrInsertComputed(position, createClaims)
-      addClaims(claims, route, defaultOwner)
-      const ownership = ownershipOf.getOrInsertComputed(position, createOwnership)
-      addOwnership(ownership, route, defaultOwner)
+      addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
+      addOwnership(ownershipOf.getOrInsertComputed(position, createOwnership), route, defaultOwner)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
