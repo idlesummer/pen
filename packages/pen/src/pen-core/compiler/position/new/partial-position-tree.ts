@@ -23,13 +23,6 @@ type PositionContext = {
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>> // route -> its declared slots, by name
 }
 
-function createPositionContext(routeTree: RouteNode, positionTree: PartialPositionNode): PositionContext {
-  return {
-    positionOf: new Map([[routeTree, positionTree]]),
-    slotsOf: new Map(),
-  }
-}
-
 function isTraversable(route: RouteNode) {
   if (route.type === 'malformed') return false
   if (route.type !== 'slot') return true
@@ -67,8 +60,10 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
 export function createPartialPositionTree(routeTree: RouteNode) {
   const positionTree: PartialPositionNode = { urlDepth: 0, dynamicCount: 0 }
   const positions = new Set([positionTree])
-  const context = createPositionContext(routeTree, positionTree)
-
+  const context: PositionContext = {
+    positionOf: new Map([[routeTree, positionTree]]),
+    slotsOf: new Map(),
+  }
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
   const ownershipOf = new Map<PartialPositionNode, Ownership>()
 
