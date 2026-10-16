@@ -1,5 +1,6 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { PositionClaims } from './position-claims'
+import type { Ownership } from './position-ownership'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
@@ -66,7 +67,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
   const positions = new Set([positionTree])
   const context = createPositionContext(routeTree, positionTree)
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
-  const ownership = createOwnership<PartialPositionNode>()
+  const ownershipOf = new Map<PartialPositionNode, Ownership>()
   const slotDescendants = findSlotDescendants(routeTree)
 
   traverse(routeTree, {
@@ -75,7 +76,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
       const claims = claimsOf.getOrInsertComputed(position, createClaims)
       addClaims(claims, route, defaultOwner)
-      addOwnership(ownership, route, defaultOwner, position)
+      const ownership = ownershipOf.getOrInsertComputed(position, createOwnership)
+      addOwnership(ownership, route, defaultOwner)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
@@ -92,5 +94,5 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     },
   })
   const conflicts = [...claimsOf.values()]
-  return [positionTree, positions, conflicts, ownership]
+  return [positionTree, positions, conflicts, ownershipOf]
 }
