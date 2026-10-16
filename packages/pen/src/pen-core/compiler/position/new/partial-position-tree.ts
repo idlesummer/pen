@@ -3,7 +3,7 @@ import type { PositionClaims } from './position-claims'
 import type { PositionOwnership } from './position-ownership'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
-import { findNearestDefaultOwner, isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route'
+import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route'
 import { createClaims, addClaims } from './position-claims'
 import { addOwnership } from './position-ownership'
 
@@ -71,7 +71,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
   traverse(routeTree, {
     visit: (route) => {
       const position = context.positionOf.get(route)!
-      const defaultOwner = findNearestDefaultOwner(route)
+      const defaultOwner = route.defaultOwner
       addOwnership(ownershipOf.getOrInsert(position, {}), route, defaultOwner)
       addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
     },
