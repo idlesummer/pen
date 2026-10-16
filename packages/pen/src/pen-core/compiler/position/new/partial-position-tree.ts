@@ -5,7 +5,7 @@ import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { findDefaultOwner, findSlotDescendants } from '@/pen-core/compiler/route/route-tree'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route/route-segment'
-import { createClaims, addPageAndDefaultClaims, addDynamicOrCatchallClaim } from './position-claims'
+import { createClaims, addClaims } from './position-claims'
 import { createOwnership, addOwnership } from './position-ownership'
 
 type PartialPositionNode = {
@@ -74,11 +74,8 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     visit: (route) => {
       const position = context.positionOf.get(route)!
       const defaultOwner = findDefaultOwner(route)  // an explicit default beats fallback boundary default
-      addPageAndDefaultClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
       addOwnership(ownershipOf.getOrInsertComputed(position, createOwnership), route, defaultOwner)
-
-      if (route.parent) // root has no parent to stake a dynamic/catchall claim against
-        addDynamicOrCatchallClaim(claimsOf.get(context.positionOf.get(route.parent)!)!, route)
+      addClaims(claimsOf.getOrInsertComputed(position, createClaims), route, defaultOwner)
     },
     expand: (route) => {
       if (route.type !== 'catchall')
