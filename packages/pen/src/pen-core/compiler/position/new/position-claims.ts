@@ -11,16 +11,19 @@ export function createClaims(): PositionClaims {
   return { page: [], default: [], dynamic: [], catchall: [] }
 }
 
-/** Records this route's page/default ownership claim. */
-export function addPageAndDefaultClaims(claims: PositionClaims, route: RouteNode, defaultOwner: RouteNode) {
-  if (route.modules.page)     // records a position's page owner
-    claims.page.push(route)  // if there's multiple, it's recorded here
-  if (defaultOwner.modules.default) // records the position's explicit default owners
-    claims.default.push(defaultOwner)
-}
+/** Records page, default, dynamic, and catchall claims for this position. */
+export function addClaims(claims: PositionClaims, route: RouteNode, defaultOwner: RouteNode) {
+  // records a position's page owner;
+  // a valid tree should only have one per position
+  if (route.modules.page)
+    claims.page.push(route)
 
-/** Records a dynamic/catchall route's naming claim at its parent's claims. */
-export function addDynamicOrCatchallClaim(claims: PositionClaims, route: RouteNode) {
+  // records the position's explicit default owners
+  if (defaultOwner.modules.default)
+    claims.default.push(defaultOwner)
+
+  // records the position's dynamic or catchall routes;
+  // a valid tree should only have one per position
   if (route.type === 'dynamic' || route.type === 'catchall')
     claims[route.type].push(route)
 }
