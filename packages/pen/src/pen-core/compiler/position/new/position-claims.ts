@@ -1,4 +1,4 @@
-import type { RouteNode } from '@/pen-core/compiler/route/route-tree'
+import type { RouteNode } from '@/pen-core/compiler/route'
 
 export type PositionClaims = {
   page: RouteNode[]      // routes with a page collapsed into this position
