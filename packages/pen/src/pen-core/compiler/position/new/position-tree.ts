@@ -43,8 +43,7 @@ type FrameContext = {
 
 // ── frames ───────────────────────────────────────────────────────────────
 
-/** Creates a folder's Frame, or undefined if it wraps nothing.
- *  Memoised by route folder so shared ancestry reuses the same Frame reference. */
+/** Creates a route's Frame, or undefined if it wraps nothing. */
 function createFrame(routeNode: RouteNode, context: FrameContext): Frame | undefined {
   const frameOf = context.frameOf
   if (frameOf.has(routeNode))
