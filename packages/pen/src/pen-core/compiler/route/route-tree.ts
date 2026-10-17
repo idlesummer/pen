@@ -16,7 +16,7 @@ export type RouteNode = {
   segment: string
   path: string
   modules: ModulePaths
-  defaultFallback: RouteNode  // this folder's own nearest real default - itself, if explicit/boundary, else the nearest ancestor that is
+  defaultFallback: RouteNode  // this folder's own nearest real default fallback
   // Tree
   parent?: RouteNode
   children: RouteNode[]
@@ -37,7 +37,8 @@ function isModuleFilePath(path: string): boolean {
 }
 
 function createRouteNode(name: string, path: string): RouteNode {
-  const route = { name, ...createSegment(name), path, modules: {}, children: [] } as unknown as RouteNode
+  const segment = createSegment(name)
+  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], defaultFallback: undefined as never }
   route.defaultFallback = route
   return route
 }
