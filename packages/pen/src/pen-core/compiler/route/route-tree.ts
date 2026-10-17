@@ -37,7 +37,9 @@ function isModuleFilePath(path: string): boolean {
 }
 
 function createRouteNode(name: string, path: string): RouteNode {
-  return { name, ...createSegment(name), path, modules: {}, children: [], defaultFallback: undefined as never }
+  const route = { name, ...createSegment(name), path, modules: {}, children: [] } as unknown as RouteNode
+  route.defaultFallback = route
+  return route
 }
 
 /** Builds the route tree from a file list. Private folders (`_lib`) are erased.
