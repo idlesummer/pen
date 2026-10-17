@@ -4,7 +4,7 @@ import { basename } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from './route-module'
-import { createSegment, isBoundary, isPrivate } from './route-segment'
+import { createSegment, isBoundary, isDynamicOrCatchall, isPrivate } from './route-segment'
 
 /** The parse tree, with one node per folder in the app directory. */
 export type RouteNode = {
@@ -14,6 +14,7 @@ export type RouteNode = {
   path: string
   modules: ModulePaths
   defaultFallback: RouteNode  // this folder's own nearest real default fallback
+  dynamicCount: number        // dynamic/catchall segments from root to here, inclusive
   // Tree
   parent?: RouteNode
   children: RouteNode[]
@@ -35,7 +36,7 @@ function isModuleFilePath(path: string): boolean {
 
 function createRouteNode(name: string, path: string): RouteNode {
   const segment = createSegment(name)
-  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], defaultFallback: undefined as never }
+  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], defaultFallback: undefined as never, dynamicCount: 0 }
   route.defaultFallback = route
   return route
 }
@@ -65,6 +66,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   forEach(routeTree, (route) => {
     if (!route.modules.default && !isBoundary(route.type))
       route.defaultFallback = route.parent!.defaultFallback
+    route.dynamicCount = (route.parent?.dynamicCount ?? 0) + +isDynamicOrCatchall(route.type)
   })
   return routeTree
 }
