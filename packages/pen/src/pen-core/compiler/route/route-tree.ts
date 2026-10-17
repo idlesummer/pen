@@ -13,6 +13,7 @@ export type RouteNode = {
   segment: string
   path: string
   modules: ModulePaths
+  // Precomputations
   defaultFallback: RouteNode  // this folder's own nearest real default fallback
   dynamicCount: number        // dynamic/catchall segments from root to here, inclusive
   // Tree
@@ -36,7 +37,15 @@ function isModuleFilePath(path: string): boolean {
 
 function createRouteNode(name: string, path: string): RouteNode {
   const segment = createSegment(name)
-  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], defaultFallback: undefined as never, dynamicCount: 0 }
+  const route: RouteNode = {
+    name,
+    ...segment,
+    path,
+    modules: {},
+    children: [],
+    defaultFallback: undefined as never,
+    dynamicCount: 0,
+  }
   route.defaultFallback = route
   return route
 }
@@ -63,6 +72,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
+  // Attach
   forEach(routeTree, (route) => {
     if (!route.modules.default && !isBoundary(route.type))
       route.defaultFallback = route.parent!.defaultFallback
