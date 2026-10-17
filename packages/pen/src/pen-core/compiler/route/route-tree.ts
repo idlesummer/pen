@@ -72,7 +72,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
       parent.children.push(child)
     },
   })
-  // Attach
+  // Attach precomputed values
   forEach(routeTree, (route) => {
     if (!route.modules.default && !isBoundary(route.type))
       route.defaultFallback = route.parent!.defaultFallback
