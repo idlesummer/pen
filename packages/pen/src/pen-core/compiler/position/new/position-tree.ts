@@ -22,11 +22,6 @@ type Endpoint = {
   paramCount: number  // which position's params `contentPath` receives
 }
 
-type PositionEndpoints = {
-  endpoint?: Endpoint
-  fallback: Endpoint
-}
-
 export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'catchall'> & {
   // Children
   statics?: Record<string, PositionNode>
@@ -96,15 +91,15 @@ function createFallback(defaultOwner: RouteNode, contentPath: string, context: F
 }
 
 /** Creates a position's page endpoint, if any, and its fallback. */
-function createPositionEndpoints(ownership: PositionOwnership, context: FrameContext): PositionEndpoints {
-  const pageOwner = ownership.page
-  const pageContent = pageOwner?.modules.page
-  const endpoint = pageContent ? createEndpoint(pageOwner, pageContent, context) : undefined
-
+function createPositionEndpoints(ownership: PositionOwnership, context: FrameContext): [Endpoint, Endpoint?] {
   const defaultOwner = ownership.default!  // always set; worst case, a boundary
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
   const fallback = createFallback(defaultOwner, defaultContent, context)
-  return { endpoint, fallback }
+
+  const pageOwner = ownership.page
+  const pageContent = pageOwner?.modules.page
+  const endpoint = pageContent ? createEndpoint(pageOwner, pageContent, context) : undefined
+  return [fallback, endpoint]
 }
 
 // ── build ────────────────────────────────────────────────────────────────
@@ -144,8 +139,9 @@ export function createPositionTree(routeTree: RouteNode) {
   const positionNodes = positions as Set<PositionNode>
 
   for (const position of positionNodes) {
-    const ownership = ownershipOf.get(position)!
-    Object.assign(position, createPositionEndpoints(ownership, context))
+    const [fallback, endpoint] = createPositionEndpoints(ownershipOf.get(position)!, context)
+    position.fallback = fallback
+    position.endpoint = endpoint
   }
   const modulePaths = getModulePaths(positionNodes)
   const pageEndpoints = getPageEndpoints(positionNodes)
