@@ -89,7 +89,7 @@ function createPositionEndpoints(position: PositionNode, context: PositionContex
 export function createPositionTree(routeTree: RouteNode) {
   const [positionTree, positions, conflicts, ownership] = createPartialPositionTree(routeTree)
   for (const position of positions) {
-    const endpoints = createPositionEndpoints(position, ownership)
+    const endpoints = createPositionEndpoints(position as PositionNode, ownership)
     Object.assign(position, endpoints)
   }
   const modulePaths = getModulePaths(positions)
