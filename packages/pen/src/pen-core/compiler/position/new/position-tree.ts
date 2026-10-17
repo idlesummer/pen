@@ -41,7 +41,6 @@ export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'ca
  *  position tree's shape already exists. `frameOf`/`fallbackFrameOf` memoize
  *  frames to reuse references instead of creating duplicate objects. */
 type FrameContext = {
-  positionOf: Map<RouteNode, PartialPositionNode>
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>>
   frameOf: Map<RouteNode, Frame>
   fallbackFrameOf: Map<Frame, Frame>
@@ -62,7 +61,7 @@ function createFrame(routeNode: RouteNode, context: FrameContext): Frame | undef
   const slots = context.slotsOf.get(routeNode) as Record<string, PositionNode> | undefined
 
   if (layout || error || loading || _default || slots) {
-    const paramCount = context.positionOf.get(routeNode)!.dynamicCount
+    const paramCount = routeNode.dynamicCount
     const frame = { layout, loading, error, default: _default, slots, paramCount }
     frameOf.set(routeNode, frame)
     return frame
@@ -80,7 +79,7 @@ function createFallbackFrame(frame: Frame): Frame {
 /** Creates a page endpoint with its precomputed wrapper chain and parameter count. */
 function createEndpoint(pageOwner: RouteNode, contentPath: string, context: FrameContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
-  const paramCount = context.positionOf.get(pageOwner)!.dynamicCount
+  const paramCount = pageOwner.dynamicCount
   return { frames, contentPath, paramCount }
 }
 
@@ -140,8 +139,8 @@ function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
 }
 
 export function createPositionTree(routeTree: RouteNode) {
-  const [positionTree, positions, conflicts, ownershipOf, positionOf, slotsOf] = createPartialPositionTree(routeTree)
-  const context: FrameContext = { positionOf, slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
+  const [positionTree, positions, conflicts, ownershipOf, slotsOf] = createPartialPositionTree(routeTree)
+  const context: FrameContext = { slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
   const positionNodes = positions as Set<PositionNode>
 
   for (const position of positionNodes) {
