@@ -1,6 +1,7 @@
 import type { PartialPositionNode } from './partial-position-tree'
 import type { RouteNode } from '@/pen-core/compiler/route'
-import { compactMapAncestors } from '@/pen-core/compiler/route'
+import type { PositionOwnership } from './position-ownership'
+import { GLOBAL_DEFAULT, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'
 import { isBoundary } from '@/pen-core/compiler/route/route-segment'
 import { createPartialPositionTree } from './partial-position-tree'
 
@@ -21,6 +22,11 @@ type Endpoint = {
   paramCount: number  // which position's params `contentPath` receives
 }
 
+type PositionEndpoints = {
+  endpoint?: Endpoint
+  fallback: Endpoint
+}
+
 export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'catchall'> & {
   // Children
   statics?: Record<string, PositionNode>
@@ -31,11 +37,21 @@ export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'ca
   fallback: Endpoint
 }
 
+/** State needed to build a position's rendering frames/endpoints, once the
+ *  position tree's shape already exists. `frameOf`/`fallbackFrameOf` memoize
+ *  frames to reuse references instead of creating duplicate objects. */
+type FrameContext = {
+  positionOf: Map<RouteNode, PartialPositionNode>
+  slotsOf: Map<RouteNode, Record<string, PartialPositionNode>>
+  frameOf: Map<RouteNode, Frame>
+  fallbackFrameOf: Map<Frame, Frame>
+}
+
 // ── frames ───────────────────────────────────────────────────────────────
 
 /** Creates a folder's Frame, or undefined if it wraps nothing.
  *  Memoised by route folder so shared ancestry reuses the same Frame reference. */
-function createFrame(routeNode: RouteNode, context: PositionContext): Frame | undefined {
+function createFrame(routeNode: RouteNode, context: FrameContext): Frame | undefined {
   const frameOf = context.frameOf
   if (frameOf.has(routeNode))
     return frameOf.get(routeNode)
@@ -43,7 +59,7 @@ function createFrame(routeNode: RouteNode, context: PositionContext): Frame | un
   const { layout, error: errorPath, loading, default: defaultPath } = routeNode.modules
   const error = errorPath ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)  // Only the root needs a global error fallback
   const _default = defaultPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
-  const slots = context.slotsOf.get(routeNode)
+  const slots = context.slotsOf.get(routeNode) as Record<string, PositionNode> | undefined
 
   if (layout || error || loading || _default || slots) {
     const paramCount = context.positionOf.get(routeNode)!.dynamicCount
@@ -62,14 +78,14 @@ function createFallbackFrame(frame: Frame): Frame {
 // ── endpoints ───────────────────────────────────────────────────────────
 
 /** Creates a page endpoint with its precomputed wrapper chain and parameter count. */
-function createEndpoint(pageOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
+function createEndpoint(pageOwner: RouteNode, contentPath: string, context: FrameContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
   const paramCount = context.positionOf.get(pageOwner)!.dynamicCount
   return { frames, contentPath, paramCount }
 }
 
 /** Creates a fallback endpoint, removing the innermost frame's default. Drops the frame if it doesn't contribute. */
-function createFallback(defaultOwner: RouteNode, contentPath: string, context: PositionContext): Endpoint {
+function createFallback(defaultOwner: RouteNode, contentPath: string, context: FrameContext): Endpoint {
   const endpoint = createEndpoint(defaultOwner, contentPath, context)
   const lastFrame = endpoint.frames.pop() // pop on empty array returns undefined
 
@@ -80,24 +96,59 @@ function createFallback(defaultOwner: RouteNode, contentPath: string, context: P
   return endpoint
 }
 
-function createPositionEndpoints(position: PositionNode, context: PositionContext): PositionEndpoints {
-  const pageOwner = context.pageOwnerOf.get(position)
+/** Creates a position's page endpoint, if any, and its fallback. */
+function createPositionEndpoints(ownership: PositionOwnership, context: FrameContext): PositionEndpoints {
+  const pageOwner = ownership.page
   const pageContent = pageOwner?.modules.page
   const endpoint = pageContent ? createEndpoint(pageOwner, pageContent, context) : undefined
 
-  const defaultOwner = context.defaultOwnerOf.get(position)!  // always set; worst case, a boundary
+  const defaultOwner = ownership.default!  // always set; worst case, a boundary
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
   const fallback = createFallback(defaultOwner, defaultContent, context)
   return { endpoint, fallback }
 }
 
-export function createPositionTree(routeTree: RouteNode) {
-  const [positionTree, positions, conflicts, ownership] = createPartialPositionTree(routeTree)
-  for (const position of positions as Set<PositionNode>) {
-    const endpoints = createPositionEndpoints(position, ownership)
-    Object.assign(position, endpoints)
+// ── build ────────────────────────────────────────────────────────────────
+
+/** Collects all unique module paths used by the position tree's endpoints and frames, including slots. */
+function getModulePaths(positions: Set<PositionNode>): string[] {
+  const modules = new Set<string>()
+
+  for (const position of positions) {
+    for (const endpoint of [position.endpoint, position.fallback]) {
+      if (!endpoint) continue
+
+      modules.add(endpoint.contentPath)
+      for (const { layout, loading, error, default: default_ } of endpoint.frames) {
+        if (layout)   modules.add(layout)
+        if (loading)  modules.add(loading)
+        if (error)    modules.add(error)
+        if (default_) modules.add(default_)
+      }
+    }
   }
-  const modulePaths = getModulePaths(positions)
-  const pageEndpoints = getPageEndpoints(positions)
+  return [...modules].sort()
+}
+
+/** Collects real page endpoints, excluding fallbacks that render sentinels. */
+function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
+  const endpoints: Endpoint[] = []
+  for (const position of positions)
+    if (position.endpoint)
+      endpoints.push(position.endpoint)
+  return endpoints
+}
+
+export function createPositionTree(routeTree: RouteNode) {
+  const [positionTree, positions, conflicts, ownershipOf, positionOf, slotsOf] = createPartialPositionTree(routeTree)
+  const context: FrameContext = { positionOf, slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
+  const positionNodes = positions as Set<PositionNode>
+
+  for (const position of positionNodes) {
+    const ownership = ownershipOf.get(position)!
+    Object.assign(position, createPositionEndpoints(ownership, context))
+  }
+  const modulePaths = getModulePaths(positionNodes)
+  const pageEndpoints = getPageEndpoints(positionNodes)
   return [positionTree as PositionNode, conflicts, modulePaths, pageEndpoints] as const
 }
