@@ -21,7 +21,12 @@ type Endpoint = {
   paramCount: number  // which position's params `contentPath` receives
 }
 
-export type PositionNode = PartialPositionNode & {
+export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'catchall'> & {
+  // Children
+  statics?: Record<string, PositionNode>
+  dynamic?: PositionNode
+  catchall?: PositionNode
+  // Rendering
   endpoint?: Endpoint
   fallback: Endpoint
 }
