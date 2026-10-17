@@ -77,7 +77,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     },
     expand: (route) => {
       return route.type === 'catchall' ? [] :
-        route.children.filter(child => isTraversable(child))
+        route.children.filter(isTraversable)
     },
     attach: (childRoute) => {
       const childPosition = getOrCreatePosition(childRoute, context)
