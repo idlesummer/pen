@@ -85,5 +85,5 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     },
   })
   const conflicts = [...claimsOf.values()]
-  return [positionTree, positions, conflicts, ownershipOf]
+  return [positionTree, positions, conflicts, ownershipOf] as const
 }
