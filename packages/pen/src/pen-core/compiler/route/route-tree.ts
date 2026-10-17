@@ -15,7 +15,7 @@ export type RouteNode = {
   modules: ModulePaths
   // Derived
   defaultFallback: RouteNode  // this folder's own nearest real default fallback
-  dynamicCount: number        // dynamic/catchall segments from root to here, inclusive
+  paramCount: number        // dynamic/catchall segments from root to here, inclusive
   // Tree
   parent?: RouteNode
   children: RouteNode[]
@@ -37,21 +37,12 @@ function isModuleFilePath(path: string): boolean {
 
 function createRouteNode(name: string, path: string): RouteNode {
   const segment = createSegment(name)
-  const route: RouteNode = {
-    name,
-    ...segment,
-    path,
-    modules: {},
-    children: [],
-    defaultFallback: undefined as never,
-    dynamicCount: 0,
-  }
+  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], defaultFallback: undefined as never, paramCount: 0 }
   route.defaultFallback = route
   return route
 }
 
-/** Builds the route tree from a file list. Private folders (`_lib`) are erased.
- *  Everything else is kept, including illegal names to report later. */
+/** Builds the route tree; prunes private folders and preserves invalid routes to report it later. */
 export function createRouteTree(filePaths: string[]): RouteNode {
   const routeTree = createRouteNode('', '')
   const modulePaths = filePaths.filter(isModuleFilePath)  // Route paths stay '/' regardless of OS
@@ -76,7 +67,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   forEach(routeTree, (route) => {
     if (!route.modules.default && !isBoundary(route.type))
       route.defaultFallback = route.parent!.defaultFallback
-    route.dynamicCount = (route.parent?.dynamicCount ?? 0) + +isDynamicOrCatchall(route.type)
+    route.paramCount = (route.parent?.paramCount ?? 0) + +isDynamicOrCatchall(route.type)
   })
   return routeTree
 }
