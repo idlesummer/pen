@@ -107,7 +107,6 @@ function createPositionEndpoints(ownership: PositionOwnership, context: FrameCon
 /** Collects all unique module paths used by the position tree's endpoints and frames, including slots. */
 function getModulePaths(positions: Set<PositionNode>): string[] {
   const modules = new Set<string>()
-
   for (const position of positions) {
     for (const endpoint of [position.endpoint, position.fallback]) {
       if (!endpoint) continue
