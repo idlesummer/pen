@@ -6,10 +6,7 @@ import { traverse } from '@/lib/traverse'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from './route-module'
 import { createSegment, isBoundary, isPrivate } from './route-segment'
 
-/** The parse tree, with one node per folder in the app directory.
- *
- *  Built once and never mutated. Fallbacks and invalid routes are handled
- *  during compilation. */
+/** The parse tree, with one node per folder in the app directory. */
 export type RouteNode = {
   name: string
   type: SegmentType
@@ -79,8 +76,7 @@ export function forEach(root: RouteNode, visit: (routeNode: RouteNode) => void) 
   traverse(root, { visit, expand: routeNode => routeNode.children })
 }
 
-/** The file a diagnostic should point at. Falls back to the route path if
- *  a folder doesn't have its own module. */
+/** Returns the diagnostic file, falling back to the route path if no module exists. */
 export function getRouteSource(routeNode: RouteNode): string {
   return Object.values(routeNode.modules)[0] ?? routeNode.path
 }
