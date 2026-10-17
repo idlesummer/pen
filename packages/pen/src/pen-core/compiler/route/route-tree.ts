@@ -65,7 +65,8 @@ export function createRouteTree(filePaths: string[]): RouteNode {
     },
   })
   forEach(routeTree, (route) => {
-    route.defaultFallback = (route.modules.default || isBoundary(route.type)) ? route : route.parent!.defaultFallback
+    if (!route.modules.default && !isBoundary(route.type))
+      route.defaultFallback = route.parent!.defaultFallback
   })
   return routeTree
 }
