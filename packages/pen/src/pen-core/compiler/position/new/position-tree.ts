@@ -61,7 +61,7 @@ function createFrame(routeNode: RouteNode, context: FrameContext): Frame | undef
   const slots = context.slotsOf.get(routeNode) as Record<string, PositionNode> | undefined
 
   if (layout || error || loading || _default || slots) {
-    const paramCount = routeNode.dynamicCount
+    const paramCount = routeNode.paramCount
     const frame = { layout, loading, error, default: _default, slots, paramCount }
     frameOf.set(routeNode, frame)
     return frame
@@ -79,7 +79,7 @@ function createFallbackFrame(frame: Frame): Frame {
 /** Creates a page endpoint with its precomputed wrapper chain and parameter count. */
 function createEndpoint(pageOwner: RouteNode, contentPath: string, context: FrameContext): Endpoint {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
-  const paramCount = pageOwner.dynamicCount
+  const paramCount = pageOwner.paramCount
   return { frames, contentPath, paramCount }
 }
 
