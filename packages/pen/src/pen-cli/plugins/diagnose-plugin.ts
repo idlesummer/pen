@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite'
+import type { Plugin, ViteDevServer } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { join, relative } from 'node:path'
 import * as log from '@/pen-cli/logger/console'
@@ -8,8 +8,8 @@ const WATCH_DEBOUNCE_MS = 150
 
 /** Re-checks routes outside the initial build - a watcher-triggered check
  *  can't throw to fail a build like buildStart does, so it just logs. */
-async function logRouteDiagnostics(projectDir: string, routesDir: string) {
-  const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir)
+async function logRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer) {
+  const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir, server)
   for (const message of warnings) log.warn(message)
   if (error) log.error(error)
 }
@@ -33,6 +33,9 @@ function isInside(filePath: string, dir: string): boolean {
  *  `buildStart` alone only runs once, at server start. */
 export function penDiagnose({ routesDir }: PluginOptions): Plugin {
   let debounceTimer: ReturnType<typeof setTimeout> | undefined
+  // Set only in configureServer, which never runs for `pen build` (createBuilder
+  // has no dev server) - buildStart there correctly falls back to a throwaway one.
+  let devServer: ViteDevServer | undefined
 
   return {
     name: 'pen:diagnose',
@@ -45,13 +48,14 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir)
+        const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir, devServer)
 
         for (const message of warnings) this.warn(message)
         if (error) this.error(error)
       },
     },
     configureServer(server) {
+      devServer = server
       const projectDir = server.config.root
       const routesDirAbs = join(projectDir, routesDir)
 
@@ -60,7 +64,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
 
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
-          logRouteDiagnostics(projectDir, routesDir).catch(err => log.error(String(err)))
+          logRouteDiagnostics(projectDir, routesDir, devServer).catch(err => log.error(String(err)))
         }, WATCH_DEBOUNCE_MS)
       }
       server.watcher.on('add', onRouteFileChange)
