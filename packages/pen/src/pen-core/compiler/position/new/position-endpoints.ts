@@ -81,7 +81,7 @@ function createFallback<P>(defaultOwner: RouteNode, contentPath: string, context
 }
 
 /** Creates a position's page endpoint, if any, and its fallback. */
-export function createPositionEndpoints<P>(ownership: Ownership, context: FrameContext<P>): [fallback: Endpoint<P>, endpoint?: Endpoint<P>] {
+export function createPositionEndpoints<P>(ownership: Ownership, context: FrameContext<P>) {
   const defaultOwner = ownership.default!  // always set; worst case, a boundary
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
   const fallback = createFallback(defaultOwner, defaultContent, context)
@@ -89,5 +89,5 @@ export function createPositionEndpoints<P>(ownership: Ownership, context: FrameC
   const pageOwner = ownership.page
   const pageContent = pageOwner?.modules.page
   const endpoint = pageContent ? createEndpoint(pageOwner, pageContent, context) : undefined
-  return [fallback, endpoint]
+  return [fallback, endpoint] as const
 }
