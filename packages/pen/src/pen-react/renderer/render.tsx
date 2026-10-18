@@ -32,11 +32,11 @@ function getSlotProps(slots: Frame<PositionNode>['slots'], slotElements: SlotEle
  *  safe because frames and components come from the same createRouter() call. A
  *  missing component indicates a compiler bug. */
 function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: ParamEntries, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
-  const { layout, loading, error, default: _default, slots, paramCount } = frame
+  const { layout, loading, error, default: default_, slots, paramCount } = frame
   const paramTable = sliceParams(params, paramCount)
 
-  if (_default) {
-    const Fallback = components.default[_default]!
+  if (default_) {
+    const Fallback = components.default[default_]!
     content = <DefaultBoundary fallback={Fallback} params={paramTable}>{content}</DefaultBoundary>
   }
   if (loading) {
