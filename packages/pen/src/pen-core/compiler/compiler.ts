@@ -4,7 +4,7 @@ import { createRouteTree } from './route'
 import { createPositionTree } from './position'
 import { validateConflicts, validateRouteTree } from './validate'
 
-export type CompiledRoutes = {
+export type CompileOutput = {
   /** The compiled artifact - the only thing that outlives this call. */
   positionTree: PositionNode
   /** Every module the tree can render, for the generated component map. */
@@ -20,7 +20,7 @@ export type CompiledRoutes = {
  *
  * @param filePaths Route file paths to compile.
  */
-export function compileApp(filePaths: string[]): CompiledRoutes {
+export function compileApp(filePaths: string[]): CompileOutput {
   const routeTree = createRouteTree(filePaths)
   const [positionTree, claims, modulePaths, pageEndpoints] = createPositionTree(routeTree)
   const diagnostics = validateRouteTree(routeTree)
