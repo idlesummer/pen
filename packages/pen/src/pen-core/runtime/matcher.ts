@@ -1,7 +1,7 @@
 import type { Endpoint, PositionNode } from '../compiler'
 import { traverse } from '@/lib/traverse'
 
-export type ParamEntries = ReadonlyArray<readonly [name: string, value: string | string[]]>
+export type ParamEntries = ReadonlyArray<[name: string, value: string | string[]]>
 export type Match = {
   endpoint: Endpoint<PositionNode> // the winning endpoint - page or fallback, same type either way
   params: ParamEntries            // every param bound reaching this position, in bind order
