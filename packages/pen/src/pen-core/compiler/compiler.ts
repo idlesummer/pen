@@ -1,4 +1,4 @@
-import type { Diagnostic } from './diagnostic'
+import type { Diagnostic } from './validate'
 import type { Endpoint, PositionNode } from './position'
 import { createRouteTree } from './route/route-tree'
 import { validateConflicts, validateRouteTree } from './validate'
