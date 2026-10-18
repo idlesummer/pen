@@ -1,6 +1,6 @@
 export type { RouteNode } from './route'
 export type { Endpoint, Frame, PositionNode } from './position'
-export type { CompiledRoutes } from './compiler'
+export type { CompileOutput } from './compiler'
 export type { Diagnostic } from './validate'
 export type { Module, ModuleRole } from './route'
 
