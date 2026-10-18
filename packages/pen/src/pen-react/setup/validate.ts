@@ -1,4 +1,4 @@
-import type { Diagnostic, Endpoint } from '@/pen-core'
+import type { Diagnostic, Endpoint, PositionNode } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import type { DefaultExportMap } from './default-export-map'
 import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
@@ -37,7 +37,7 @@ export function validateComponentExports(modulePaths: string[], routeComponents:
 }
 
 /** Validates that every async page has a loading.tsx in its frame chain. */
-export function validateAsyncPages(pageEndpoints: Endpoint[], routeComponents: DefaultExportMap<RouteComponent>): Diagnostic[] {
+export function validateAsyncPages(pageEndpoints: Endpoint<PositionNode>[], routeComponents: DefaultExportMap<RouteComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {

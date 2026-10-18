@@ -1,4 +1,4 @@
-import type { Diagnostic, Endpoint } from '../compiler'
+import type { Diagnostic, Endpoint, PositionNode } from '../compiler'
 import type { Match } from './matcher'
 import { compileApp } from '../compiler'
 import { match } from './matcher'
@@ -9,7 +9,7 @@ export type Matcher =
 export type Router = {
   matcher: Matcher
   modulePaths: string[] // for the generated component map
-  pageEndpoints: Endpoint[] // for validation that needs each page's own frame chain
+  pageEndpoints: Endpoint<PositionNode>[] // for validation that needs each page's own frame chain
   diagnostics: Diagnostic[]
 }
 
