@@ -115,7 +115,6 @@ export function validateConflicts(claims: Claims[]): Diagnostic[] {
         files: claim.page.map(pageSource),
       }))
     }
-
     const distinctDefaults = new Set(claim.default)
     if (distinctDefaults.size > 1) {
       diagnostics.push(createDiagnostic({
