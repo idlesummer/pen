@@ -64,7 +64,7 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
   const contentParams = sliceParams(params, endpoint.paramCount)
 
   let element: ReactNode = isAsyncComponent(Content)
-    ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page has a loading boundary
+    ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page should have a loading boundary
     : <Content params={contentParams} />
 
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
