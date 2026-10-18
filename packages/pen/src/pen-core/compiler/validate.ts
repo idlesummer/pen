@@ -13,7 +13,7 @@ export type Diagnostic = {
 }
 
 /** Creates a diagnostic with a formatted message. */
-export function createDiagnostic(diagnostic: Omit<Diagnostic, 'message'>): Diagnostic {
+function createDiagnostic(diagnostic: Omit<Diagnostic, 'message'>): Diagnostic {
   const { rule, severity, description, files } = diagnostic
   const message = [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${file}`)].join('\n')
   return { ...diagnostic, message }
