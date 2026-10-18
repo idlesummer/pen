@@ -1,8 +1,8 @@
 import type { Diagnostic } from './validate'
 import type { Endpoint, PositionNode } from './position'
-import { createRouteTree } from './route/route-tree'
-import { validateConflicts, validateRouteTree } from './validate'
+import { createRouteTree } from './route'
 import { createPositionTree } from './position'
+import { validateConflicts, validateRouteTree } from './validate'
 
 export type CompiledRoutes = {
   /** The compiled artifact - the only thing that outlives this call. */
