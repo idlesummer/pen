@@ -60,7 +60,6 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
 /** Represents a URL position in the route tree before rendering information is attached. */
 export function createPartialPositionTree(routeTree: RouteNode) {
   const positionTree: PartialPositionNode = { urlDepth: 0, dynamicCount: 0 }
-  const positions = new Set([positionTree])
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]),
     slotsOf: new Map(),
@@ -81,7 +80,6 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     attach: (childRoute) => {
       const childPosition = getOrCreatePosition(childRoute, context)
       context.positionOf.set(childRoute, childPosition)
-      positions.add(childPosition)
     },
   })
   return [positionTree, claimsOf, ownershipOf, context.slotsOf] as const
