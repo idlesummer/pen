@@ -1,8 +1,8 @@
 import type { RouteNode } from './route/route-tree'
-import type { PositionClaims } from './position/position'
+import type { PositionClaims } from './position'
 import type { Diagnostic } from './diagnostic'
 import { createDiagnostic } from './diagnostic'
-import { forEach, getRouteSource } from './route/route-tree'
+import { forEach, getRouteSource } from './route'
 
 /** Prefer the page as the diagnostic source or fall back to the route source when absent. */
 function pageSource(routeNode: RouteNode): string {
@@ -86,20 +86,20 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
 
 /** Relational issues: only visible after folders collapse onto shared
  *  positions. Keep route nodes so diagnostics can identify source files. */
-export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
+export function validateConflicts(claims: PositionClaims[]): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
-  for (const { pages, defaults, catchalls, dynamics } of conflicts) {
-    if (pages.length > 1) {
+  for (const claim of claims) {
+    if (claim.page.length > 1) {
       diagnostics.push(createDiagnostic({
         rule: 'duplicate-page-route',
         severity: 'error',
         description: 'multiple pages resolve to the same URL pattern',
-        files: pages.map(pageSource),
+        files: claim.page.map(pageSource),
       }))
     }
 
-    const distinctDefaults = new Set(defaults)
+    const distinctDefaults = new Set(claim.default)
     if (distinctDefaults.size > 1) {
       diagnostics.push(createDiagnostic({
         rule: 'duplicate-default-route',
@@ -108,21 +108,21 @@ export function validateConflicts(conflicts: PositionClaims[]): Diagnostic[] {
         files: [...distinctDefaults].map(getRouteSource),
       }))
     }
-    if (catchalls.length > 1) {
+    if (claim.catchall.length > 1) {
       diagnostics.push(createDiagnostic({
         rule: 'duplicate-catchall-route',
         severity: 'error',
         description: 'multiple catch-all pages resolve to the same URL pattern',
-        files: catchalls.map(pageSource),
+        files: claim.catchall.map(pageSource),
       }))
     }
-    const paramNames = new Set(dynamics.map(r => r.segment))
+    const paramNames = new Set(claim.dynamic.map(r => r.segment))
     if (paramNames.size > 1) {
       diagnostics.push(createDiagnostic({
         rule: 'param-name-clash',
         severity: 'error',
         description: `two routes disagree on what to call the same URL parameter: ${[...paramNames].map(n => `"${n}"`).join(' vs ')}`,
-        files: dynamics.map(getRouteSource),
+        files: claim.dynamic.map(getRouteSource),
       }))
     }
   }
