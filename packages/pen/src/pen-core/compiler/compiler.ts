@@ -15,11 +15,8 @@ export type CompileOutput = {
   diagnostics: Diagnostic[]
 }
 
-/**
- * Compiles route file paths into the representation consumed downstream.
- *
- * @param filePaths Route file paths to compile.
- */
+/** Compiles route file paths into the representation consumed downstream.
+ *  @param filePaths Route file paths to compile. */
 export function compileApp(filePaths: string[]): CompileOutput {
   const routeTree = createRouteTree(filePaths)
   const [positionTree, claims, modulePaths, pageEndpoints] = createPositionTree(routeTree)
