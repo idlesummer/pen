@@ -1,4 +1,4 @@
-import type { Matcher } from '@/pen-core/runtime'
+import type { Matcher } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
 import { Fragment, useMemo } from 'react'
 import { useNavigate } from '../navigation/hooks/use-navigate'
