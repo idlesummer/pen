@@ -1,6 +1,6 @@
 import type { PartialPositionNode } from './partial-position-tree'
 import type { RouteNode } from '@/pen-core/compiler/route'
-import type { PositionOwnership } from './position-ownership'
+import type { Ownership } from './position-ownership'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'
 import { isBoundary } from '@/pen-core/compiler/route/route-segment'
 
@@ -81,7 +81,7 @@ function createFallback<P>(defaultOwner: RouteNode, contentPath: string, context
 }
 
 /** Creates a position's page endpoint, if any, and its fallback. */
-export function createPositionEndpoints<P>(ownership: PositionOwnership, context: FrameContext<P>): [fallback: Endpoint<P>, endpoint?: Endpoint<P>] {
+export function createPositionEndpoints<P>(ownership: Ownership, context: FrameContext<P>): [fallback: Endpoint<P>, endpoint?: Endpoint<P>] {
   const defaultOwner = ownership.default!  // always set; worst case, a boundary
   const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
   const fallback = createFallback(defaultOwner, defaultContent, context)
