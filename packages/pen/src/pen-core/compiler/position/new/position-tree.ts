@@ -10,8 +10,8 @@ export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'ca
   dynamic?: PositionNode
   catchall?: PositionNode
   // Rendering
-  endpoint?: Endpoint
-  fallback: Endpoint
+  endpoint?: Endpoint<PositionNode>
+  fallback: Endpoint<PositionNode>
 }
 
 // ── build ────────────────────────────────────────────────────────────────
@@ -36,8 +36,8 @@ function getModulePaths(positions: Set<PositionNode>): string[] {
 }
 
 /** Collects real page endpoints, excluding fallbacks that render sentinels. */
-function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
-  const endpoints: Endpoint[] = []
+function getPageEndpoints(positions: Set<PositionNode>): Endpoint<PositionNode>[] {
+  const endpoints: Endpoint<PositionNode>[] = []
   for (const position of positions)
     if (position.endpoint)
       endpoints.push(position.endpoint)
@@ -46,7 +46,7 @@ function getPageEndpoints(positions: Set<PositionNode>): Endpoint[] {
 
 export function createPositionTree(routeTree: RouteNode) {
   const [positionTree, positions, conflicts, ownershipOf, slotsOf] = createPartialPositionTree(routeTree)
-  const context: FrameContext = { slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
+  const context: FrameContext<PositionNode> = { slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
   const positionNodes = positions as Set<PositionNode>
 
   for (const position of positionNodes) {
