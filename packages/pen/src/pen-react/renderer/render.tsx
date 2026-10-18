@@ -62,15 +62,14 @@ function renderChain(match: Match, slotElements: SlotElements, pathname: string,
   const Content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
   const contentParams = sliceParams(params, endpoint.paramCount)
 
-  let element: ReactNode = isAsyncComponent(Content)
+  const contentElement: ReactNode = isAsyncComponent(Content)
     ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page should have a loading boundary
     : <Content params={contentParams} />
 
-  for (let i = endpoint.frames.length-1; i >= 0; i--) {
-    const frame = endpoint.frames[i]!
-    element = wrapFrame(frame, element, params, slotElements, pathname, components)
-  }
-  return element
+  return endpoint.frames.reduceRight<ReactNode>(
+    (element, frame) => wrapFrame(frame, element, params, slotElements, pathname, components),
+    contentElement,
+  )
 }
 
 /** Turns a router `Match` into a React element tree by rendering its slots
