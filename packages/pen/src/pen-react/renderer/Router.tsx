@@ -1,7 +1,7 @@
 import type { Matcher } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
 import { Fragment, useMemo } from 'react'
-import { useNavigate } from '../navigation/hooks/use-navigate'
+import { useNavigate } from '@/pen-react/navigation/hooks/use-navigate'
 import { renderMatch } from './render'
 
 export type RouterProps = {
