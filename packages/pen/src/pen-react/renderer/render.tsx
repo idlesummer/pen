@@ -31,7 +31,7 @@ function getSlotProps(slots: Frame<PositionNode>['slots'], slotElements: SlotEle
 /** Wraps content with a frame's boundaries, layout, and slots. The assertions are
  *  safe because frames and components come from the same createRouter() call. A
  *  missing component indicates a compiler bug. */
-function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: ParamEntries, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
+function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: ParamEntries, slotElements: SlotElements, pathname: string, components: ComponentMap): ReactNode {
   const paramTable = sliceParams(params, frame.paramCount)
 
   if (frame.default) {
@@ -68,7 +68,7 @@ function renderChain(match: Match, slotElements: SlotElements, pathname: string,
 
   for (let i = endpoint.frames.length-1; i >= 0; i--) {
     const frame = endpoint.frames[i]!
-    element = wrapFrame(frame, element, params, slotElements, components, pathname)
+    element = wrapFrame(frame, element, params, slotElements, pathname, components)
   }
   return element
 }
