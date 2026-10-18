@@ -4,9 +4,7 @@ import type { Ownership } from './position-ownership'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'
 import { isBoundary } from '@/pen-core/compiler/route/route-segment'
 
-/** Represents the module folders that wrap a page endpoint. `P` is the position type
- *  held by this folder's own declared slots - left generic so this file never needs
- *  to import the position tree's own (recursive) node type. */
+/** Folder modules wrapping a page endpoint. `P` is the slot position type. */
 export type Frame<P> = {
   layout?: string
   loading?: string
@@ -23,9 +21,7 @@ export type Endpoint<P> = {
   paramCount: number  // which position's params `contentPath` receives
 }
 
-/** State needed to build a position's rendering frames/endpoints, once the
- *  position tree's shape already exists. `frameOf`/`fallbackFrameOf` memoize
- *  frames to reuse references instead of creating duplicate objects. */
+/** Context for building frames and endpoints, with memoized frame reuse. */
 export type FrameContext<P> = {
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>>
   frameOf: Map<RouteNode, Frame<P>>
