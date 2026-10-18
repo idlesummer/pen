@@ -77,9 +77,10 @@ function renderChain(match: Match, slotElements: SlotElements, components: Compo
  *  and wrapping the main match with its frame chain.
  *
  *  @param mainMatch - The resolved route match to render.
+ *  @param pathname - The path the match was produced from
  *  @param components - The component map used to resolve route modules.
  *  @returns The rendered React element tree. */
-export function renderMatch(mainMatch: Match, components: ComponentMap, pathname: string): ReactNode {
+export function renderMatch(mainMatch: Match, pathname: string, components: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))

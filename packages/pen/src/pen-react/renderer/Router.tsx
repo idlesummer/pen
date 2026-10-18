@@ -22,7 +22,7 @@ export function Router({ matcher, componentMap }: RouterProps) {
   return useMemo(
     () => {
       const match = matcher(pathname)
-      const tree = renderMatch(match, componentMap, pathname)
+      const tree = renderMatch(match, pathname, componentMap)
       return <Fragment key={refreshes}>{tree}</Fragment>
     },
     [
