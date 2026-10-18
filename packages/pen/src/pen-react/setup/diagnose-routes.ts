@@ -1,4 +1,5 @@
 import type { Diagnostic, Module } from '@/pen-core'
+import type { ViteDevServer } from 'vite'
 import type { RouteComponent } from '../renderer/types/route-component'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -39,11 +40,12 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
  *
  * @param projectDir - Project directory containing the app directory.
  * @param routesDir - App route directory relative to the project directory.
+ * @param server - An existing dev server to reuse, if one is already running.
  * @returns Diagnostics produced while compiling and validating the routes.
  */
-async function diagnoseRoutes(projectDir: string, routesDir: string): Promise<RouteDiagnosis> {
+async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
   // Load modules and create component map
-  const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, routesDir)
+  const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, routesDir, server)
   const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
     [GLOBAL_DEFAULT]: DefaultFallback,
     [GLOBAL_ERROR]: ErrorFallback,
@@ -63,12 +65,14 @@ async function diagnoseRoutes(projectDir: string, routesDir: string): Promise<Ro
  *
  *  @param projectDir - Project directory containing the app directory.
  *  @param routesDir - App route directory relative to the project directory.
+ *  @param server - An existing dev server to reuse, if one is already running -
+ *   otherwise a throwaway one is created for this call alone.
  *  @returns A formatted summary of route diagnostics. */
-export async function reportRouteDiagnostics(projectDir: string, routesDir: string): Promise<DiagnosticReport> {
+export async function reportRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<DiagnosticReport> {
   if (!existsSync(join(projectDir, routesDir)))
     return { warnings: [], error: `No such directory: '${routesDir}'`, routes: [] }
 
-  const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir, routesDir)
+  const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir, routesDir, server)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
     .map(d => formatDiagnostic(d, routesDir))
