@@ -17,7 +17,7 @@ export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'ca
 // ── build ────────────────────────────────────────────────────────────────
 
 /** Collects all unique module paths used by the position tree's endpoints and frames, including slots. */
-function getModulePaths(positions: Iterable<PositionNode>): string[] {
+function getModulePaths(positions: PositionNode[]): string[] {
   const modules = new Set<string>()
   for (const position of positions) {
     for (const endpoint of [position.endpoint, position.fallback]) {
@@ -36,7 +36,7 @@ function getModulePaths(positions: Iterable<PositionNode>): string[] {
 }
 
 /** Collects real page endpoints, excluding fallbacks that render sentinels. */
-function getPageEndpoints(positions: Iterable<PositionNode>): Endpoint<PositionNode>[] {
+function getPageEndpoints(positions: PositionNode[]): Endpoint<PositionNode>[] {
   const endpoints: Endpoint<PositionNode>[] = []
   for (const position of positions)
     if (position.endpoint)
@@ -46,7 +46,7 @@ function getPageEndpoints(positions: Iterable<PositionNode>): Endpoint<PositionN
 
 export function createPositionTree(routeTree: RouteNode) {
   const [positionTree, claimsOf, ownershipOf, slotsOf] = createPartialPositionTree(routeTree)
-  const positionNodes = claimsOf.keys() as Iterable<PositionNode>
+  const positionNodes = [...claimsOf.keys()] as PositionNode[]
   const context: FrameContext<PositionNode> = {
     slotsOf,
     frameOf: new Map(),
