@@ -57,7 +57,7 @@ function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: Param
 /** Wraps endpoint content with its frame chain, from inner to outer. Component
  *  and frame assertions are safe for the same reason as in wrapFrame. Async
  *  pages are guaranteed to have a loading boundary by validation. */
-function renderChain(match: Match, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
+function renderChain(match: Match, slotElements: SlotElements, pathname: string, components: ComponentMap): ReactNode {
   const { endpoint, params } = match
   const Content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
   const contentParams = sliceParams(params, endpoint.paramCount)
@@ -84,6 +84,6 @@ export function renderMatch(mainMatch: Match, pathname: string, components: Comp
   const slotElements: SlotElements = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotElements[slotName] = renderChain(slotMatch, {}, components, pathname)
-  return renderChain(mainMatch, slotElements, components, pathname)
+    slotElements[slotName] = renderChain(slotMatch, {}, pathname, components)
+  return renderChain(mainMatch, slotElements, pathname, components)
 }
