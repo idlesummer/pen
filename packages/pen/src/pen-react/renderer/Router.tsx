@@ -19,6 +19,7 @@ export function Router({ matcher, componentMap }: RouterProps) {
   const { history, position, refreshes } = useNavigate()
   const pathname = history[position]!.url
 
+  // useMemo only triggers on any navigation action calls inside the tree
   return useMemo(
     () => {
       const match = matcher(pathname)
