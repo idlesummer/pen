@@ -1,16 +1,17 @@
 import type { Endpoint, PositionNode } from '../compiler'
 import { traverse } from '@/lib/traverse'
 
+/** Ordered URL parameter bindings. */
 export type ParamEntries = ReadonlyArray<[name: string, value: string | string[]]>
+
+/** A matched endpoint, its params, and any matched slots. */
 export type Match = {
   endpoint: Endpoint<PositionNode> // the winning endpoint - page or fallback, same type either way
   params: ParamEntries            // every param bound reaching this position, in bind order
-  pathname: string                // the url this match was resolved against, unchanged across slots
   slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
 
-/** A competing search attempt. No parent pointer is needed because
- *  endpoints already flatten their wrapper chain into frames. */
+/** A candidate explored during route matching. */
 type MatchCandidate = {
   position: PositionNode
   params: ParamEntries
@@ -18,9 +19,7 @@ type MatchCandidate = {
   isTerminal?: true
 }
 
-/** Which children to try next, in preference order: exact literal match,
- *  then a bound param, then everything remaining. None are offered once the
- *  URL runs out - a position with no segment left to try has no children. */
+/** Expands a candidate into matching children, ordered by preference. */
 function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
   const { position, params } = candidate
   const segment = url[position.urlDepth]
@@ -45,10 +44,8 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
   return candidates
 }
 
-/** Depth-first, static-preferring search over one position tree.
- *  Returns the first accepting endpoint, or the most static terminal
- *  position's fallback if no endpoint accepts. */
-function findMatch(position: PositionNode, url: string[], seedParams: ParamEntries, pathname: string): Match {
+/** Finds the best endpoint or fallback using static-preferring DFS. */
+function findMatch(position: PositionNode, url: string[], seedParams: ParamEntries): Match {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -74,27 +71,25 @@ function findMatch(position: PositionNode, url: string[], seedParams: ParamEntri
   })
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
   const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
-  return { endpoint, params, pathname }
+  return { endpoint, params }
 }
 
-/** Splits a URL into non-empty segments, discarding empty segments from
- *  leading, trailing, or repeated slashes. The root URL is `[]`. */
+/** Splits a pathname into non-empty segments. */
 function normalizeUrl(pathname: string): string[] {
   return pathname.split('/').filter(Boolean)
 }
 
-/** Resolves the match tree for one URL, then matches each declared slot
- *  independently against the same full URL with the inherited params. */
+/** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
-  const mainMatch = findMatch(positionTree, url, [], pathname)
+  const mainMatch = findMatch(positionTree, url, [])
 
   for (const frame of mainMatch.endpoint.frames) {
     if (!frame.slots) continue
     mainMatch.slots ??= {}
 
     for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
-      const slotMatch = findMatch(slotPosition, url, mainMatch.params, pathname)
+      const slotMatch = findMatch(slotPosition, url, mainMatch.params)
       mainMatch.slots[slotName] = slotMatch
     }
   }
