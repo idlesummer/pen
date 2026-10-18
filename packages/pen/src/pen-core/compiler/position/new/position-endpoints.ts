@@ -1,4 +1,4 @@
-import type { PartialPositionNode } from './partial-position-tree'
+import type { PartialPositionNode } from './position-partial-tree'
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { Ownership } from './position-ownership'
 import { GLOBAL_DEFAULT, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'

@@ -1,7 +1,7 @@
-import type { PartialPositionNode } from './partial-position-tree'
+import type { PartialPositionNode } from './position-partial-tree'
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { Endpoint, FrameContext } from './position-endpoints'
-import { createPartialPositionTree } from './partial-position-tree'
+import { createPartialPositionTree } from './position-partial-tree'
 import { createPositionEndpoints } from './position-endpoints'
 
 export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'catchall'> & {
