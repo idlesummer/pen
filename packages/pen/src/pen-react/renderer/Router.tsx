@@ -21,7 +21,7 @@ export function Router({ matcher, componentMap }: RouterProps) {
 
   return useMemo(() => {
     const match = matcher(pathname)
-    const tree = renderMatch(match, componentMap)
+    const tree = renderMatch(match, componentMap, pathname)
     return <Fragment key={refreshes}>{tree}</Fragment>
   }, [pathname, refreshes, matcher, componentMap])
 }
