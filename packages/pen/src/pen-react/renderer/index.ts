@@ -1,5 +1,5 @@
 export { PenApp } from './App'
-export { renderMatch } from './render'
+export { createRouteElement } from './render'
 export type { ComponentMap } from './types/component-map'
 export type { RouteComponent } from './types/route-component'
 export type { Params } from './types/params'
