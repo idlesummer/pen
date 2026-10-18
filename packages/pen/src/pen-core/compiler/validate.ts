@@ -1,5 +1,5 @@
 import type { RouteNode } from './route/route-tree'
-import type { PositionClaims } from './position'
+import type { Claims } from './position'
 import type { Diagnostic } from './diagnostic'
 import { createDiagnostic } from './diagnostic'
 import { forEach, getRouteSource } from './route'
@@ -86,7 +86,7 @@ export function validateRouteTree(routeTree: RouteNode): Diagnostic[] {
 
 /** Relational issues: only visible after folders collapse onto shared
  *  positions. Keep route nodes so diagnostics can identify source files. */
-export function validateConflicts(claims: PositionClaims[]): Diagnostic[] {
+export function validateConflicts(claims: Claims[]): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const claim of claims) {

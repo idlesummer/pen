@@ -1,5 +1,5 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
-import type { PositionClaims } from './position-claims'
+import type { Claims } from './position-claims'
 import type { Ownership } from './position-ownership'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
@@ -65,7 +65,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     positionOf: new Map([[routeTree, positionTree]]),
     slotsOf: new Map(),
   }
-  const claimsOf = new Map<PartialPositionNode, PositionClaims>()
+  const claimsOf = new Map<PartialPositionNode, Claims>()
   const ownershipOf = new Map<PartialPositionNode, Ownership>()
 
   traverse(routeTree, {
