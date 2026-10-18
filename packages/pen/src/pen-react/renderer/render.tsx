@@ -12,7 +12,7 @@ type SlotElements = Record<string, ReactNode>
 
 /** Unwraps an async page's promise where the route's Suspense boundary can catch it. */
 function AsyncContent({ promise }: { promise: Promise<ReactNode> }): ReactNode {
-  return use(promise)
+  return use(promise) // suspends here until a promise resolves
 }
 
 /** Returns params up to the given depth as an object. */
