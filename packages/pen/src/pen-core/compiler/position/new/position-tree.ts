@@ -46,9 +46,12 @@ function getPageEndpoints(positions: Set<PositionNode>): Endpoint<PositionNode>[
 
 export function createPositionTree(routeTree: RouteNode) {
   const [positionTree, positions, conflicts, ownershipOf, slotsOf] = createPartialPositionTree(routeTree)
-  const context: FrameContext<PositionNode> = { slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
   const positionNodes = positions as Set<PositionNode>
-
+  const context: FrameContext<PositionNode> = {
+    slotsOf,
+    frameOf: new Map(),
+    fallbackFrameOf: new Map(),
+  }
   for (const position of positionNodes) {
     const [fallback, endpoint] = createPositionEndpoints(ownershipOf.get(position)!, context)
     position.fallback = fallback
