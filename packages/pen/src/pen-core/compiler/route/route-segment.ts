@@ -72,9 +72,7 @@ export function isDynamicOrCatchall(type: SegmentType): boolean {
   return type === 'dynamic' || type === 'catchall'
 }
 
-/** Where routing stops inheriting: the app root, and each slot. Both must
- *  always be able to render "nothing claimed this", so both always carry a
- *  default - a real one if declared, the built-in otherwise. */
+/** Checks if route is the app root or slot, both of which require a default fallback. */
 export function isBoundary(type: SegmentType): boolean {
   return type === 'root' || type === 'slot'
 }
