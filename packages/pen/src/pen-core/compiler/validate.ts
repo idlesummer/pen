@@ -1,8 +1,25 @@
 import type { RouteNode } from './route/route-tree'
 import type { Claims } from './position'
-import type { Diagnostic } from './diagnostic'
-import { createDiagnostic } from './diagnostic'
 import { forEach, getRouteSource } from './route'
+
+// ── diagnostic ─────────────────────────────────────────────────────────
+
+export type Diagnostic = {
+  rule: string
+  severity: 'error' | 'warn'
+  description: string
+  files: string[]
+  message: string
+}
+
+/** Creates a diagnostic with a formatted message. */
+export function createDiagnostic(diagnostic: Omit<Diagnostic, 'message'>): Diagnostic {
+  const { rule, severity, description, files } = diagnostic
+  const message = [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${file}`)].join('\n')
+  return { ...diagnostic, message }
+}
+
+// ── validation ─────────────────────────────────────────────────────────
 
 /** Prefer the page as the diagnostic source or fall back to the route source when absent. */
 function pageSource(routeNode: RouteNode): string {
