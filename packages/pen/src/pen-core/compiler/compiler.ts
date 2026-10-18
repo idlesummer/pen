@@ -9,8 +9,7 @@ export type CompiledRoutes = {
   positionTree: PositionNode
   /** Every module the tree can render, for the generated component map. */
   modulePaths: string[]
-  /** Every real page endpoint, for validation that needs each page's own
-   *  frame chain rather than just its module path. */
+  /** Every page endpoint, for validation that needs each page's own frame chain. */
   pageEndpoints: Endpoint<PositionNode>[]
   /** Problems, each pointing at a file the user can open. */
   diagnostics: Diagnostic[]
