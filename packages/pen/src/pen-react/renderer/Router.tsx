@@ -27,8 +27,8 @@ export function Router({ matcher, componentMap }: RouterProps) {
       return <Fragment key={refreshes}>{tree}</Fragment>
     },
     [
-      pathname,
-      refreshes,
+      pathname,     // changes when push/replace/back/forward is called
+      refreshes,    // changes when refresh is called
       matcher,      // stable
       componentMap, // stable
     ],
