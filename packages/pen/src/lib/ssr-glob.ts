@@ -26,6 +26,7 @@ export async function ssrGlob<T>(projectDir: string, routesDir: string, server?:
     return await Promise.all(modules)
   }
   finally {
-    if (!server) await activeServer.close()  // only close servers created for this call
+    if (!server)
+      await activeServer.close()  // only close servers created for this call
   }
 }
