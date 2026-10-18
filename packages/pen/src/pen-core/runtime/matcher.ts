@@ -21,27 +21,26 @@ type MatchCandidate = {
 /** Which children to try next, in preference order: exact literal match,
  *  then a bound param, then everything remaining. None are offered once the
  *  URL runs out - a position with no segment left to try has no children. */
-function expandChildren(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
+function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
   const { position, params } = candidate
   const segment = url[position.urlDepth]
   if (segment === undefined)
     return []
 
-  const { statics, dynamic, catchall } = position
   const candidates: MatchCandidate[] = []
-  if (statics?.[segment])
-    candidates.push({ position: statics[segment], params })
+  if (position.statics?.[segment])
+    candidates.push({ position: position.statics[segment], params })
 
-  if (dynamic) {
-    const paramName = dynamic.param!
+  if (position.dynamic) {
+    const paramName = position.dynamic.param!
     const newParams: ParamEntries = [...params, [paramName, segment]]
-    candidates.push({ position: dynamic, params: newParams })
+    candidates.push({ position: position.dynamic, params: newParams })
   }
-  if (catchall) {
-    const paramName = catchall.param!
+  if (position.catchall) {
+    const paramName = position.catchall.param!
     const segments = url.slice(position.urlDepth)
     const newParams: ParamEntries = [...params, [paramName, segments]]
-    candidates.push({ position: catchall, params: newParams, isCatchall: true })
+    candidates.push({ position: position.catchall, params: newParams, isCatchall: true })
   }
   return candidates
 }
@@ -56,9 +55,8 @@ function findMatch(position: PositionNode, url: string[], seedParams: ParamEntri
 
   traverse(rootCandidate, {
     expand: (candidate) => {
-      const children = expandChildren(candidate, url)
-      if (!children.length)
-        candidate.isTerminal = true
+      const children = expand(candidate, url)
+      if (!children.length) candidate.isTerminal = true
       return children
     },
     leave: (candidate) => {
