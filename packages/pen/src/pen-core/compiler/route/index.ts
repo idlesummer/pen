@@ -6,4 +6,5 @@ export type { Module, ModuleRole } from './route-module'
 export { GLOBAL_ERROR, GLOBAL_DEFAULT } from './route-module'
 
 // Route tree exports
-export * from './route-tree'
+export type { RouteNode } from './route-tree'
+export { createRouteTree, forEach, getRouteSource, compactMapAncestors } from './route-tree'

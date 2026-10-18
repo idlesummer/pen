@@ -1,4 +1,4 @@
-import type { RouteNode } from './route/route-tree'
+import type { RouteNode } from './route'
 import type { Claims } from './position'
 import { forEach, getRouteSource } from './route'
 
