@@ -65,7 +65,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     positionOf: new Map([[routeTree, positionTree]]),
     slotsOf: new Map(),
   }
-  const claimsOf = new Map<PartialPositionNode, Claims>()
+  const claimsOf = new Map<PartialPositionNode, Claims>() // map of all position nodes and their claims
   const ownershipOf = new Map<PartialPositionNode, Ownership>()
 
   traverse(routeTree, {
@@ -84,6 +84,5 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       positions.add(childPosition)
     },
   })
-  const claims = [...claimsOf.values()]
-  return [positionTree, positions, claims, ownershipOf, context.slotsOf] as const
+  return [positionTree, claimsOf, ownershipOf, context.slotsOf] as const
 }
