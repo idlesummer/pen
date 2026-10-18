@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Frame, Match, ParamEntries } from '@/pen-core'
+import type { Frame, Match, ParamEntries, PositionNode } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
 import type { Params } from './types/params'
 import { use } from 'react'
@@ -21,7 +21,7 @@ function sliceParams(params: ParamEntries, depth: number): Params {
 }
 
 /** Returns the rendered elements for the slots declared by a frame. */
-function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotElements {
+function getSlotProps(slots: Frame<PositionNode>['slots'], slotElements: SlotElements): SlotElements {
   const slotProps: SlotElements = {}
   for (const name in slots)
     slotProps[name] = slotElements[name]
@@ -31,7 +31,7 @@ function getSlotProps(slots: Frame['slots'], slotElements: SlotElements): SlotEl
 /** Wraps content with a frame's boundaries, layout, and slots. The assertions are
  *  safe because frames and components come from the same createRouter() call. A
  *  missing component indicates a compiler bug. */
-function wrapFrame(frame: Frame, content: ReactNode, params: ParamEntries, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
+function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: ParamEntries, slotElements: SlotElements, components: ComponentMap, pathname: string): ReactNode {
   const { layout, loading, error, default: _default, slots, paramCount } = frame
   const paramTable = sliceParams(params, paramCount)
 
