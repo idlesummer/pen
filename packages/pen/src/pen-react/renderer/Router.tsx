@@ -2,7 +2,7 @@ import type { Matcher } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
 import { Fragment, useMemo } from 'react'
 import { useNavigate } from '@/pen-react/navigation/hooks/use-navigate'
-import { renderMatch } from './render'
+import { createRouteElement } from './render'
 
 export type RouterProps = {
   matcher: Matcher
@@ -23,8 +23,8 @@ export function Router({ matcher, componentMap }: RouterProps) {
   return useMemo(
     () => {
       const match = matcher(pathname)
-      const tree = renderMatch(match, pathname, componentMap)
-      return <Fragment key={refreshes}>{tree}</Fragment>
+      const routeElement = createRouteElement(match, pathname, componentMap)
+      return <Fragment key={refreshes}>{routeElement}</Fragment>
     },
     [
       pathname,     // changes when push/replace/back/forward is called
