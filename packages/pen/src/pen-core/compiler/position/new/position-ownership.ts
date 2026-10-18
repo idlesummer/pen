@@ -1,6 +1,6 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 
-export type PositionOwnership = {
+export type Ownership = {
   page?: RouteNode
   default?: RouteNode
 }
@@ -9,7 +9,7 @@ export type PositionOwnership = {
  *
  *  @param ownership - The position's current ownership record.
  *  @param route - The route being processed. */
-export function addOwnership(ownership: PositionOwnership, route: RouteNode) {
+export function addOwnership(ownership: Ownership, route: RouteNode) {
   // Assign if empty or if the route has an explicit default
   if (!ownership.default || route.defaultFallback.modules.default)
     ownership.default = route.defaultFallback

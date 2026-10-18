@@ -1,6 +1,6 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { PositionClaims } from './position-claims'
-import type { PositionOwnership } from './position-ownership'
+import type { Ownership } from './position-ownership'
 import { dict } from '@/lib/dict'
 import { traverse } from '@/lib/traverse'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route'
@@ -66,7 +66,7 @@ export function createPartialPositionTree(routeTree: RouteNode) {
     slotsOf: new Map(),
   }
   const claimsOf = new Map<PartialPositionNode, PositionClaims>()
-  const ownershipOf = new Map<PartialPositionNode, PositionOwnership>()
+  const ownershipOf = new Map<PartialPositionNode, Ownership>()
 
   traverse(routeTree, {
     visit: (route) => {
