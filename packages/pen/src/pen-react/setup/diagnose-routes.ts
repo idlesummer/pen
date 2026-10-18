@@ -83,6 +83,5 @@ export async function reportRouteDiagnostics(projectDir: string, routesDir: stri
 
   // The two sentinel keys aren't real files - nothing to list
   const routes = modulePaths.filter(path => path !== GLOBAL_DEFAULT && path !== GLOBAL_ERROR)
-
   return { warnings, error, routes }
 }
