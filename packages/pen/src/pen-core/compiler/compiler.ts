@@ -1,5 +1,5 @@
 import type { Diagnostic } from './diagnostic'
-import type { Endpoint, PositionNode } from './position/position'
+import type { Endpoint, PositionNode } from './position'
 import { createRouteTree } from './route/route-tree'
 import { validateConflicts, validateRouteTree } from './validate'
 import { createPositionTree } from './position'
@@ -11,7 +11,7 @@ export type CompiledRoutes = {
   modulePaths: string[]
   /** Every real page endpoint, for validation that needs each page's own
    *  frame chain rather than just its module path. */
-  pageEndpoints: Endpoint[]
+  pageEndpoints: Endpoint<PositionNode>[]
   /** Problems, each pointing at a file the user can open. */
   diagnostics: Diagnostic[]
 }
@@ -23,7 +23,7 @@ export type CompiledRoutes = {
  */
 export function compileApp(filePaths: string[]): CompiledRoutes {
   const routeTree = createRouteTree(filePaths)
-  const { positionTree, conflicts, modulePaths, pageEndpoints } = createPositionTree(routeTree)
+  const [positionTree, conflicts, modulePaths, pageEndpoints] = createPositionTree(routeTree)
   const diagnostics = validateRouteTree(routeTree)
   diagnostics.push(...validateConflicts(conflicts))
 
