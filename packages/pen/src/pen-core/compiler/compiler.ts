@@ -23,9 +23,9 @@ export type CompiledRoutes = {
  */
 export function compileApp(filePaths: string[]): CompiledRoutes {
   const routeTree = createRouteTree(filePaths)
-  const [positionTree, conflicts, modulePaths, pageEndpoints] = createPositionTree(routeTree)
+  const [positionTree, claims, modulePaths, pageEndpoints] = createPositionTree(routeTree)
   const diagnostics = validateRouteTree(routeTree)
-  diagnostics.push(...validateConflicts(conflicts))
+  diagnostics.push(...validateConflicts(claims))
 
   return { positionTree, modulePaths, pageEndpoints, diagnostics }
 }
