@@ -65,8 +65,7 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
  *
  *  @param projectDir - Project directory containing the app directory.
  *  @param routesDir - App route directory relative to the project directory.
- *  @param server - An existing dev server to reuse, if one is already running -
- *   otherwise a throwaway one is created for this call alone.
+ *  @param server - Existing dev server to reuse; otherwise, one is created for this call.
  *  @returns A formatted summary of route diagnostics. */
 export async function reportRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<DiagnosticReport> {
   if (!existsSync(join(projectDir, routesDir)))
