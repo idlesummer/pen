@@ -24,6 +24,7 @@ type ErrorBoundaryProps = PropsWithChildren<{
   pathname: string
 }>
 
+/** Catches render errors and renders the route's `error` module. */
 export function ErrorBoundary({ Fallback=ErrorFallback, pathname, children }: ErrorBoundaryProps) {
   return (
     <ReactErrorBoundary
