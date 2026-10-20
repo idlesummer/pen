@@ -79,7 +79,7 @@ function renderChain(match: Match, slotElements: SlotElements, pathname: string,
  *  @param pathname - The path the match was produced from
  *  @param components - The component map used to resolve route modules.
  *  @returns The rendered React element tree. */
-export function createMatchElement(mainMatch: Match, pathname: string, components: ComponentMap): ReactNode {
+export function createRouteElement(mainMatch: Match, pathname: string, components: ComponentMap): ReactNode {
   const slotElements: SlotElements = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
