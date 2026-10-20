@@ -35,7 +35,7 @@ function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: Param
   }
   if (frame.loading) {
     const Fallback = components.loading[frame.loading]!
-    content = <LoadingBoundary fallback={Fallback}>{content}</LoadingBoundary>
+    content = <LoadingBoundary Fallback={Fallback}>{content}</LoadingBoundary>
   }
   if (frame.error) {
     const Fallback = components.error[frame.error]!
