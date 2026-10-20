@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react'
+import type { FunctionComponent, PropsWithChildren } from 'react'
 import type { Params } from '@/pen-react/renderer/types/params'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
@@ -17,7 +17,7 @@ function DefaultFallback({ }: DefaultFallbackProps) { // eslint-disable-line no-
 // ── boundary ─────────────────────────────────────────────────────────────
 
 type DefaultBoundaryProps = PropsWithChildren<{
-  Fallback?: typeof DefaultFallback
+  Fallback?: FunctionComponent<DefaultFallbackProps>
   pathname: string
   params: Params
 }>

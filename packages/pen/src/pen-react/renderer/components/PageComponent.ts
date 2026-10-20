@@ -8,12 +8,6 @@ export type PageComponentProps = {
   params: Params
 }
 
-/** A page component. */
-export type PageComponent = FunctionComponent<PageComponentProps>
-
-/** An async page called outside React, with its result unwrapped by pen. */
-export type AsyncPageComponent = (props: PageComponentProps) => Promise<ReactNode>
-
 // ── utility ──────────────────────────────────────────────────────────────
 
 /** Checks whether a component is declared with `async`.
@@ -23,6 +17,6 @@ export type AsyncPageComponent = (props: PageComponentProps) => Promise<ReactNod
  *
  *  @param Content - The component function to check.
  *  @returns Whether the component is declared with `async`. */
-export function isAsyncComponent(Content: (props: never) => ReactNode | Promise<ReactNode>): Content is AsyncPageComponent {
+export function isAsyncComponent<P>(Content: FunctionComponent<P>): Content is (props: P) => Promise<ReactNode> {
   return Content.constructor.name === 'AsyncFunction'
 }
