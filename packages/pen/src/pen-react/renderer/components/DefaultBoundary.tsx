@@ -5,7 +5,7 @@ import { Text } from 'ink'
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
-type DefaultFallbackProps = {
+export type DefaultFallbackProps = {
   params: Params
 }
 
