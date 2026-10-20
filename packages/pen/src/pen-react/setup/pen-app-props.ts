@@ -1,22 +1,21 @@
+import type { FunctionComponent } from 'react'
 import type { Module } from '@/pen-core'
 import type { ComponentMap } from '../renderer/types/component-map'
-import type { DefaultComponent } from '../renderer/components/DefaultBoundary'
-import type { ErrorComponent } from '../renderer/components/ErrorBoundary'
-import type { LayoutComponent } from '../renderer/components/LayoutComponent'
-import type { LoadingComponent } from '../renderer/components/LoadingBoundary'
-import type { PageComponent } from '../renderer/components/PageComponent'
+import type { DefaultFallbackProps } from '../renderer/components/DefaultBoundary'
+import type { ErrorFallbackProps } from '../renderer/components/ErrorBoundary'
+import type { LayoutComponentProps } from '../renderer/components/LayoutComponent'
+import type { LoadingComponentProps } from '../renderer/components/LoadingBoundary'
+import type { PageComponentProps } from '../renderer/components/PageComponent'
 import type { PenAppProps } from '../renderer/App'
-import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { DefaultFallback } from '../renderer/components/DefaultBoundary'
-import { ErrorFallback } from '../renderer/components/ErrorBoundary'
+import { createRouter } from '@/pen-core'
 import { createDefaultExportMap } from './default-export-map'
 
 type AppModules = {
-  page: Record<string, Module<PageComponent>>
-  layout: Record<string, Module<LayoutComponent>>
-  loading: Record<string, Module<LoadingComponent>>
-  error: Record<string, Module<ErrorComponent>>
-  default: Record<string, Module<DefaultComponent>>
+  page: Record<string, Module<FunctionComponent<PageComponentProps>>>
+  layout: Record<string, Module<FunctionComponent<LayoutComponentProps>>>
+  loading: Record<string, Module<FunctionComponent<LoadingComponentProps>>>
+  error: Record<string, Module<FunctionComponent<ErrorFallbackProps>>>
+  default: Record<string, Module<FunctionComponent<DefaultFallbackProps>>>
 }
 
 /** Resolves each role's glob'd modules into its own component map and
@@ -32,8 +31,8 @@ export function createPenAppProps(modules: AppModules): PenAppProps {
   const pageComponents = createDefaultExportMap(Object.entries(modules.page))
   const layoutComponents = createDefaultExportMap(Object.entries(modules.layout))
   const loadingComponents = createDefaultExportMap(Object.entries(modules.loading))
-  const errorComponents = createDefaultExportMap(Object.entries(modules.error), { [GLOBAL_ERROR]: ErrorFallback })
-  const defaultComponents = createDefaultExportMap(Object.entries(modules.default), { [GLOBAL_DEFAULT]: DefaultFallback })
+  const errorComponents = createDefaultExportMap(Object.entries(modules.error))
+  const defaultComponents = createDefaultExportMap(Object.entries(modules.default))
 
   const { matcher } = createRouter([
     ...Object.keys(pageComponents),

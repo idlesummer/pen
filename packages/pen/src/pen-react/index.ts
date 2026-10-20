@@ -1,6 +1,6 @@
 export type {
   Params,
-  ErrorComponentProps,
+  ErrorFallbackProps,
   ErrorComponent,
   DefaultComponent,
   LoadingComponent,
