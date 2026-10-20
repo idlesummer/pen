@@ -57,7 +57,7 @@ export async function loadPenConfig(projectDir: string, command: 'build' | 'serv
     return mergeConfig(DEFAULT_PEN_CONFIG, config)
   }
   catch (err) {
-    log.error(`Failed to load ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err}`)
+    log.error(`Failed to load ${CONFIG_FILENAME}: ${Error.isError(err) ? err.message : err}`)
     process.exit(1)
   }
 }
