@@ -22,5 +22,4 @@ export {
   notFound,
   ErrorBoundary,
   LoadingBoundary,
-  createRouteElement,
 } from './renderer'
