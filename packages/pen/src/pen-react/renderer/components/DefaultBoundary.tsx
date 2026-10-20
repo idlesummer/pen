@@ -1,54 +1,40 @@
-import type { FunctionComponent, ReactNode } from 'react'
-import type { Params } from '../types/params'
-import { Component } from 'react'
+import type { PropsWithChildren } from 'react'
+import type { Params } from '@/pen-react/renderer/types/params'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
-
-// ── component ────────────────────────────────────────────────────────────
-
-/** Props passed to a default component. */
-export type DefaultComponentProps = {
-  params: Params
-}
-
-/** A default component receiving the params of its route position. */
-export type DefaultComponent = FunctionComponent<DefaultComponentProps>
 
 // ── fallback ─────────────────────────────────────────────────────────────
 
+type DefaultFallbackProps = {
+  params: Params
+}
+
 /** Built-in fallback when no root default.tsx is defined. */
-export function DefaultFallback() {
-  return <Text>404 - Not Found</Text>
+function DefaultFallback({ }: DefaultFallbackProps) { // eslint-disable-line no-empty-pattern
+  return <Text>Page Not Found</Text>
 }
 
 // ── boundary ─────────────────────────────────────────────────────────────
 
-type DefaultBoundaryProps = {
-  fallback: DefaultComponent
+type DefaultBoundaryProps = PropsWithChildren<{
+  Fallback?: typeof DefaultFallback
   params: Params
-  children: ReactNode
-}
+  pathname: string
+}>
 
-type DefaultBoundaryState = {
-  triggered: boolean
-}
-
-/** Catches notFound() and renders this position's default component.
- *  Other errors are re-thrown for the nearest error boundary. */
-export class DefaultBoundary extends Component<DefaultBoundaryProps, DefaultBoundaryState> {
-  constructor(props: DefaultBoundaryProps) {
-    super(props)
-    this.state = { triggered: false }
-  }
-
-  static getDerivedStateFromError(error: unknown): DefaultBoundaryState {
-    if (!(error instanceof DefaultSignal)) throw error
-    return { triggered: true }
-  }
-
-  render() {
-    const { fallback: Fallback, params, children } = this.props
-    return this.state.triggered ? <Fallback params={params} /> : children
-  }
+export function DefaultBoundary({ Fallback=DefaultFallback, params, pathname, children }: DefaultBoundaryProps) {
+  return (
+    <ReactErrorBoundary
+      resetKeys={[pathname]}
+      fallbackRender={() => <Fallback params={params} />}
+      onError={(error) => {
+        if (!(error instanceof DefaultSignal))
+          throw error
+      }}
+    >
+      {children}
+    </ReactErrorBoundary>
+  )
 }
 
 // ── signal ───────────────────────────────────────────────────────────────

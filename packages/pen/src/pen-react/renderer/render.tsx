@@ -39,7 +39,7 @@ function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: Param
   }
   if (frame.error) {
     const Fallback = components.error[frame.error]!
-    content = <ErrorBoundary fallback={Fallback} pathname={pathname}>{content}</ErrorBoundary>
+    content = <ErrorBoundary Fallback={Fallback} pathname={pathname}>{content}</ErrorBoundary>
   }
   if (frame.layout) {
     const Layout = components.layout[frame.layout]!
