@@ -2,7 +2,7 @@ import type { Diagnostic, Endpoint, PositionNode } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import type { DefaultExportMap } from './default-export-map'
 import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { isAsyncComponent } from '../renderer/components/PageComponent'
+import { isAsyncComponent } from '@/lib/await-component'
 
 /** Validates that every discovered module has a valid component default export. */
 export function validateComponentExports(modulePaths: string[], routeComponents: DefaultExportMap<RouteComponent>): Diagnostic[] {

@@ -26,5 +26,5 @@ export type DefaultComponent = FunctionComponent<DefaultFallbackProps>
 export { LoadingBoundary } from './components/LoadingBoundary'
 export { ErrorBoundary } from './components/ErrorBoundary'
 export { DefaultBoundary, notFound, DefaultSignal } from './components/DefaultBoundary'
-export { isAsyncComponent } from './components/PageComponent'
+export { isAsyncComponent } from '@/lib/await-component'
 export { PenApp } from './App'
