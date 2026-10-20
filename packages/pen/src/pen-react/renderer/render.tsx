@@ -2,18 +2,13 @@ import type { ReactNode } from 'react'
 import type { Frame, Match, ParamEntries, PositionNode } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
 import type { Params } from './types/params'
-import { use } from 'react'
+import { AwaitComponent } from '@/lib/await-component'
 import { isAsyncComponent } from './components/PageComponent'
 import { DefaultBoundary } from './components/DefaultBoundary'
 import { LoadingBoundary } from './components/LoadingBoundary'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
 type SlotElements = Record<string, ReactNode>
-
-/** Unwraps an async page's promise where the route's Suspense boundary can catch it. */
-function AsyncContent({ promise }: { promise: Promise<ReactNode> }): ReactNode {
-  return use(promise) // suspends here until a promise resolves
-}
 
 /** Returns params up to the given depth as an object. */
 function sliceParams(params: ParamEntries, depth: number): Params {
@@ -63,7 +58,7 @@ function renderChain(match: Match, slotElements: SlotElements, pathname: string,
   const contentParams = sliceParams(params, endpoint.paramCount)
 
   const contentElement: ReactNode = isAsyncComponent(Content)
-    ? <AsyncContent promise={Content({ params: contentParams })} /> // every async page should have a loading boundary
+    ? <AwaitComponent resolve={Content({ params: contentParams })} /> // every async page should have a loading boundary
     : <Content params={contentParams} />
 
   return endpoint.frames.reduceRight<ReactNode>(
