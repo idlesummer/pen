@@ -31,7 +31,7 @@ function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: Param
 
   if (frame.default) {
     const Fallback = components.default[frame.default]!
-    content = <DefaultBoundary fallback={Fallback} params={paramTable}>{content}</DefaultBoundary>
+    content = <DefaultBoundary Fallback={Fallback} params={paramTable} pathname={pathname}>{content}</DefaultBoundary>
   }
   if (frame.loading) {
     const Fallback = components.loading[frame.loading]!
