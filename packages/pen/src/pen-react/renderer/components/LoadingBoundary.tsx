@@ -9,11 +9,11 @@ export type LoadingComponent = FunctionComponent
 // ── boundary ─────────────────────────────────────────────────────────────
 
 type LoadingBoundaryProps = {
-  fallback: LoadingComponent
+  Fallback: LoadingComponent
   children: ReactNode
 }
 
 /** Shows the loading component while its children are suspended. */
-export function LoadingBoundary({ fallback: Fallback, children }: LoadingBoundaryProps) {
+export function LoadingBoundary({ Fallback, children }: LoadingBoundaryProps) {
   return <Suspense fallback={<Fallback />}>{children}</Suspense>
 }
