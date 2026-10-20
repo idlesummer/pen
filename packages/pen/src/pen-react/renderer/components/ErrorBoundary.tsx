@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react'
+import type { FunctionComponent, PropsWithChildren } from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
 import { normalizeError } from '@/lib/normalize-error'
@@ -20,7 +20,7 @@ function ErrorFallback({ error }: ErrorFallbackProps) {
 // ── boundary ─────────────────────────────────────────────────────────────
 
 type ErrorBoundaryProps = PropsWithChildren<{
-  Fallback?: typeof ErrorFallback
+  Fallback?: FunctionComponent<ErrorFallbackProps>
   pathname: string
 }>
 

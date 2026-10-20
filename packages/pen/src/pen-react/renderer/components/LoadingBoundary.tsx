@@ -1,15 +1,11 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import { Suspense } from 'react'
 
-// ── component ────────────────────────────────────────────────────────────
-
-/** A loading component rendered while its content is suspended. */
-export type LoadingComponent = FunctionComponent
-
-// ── boundary ─────────────────────────────────────────────────────────────
+// doesn't accept anything for now
+export type LoadingComponentProps = object
 
 type LoadingBoundaryProps = {
-  Fallback: LoadingComponent
+  Fallback: FunctionComponent<LoadingComponentProps>
   children: ReactNode
 }
 

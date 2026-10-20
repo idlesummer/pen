@@ -1,17 +1,15 @@
-import type { ErrorComponent } from '../components/ErrorBoundary'
-import type { DefaultComponent } from '../components/DefaultBoundary'
-import type { LoadingComponent } from '../components/LoadingBoundary'
-import type { PageComponent } from '../components/PageComponent'
-import type { LayoutComponent } from '../components/LayoutComponent'
+  import type { FunctionComponent } from 'react'
+  import type { PageComponentProps } from '@/pen-react/renderer/components/PageComponent'
+  import type { LayoutComponentProps } from '@/pen-react/renderer/components/LayoutComponent'
+  import type { LoadingComponentProps } from '@/pen-react/renderer/components/LoadingBoundary'
+  import type { DefaultFallbackProps } from '@/pen-react/renderer/components/DefaultBoundary'
+  import type { ErrorFallbackProps } from '@/pen-react/renderer/components/ErrorBoundary'
 
-/** One bucket per route module role; every module in a bucket shares that
- *  role's real prop shape. Lookups can still miss a key - wrapFrame/
- *  renderChain trust specific keys exist because they come from the same
- *  compiled route tree that produced this map. */
-export type ComponentMap = {
-  page: Record<string, PageComponent | undefined>
-  layout: Record<string, LayoutComponent | undefined>
-  loading: Record<string, LoadingComponent | undefined>
-  error: Record<string, ErrorComponent | undefined>
-  default: Record<string, DefaultComponent | undefined>
-}
+  /** Maps each route module role to its components by file path. */
+  export type ComponentMap = {
+    page:     Record<string, FunctionComponent<PageComponentProps> | undefined>
+    layout:   Record<string, FunctionComponent<LayoutComponentProps> | undefined>
+    loading:  Record<string, FunctionComponent<LoadingComponentProps> | undefined>
+    error:    Record<string, FunctionComponent<ErrorFallbackProps> | undefined>
+    default:  Record<string, FunctionComponent<DefaultFallbackProps> | undefined>
+  }
