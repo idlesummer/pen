@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { FunctionComponent, ReactNode } from 'react'
 import type { Params } from '../types/params'
 
 // ── component ────────────────────────────────────────────────────────────
@@ -17,6 +17,6 @@ export type PageComponentProps = {
  *
  *  @param Content - The component function to check.
  *  @returns Whether the component is declared with `async`. */
-export function isAsyncComponent<T extends (props: never) => ReactNode | Promise<ReactNode>>(Content: T): Content is ((...args: Parameters<T>) => Promise<ReactNode>) & T {
+export function isAsyncComponent<T extends FunctionComponent<any>>(Content: T): Content is ((...args: Parameters<T>) => Promise<ReactNode>) & T {
   return Content.constructor.name === 'AsyncFunction'
 }
