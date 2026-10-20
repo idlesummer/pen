@@ -17,6 +17,6 @@ export type PageComponentProps = {
  *
  *  @param Content - The component function to check.
  *  @returns Whether the component is declared with `async`. */
-export function isAsyncComponent<P>(Content: FunctionComponent<P>): Content is (props: P) => Promise<ReactNode> {
+export function isAsyncComponent(Content: FunctionComponent<any>): Content is (props: any) => Promise<ReactNode> {
   return Content.constructor.name === 'AsyncFunction'
 }

@@ -5,8 +5,6 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { DefaultFallback } from '../renderer/components/DefaultBoundary'
-import { ErrorFallback } from '../renderer/components/ErrorBoundary'
 import { createDefaultExportMap } from './default-export-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
@@ -46,10 +44,7 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
   // Load modules and create component map
   const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, routesDir, server)
-  const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries, {
-    [GLOBAL_DEFAULT]: DefaultFallback,
-    [GLOBAL_ERROR]: ErrorFallback,
-  })
+  const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries)
 
   // Create router and collect diagnostics
   const filePaths = moduleEntries.map(entry => entry[0])

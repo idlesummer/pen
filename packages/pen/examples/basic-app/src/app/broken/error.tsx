@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
-import type { ErrorComponentProps } from '@idlesummer/pen'
+import type { ErrorFallbackProps } from '@idlesummer/pen'
 
-export default function BrokenError({ error }: ErrorComponentProps) {
+export default function BrokenError({ error }: ErrorFallbackProps) {
   return (
     <Box flexDirection="column">
       <Box>
