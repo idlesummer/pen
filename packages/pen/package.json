@@ -75,8 +75,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "allowScripts": {
-    "esbuild@0.28.2": true
   }
 }
