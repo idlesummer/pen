@@ -7,7 +7,7 @@ import { DefaultSignal } from './DefaultBoundary'
 // ── fallback ─────────────────────────────────────────────────────────────
 
 /** Props passed to an error component. */
-type ErrorFallbackProps = {
+export type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
