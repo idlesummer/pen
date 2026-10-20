@@ -22,6 +22,8 @@ type DefaultBoundaryProps = PropsWithChildren<{
   pathname: string
 }>
 
+/** Catches notFound() and renders this position's default component.
+ *  Other errors are re-thrown for the nearest error boundary. */
 export function DefaultBoundary({ Fallback=DefaultFallback, params, pathname, children }: DefaultBoundaryProps) {
   return (
     <ReactErrorBoundary
