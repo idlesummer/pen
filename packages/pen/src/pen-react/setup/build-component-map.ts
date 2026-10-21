@@ -1,7 +1,7 @@
 import type { Module } from '@/pen-core'
 import type { ComponentMap, PageComponent, LayoutComponent, LoadingComponent, ErrorComponent, DefaultComponent } from '@/pen-react/renderer/types/component-map'
 
-type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>>?]>
+export type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>>?]>
 type DefaultExportMap<T> = Record<string, T>
 
 /** Each role's glob'd module entries, keyed by role. */
