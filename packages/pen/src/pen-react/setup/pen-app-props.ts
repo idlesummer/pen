@@ -1,15 +1,22 @@
 import type { Module } from '@/pen-core'
-import type { ComponentMap, PageComponent, LayoutComponent, LoadingComponent, ErrorComponent, DefaultComponent } from '../renderer/types/component-map'
-import type { PenAppProps } from '../renderer/App'
+import type {
+  ComponentMap,
+  PageComponent,
+  LayoutComponent,
+  LoadingComponent,
+  ErrorComponent,
+  DefaultComponent,
+} from '@/pen-react/renderer/types/component-map'
+import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
 import { createDefaultExportMap } from './default-export-map'
 
 type AppModules = {
-  page: Record<string, Module<PageComponent>>
-  layout: Record<string, Module<LayoutComponent>>
-  loading: Record<string, Module<LoadingComponent>>
-  error: Record<string, Module<ErrorComponent>>
-  default: Record<string, Module<DefaultComponent>>
+  page:     Record<string, Module<PageComponent>>
+  layout:   Record<string, Module<LayoutComponent>>
+  loading:  Record<string, Module<LoadingComponent>>
+  error:    Record<string, Module<ErrorComponent>>
+  default:  Record<string, Module<DefaultComponent>>
 }
 
 /** Resolves each role's glob'd modules into its own component map and
