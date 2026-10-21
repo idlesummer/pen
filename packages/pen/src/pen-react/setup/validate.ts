@@ -41,7 +41,7 @@ export function validateAsyncPages(pageEndpoints: Endpoint<PositionNode>[], rout
 
   for (const endpoint of pageEndpoints) {
     const Content = routeComponents[endpoint.contentPath]! // Safe - every real page endpoint has a discovered component
-    if (Content && Content.constructor.name === 'AsyncFunction' && !endpoint.frames.some(frame => frame.loading)) {
+    if (Content?.constructor.name === 'AsyncFunction' && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push(createDiagnostic({
         rule: 'async-page-missing-loading',
         severity: 'error',
