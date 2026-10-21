@@ -2,7 +2,6 @@ import type { Diagnostic, Endpoint, PositionNode } from '@/pen-core'
 import type { RouteComponent } from '../renderer/types/route-component'
 import type { DefaultExportMap } from './default-export-map'
 import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { isAsyncComponent } from '@/lib/await-component'
 
 /** Validates that every discovered module has a valid component default export. */
 export function validateComponentExports(modulePaths: string[], routeComponents: DefaultExportMap<RouteComponent>): Diagnostic[] {
@@ -42,7 +41,7 @@ export function validateAsyncPages(pageEndpoints: Endpoint<PositionNode>[], rout
 
   for (const endpoint of pageEndpoints) {
     const Content = routeComponents[endpoint.contentPath]! // Safe - every real page endpoint has a discovered component
-    if (Content && isAsyncComponent(Content) && !endpoint.frames.some(frame => frame.loading)) {
+    if (Content && Content.constructor.name === 'AsyncFunction' && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push(createDiagnostic({
         rule: 'async-page-missing-loading',
         severity: 'error',
