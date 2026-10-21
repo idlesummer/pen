@@ -1,6 +1,5 @@
 import type { Module } from '@/pen-core'
 import type {
-  ComponentMap,
   PageComponent,
   LayoutComponent,
   LoadingComponent,
@@ -9,7 +8,7 @@ import type {
 } from '@/pen-react/renderer/types/component-map'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
-import { createDefaultExportMap } from './default-export-map'
+import { buildComponentMap } from './build-component-map'
 
 type AppModules = {
   page:     Record<string, Module<PageComponent>>
@@ -29,25 +28,13 @@ type AppModules = {
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
 export function createPenAppProps(modules: AppModules): PenAppProps {
-  const pageComponents = createDefaultExportMap(Object.entries(modules.page))
-  const layoutComponents = createDefaultExportMap(Object.entries(modules.layout))
-  const loadingComponents = createDefaultExportMap(Object.entries(modules.loading))
-  const errorComponents = createDefaultExportMap(Object.entries(modules.error))
-  const defaultComponents = createDefaultExportMap(Object.entries(modules.default))
-
-  const { matcher } = createRouter([
-    ...Object.keys(pageComponents),
-    ...Object.keys(layoutComponents),
-    ...Object.keys(loadingComponents),
-    ...Object.keys(errorComponents),
-    ...Object.keys(defaultComponents),
-  ])
-  const componentMap: ComponentMap = {
-    page: pageComponents,
-    layout: layoutComponents,
-    loading: loadingComponents,
-    error: errorComponents,
-    default: defaultComponents,
-  }
+  const { componentMap, allPaths } = buildComponentMap({
+    page: Object.entries(modules.page),
+    layout: Object.entries(modules.layout),
+    loading: Object.entries(modules.loading),
+    error: Object.entries(modules.error),
+    default: Object.entries(modules.default),
+  })
+  const { matcher } = createRouter(allPaths)
   return { matcher, componentMap }
 }

@@ -6,4 +6,4 @@ export type { Module, ModuleRole } from './route'
 
 export { compileApp } from './compiler'
 export { createDiagnostic } from './validate'
-export { GLOBAL_DEFAULT, GLOBAL_ERROR } from './route'
+export { GLOBAL_DEFAULT, GLOBAL_ERROR, getModuleRole, MODULE_ROLES } from './route'

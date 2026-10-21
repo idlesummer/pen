@@ -1,6 +1,6 @@
 import type { Module } from '@/pen-core'
 
-type ModuleEntries<T> =
+export type ModuleEntries<T> =
   Array<readonly [string, Partial<Module<T>>?]>
 
 export type DefaultExportMap<T> = Record<string, T>
