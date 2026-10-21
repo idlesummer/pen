@@ -12,7 +12,7 @@ export function validateComponentExports(modulePaths: string[], routeComponents:
     // nothing to validate, and their names get minified in the published build
     if (path === GLOBAL_DEFAULT || path === GLOBAL_ERROR) continue
 
-    const Content = routeComponents[path]! // Safe - modulePaths is a subset of components's keys
+    const Content = routeComponents[path]
     if (typeof Content !== 'function') {
       diagnostics.push(createDiagnostic({
         rule: 'invalid-component-export',
@@ -40,7 +40,7 @@ export function validateAsyncPages(pageEndpoints: Endpoint<PositionNode>[], rout
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {
-    const Content = routeComponents[endpoint.contentPath]! // Safe - every real page endpoint has a discovered component
+    const Content = routeComponents[endpoint.contentPath]
     if (Content?.constructor.name === 'AsyncFunction' && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push(createDiagnostic({
         rule: 'async-page-missing-loading',
