@@ -13,9 +13,9 @@ export type DefaultComponent = FunctionComponent<DefaultFallbackProps>
 
 /** Maps each route module role to its components by file path. */
 export type ComponentMap = {
-  page:     Record<string, PageComponent | undefined>
-  layout:   Record<string, LayoutComponent | undefined>
+  page:     Record<string, PageComponent    | undefined>
+  layout:   Record<string, LayoutComponent  | undefined>
   loading:  Record<string, LoadingComponent | undefined>
-  error:    Record<string, ErrorComponent | undefined>
+  error:    Record<string, ErrorComponent   | undefined>
   default:  Record<string, DefaultComponent | undefined>
 }
