@@ -5,7 +5,7 @@ export type {
   LoadingComponent,
   ErrorComponent,
   DefaultComponent,
-} from './types/component-map'
+} from './types/components'
 export type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from './types/resolved-match'
 
 export type { PageComponentProps } from './components/PageComponent'

@@ -1,11 +1,11 @@
 import type { FunctionComponent, ReactNode } from 'react'
 import { Suspense } from 'react'
 
-// doesn't accept anything for now
-export type LoadingComponentProps = object
+export type LoadingComponent =
+  FunctionComponent  // doesnt accept anything for now
 
 type LoadingBoundaryProps = {
-  Fallback: FunctionComponent<LoadingComponentProps>
+  Fallback: LoadingComponent
   children: ReactNode
 }
 

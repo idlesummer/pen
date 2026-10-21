@@ -3,24 +3,23 @@ import type { Params } from '@/pen-react/renderer/types/params'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
 
-// ── fallback ─────────────────────────────────────────────────────────────
-
-export type DefaultFallbackProps = {
+type DefaultFallbackProps = {
   params: Params
 }
+
+type DefaultBoundaryProps = PropsWithChildren<{
+  Fallback?: DefaultComponent
+  pathname: string
+  params: Params
+}>
+
+export type DefaultComponent =
+  FunctionComponent<DefaultFallbackProps>
 
 /** Built-in fallback when no root default.tsx is defined. */
 function DefaultFallback({ }: DefaultFallbackProps) { // eslint-disable-line no-empty-pattern
   return <Text>Page Not Found</Text>
 }
-
-// ── boundary ─────────────────────────────────────────────────────────────
-
-type DefaultBoundaryProps = PropsWithChildren<{
-  Fallback?: FunctionComponent<DefaultFallbackProps>
-  pathname: string
-  params: Params
-}>
 
 /** Catches notFound() and renders this position's default component.
  *  Other errors are re-thrown for the nearest error boundary. */
