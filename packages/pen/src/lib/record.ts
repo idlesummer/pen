@@ -11,10 +11,10 @@ export function isEmpty<T>(dict: Record<string, T>): boolean {
   return true
 }
 
-/** Compact maps a record's entries, removing entries mapped to undefined.
+/** Compact maps a record's entries, removing entries whose mapped values are undefined.
  *
  *  @param record - The record to map.
- *  @param mapper - Maps each value and key to a new [key, value] pair, or undefined.
+ *  @param mapper - Maps each value and key to a new [key, value] pair.
  *  @returns A new record built from the mapped entries. */
 export function compactMap<T, U>(record: Record<string, T>, mapper: (value: T, key: string) => readonly [string, U?]): Record<string, U> {
   const result: Record<string, U> = {}
