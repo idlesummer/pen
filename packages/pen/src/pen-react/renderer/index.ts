@@ -1,18 +1,10 @@
 export type { Params } from './types/params'
-export type {
-  PageComponent,
-  LayoutComponent,
-  LoadingComponent,
-  ErrorComponent,
-  DefaultComponent,
-} from './types/components'
+export type { PageComponent } from './components/PageComponent'
+export type { LayoutComponent } from './components/LayoutComponent'
+export type { LoadingComponent } from './components/LoadingBoundary'
+export type { ErrorComponent, ErrorFallbackProps } from './components/ErrorBoundary'
+export type { DefaultComponent } from './components/DefaultBoundary'
 export type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from './types/resolved-match'
-
-export type { PageComponentProps } from './components/PageComponent'
-export type { LayoutComponentProps } from './components/LayoutComponent'
-export type { LoadingComponentProps } from './components/LoadingBoundary'
-export type { ErrorFallbackProps } from './components/ErrorBoundary'
-export type { DefaultFallbackProps } from './components/DefaultBoundary'
 
 export { LoadingBoundary } from './components/LoadingBoundary'
 export { ErrorBoundary } from './components/ErrorBoundary'

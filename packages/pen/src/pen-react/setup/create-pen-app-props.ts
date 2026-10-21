@@ -1,11 +1,9 @@
 import type { Module } from '@/pen-core'
-import type {
-  PageComponent,
-  LayoutComponent,
-  LoadingComponent,
-  ErrorComponent,
-  DefaultComponent,
-} from '@/pen-react/renderer/types/components'
+import type { PageComponent } from '@/pen-react/renderer/components/PageComponent'
+import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComponent'
+import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBoundary'
+import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
+import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
 import { createComponentMap, createResolvedMatcher } from './build-component-map'
