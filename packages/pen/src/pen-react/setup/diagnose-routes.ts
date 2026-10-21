@@ -1,7 +1,6 @@
 import type { Diagnostic } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
-import type { ModuleEntries } from './default-export-map'
-import type { AnyComponent, RoleModuleEntries } from './build-component-map'
+import type { AnyComponent, ModuleEntries, RoleModuleEntries } from './build-component-map'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
