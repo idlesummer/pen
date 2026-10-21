@@ -1,6 +1,6 @@
 import type { Diagnostic, Module } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
-import type { AnyComponent, RoleModuleEntries } from './create-component-map'
+import type { AnyComponent, RoleModules } from './create-component-map'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
@@ -33,17 +33,17 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
  *  filename isn't a recognized module role (a stray non-route .tsx file, say)
  *  are silently dropped - modulePaths (from createRouter) stays the real
  *  source of truth for which paths are actual routes. */
-function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>): RoleModuleEntries {
-  const byRole: RoleModuleEntries = { page: [], layout: [], loading: [], error: [], default: [] }
-  for (const entry of Object.entries(modules)) {
-    const role = getModuleRole(basename(entry[0]))
-    // Each push asserts what the filename check just verified - TS can't see
+function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>): RoleModules {
+  const byRole: RoleModules = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
+  for (const [path, module] of Object.entries(modules)) {
+    const role = getModuleRole(basename(path))
+    // Each assignment asserts what the filename check just verified - TS can't see
     // that connection on its own, since the role is only known at runtime.
-    if (role === 'page') byRole.page.push(entry as RoleModuleEntries['page'][number])
-    else if (role === 'layout') byRole.layout.push(entry as RoleModuleEntries['layout'][number])
-    else if (role === 'loading') byRole.loading.push(entry as RoleModuleEntries['loading'][number])
-    else if (role === 'error') byRole.error.push(entry as RoleModuleEntries['error'][number])
-    else if (role === 'default') byRole.default.push(entry as RoleModuleEntries['default'][number])
+    if (role === 'page') byRole.page[path] = module as RoleModules['page'][string]
+    else if (role === 'layout') byRole.layout[path] = module as RoleModules['layout'][string]
+    else if (role === 'loading') byRole.loading[path] = module as RoleModules['loading'][string]
+    else if (role === 'error') byRole.error[path] = module as RoleModules['error'][string]
+    else if (role === 'default') byRole.default[path] = module as RoleModules['default'][string]
   }
   return byRole
 }

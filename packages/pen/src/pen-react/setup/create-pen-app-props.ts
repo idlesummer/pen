@@ -22,13 +22,7 @@ type AppModules = {
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
 export function createPenAppProps(modules: AppModules): PenAppProps {
-  const { componentMap, allPaths } = createComponentMap({
-    page: Object.entries(modules.page),
-    layout: Object.entries(modules.layout),
-    loading: Object.entries(modules.loading),
-    error: Object.entries(modules.error),
-    default: Object.entries(modules.default),
-  })
+  const { componentMap, allPaths } = createComponentMap(modules)
   const { matcher } = createRouter(allPaths)
   const resolvedMatcher = createResolvedMatcher(matcher, componentMap)
   return { resolvedMatcher }
