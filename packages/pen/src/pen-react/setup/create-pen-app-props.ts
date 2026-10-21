@@ -6,7 +6,7 @@ import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBounda
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
-import { createComponentMap, createResolvedMatcher } from './build-component-map'
+import { createComponentMap, createResolvedMatcher } from './create-component-map'
 
 type AppModules = {
   page:     Record<string, Module<PageComponent>>
