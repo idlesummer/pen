@@ -4,25 +4,24 @@ import { Text } from 'ink'
 import { normalizeError } from '@/lib/normalize-error'
 import { DefaultSignal } from './DefaultBoundary'
 
-// ── fallback ─────────────────────────────────────────────────────────────
-
 /** Props passed to an error component. */
-export type ErrorFallbackProps = {
+type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
+
+export type ErrorComponent =
+  FunctionComponent<ErrorFallbackProps>
+
+type ErrorBoundaryProps = PropsWithChildren<{
+  Fallback?: ErrorComponent
+  pathname: string
+}>
 
 /** Built-in fallback rendered when an app defines no root `error.tsx`. */
 function ErrorFallback({ error }: ErrorFallbackProps) {
   return <Text>Something went wrong: {`${error.message}\n\n${error.stack}`}</Text>
 }
-
-// ── boundary ─────────────────────────────────────────────────────────────
-
-type ErrorBoundaryProps = PropsWithChildren<{
-  Fallback?: FunctionComponent<ErrorFallbackProps>
-  pathname: string
-}>
 
 /** Catches render errors and renders the route's `error` module. */
 export function ErrorBoundary({ Fallback=ErrorFallback, pathname, children }: ErrorBoundaryProps) {

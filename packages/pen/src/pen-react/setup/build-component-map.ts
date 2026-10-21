@@ -1,5 +1,5 @@
 import type { Module, Match, Matcher, Frame, Endpoint, PositionNode } from '@/pen-core'
-import type { PageComponent, LayoutComponent, LoadingComponent, ErrorComponent, DefaultComponent } from '@/pen-react/renderer/types/component-map'
+import type { PageComponent, LayoutComponent, LoadingComponent, ErrorComponent, DefaultComponent } from '@/pen-react/renderer/types/components'
 import type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from '@/pen-react/renderer/types/resolved-match'
 
 export type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>>?]>

@@ -1,5 +1,9 @@
 import type { ParamEntries } from '@/pen-core'
-import type { PageComponent, LayoutComponent, LoadingComponent, ErrorComponent, DefaultComponent } from './component-map'
+import type { PageComponent } from '@/pen-react/renderer/components/PageComponent'
+import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
+import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComponent'
+import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBoundary'
+import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
 
 /** A frame with every path reference already resolved to a component. */
 export type ResolvedFrame = {

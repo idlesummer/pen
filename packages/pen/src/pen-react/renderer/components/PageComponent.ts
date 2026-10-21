@@ -1,6 +1,10 @@
 import type { Params } from '@/pen-react/renderer/types/params'
+import type { FunctionComponent } from 'react'
 
-/** Props passed to a page component. */
-export type PageComponentProps = {
+type PageComponentProps = {
   params: Params
 }
+
+export type PageComponent =
+  FunctionComponent<PageComponentProps>
+

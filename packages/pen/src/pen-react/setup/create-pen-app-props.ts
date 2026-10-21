@@ -5,7 +5,7 @@ import type {
   LoadingComponent,
   ErrorComponent,
   DefaultComponent,
-} from '@/pen-react/renderer/types/component-map'
+} from '@/pen-react/renderer/types/components'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
 import { createComponentMap, createResolvedMatcher } from './build-component-map'
