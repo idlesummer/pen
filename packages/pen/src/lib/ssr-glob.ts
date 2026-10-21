@@ -22,7 +22,8 @@ export async function ssrGlob<T>(projectDir: string, routesDir: string, server?:
   })
   try {
     const paths = globSync('**/*.tsx', { cwd: join(projectDir, routesDir) }).map(normalizePath).sort()
-    const entries = await Promise.all(paths.map(async path => [path, await activeServer.ssrLoadModule(`/${routesDir}/${path}`)] as [string, T]))
+    const modules = paths.map(async path => [path, await activeServer.ssrLoadModule(`/${routesDir}/${path}`)] as [string, T])
+    const entries = await Promise.all(modules)
     return Object.fromEntries(entries)
   }
   finally {
