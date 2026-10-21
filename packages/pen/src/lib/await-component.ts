@@ -1,5 +1,8 @@
-import type { ReactNode } from 'react'
+import type { FunctionComponent, ReactNode } from 'react'
 import { use } from 'react'
+
+export type AsyncFunctionComponent<C extends FunctionComponent<never>> =
+  (props: Parameters<C>[0]) => Promise<Awaited<ReturnType<C>>>
 
 type AwaitComponentProps = {
   resolve: Promise<ReactNode>
@@ -21,6 +24,6 @@ export function AwaitComponent({ resolve }: AwaitComponentProps) {
  *
  *  @param Content - The component function to check.
  *  @returns Whether the component is declared with `async`. */
-export function isAsyncComponent<T extends (...args: never[]) => unknown>(Content: T): Content is ((...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>) & T {
+export function isAsyncComponent<T extends FunctionComponent<never>>(Content: T): Content is AsyncFunctionComponent<T> & T {
   return Content.constructor.name === 'AsyncFunction'
 }
