@@ -5,7 +5,7 @@ import { normalizeError } from '@/lib/normalize-error'
 import { DefaultSignal } from './DefaultBoundary'
 
 /** Props passed to an error component. */
-type ErrorFallbackProps = {
+export type ErrorFallbackProps = {
   error: Error
   reset: () => void
 }
