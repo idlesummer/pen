@@ -8,7 +8,7 @@ import type {
 } from '@/pen-react/renderer/types/component-map'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
-import { createComponentMap } from './build-component-map'
+import { createComponentMap, createResolvedMatcher } from './build-component-map'
 
 type AppModules = {
   page:     Record<string, Module<PageComponent>>
@@ -18,13 +18,9 @@ type AppModules = {
   default:  Record<string, Module<DefaultComponent>>
 }
 
-/** Resolves each role's glob'd modules into its own component map and
- *  builds the matcher from the same paths. Modules are expected to have
- *  been validated by `buildApp`.
- *
- *  A component map can carry entries createRouter didn't resolve into a
- *  route (an orphaned file, say) - harmless, since render.tsx only ever
- *  looks up paths that came from the same compiled tree the matcher did.
+/** Resolves each role's glob'd modules into a resolved matcher - a function
+ *  straight from pathname to a renderable match. Modules are expected to
+ *  have been validated by `buildApp`.
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
 export function createPenAppProps(modules: AppModules): PenAppProps {
@@ -36,5 +32,6 @@ export function createPenAppProps(modules: AppModules): PenAppProps {
     default: Object.entries(modules.default),
   })
   const { matcher } = createRouter(allPaths)
-  return { matcher, componentMap }
+  const resolvedMatcher = createResolvedMatcher(matcher, componentMap)
+  return { resolvedMatcher }
 }

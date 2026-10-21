@@ -5,8 +5,8 @@ export type {
   LoadingComponent,
   ErrorComponent,
   DefaultComponent,
-  ComponentMap,
 } from './types/component-map'
+export type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from './types/resolved-match'
 
 export type { PageComponentProps } from './components/PageComponent'
 export type { LayoutComponentProps } from './components/LayoutComponent'
