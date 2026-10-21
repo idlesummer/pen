@@ -6,16 +6,15 @@ import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBounda
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from '@/pen-react/renderer/types/resolved-match'
 
-export type ModuleEntries<T> = Array<readonly [string, Partial<Module<T>>?]>
 type DefaultExportMap<T> = Record<string, T>
 
-/** Each role's glob'd module entries, keyed by role. */
-export type RoleModuleEntries = {
-  page: ModuleEntries<PageComponent>
-  layout: ModuleEntries<LayoutComponent>
-  loading: ModuleEntries<LoadingComponent>
-  error: ModuleEntries<ErrorComponent>
-  default: ModuleEntries<DefaultComponent>
+/** Each role's glob'd modules, keyed by path. */
+export type RoleModules = {
+  page: Record<string, Partial<Module<PageComponent>>>
+  layout: Record<string, Partial<Module<LayoutComponent>>>
+  loading: Record<string, Partial<Module<LoadingComponent>>>
+  error: Record<string, Partial<Module<ErrorComponent>>>
+  default: Record<string, Partial<Module<DefaultComponent>>>
 }
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
@@ -42,11 +41,11 @@ export type BuiltComponentMap = {
 }
 
 /** Maps module paths to their default exports, skipping missing exports.
- *  @param entries - Module entries keyed by path.
+ *  @param modules - Modules keyed by path.
  *  @returns Default exports keyed by module path. */
-function createDefaultExportMap<T>(modules: ModuleEntries<T>): DefaultExportMap<T> {
+function createDefaultExportMap<T>(modules: Record<string, Partial<Module<T>>>): DefaultExportMap<T> {
   const moduleExports: DefaultExportMap<T> = {}
-  for (const [path, module] of modules) {
+  for (const [path, module] of Object.entries(modules)) {
     const component = module?.default
     if (component)
       moduleExports[path.replace(/^\.\//, '')] = component
@@ -54,12 +53,12 @@ function createDefaultExportMap<T>(modules: ModuleEntries<T>): DefaultExportMap<
   return moduleExports
 }
 
-/** Resolves a role-separated set of glob'd module entries into one component map,
+/** Resolves a role-separated set of glob'd modules into one component map,
  *  shared by both the production app-building path and the dev-time diagnostics path.
  *
- *  @param modules - Each role's glob'd module entries, keyed by role.
+ *  @param modules - Each role's glob'd modules, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
-export function createComponentMap(modules: RoleModuleEntries): BuiltComponentMap {
+export function createComponentMap(modules: RoleModules): BuiltComponentMap {
   const page = createDefaultExportMap(modules.page)
   const layout = createDefaultExportMap(modules.layout)
   const loading = createDefaultExportMap(modules.loading)
