@@ -16,12 +16,12 @@ export function isEmpty<T>(dict: Record<string, T>): boolean {
  *  @param record - The record to map.
  *  @param mapper - Maps each value and key to a new [key, value] pair, or undefined.
  *  @returns A new record built from the mapped entries. */
-export function compactMap<T, U>(record: Record<string, T>, mapper: (value: T, key: string) => readonly [string, U] | undefined): Record<string, U> {
+export function compactMap<T, U>(record: Record<string, T>, mapper: (value: T, key: string) => readonly [string, U?]): Record<string, U> {
   const result: Record<string, U> = {}
   for (const [key, value] of Object.entries(record)) {
-    const entry = mapper(value, key)
-    if (entry !== undefined)
-      result[entry[0]] = entry[1]
+    const [newKey, newValue] = mapper(value, key)
+    if (newValue !== undefined)
+      result[newKey] = newValue
   }
   return result
 }
