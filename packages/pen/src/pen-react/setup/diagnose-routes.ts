@@ -1,6 +1,6 @@
-import type { Diagnostic } from '@/pen-core'
+import type { Diagnostic, Module } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
-import type { AnyComponent, ModuleEntries, RoleModuleEntries } from './build-component-map'
+import type { AnyComponent, RoleModuleEntries } from './build-component-map'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
@@ -33,9 +33,9 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
  *  filename isn't a recognized module role (a stray non-route .tsx file, say)
  *  are silently dropped - modulePaths (from createRouter) stays the real
  *  source of truth for which paths are actual routes. */
-function classifyByRole(entries: ModuleEntries<AnyComponent>): RoleModuleEntries {
+function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>): RoleModuleEntries {
   const byRole: RoleModuleEntries = { page: [], layout: [], loading: [], error: [], default: [] }
-  for (const entry of entries) {
+  for (const entry of Object.entries(modules)) {
     const role = getModuleRole(basename(entry[0]))
     // Each push asserts what the filename check just verified - TS can't see
     // that connection on its own, since the role is only known at runtime.
@@ -60,8 +60,8 @@ function classifyByRole(entries: ModuleEntries<AnyComponent>): RoleModuleEntries
  */
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
   // Load modules, classify by role, and build the component map
-  const moduleEntries = await ssrGlob<Partial<{ default: AnyComponent }>>(projectDir, routesDir, server)
-  const { componentMap, allComponents, allPaths } = buildComponentMap(classifyByRole(moduleEntries))
+  const modules = await ssrGlob<Partial<Module<AnyComponent>>>(projectDir, routesDir, server)
+  const { componentMap, allComponents, allPaths } = buildComponentMap(classifyByRole(modules))
 
   // Create router and collect diagnostics
   const { modulePaths, pageEndpoints, diagnostics } = createRouter(allPaths)

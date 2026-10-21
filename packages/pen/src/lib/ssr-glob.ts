@@ -11,9 +11,9 @@ import { createServer, normalizePath } from 'vite'
  * @param server - An existing dev server to reuse, if one is already
  *  running. Otherwise a throwaway one is created and closed for this call
  *  alone - the only option when there's no dev server, as during `pen build`.
- * @returns Sorted route file paths paired with their imported module values.
+ * @returns Imported module values keyed by their sorted route file paths.
  */
-export async function ssrGlob<T>(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<Array<[string, T]>> {
+export async function ssrGlob<T>(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<Record<string, T>> {
   const activeServer = server ?? await createServer({
     root: projectDir,
     configFile: false,
@@ -22,8 +22,8 @@ export async function ssrGlob<T>(projectDir: string, routesDir: string, server?:
   })
   try {
     const paths = globSync('**/*.tsx', { cwd: join(projectDir, routesDir) }).map(normalizePath).sort()
-    const modules = paths.map(async path => [path, await activeServer.ssrLoadModule(`/${routesDir}/${path}`)] as [string, T])
-    return await Promise.all(modules)
+    const entries = await Promise.all(paths.map(async path => [path, await activeServer.ssrLoadModule(`/${routesDir}/${path}`)] as [string, T]))
+    return Object.fromEntries(entries)
   }
   finally {
     if (!server)
