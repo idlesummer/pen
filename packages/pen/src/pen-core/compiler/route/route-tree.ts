@@ -22,7 +22,7 @@ export type RouteNode = {
 }
 
 /** The role a module path or a sentinel belongs to. */
-function getModuleRole(fileName: string): ModuleRole {
+export function getModuleRole(fileName: string): ModuleRole {
   if (fileName === GLOBAL_DEFAULT) return 'default'
   if (fileName === GLOBAL_ERROR) return 'error'
   return basename(fileName, '.tsx') as ModuleRole

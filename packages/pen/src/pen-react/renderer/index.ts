@@ -1,5 +1,4 @@
 export type { Params } from './types/params'
-export type { RouteComponent } from './types/route-component'
 export type {
   PageComponent,
   LayoutComponent,

@@ -1,15 +1,13 @@
-import type { Diagnostic, Module } from '@/pen-core'
+import type { Diagnostic } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
-import type { RouteComponent } from '../renderer/types/route-component'
+import type { ModuleEntries } from './default-export-map'
+import type { AnyComponent, RoleModuleEntries } from './build-component-map'
+import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { createRouter, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { createDefaultExportMap } from './default-export-map'
+import { createRouter, getModuleRole, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
+import { buildComponentMap } from './build-component-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
-
-/** The shape of a route module file. */
-type RouteModule = Module<RouteComponent>
 
 /** The result of compiling and validating the app's routes. */
 type RouteDiagnosis = {
@@ -31,6 +29,26 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
   return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${routesDir}/${file}`)].join('\n')
 }
 
+/** Splits a flat glob scan into the same role-separated shape the production
+ *  path already gets for free from Vite's per-role globs. Entries whose
+ *  filename isn't a recognized module role (a stray non-route .tsx file, say)
+ *  are silently dropped - modulePaths (from createRouter) stays the real
+ *  source of truth for which paths are actual routes. */
+function classifyByRole(entries: ModuleEntries<AnyComponent>): RoleModuleEntries {
+  const byRole: RoleModuleEntries = { page: [], layout: [], loading: [], error: [], default: [] }
+  for (const entry of entries) {
+    const role = getModuleRole(basename(entry[0]))
+    // Each push asserts what the filename check just verified - TS can't see
+    // that connection on its own, since the role is only known at runtime.
+    if (role === 'page') byRole.page.push(entry as RoleModuleEntries['page'][number])
+    else if (role === 'layout') byRole.layout.push(entry as RoleModuleEntries['layout'][number])
+    else if (role === 'loading') byRole.loading.push(entry as RoleModuleEntries['loading'][number])
+    else if (role === 'error') byRole.error.push(entry as RoleModuleEntries['error'][number])
+    else if (role === 'default') byRole.default.push(entry as RoleModuleEntries['default'][number])
+  }
+  return byRole
+}
+
 /**
  * Scans the app directory for route modules and collects diagnostics from
  * route compilation and validation. Shared by `pen build` (once per build)
@@ -42,17 +60,16 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
  * @returns Diagnostics produced while compiling and validating the routes.
  */
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
-  // Load modules and create component map
-  const moduleEntries = await ssrGlob<Partial<RouteModule>>(projectDir, routesDir, server)
-  const routeComponents = createDefaultExportMap<RouteComponent>(moduleEntries)
+  // Load modules, classify by role, and build the component map
+  const moduleEntries = await ssrGlob<Partial<{ default: AnyComponent }>>(projectDir, routesDir, server)
+  const { componentMap, allComponents, allPaths } = buildComponentMap(classifyByRole(moduleEntries))
 
   // Create router and collect diagnostics
-  const filePaths = moduleEntries.map(entry => entry[0])
-  const { modulePaths, pageEndpoints, diagnostics } = createRouter(filePaths)
+  const { modulePaths, pageEndpoints, diagnostics } = createRouter(allPaths)
 
   // Collect additional runtime diagnostics
-  diagnostics.push(...validateComponentExports(modulePaths, routeComponents))
-  diagnostics.push(...validateAsyncPages(pageEndpoints, routeComponents))
+  diagnostics.push(...validateComponentExports(modulePaths, allComponents))
+  diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
   return { diagnostics, modulePaths }
 }
 
