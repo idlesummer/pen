@@ -1,21 +1,15 @@
-import type { FunctionComponent } from 'react'
 import type { Module } from '@/pen-core'
-import type { ComponentMap } from '../renderer/types/component-map'
-import type { DefaultFallbackProps } from '../renderer/components/DefaultBoundary'
-import type { ErrorFallbackProps } from '../renderer/components/ErrorBoundary'
-import type { LayoutComponentProps } from '../renderer/components/LayoutComponent'
-import type { LoadingComponentProps } from '../renderer/components/LoadingBoundary'
-import type { PageComponentProps } from '../renderer/components/PageComponent'
+import type { ComponentMap, PageComponent, LayoutComponent, LoadingComponent, ErrorComponent, DefaultComponent } from '../renderer/types/component-map'
 import type { PenAppProps } from '../renderer/App'
 import { createRouter } from '@/pen-core'
 import { createDefaultExportMap } from './default-export-map'
 
 type AppModules = {
-  page: Record<string, Module<FunctionComponent<PageComponentProps>>>
-  layout: Record<string, Module<FunctionComponent<LayoutComponentProps>>>
-  loading: Record<string, Module<FunctionComponent<LoadingComponentProps>>>
-  error: Record<string, Module<FunctionComponent<ErrorFallbackProps>>>
-  default: Record<string, Module<FunctionComponent<DefaultFallbackProps>>>
+  page: Record<string, Module<PageComponent>>
+  layout: Record<string, Module<LayoutComponent>>
+  loading: Record<string, Module<LoadingComponent>>
+  error: Record<string, Module<ErrorComponent>>
+  default: Record<string, Module<DefaultComponent>>
 }
 
 /** Resolves each role's glob'd modules into its own component map and
