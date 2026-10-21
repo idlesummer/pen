@@ -20,7 +20,8 @@ export function createDefaultExportMap<T>(modules: ModuleEntries<T>): DefaultExp
   const moduleExports: DefaultExportMap<T> = {}
   for (const [path, module] of modules) {
     const component = module?.default
-    if (component) moduleExports[path.replace(/^\.\//, '')] = component
+    if (component)
+      moduleExports[path.replace(/^\.\//, '')] = component
   }
   return moduleExports
 }
