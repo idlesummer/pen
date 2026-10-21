@@ -64,6 +64,12 @@ export function buildComponentMap(modules: RoleModuleEntries): BuiltComponentMap
   return {
     componentMap: { page, layout, loading, error, default: default_ },
     allComponents: { ...page, ...layout, ...loading, ...error, ...default_ },
-    allPaths: [...Object.keys(page), ...Object.keys(layout), ...Object.keys(loading), ...Object.keys(error), ...Object.keys(default_)],
+    allPaths: [
+      ...Object.keys(page),
+      ...Object.keys(layout),
+      ...Object.keys(loading),
+      ...Object.keys(error),
+      ...Object.keys(default_),
+    ],
   }
 }
