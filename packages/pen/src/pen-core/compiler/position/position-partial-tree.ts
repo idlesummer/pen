@@ -1,7 +1,7 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { Claims } from './position-claims'
 import type { Ownership } from './position-ownership'
-import { dict } from '@/lib/dict'
+import { dict } from '@/lib/record'
 import { traverse } from '@/lib/traverse'
 import { isUrlConsuming, isDynamicOrCatchall } from '@/pen-core/compiler/route'
 import { createClaims, addClaims } from './position-claims'
