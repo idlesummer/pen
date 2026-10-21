@@ -7,7 +7,7 @@ import { DefaultBoundary } from './components/DefaultBoundary'
 import { LoadingBoundary } from './components/LoadingBoundary'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-type SlotElements = Record<string, ReactNode>
+type ReactNodeMap = Record<string, ReactNode>
 
 /** Returns params up to the given depth as an object. */
 function sliceParams(params: ParamEntries, depth: number): Params {
@@ -15,16 +15,16 @@ function sliceParams(params: ParamEntries, depth: number): Params {
 }
 
 /** Picks out the rendered elements for the slots a frame declares. */
-function getSlotProps(slotNames: string[], slotElements: SlotElements): SlotElements {
-  const slotProps: SlotElements = {}
+function getSlotProps(slotNames: string[], slotComponents: ReactNodeMap): ReactNodeMap {
+  const slotProps: ReactNodeMap = {}
   for (const name of slotNames)
-    slotProps[name] = slotElements[name]
+    slotProps[name] = slotComponents[name]
   return slotProps
 }
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(frame: ResolvedFrame, content: ReactNode, params: ParamEntries, slotElements: SlotElements, pathname: string): ReactNode {
+function wrapFrame(frame: ResolvedFrame, content: ReactNode, params: ParamEntries, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   const paramTable = sliceParams(params, frame.paramCount)
 
   if (frame.default) {
@@ -38,14 +38,14 @@ function wrapFrame(frame: ResolvedFrame, content: ReactNode, params: ParamEntrie
   }
   if (frame.layout) {
     const Layout = frame.layout
-    const slotProps = frame.slots ? getSlotProps(frame.slots, slotElements) : {}
+    const slotProps = frame.slots ? getSlotProps(frame.slots, slotComponents) : {}
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
   return content
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(match: ResolvedMatch, slotElements: SlotElements, pathname: string): ReactNode {
+function renderChain(match: ResolvedMatch, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   const { endpoint, params } = match
   const Content = endpoint.content
   const contentProps = { params: sliceParams(params, endpoint.paramCount) }
@@ -55,7 +55,7 @@ function renderChain(match: ResolvedMatch, slotElements: SlotElements, pathname:
     : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
-    (element, frame) => wrapFrame(frame, element, params, slotElements, pathname),
+    (element, frame) => wrapFrame(frame, element, params, slotComponents, pathname),
     contentElement,
   )
 }
@@ -63,9 +63,9 @@ function renderChain(match: ResolvedMatch, slotElements: SlotElements, pathname:
 /** Turns a resolved route match into a React element tree, rendering its
  *  slots first and wrapping the main match with its own frame chain. */
 export function createRouteElement(mainMatch: ResolvedMatch, pathname: string): ReactNode {
-  const slotElements: SlotElements = {}
+  const slotComponents: ReactNodeMap = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotElements[slotName] = renderChain(slotMatch, {}, pathname)
-  return renderChain(mainMatch, slotElements, pathname)
+    slotComponents[slotName] = renderChain(slotMatch, {}, pathname)
+  return renderChain(mainMatch, slotComponents, pathname)
 }
