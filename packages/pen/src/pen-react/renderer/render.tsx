@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import type { Frame, Match, ParamEntries, PositionNode } from '@/pen-core'
-import type { ComponentMap } from './types/component-map'
+import type { ParamEntries } from '@/pen-core'
+import type { ResolvedFrame, ResolvedMatch } from './types/resolved-match'
 import type { Params } from './types/params'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from './components/DefaultBoundary'
@@ -14,69 +14,58 @@ function sliceParams(params: ParamEntries, depth: number): Params {
   return Object.fromEntries(params.slice(0, depth))
 }
 
-/** Returns the rendered elements for the slots declared by a frame. */
-function getSlotProps(slots: Frame<PositionNode>['slots'], slotElements: SlotElements): SlotElements {
+/** Picks out the rendered elements for the slots a frame declares. */
+function getSlotProps(slotNames: string[], slotElements: SlotElements): SlotElements {
   const slotProps: SlotElements = {}
-  for (const name in slots)
+  for (const name of slotNames)
     slotProps[name] = slotElements[name]
   return slotProps
 }
 
-/** Wraps content with a frame's boundaries, layout, and slots. The assertions are
- *  safe because frames and components come from the same createRouter() call. A
- *  missing component indicates a compiler bug. */
-function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: ParamEntries, slotElements: SlotElements, pathname: string, components: ComponentMap): ReactNode {
+/** Wraps content with a frame's boundaries, layout, and slots. Every
+ *  component is already resolved, so this is pure React tree assembly. */
+function wrapFrame(frame: ResolvedFrame, content: ReactNode, params: ParamEntries, slotElements: SlotElements, pathname: string): ReactNode {
   const paramTable = sliceParams(params, frame.paramCount)
 
   if (frame.default) {
-    const Fallback = components.default[frame.default]!
-    content = <DefaultBoundary Fallback={Fallback} pathname={pathname} params={paramTable}>{content}</DefaultBoundary>
+    content = <DefaultBoundary Fallback={frame.default} pathname={pathname} params={paramTable}>{content}</DefaultBoundary>
   }
   if (frame.loading) {
-    const Fallback = components.loading[frame.loading]!
-    content = <LoadingBoundary Fallback={Fallback}>{content}</LoadingBoundary>
+    content = <LoadingBoundary Fallback={frame.loading}>{content}</LoadingBoundary>
   }
   if (frame.error) {
-    const Fallback = components.error[frame.error]!
-    content = <ErrorBoundary Fallback={Fallback} pathname={pathname}>{content}</ErrorBoundary>
+    content = <ErrorBoundary Fallback={frame.error} pathname={pathname}>{content}</ErrorBoundary>
   }
   if (frame.layout) {
-    const Layout = components.layout[frame.layout]!
+    const Layout = frame.layout
     const slotProps = frame.slots ? getSlotProps(frame.slots, slotElements) : {}
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
   return content
 }
 
-/** Wraps endpoint content with its frame chain, from inner to outer. Component
- *  and frame assertions are safe for the same reason as in wrapFrame. Async
- *  pages are guaranteed to have a loading boundary by validation. */
-function renderChain(match: Match, slotElements: SlotElements, pathname: string, components: ComponentMap): ReactNode {
+/** Wraps endpoint content with its frame chain, from inner to outer. */
+function renderChain(match: ResolvedMatch, slotElements: SlotElements, pathname: string): ReactNode {
   const { endpoint, params } = match
-  const Content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
-  const contentProps = { params: sliceParams(match.params, endpoint.paramCount) }
+  const Content = endpoint.content
+  const contentProps = { params: sliceParams(params, endpoint.paramCount) }
 
   const contentElement = Content.constructor.name === 'AsyncFunction'
     ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
     : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
-    (element, frame) => wrapFrame(frame, element, params, slotElements, pathname, components),
+    (element, frame) => wrapFrame(frame, element, params, slotElements, pathname),
     contentElement,
   )
 }
 
-/** Turns a router `Match` into a React element tree by rendering its slots
- *  and wrapping the main match with its frame chain.
- *
- *  @param mainMatch - The resolved route match to render.
- *  @param pathname - The path the match was produced from
- *  @param components - The component map used to resolve route modules.
- *  @returns The rendered React element tree. */
-export function createRouteElement(mainMatch: Match, pathname: string, components: ComponentMap): ReactNode {
+/** Turns a resolved route match into a React element tree, rendering its
+ *  slots first and wrapping the main match with its own frame chain. */
+export function createRouteElement(mainMatch: ResolvedMatch, pathname: string): ReactNode {
   const slotElements: SlotElements = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotElements[slotName] = renderChain(slotMatch, {}, pathname, components)
-  return renderChain(mainMatch, slotElements, pathname, components)
+    slotElements[slotName] = renderChain(slotMatch, {}, pathname)
+  return renderChain(mainMatch, slotElements, pathname)
 }

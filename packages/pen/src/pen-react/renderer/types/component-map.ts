@@ -10,12 +10,3 @@ export type LayoutComponent = FunctionComponent<LayoutComponentProps>
 export type LoadingComponent = FunctionComponent<LoadingComponentProps>
 export type ErrorComponent = FunctionComponent<ErrorFallbackProps>
 export type DefaultComponent = FunctionComponent<DefaultFallbackProps>
-
-/** Maps each route module role to its components by file path. */
-export type ComponentMap = {
-  page:     Record<string, PageComponent>
-  layout:   Record<string, LayoutComponent>
-  loading:  Record<string, LoadingComponent>
-  error:    Record<string, ErrorComponent>
-  default:  Record<string, DefaultComponent>
-}
