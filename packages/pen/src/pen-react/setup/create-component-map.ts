@@ -6,8 +6,6 @@ import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBounda
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from '@/pen-react/renderer/types/resolved-match'
 
-type DefaultExportMap<T> = Record<string, T>
-
 /** Each role's glob'd modules, keyed by path. */
 export type RoleModules = {
   page: Record<string, Partial<Module<PageComponent>>>
@@ -44,8 +42,8 @@ export type BuiltComponentMap = {
 /** Maps module paths to their default exports, skipping missing exports.
  *  @param modules - Modules keyed by path.
  *  @returns Default exports keyed by module path. */
-function createDefaultExportMap<T>(modules: Record<string, Partial<Module<T>>>): DefaultExportMap<T> {
-  const moduleExports: DefaultExportMap<T> = {}
+function createDefaultExportMap<T>(modules: Record<string, Partial<Module<T>>>): Record<string, T> {
+  const moduleExports: Record<string, T> = {}
   for (const [path, module] of Object.entries(modules)) {
     const component = module?.default
     if (component)
