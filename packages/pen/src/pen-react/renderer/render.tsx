@@ -57,7 +57,7 @@ function renderChain(match: Match, slotElements: SlotElements, pathname: string,
   const contentProps = { params: sliceParams(match.params, endpoint.paramCount) }
 
   const contentElement = Content.constructor.name === 'AsyncFunction'
-    ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} /> // every async page should have a loading boundary
+    ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
     : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
