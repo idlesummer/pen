@@ -43,7 +43,7 @@ function createDefaultExportMap<T>(modules: ModuleEntries<T>): DefaultExportMap<
  *
  *  @param modules - Each role's glob'd module entries, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
-export function buildComponentMap(modules: RoleModuleEntries): BuiltComponentMap {
+export function createComponentMap(modules: RoleModuleEntries): BuiltComponentMap {
   const page = createDefaultExportMap(modules.page)
   const layout = createDefaultExportMap(modules.layout)
   const loading = createDefaultExportMap(modules.loading)
