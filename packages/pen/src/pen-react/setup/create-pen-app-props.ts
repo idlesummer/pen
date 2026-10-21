@@ -6,7 +6,7 @@ import { createComponentMap, createResolvedMatcher } from './create-component-ma
 
 /** Strips the leading './' Vite's import.meta.glob puts on every key. */
 function normalizeGlobPaths<T>(modules: Record<string, T>): Record<string, T> {
-  return compactMapRecord(modules, (module, path) => [path.replace(/^\.\//, ''), module])
+  return compactMapRecord(modules, (path, module) => [path.replace(/^\.\//, ''), module])
 }
 
 /** Resolves each role's glob'd modules into a resolved matcher - a function
