@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { Frame, Match, ParamEntries, PositionNode } from '@/pen-core'
 import type { ComponentMap } from './types/component-map'
 import type { Params } from './types/params'
-import { AwaitComponent, isAsyncComponent } from '@/lib/await-component'
+import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from './components/DefaultBoundary'
 import { LoadingBoundary } from './components/LoadingBoundary'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -54,11 +54,11 @@ function wrapFrame(frame: Frame<PositionNode>, content: ReactNode, params: Param
 function renderChain(match: Match, slotElements: SlotElements, pathname: string, components: ComponentMap): ReactNode {
   const { endpoint, params } = match
   const Content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
-  const contentParams = sliceParams(params, endpoint.paramCount)
+  const contentProps = { params: sliceParams(match.params, endpoint.paramCount) }
 
-  const contentElement: ReactNode = isAsyncComponent(Content)
-    ? <AwaitComponent resolve={Content({ params: contentParams })} /> // every async page should have a loading boundary
-    : <Content params={contentParams} />
+  const contentElement = Content.constructor.name === 'AsyncFunction'
+    ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} /> // every async page should have a loading boundary
+    : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
     (element, frame) => wrapFrame(frame, element, params, slotElements, pathname, components),
