@@ -8,7 +8,7 @@ import type {
 } from '@/pen-react/renderer/types/component-map'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { createRouter } from '@/pen-core'
-import { buildComponentMap } from './build-component-map'
+import { createComponentMap } from './build-component-map'
 
 type AppModules = {
   page:     Record<string, Module<PageComponent>>
@@ -28,7 +28,7 @@ type AppModules = {
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
 export function createPenAppProps(modules: AppModules): PenAppProps {
-  const { componentMap, allPaths } = buildComponentMap({
+  const { componentMap, allPaths } = createComponentMap({
     page: Object.entries(modules.page),
     layout: Object.entries(modules.layout),
     loading: Object.entries(modules.loading),
