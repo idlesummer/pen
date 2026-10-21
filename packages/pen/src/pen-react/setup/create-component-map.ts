@@ -19,7 +19,8 @@ export type RoleModuleEntries = {
 }
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
-export type AnyComponent = PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
+export type AnyComponent =
+  PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
 
 /** Maps each route module role to its components by file path. Internal to
  *  setup - the renderer never sees path strings or this map, only the
