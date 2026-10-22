@@ -4,7 +4,7 @@ export type { LayoutComponent } from './components/LayoutComponent'
 export type { LoadingComponent } from './components/LoadingBoundary'
 export type { ErrorComponent, ErrorFallbackProps } from './components/ErrorBoundary'
 export type { DefaultComponent } from './components/DefaultBoundary'
-export type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from './types/matcher'
+export type { ComponentFrame, ComponentEndpoint, ComponentMatch, ComponentMatcher } from './types/matcher'
 
 export { LoadingBoundary } from './components/LoadingBoundary'
 export { ErrorBoundary } from './components/ErrorBoundary'

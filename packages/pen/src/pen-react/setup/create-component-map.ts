@@ -6,13 +6,13 @@ import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBounda
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { ComponentFrame, ComponentEndpoint, ComponentMatch, ComponentMatcher } from '@/pen-react/renderer/types/matcher'
 
-/** Each role's glob'd modules, keyed by path. */
-export type RoleModules = {
-  page: Record<string, Partial<Module<PageComponent>>>
-  layout: Record<string, Partial<Module<LayoutComponent>>>
-  loading: Record<string, Partial<Module<LoadingComponent>>>
-  error: Record<string, Partial<Module<ErrorComponent>>>
-  default: Record<string, Partial<Module<DefaultComponent>>>
+/** Each role's raw glob'd entries, keyed by path - not yet confirmed to be valid modules. */
+export type ModuleRegistry = {
+  page: Record<string, unknown>
+  layout: Record<string, unknown>
+  loading: Record<string, unknown>
+  error: Record<string, unknown>
+  default: Record<string, unknown>
 }
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
@@ -39,30 +39,36 @@ export type BuiltComponentMap = {
   allPaths: string[]
 }
 
-/** Maps module paths to their default exports, skipping missing exports.
- *  @param modules - Modules keyed by path.
- *  @returns Default exports keyed by module path. */
-function createDefaultExportMap<T>(modules: Record<string, Partial<Module<T>>>): Record<string, T> {
-  const moduleExports: Record<string, T> = {}
-  for (const [path, module] of Object.entries(modules)) {
-    const component = module?.default
-    if (component)
-      moduleExports[path.replace(/^\.\//, '')] = component
-  }
-  return moduleExports
+/** Checks that a glob'd registry entry really is a module with a component default export. */
+function isModule(value: unknown): value is Module<AnyComponent> {
+  return typeof value === 'object' && value !== null
+    && typeof (value as Partial<Module<AnyComponent>>).default === 'function'
 }
 
-/** Resolves a role-separated set of glob'd modules into one component map,
+/** Resolves one role's registry entries into real components, keyed by path.
+ *  Drops any entry that doesn't pass the module guard.
+ *  @param registry - Raw, unconfirmed registry entries keyed by path.
+ *  @returns Components keyed by path. */
+function resolveModules<T>(registry: Record<string, unknown>): Record<string, T> {
+  const components: Record<string, T> = {}
+  for (const [path, value] of Object.entries(registry)) {
+    if (isModule(value))
+      components[path] = value.default as T
+  }
+  return components
+}
+
+/** Converts a raw module registry into a usable component map,
  *  shared by both the production app-building path and the dev-time diagnostics path.
  *
- *  @param modules - Each role's glob'd modules, keyed by role.
+ *  @param registry - Each role's raw glob'd entries, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
-export function createComponentMap(modules: RoleModules): BuiltComponentMap {
-  const page = createDefaultExportMap(modules.page)
-  const layout = createDefaultExportMap(modules.layout)
-  const loading = createDefaultExportMap(modules.loading)
-  const error = createDefaultExportMap(modules.error)
-  const default_ = createDefaultExportMap(modules.default)
+export function createComponentMap(registry: ModuleRegistry): BuiltComponentMap {
+  const page = resolveModules<PageComponent>(registry.page)
+  const layout = resolveModules<LayoutComponent>(registry.layout)
+  const loading = resolveModules<LoadingComponent>(registry.loading)
+  const error = resolveModules<ErrorComponent>(registry.error)
+  const default_ = resolveModules<DefaultComponent>(registry.default)
 
   return {
     componentMap: { page, layout, loading, error, default: default_ },

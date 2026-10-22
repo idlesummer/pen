@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { ParamEntries } from '@/pen-core'
-import type { ResolvedFrame, ResolvedMatch } from './types/matcher'
+import type { ComponentFrame, ComponentMatch } from './types/matcher'
 import type { Params } from './types/params'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from './components/DefaultBoundary'
@@ -24,7 +24,7 @@ function getSlotProps(slotNames: string[], slotComponents: ReactNodeMap): ReactN
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(frame: ResolvedFrame, content: ReactNode, params: ParamEntries, slotComponents: ReactNodeMap, pathname: string): ReactNode {
+function wrapFrame(frame: ComponentFrame, content: ReactNode, params: ParamEntries, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   const paramTable = sliceParams(params, frame.paramCount)
 
   if (frame.default) {
@@ -45,7 +45,7 @@ function wrapFrame(frame: ResolvedFrame, content: ReactNode, params: ParamEntrie
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(match: ResolvedMatch, slotComponents: ReactNodeMap, pathname: string): ReactNode {
+function renderChain(match: ComponentMatch, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   const { endpoint, params } = match
   const Content = endpoint.content
   const contentProps = { params: sliceParams(params, endpoint.paramCount) }
@@ -62,7 +62,7 @@ function renderChain(match: ResolvedMatch, slotComponents: ReactNodeMap, pathnam
 
 /** Turns a resolved route match into a React element tree, rendering its
  *  slots first and wrapping the main match with its own frame chain. */
-export function createRouteElement(mainMatch: ResolvedMatch, pathname: string): ReactNode {
+export function createRouteElement(mainMatch: ComponentMatch, pathname: string): ReactNode {
   const slotComponents: ReactNodeMap = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))

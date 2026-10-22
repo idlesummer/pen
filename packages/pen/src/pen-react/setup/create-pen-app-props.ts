@@ -1,26 +1,25 @@
-import type { RoleModules } from './create-component-map'
+import type { ModuleRegistry } from './create-component-map'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { compactMapRecord } from '@/lib/record'
 import { createRouter } from '@/pen-core'
 import { createComponentMap, createComponentMatcher } from './create-component-map'
 
 /** Strips the leading './' Vite's import.meta.glob puts on every key. */
-function normalizeGlobPaths<T>(modules: Record<string, T>): Record<string, T> {
-  return compactMapRecord(modules, (path, module) => [path.replace(/^\.\//, ''), module])
+function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
+  return compactMapRecord(registry, (path, value) => [path.replace(/^\.\//, ''), value])
 }
 
-/** Resolves each role's glob'd modules into a resolved matcher - a function
- *  straight from pathname to a renderable match. Modules are expected to
- *  have been validated by `buildApp`.
+/** Resolves a raw module registry into a component matcher - a function
+ *  straight from pathname to a renderable match.
  *
- *  @param modules - Each role's glob'd modules, keyed by role. */
-export function createPenAppProps(modules: RoleModules): PenAppProps {
+ *  @param registry - Each role's raw glob'd entries, keyed by role. */
+export function createPenAppProps(registry: ModuleRegistry): PenAppProps {
   const { componentMap, allPaths } = createComponentMap({
-    page: normalizeGlobPaths(modules.page),
-    layout: normalizeGlobPaths(modules.layout),
-    loading: normalizeGlobPaths(modules.loading),
-    error: normalizeGlobPaths(modules.error),
-    default: normalizeGlobPaths(modules.default),
+    page: normalizeGlobPaths(registry.page),
+    layout: normalizeGlobPaths(registry.layout),
+    loading: normalizeGlobPaths(registry.loading),
+    error: normalizeGlobPaths(registry.error),
+    default: normalizeGlobPaths(registry.default),
   })
 
   const { matcher } = createRouter(allPaths)
