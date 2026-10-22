@@ -63,10 +63,10 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
   // Load modules, classify by role, and build the component map
   const modules = await ssrGlob<Partial<Module<AnyComponent>>>(projectDir, routesDir, server)
   const cleaned = createComponentRegistry(classifyByRole(modules))
-  const { componentMap, allComponents, allPaths } = createComponentMap(cleaned)
+  const { componentMap, allComponents, componentPaths } = createComponentMap(cleaned)
 
   // Create router and collect diagnostics
-  const { modulePaths, pageEndpoints, diagnostics } = createRouter(allPaths)
+  const { modulePaths, pageEndpoints, diagnostics } = createRouter(componentPaths)
 
   // Collect additional runtime diagnostics
   diagnostics.push(...validateComponentExports(modulePaths, allComponents))
