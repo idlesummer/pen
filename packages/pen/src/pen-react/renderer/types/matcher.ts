@@ -6,7 +6,7 @@ import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBo
 import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
 
 /** A frame with every path reference already resolved to a component. */
-export type ResolvedFrame = {
+export type ComponentFrame = {
   layout?: LayoutComponent
   loading?: LoadingComponent
   error?: ErrorComponent
@@ -16,19 +16,19 @@ export type ResolvedFrame = {
 }
 
 /** An endpoint with its content and frame chain already resolved. */
-export type ResolvedEndpoint = {
-  frames: ResolvedFrame[]
+export type ComponentEndpoint = {
+  frames: ComponentFrame[]
   content: PageComponent | DefaultComponent
   paramCount: number
 }
 
 /** A route match with every path reference resolved into a real component -
  *  everything the renderer needs to build a React tree, and nothing else. */
-export type ResolvedMatch = {
-  endpoint: ResolvedEndpoint
+export type ComponentMatch = {
+  endpoint: ComponentEndpoint
   params: ParamEntries
-  slots?: Record<string, ResolvedMatch>
+  slots?: Record<string, ComponentMatch>
 }
 
 /** Resolves a pathname straight into a renderable match. */
-export type ResolvedMatcher = (pathname: string) => ResolvedMatch
+export type ComponentMatcher = (pathname: string) => ComponentMatch

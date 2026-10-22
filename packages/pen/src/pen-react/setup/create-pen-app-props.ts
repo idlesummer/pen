@@ -2,7 +2,7 @@ import type { RoleModules } from './create-component-map'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { compactMapRecord } from '@/lib/record'
 import { createRouter } from '@/pen-core'
-import { createComponentMap, createResolvedMatcher } from './create-component-map'
+import { createComponentMap, createComponentMatcher } from './create-component-map'
 
 /** Strips the leading './' Vite's import.meta.glob puts on every key. */
 function normalizeGlobPaths<T>(modules: Record<string, T>): Record<string, T> {
@@ -15,15 +15,15 @@ function normalizeGlobPaths<T>(modules: Record<string, T>): Record<string, T> {
  *
  *  @param modules - Each role's glob'd modules, keyed by role. */
 export function createPenAppProps(modules: RoleModules): PenAppProps {
-  const normalized: RoleModules = {
+  const { componentMap, allPaths } = createComponentMap({
     page: normalizeGlobPaths(modules.page),
     layout: normalizeGlobPaths(modules.layout),
     loading: normalizeGlobPaths(modules.loading),
     error: normalizeGlobPaths(modules.error),
     default: normalizeGlobPaths(modules.default),
-  }
-  const { componentMap, allPaths } = createComponentMap(normalized)
+  })
+
   const { matcher } = createRouter(allPaths)
-  const resolvedMatcher = createResolvedMatcher(matcher, componentMap)
-  return { resolvedMatcher }
+  const componentMatcher = createComponentMatcher(matcher, componentMap)
+  return { componentMatcher }
 }

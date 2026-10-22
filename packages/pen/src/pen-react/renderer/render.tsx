@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { ParamEntries } from '@/pen-core'
-import type { ResolvedFrame, ResolvedMatch } from './types/resolved-match'
+import type { ResolvedFrame, ResolvedMatch } from './types/matcher'
 import type { Params } from './types/params'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from './components/DefaultBoundary'
