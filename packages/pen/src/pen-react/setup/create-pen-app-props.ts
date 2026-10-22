@@ -2,6 +2,7 @@ import type { ModuleRegistry } from './module-registry'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { compactMapRecord } from '@/lib/record'
 import { createRouter } from '@/pen-core'
+import { cleanModuleRegistry } from './module-registry'
 import { createComponentMap } from './create-component-map'
 import { createComponentMatcher } from './create-component-matcher'
 
@@ -15,13 +16,15 @@ function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
  *
  *  @param registry - Each role's raw glob'd entries, keyed by role. */
 export function createPenAppProps(registry: ModuleRegistry): PenAppProps {
-  const { componentMap, allPaths } = createComponentMap({
+  const normalized: ModuleRegistry = {
     page: normalizeGlobPaths(registry.page),
     layout: normalizeGlobPaths(registry.layout),
     loading: normalizeGlobPaths(registry.loading),
     error: normalizeGlobPaths(registry.error),
     default: normalizeGlobPaths(registry.default),
-  })
+  }
+  const cleaned = cleanModuleRegistry(normalized)
+  const { componentMap, allPaths } = createComponentMap(cleaned)
 
   const { matcher } = createRouter(allPaths)
   const componentMatcher = createComponentMatcher(matcher, componentMap)
