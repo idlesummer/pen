@@ -1,4 +1,4 @@
-import type { Match, Matcher, Frame, Endpoint, PositionNode } from '@/pen-core'
+import type { Match, RouteMatcher, Frame, Endpoint, PositionNode } from '@/pen-core'
 import type { ComponentFrame, ComponentEndpoint, ComponentMatch, ComponentMatcher } from '@/pen-react/renderer/types/matcher'
 import type { ComponentMap } from './create-component-map'
 
@@ -48,6 +48,6 @@ function resolveMatch(match: Match, components: ComponentMap): ComponentMatch {
  *  @param matcher - A compiled route matcher, from createRouter.
  *  @param components - The component map to resolve path references against.
  *  @returns A function from pathname straight to a resolved, renderable match. */
-export function createComponentMatcher(matcher: Matcher, components: ComponentMap): ComponentMatcher {
-  return pathname => resolveMatch(matcher(pathname), components)
+export function createComponentMatcher(routeMatcher: RouteMatcher, components: ComponentMap): ComponentMatcher {
+  return pathname => resolveMatch(routeMatcher(pathname), components)
 }

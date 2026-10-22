@@ -13,7 +13,7 @@ export function createPenAppProps(moduleRegistry: ModuleRegistry): PenAppProps {
   const componentRegistry = createComponentRegistry(moduleRegistry)
   const { componentMap, allPaths } = createComponentMap(componentRegistry)
 
-  const { matcher } = createRouter(allPaths)
-  const componentMatcher = createComponentMatcher(matcher, componentMap)
+  const { routeMatcher } = createRouter(allPaths)
+  const componentMatcher = createComponentMatcher(routeMatcher, componentMap)
   return { componentMatcher }
 }

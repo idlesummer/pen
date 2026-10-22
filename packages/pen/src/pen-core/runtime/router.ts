@@ -3,11 +3,11 @@ import type { Match } from './matcher'
 import { compileApp } from '../compiler'
 import { match } from './matcher'
 
-export type Matcher =
+export type RouteMatcher =
   (url: string) => Match
 
 export type Router = {
-  matcher: Matcher
+  routeMatcher: RouteMatcher
   modulePaths: string[] // for the generated component map
   pageEndpoints: Endpoint<PositionNode>[] // for validation that needs each page's own frame chain
   diagnostics: Diagnostic[]
@@ -17,6 +17,6 @@ export type Router = {
  *  module path the compiled tree can render. */
 export function createRouter(filePaths: string[]): Router {
   const { positionTree, modulePaths, pageEndpoints, diagnostics } = compileApp(filePaths)
-  const matcher: Matcher = (url) => match(positionTree, url)
-  return { matcher, modulePaths, pageEndpoints, diagnostics }
+  const routeMatcher: RouteMatcher = (url) => match(positionTree, url)
+  return { routeMatcher, modulePaths, pageEndpoints, diagnostics }
 }
