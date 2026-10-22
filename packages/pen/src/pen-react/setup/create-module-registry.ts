@@ -17,10 +17,16 @@ export type ModuleRegistry = {
   default: Record<string, unknown>
 }
 
+/** Checks whether a value is a non-null record.
+ *  @param value - The value to check.
+ *  @returns Whether the value is a non-null record. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
 /** Checks that a glob'd registry entry really is a module with a component default export.
  *  `never` stands in for "some component, shape unspecified" - this guard only
  *  needs to prove a callable default exists, not which role it plays. */
-export function isModule(value: unknown): value is Module<FunctionComponent<never>> {
-  return typeof value === 'object' && value !== null
-    && typeof (value as Partial<Module<FunctionComponent<never>>>).default === 'function'
+export function isModuleWithDefaultExport(value: unknown): value is Module<FunctionComponent<never>> {
+  return isRecord(value) && typeof value.default === 'function'
 }
