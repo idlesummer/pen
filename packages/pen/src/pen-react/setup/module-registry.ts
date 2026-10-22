@@ -1,5 +1,6 @@
 import type { FunctionComponent } from 'react'
 import type { Module } from '@/lib/module'
+import { compactMapRecord } from '@/lib/record'
 import { hasDefaultExport } from '@/lib/module'
 
 /** Each role's raw glob'd entries, keyed by path - generic over the entry
@@ -41,5 +42,23 @@ export function cleanModuleRegistry(registry: ModuleRegistry): ModuleRegistry<Fu
     loading: extractComponents(registry.loading),
     error: extractComponents(registry.error),
     default: extractComponents(registry.default),
+  }
+}
+
+/** Strips the leading './' Vite's import.meta.glob puts on every key. */
+function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
+  return compactMapRecord(registry, (path, value) => [path.replace(/^\.\//, ''), value])
+}
+
+/** Strips the leading './' Vite's import.meta.glob puts on every key, per role.
+ *  @param registry - Each role's glob'd entries, keyed by role.
+ *  @returns The same role shape, with every key normalized. */
+export function normalizeModuleRegistry<T>(registry: ModuleRegistry<T>): ModuleRegistry<T> {
+  return {
+    page: normalizeGlobPaths(registry.page),
+    layout: normalizeGlobPaths(registry.layout),
+    loading: normalizeGlobPaths(registry.loading),
+    error: normalizeGlobPaths(registry.error),
+    default: normalizeGlobPaths(registry.default),
   }
 }
