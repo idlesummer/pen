@@ -1,4 +1,4 @@
 export { createComponentMap } from './create-component-map'
-export { createPenAppProps } from './create-pen-app-props'
+export { createAppMatcher } from './create-app-matcher'
 export { validateComponentExports, validateAsyncPages } from './validate'
 export { reportRouteDiagnostics } from './diagnose-routes'
