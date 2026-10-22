@@ -1,4 +1,4 @@
-export type { RouteNode, Endpoint, Frame, PositionNode, Diagnostic, Module, ModuleRole } from './compiler'
+export type { RouteNode, Endpoint, Frame, PositionNode, Diagnostic, ModuleRole } from './compiler'
 export type { Match, Matcher, ParamEntries, Router } from './runtime'
 
 export { GLOBAL_DEFAULT, GLOBAL_ERROR, createDiagnostic, getModuleRole, MODULE_ROLES } from './compiler'

@@ -1,7 +1,7 @@
 import type { Diagnostic, Module } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
 import type { AnyComponent } from './create-component-map'
-import type { ModuleRegistry } from './create-module-registry'
+import type { ModuleRegistry } from './module-registry'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'

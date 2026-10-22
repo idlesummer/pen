@@ -1,4 +1,4 @@
-import type { ModuleRegistry } from './create-module-registry'
+import type { ModuleRegistry } from './module-registry'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { compactMapRecord } from '@/lib/record'
 import { createRouter } from '@/pen-core'
