@@ -4,7 +4,7 @@ import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBo
 import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { ModuleRegistry } from './create-module-registry'
-import { isModule } from './create-module-registry'
+import { isModuleWithDefaultExport } from './create-module-registry'
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
 export type AnyComponent =
@@ -37,7 +37,7 @@ export type BuiltComponentMap = {
 function extractComponents<T>(registry: Record<string, unknown>): Record<string, T> {
   const components: Record<string, T> = {}
   for (const [path, value] of Object.entries(registry)) {
-    if (isModule(value))
+    if (isModuleWithDefaultExport(value))
       components[path] = value.default as T
   }
   return components
