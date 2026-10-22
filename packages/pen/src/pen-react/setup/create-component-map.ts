@@ -4,15 +4,7 @@ import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComp
 import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
-
-/** Each role's raw glob'd entries, keyed by path - not yet confirmed to be valid modules. */
-export type ModuleRegistry = {
-  page: Record<string, unknown>
-  layout: Record<string, unknown>
-  loading: Record<string, unknown>
-  error: Record<string, unknown>
-  default: Record<string, unknown>
-}
+import type { ModuleRegistry } from './create-module-registry'
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
 export type AnyComponent =
