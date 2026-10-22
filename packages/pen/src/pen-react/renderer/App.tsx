@@ -6,10 +6,10 @@ import { Router } from './Router'
 export type PenAppProps = RouterProps
 
 /** Root component that provides navigation and renders the matched route. */
-export function PenApp({ resolvedMatcher }: PenAppProps) {
+export function PenApp({ componentMatcher }: PenAppProps) {
   return (
     <NavigationProvider>
-      <Router resolvedMatcher={resolvedMatcher} />
+      <Router componentMatcher={componentMatcher} />
     </NavigationProvider>
   )
 }

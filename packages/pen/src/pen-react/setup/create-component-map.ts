@@ -4,7 +4,7 @@ import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComp
 import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
-import type { ResolvedFrame, ResolvedEndpoint, ResolvedMatch, ResolvedMatcher } from '@/pen-react/renderer/types/resolved-match'
+import type { ComponentFrame, ComponentEndpoint, ComponentMatch, ComponentMatcher } from '@/pen-react/renderer/types/matcher'
 
 /** Each role's glob'd modules, keyed by path. */
 export type RoleModules = {
@@ -84,7 +84,7 @@ export function createComponentMap(modules: RoleModules): BuiltComponentMap {
 /** Resolves one frame's path references into real components. Assertions are
  *  safe because frames and components come from the same createRouter() call -
  *  a missing component indicates a compiler bug. */
-function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): ResolvedFrame {
+function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
   return {
     layout: frame.layout ? components.layout[frame.layout] : undefined,
     loading: frame.loading ? components.loading[frame.loading] : undefined,
@@ -96,7 +96,7 @@ function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): Res
 }
 
 /** Resolves an endpoint's content and frame chain into real components. */
-function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ResolvedEndpoint {
+function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
   return {
     frames: endpoint.frames.map(frame => resolveFrame(frame, components)),
     content: (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!,
@@ -105,8 +105,8 @@ function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: Component
 }
 
 /** Resolves a match's endpoint and every slot's match, recursively. */
-function resolveMatch(match: Match, components: ComponentMap): ResolvedMatch {
-  const resolved: ResolvedMatch = {
+function resolveMatch(match: Match, components: ComponentMap): ComponentMatch {
+  const resolved: ComponentMatch = {
     endpoint: resolveEndpoint(match.endpoint, components),
     params: match.params,
   }
@@ -124,6 +124,6 @@ function resolveMatch(match: Match, components: ComponentMap): ResolvedMatch {
  *  @param matcher - A compiled route matcher, from createRouter.
  *  @param components - The component map to resolve path references against.
  *  @returns A function from pathname straight to a resolved, renderable match. */
-export function createResolvedMatcher(matcher: Matcher, components: ComponentMap): ResolvedMatcher {
+export function createComponentMatcher(matcher: Matcher, components: ComponentMap): ComponentMatcher {
   return pathname => resolveMatch(matcher(pathname), components)
 }
