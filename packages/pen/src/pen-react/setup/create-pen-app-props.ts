@@ -11,9 +11,9 @@ import { createComponentMatcher } from './create-component-matcher'
  *  @param registry - Each role's raw glob'd entries, keyed by role. */
 export function createPenAppProps(moduleRegistry: ModuleRegistry): PenAppProps {
   const componentRegistry = createComponentRegistry(moduleRegistry)
-  const { componentMap, allPaths } = createComponentMap(componentRegistry)
+  const { componentMap, componentPaths } = createComponentMap(componentRegistry)
 
-  const { routeMatcher } = createRouter(allPaths)
+  const { routeMatcher } = createRouter(componentPaths)
   const componentMatcher = createComponentMatcher(routeMatcher, componentMap)
   return { componentMatcher }
 }

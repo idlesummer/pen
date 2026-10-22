@@ -26,7 +26,7 @@ export type BuiltComponentMap = {
   /** Every component merged into one map, regardless of role. */
   allComponents: Record<string, AnyComponent>
   /** Every discovered path, across all roles - the full input createRouter expects. */
-  allPaths: string[]
+  componentPaths: string[]
 }
 
 /** Assembles an already-cleaned registry into a usable component map,
@@ -45,7 +45,7 @@ export function createComponentMap(registry: ComponentRegistry): BuiltComponentM
   return {
     componentMap: { page, layout, loading, error, default: default_ },
     allComponents: { ...page, ...layout, ...loading, ...error, ...default_ },
-    allPaths: [
+    componentPaths: [
       ...Object.keys(page),
       ...Object.keys(layout),
       ...Object.keys(loading),
