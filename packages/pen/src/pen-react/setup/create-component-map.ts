@@ -48,7 +48,7 @@ function isModule(value: unknown): value is Module<AnyComponent> {
  *  Drops any entry that doesn't pass the module guard.
  *  @param registry - Raw, unconfirmed registry entries keyed by path.
  *  @returns Components keyed by path. */
-function resolveModules<T>(registry: Record<string, unknown>): Record<string, T> {
+function extractComponents<T>(registry: Record<string, unknown>): Record<string, T> {
   const components: Record<string, T> = {}
   for (const [path, value] of Object.entries(registry)) {
     if (isModule(value))
@@ -63,11 +63,11 @@ function resolveModules<T>(registry: Record<string, unknown>): Record<string, T>
  *  @param registry - Each role's raw glob'd entries, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
 export function createComponentMap(registry: ModuleRegistry): BuiltComponentMap {
-  const page = resolveModules<PageComponent>(registry.page)
-  const layout = resolveModules<LayoutComponent>(registry.layout)
-  const loading = resolveModules<LoadingComponent>(registry.loading)
-  const error = resolveModules<ErrorComponent>(registry.error)
-  const default_ = resolveModules<DefaultComponent>(registry.default)
+  const page = extractComponents<PageComponent>(registry.page)
+  const layout = extractComponents<LayoutComponent>(registry.layout)
+  const loading = extractComponents<LoadingComponent>(registry.loading)
+  const error = extractComponents<ErrorComponent>(registry.error)
+  const default_ = extractComponents<DefaultComponent>(registry.default)
 
   return {
     componentMap: { page, layout, loading, error, default: default_ },
