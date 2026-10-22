@@ -6,12 +6,20 @@ import { hasDefaultExport } from '@/lib/module'
 /** Each role's raw glob'd entries, keyed by path - generic over the entry
  *  value's type, since it's `unknown` before cleaning and a confirmed
  *  component after. */
-export type ModuleRegistry<T = unknown> = {
-  page: Record<string, T>
-  layout: Record<string, T>
-  loading: Record<string, T>
-  error: Record<string, T>
-  default: Record<string, T>
+export type ModuleRegistry = {
+  page: Record<string, unknown>
+  layout: Record<string, unknown>
+  loading: Record<string, unknown>
+  error: Record<string, unknown>
+  default: Record<string, unknown>
+}
+
+export type ComponentRegistry = {
+  page: Record<string, FunctionComponent<never>>
+  layout: Record<string, FunctionComponent<never>>
+  loading: Record<string, FunctionComponent<never>>
+  error: Record<string, FunctionComponent<never>>
+  default: Record<string, FunctionComponent<never>>
 }
 
 /** Checks whether a value is a module with a function default export.
@@ -19,6 +27,11 @@ export type ModuleRegistry<T = unknown> = {
  *  @returns Whether the value is a module with a function default export. */
 export function isComponentModule(value: unknown): value is Module<FunctionComponent<never>> {
   return hasDefaultExport(value) && typeof value.default === 'function'
+}
+
+/** Strips the leading './' Vite's import.meta.glob puts on every key. */
+function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
+  return compactMapRecord(registry, (path, value) => [path.replace(/^\.\//, ''), value])
 }
 
 /** Resolves one role's registry entries into real components, keyed by path.
@@ -35,30 +48,19 @@ function extractComponents(registry: Record<string, unknown>): Record<string, Fu
 /** Verifies every registry entry and drops anything invalid, per role.
  *  @param registry - Raw, unconfirmed registry entries keyed by role.
  *  @returns The same role shape, with every entry confirmed to be a real component. */
-export function cleanModuleRegistry(registry: ModuleRegistry): ModuleRegistry<FunctionComponent<never>> {
-  return {
-    page: extractComponents(registry.page),
-    layout: extractComponents(registry.layout),
-    loading: extractComponents(registry.loading),
-    error: extractComponents(registry.error),
-    default: extractComponents(registry.default),
+export function createComponentRegistry(moduleRegistry: ModuleRegistry): ComponentRegistry {
+  const newModuleRegistry = {
+    page: normalizeGlobPaths(moduleRegistry.page),
+    layout: normalizeGlobPaths(moduleRegistry.layout),
+    loading: normalizeGlobPaths(moduleRegistry.loading),
+    error: normalizeGlobPaths(moduleRegistry.error),
+    default: normalizeGlobPaths(moduleRegistry.default),
   }
-}
-
-/** Strips the leading './' Vite's import.meta.glob puts on every key. */
-function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
-  return compactMapRecord(registry, (path, value) => [path.replace(/^\.\//, ''), value])
-}
-
-/** Strips the leading './' Vite's import.meta.glob puts on every key, per role.
- *  @param registry - Each role's glob'd entries, keyed by role.
- *  @returns The same role shape, with every key normalized. */
-export function normalizeModuleRegistry<T>(registry: ModuleRegistry<T>): ModuleRegistry<T> {
   return {
-    page: normalizeGlobPaths(registry.page),
-    layout: normalizeGlobPaths(registry.layout),
-    loading: normalizeGlobPaths(registry.loading),
-    error: normalizeGlobPaths(registry.error),
-    default: normalizeGlobPaths(registry.default),
+    page: extractComponents(newModuleRegistry.page),
+    layout: extractComponents(newModuleRegistry.layout),
+    loading: extractComponents(newModuleRegistry.loading),
+    error: extractComponents(newModuleRegistry.error),
+    default: extractComponents(newModuleRegistry.default),
   }
 }
