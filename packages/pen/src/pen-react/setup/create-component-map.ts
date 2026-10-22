@@ -1,10 +1,10 @@
-import type { Module } from '@/pen-core'
 import type { PageComponent } from '@/pen-react/renderer/components/PageComponent'
 import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComponent'
 import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { ModuleRegistry } from './create-module-registry'
+import { isModule } from './create-module-registry'
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
 export type AnyComponent =
@@ -28,12 +28,6 @@ export type BuiltComponentMap = {
   allComponents: Record<string, AnyComponent>
   /** Every discovered path, across all roles - the full input createRouter expects. */
   allPaths: string[]
-}
-
-/** Checks that a glob'd registry entry really is a module with a component default export. */
-function isModule(value: unknown): value is Module<AnyComponent> {
-  return typeof value === 'object' && value !== null
-    && typeof (value as Partial<Module<AnyComponent>>).default === 'function'
 }
 
 /** Resolves one role's registry entries into real components, keyed by path.
