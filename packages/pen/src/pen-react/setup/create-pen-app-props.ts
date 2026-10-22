@@ -2,7 +2,8 @@ import type { ModuleRegistry } from './create-component-map'
 import type { PenAppProps } from '@/pen-react/renderer/App'
 import { compactMapRecord } from '@/lib/record'
 import { createRouter } from '@/pen-core'
-import { createComponentMap, createComponentMatcher } from './create-component-map'
+import { createComponentMap } from './create-component-map'
+import { createComponentMatcher } from './create-component-matcher'
 
 /** Strips the leading './' Vite's import.meta.glob puts on every key. */
 function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
