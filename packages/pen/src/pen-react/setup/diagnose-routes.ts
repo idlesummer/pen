@@ -1,4 +1,5 @@
-import type { Diagnostic, Module } from '@/pen-core'
+import type { Module } from '@/lib/module'
+import type { Diagnostic } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
 import type { AnyComponent } from './create-component-map'
 import type { ModuleRegistry } from './module-registry'
