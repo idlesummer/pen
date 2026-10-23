@@ -9,7 +9,7 @@ import { traverse } from '@/lib/traverse'
 /** Resolves one frame's path references into real components. Assertions are
  *  safe because frames and components come from the same createRouter() call -
  *  a missing component indicates a compiler bug. */
-function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
+function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
   return {
     layout: frame.layout ? components.layout[frame.layout] : undefined,
     loading: frame.loading ? components.loading[frame.loading] : undefined,
@@ -21,20 +21,18 @@ function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): Com
 }
 
 /** Resolves an endpoint's content and frame chain into real components. */
-function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
-  return {
-    frames: endpoint.frames.map(frame => resolveFrame(frame, components)),
-    content: (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!,
-    paramCount: endpoint.paramCount,
-  }
+function createComponentEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
+  const frames = endpoint.frames.map(frame => createComponentFrame(frame, components))
+  const content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
+  const paramCount = endpoint.paramCount
+  return { frames, content, paramCount }
 }
 
 /** Resolves one match's endpoint, with no slots attached yet. */
-function resolveShell(match: Match, components: ComponentMap): ComponentMatch {
-  return {
-    endpoint: resolveEndpoint(match.endpoint, components),
-    params: match.params,
-  }
+function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
+  const endpoint = createComponentEndpoint(match.endpoint, components)
+  const params = match.params
+  return { endpoint, params }
 }
 
 /** Creates a component match by resolving its endpoint and every nested slot
@@ -45,29 +43,27 @@ function resolveShell(match: Match, components: ComponentMap): ComponentMatch {
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
-export function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
-  const resolvedOf = new Map<Match, ComponentMatch>()
+export function createComponentTree(match: Match, components: ComponentMap): ComponentMatch {
+  const componentMatchOf = new Map<Match, ComponentMatch>()
   const slotNameOf = new Map<Match, string>()
-
-  const root = resolveShell(match, components)
-  resolvedOf.set(match, root)
+  const rootComponentMatch = createComponentMatch(match, components)
+  componentMatchOf.set(match, rootComponentMatch)
 
   traverse(match, {
     expand: (node) => {
       if (!node.slots) return []
-      for (const [name, slotMatch] of Object.entries(node.slots))
-        slotNameOf.set(slotMatch, name)
+      for (const [slotName, slotMatch] of Object.entries(node.slots))
+        slotNameOf.set(slotMatch, slotName)
       return Object.values(node.slots)
     },
     attach: (child, parent) => {
-      const resolved = resolveShell(child, components)
-      resolvedOf.set(child, resolved)
+      const componentMatch = createComponentMatch(child, components)
+      componentMatchOf.set(child, componentMatch)
 
-      const parentResolved = resolvedOf.get(parent)!
-      parentResolved.slots ??= {}
-      parentResolved.slots[slotNameOf.get(child)!] = resolved
+      const parentComponentMatch = componentMatchOf.get(parent)!
+      parentComponentMatch.slots ??= {}
+      parentComponentMatch.slots[slotNameOf.get(child)!] = componentMatch
     },
   })
-
-  return root
+  return rootComponentMatch
 }
