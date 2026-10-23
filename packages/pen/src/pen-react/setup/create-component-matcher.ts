@@ -1,5 +1,5 @@
 import type { ModuleRegistry } from './create-component-registry'
-import type { ComponentMatcher } from './create-component-match'
+import type { ComponentMatcher } from '@/pen-react/renderer'
 import { createRouter } from '@/pen-core'
 import { createComponentRegistry } from './create-component-registry'
 import { createComponentMap } from './create-component-map'

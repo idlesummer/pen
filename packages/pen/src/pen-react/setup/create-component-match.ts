@@ -2,9 +2,6 @@ import type { Match, Frame, Endpoint, PositionNode } from '@/pen-core'
 import type { ComponentFrame, ComponentEndpoint, ComponentMatch } from '@/pen-react/renderer/types/matcher'
 import type { ComponentMap } from './create-component-map'
 
-/** Resolves a pathname straight into a renderable match. */
-export type ComponentMatcher = (pathname: string) => ComponentMatch
-
 // Turns a Match's path strings into the actual components the renderer
 // needs, so the renderer itself never has to know a component map exists.
 

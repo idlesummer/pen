@@ -29,3 +29,6 @@ export type ComponentMatch = {
   params: ParamEntries
   slots?: Record<string, ComponentMatch>
 }
+
+/** Resolves a pathname straight into a renderable match. */
+export type ComponentMatcher = (pathname: string) => ComponentMatch
