@@ -14,6 +14,6 @@ export function createComponentMatcher(moduleRegistry: ModuleRegistry): Componen
   const { componentMap, componentPaths } = createComponentMap(componentRegistry)
 
   const { routeMatcher } = createRouter(componentPaths)
-  const componentMatcher: ComponentMatcher = url => createComponentMatch(routeMatcher(url), componentMap)
+  const componentMatcher = (url: string) => createComponentMatch(routeMatcher(url), componentMap)
   return componentMatcher
 }
