@@ -16,11 +16,11 @@ function sliceParams(params: Params, depth: number): Params {
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(frame: ComponentFrame, content: ReactNode, params: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
-  const paramTable = sliceParams(params, frame.paramCount)
+function wrapFrame(frame: ComponentFrame, content: ReactNode, fullParams: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
+  const params = sliceParams(fullParams, frame.paramCount)
 
   if (frame.default) {
-    content = <DefaultBoundary Fallback={frame.default} pathname={pathname} params={paramTable}>{content}</DefaultBoundary>
+    content = <DefaultBoundary Fallback={frame.default} pathname={pathname} params={params}>{content}</DefaultBoundary>
   }
   if (frame.loading) {
     content = <LoadingBoundary Fallback={frame.loading}>{content}</LoadingBoundary>
@@ -31,7 +31,7 @@ function wrapFrame(frame: ComponentFrame, content: ReactNode, params: Params, sl
   if (frame.layout) {
     const Layout = frame.layout
     const slotProps = frame.slotNames ? pickRecord(slotComponents, frame.slotNames) : {}
-    content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
+    content = <Layout params={params} {...slotProps}>{content}</Layout>
   }
   return content
 }
