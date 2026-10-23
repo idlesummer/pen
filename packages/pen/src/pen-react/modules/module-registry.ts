@@ -1,6 +1,4 @@
-/** Each role's raw glob'd entries, keyed by path - generic over the entry
- *  value's type, since it's `unknown` before cleaning and a confirmed
- *  component after. */
+/** Raw glob entries grouped by route module role, keyed by file path. */
 export type ModuleRegistry = {
   page: Record<string, unknown>
   layout: Record<string, unknown>
