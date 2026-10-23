@@ -1,8 +1,8 @@
-import type { PageComponent } from '@/pen-react/renderer/components/PageComponent'
-import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComponent'
-import type { LoadingComponent } from '@/pen-react/renderer/components/LoadingBoundary'
-import type { ErrorComponent } from '@/pen-react/renderer/components/ErrorBoundary'
-import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
+import type { PageComponent } from '@/pen-react/render/components/PageComponent'
+import type { LayoutComponent } from '@/pen-react/render/components/LayoutComponent'
+import type { LoadingComponent } from '@/pen-react/render/components/LoadingBoundary'
+import type { ErrorComponent } from '@/pen-react/render/components/ErrorBoundary'
+import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoundary'
 import type { ComponentRegistry } from './create-component-registry'
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */

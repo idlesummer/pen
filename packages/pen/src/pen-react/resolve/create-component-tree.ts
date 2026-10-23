@@ -1,6 +1,6 @@
 import type { Match, Frame, Endpoint, PositionNode, Params } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
-import type { PageComponent, DefaultComponent, LayoutComponent, LoadingComponent, ErrorComponent } from '@/pen-react/renderer'
+import type { PageComponent, DefaultComponent, LayoutComponent, LoadingComponent, ErrorComponent } from '@/pen-react/render'
 import { traverse } from '@/lib/traverse'
 
 /** A frame with every path reference already resolved to a component. */
