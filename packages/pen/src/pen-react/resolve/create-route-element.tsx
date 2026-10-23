@@ -5,20 +5,13 @@ import type { ComponentFrame, ComponentMatch } from './create-component-tree'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary, LoadingBoundary, ErrorBoundary } from '@/pen-react/render'
 import { createComponentTree } from './create-component-tree'
+import { pickRecord } from '@/lib/record'
 
 type ReactNodeMap = Record<string, ReactNode>
 
 /** Returns params up to the given bind depth as an object. */
 function sliceParams(params: Params, depth: number): Params {
   return Object.fromEntries(Object.entries(params).slice(0, depth))
-}
-
-/** Picks out the rendered elements for the slots a frame declares. */
-function getSlotProps(slotNames: string[], slotComponents: ReactNodeMap): ReactNodeMap {
-  const slotProps: ReactNodeMap = {}
-  for (const name of slotNames)
-    slotProps[name] = slotComponents[name]
-  return slotProps
 }
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
@@ -37,7 +30,7 @@ function wrapFrame(frame: ComponentFrame, content: ReactNode, params: Params, sl
   }
   if (frame.layout) {
     const Layout = frame.layout
-    const slotProps = frame.slots ? getSlotProps(frame.slots, slotComponents) : {}
+    const slotProps = frame.slotNames ? pickRecord(slotComponents, frame.slotNames) : {}
     content = <Layout params={paramTable} {...slotProps}>{content}</Layout>
   }
   return content
