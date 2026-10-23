@@ -12,9 +12,6 @@ export type Match = {
   slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
 
-/** What findMatch actually computes - name and slots are the caller's to attach. */
-type MatchResult = Pick<Match, 'endpoint' | 'params'>
-
 /** A candidate explored during route matching. */
 type MatchCandidate = {
   position: PositionNode
@@ -49,7 +46,7 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
 }
 
 /** Finds the best endpoint or fallback using static-preferring DFS. */
-function findMatch(position: PositionNode, url: string[], seedParams: Params): MatchResult {
+function findMatch(position: PositionNode, url: string[], seedParams: Params) {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -75,7 +72,7 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params): M
   })
   const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
   const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
-  return { endpoint, params }
+  return [endpoint, params] as const
 }
 
 /** Splits a pathname into non-empty segments. */
@@ -86,14 +83,16 @@ function normalizeUrl(pathname: string): string[] {
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
-  const mainMatch: Match = { ...findMatch(positionTree, url, {}), name: '' }
+  const [endpoint, params] = findMatch(positionTree, url, {})
+  const mainMatch: Match = { endpoint, params, name: '' }
 
   for (const frame of mainMatch.endpoint.frames) {
     if (!frame.slots) continue
     mainMatch.slots ??= {}
 
     for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
-      const slotMatch: Match = { ...findMatch(slotPosition, url, mainMatch.params), name: slotName }
+      const [endpoint, params] = findMatch(slotPosition, url, mainMatch.params) // var shadowing is ok here
+      const slotMatch: Match = { endpoint, params, name: slotName }
       mainMatch.slots[slotName] = slotMatch
     }
   }
