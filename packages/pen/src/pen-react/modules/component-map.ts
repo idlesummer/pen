@@ -6,13 +6,11 @@ import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoun
 import type { ModuleRegistry } from './module-registry'
 import { hasFunctionDefaultExport } from '@/lib/module'
 
-/** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
+/** Component type shared across all route module roles. */
 export type AnyComponent =
   PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
 
-/** Maps each route module role to its components by file path. Internal to
- *  setup - the renderer never sees path strings or this map, only the
- *  components create-component-matcher.ts's resolveMatch looks up from it. */
+/** Components grouped by route module role, keyed by module path. */
 export type ComponentMap = {
   page:     Record<string, PageComponent>
   layout:   Record<string, LayoutComponent>
@@ -21,8 +19,7 @@ export type ComponentMap = {
   default:  Record<string, DefaultComponent>
 }
 
-/** Resolves a role's glob entries into components, keyed by normalized path.
- *  Drops entries that don't contain a function default export. */
+/** Extracts function default exports into a map keyed by paths without a leading `./`. */
 function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string, T> {
   const components: Record<string, T> = {}
   for (const [path, module] of Object.entries(moduleMap)) {
@@ -32,8 +29,7 @@ function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string
   return components
 }
 
-/** Verifies and assembles a raw module registry into a usable component map,
- *  shared by both the production app-building path and the dev-time diagnostics path.
+/** Creates role-specific component maps and collects their module paths.
  *
  *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role.
  *  @returns The role-separated map, and every discovered path - the full input createRouter expects. */
