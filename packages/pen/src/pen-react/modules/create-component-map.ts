@@ -34,17 +34,17 @@ export type BuiltComponentMap = {
 /** Checks whether a value is a module with a function default export.
  *  @param value - The value to check.
  *  @returns Whether the value is a module with a function default export. */
-function hasFunctionDefaultExport(value: unknown): value is Module<FunctionType> {
+function hasFunctionDefaultExport<T extends FunctionType>(value: unknown): value is Module<T> {
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
 /** Resolves a role's glob entries into components, keyed by normalized path.
  *  Drops entries that don't contain a function default export. */
-function createFunctionMap(registry: Record<string, unknown>): Record<string, FunctionType> {
-  const components: Record<string, FunctionType> = {}
-  for (const [path, value] of Object.entries(registry)) {
-    if (hasFunctionDefaultExport(value))
-      components[path.replace(/^\.\//, '')] = value.default
+function createFunctionMap<T extends FunctionType>(moduleMap: Record<string, unknown>): Record<string, T> {
+  const components: Record<string, T> = {}
+  for (const [path, module] of Object.entries(moduleMap)) {
+    if (hasFunctionDefaultExport<T>(module))
+      components[path.replace(/^\.\//, '')] = module.default
   }
   return components
 }
@@ -55,11 +55,11 @@ function createFunctionMap(registry: Record<string, unknown>): Record<string, Fu
  *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
 export function createComponentMap(moduleRegistry: ModuleRegistry): BuiltComponentMap {
-  const page = createFunctionMap(moduleRegistry.page) as Record<string, PageComponent>
-  const layout = createFunctionMap(moduleRegistry.layout) as Record<string, LayoutComponent>
-  const loading = createFunctionMap(moduleRegistry.loading) as Record<string, LoadingComponent>
-  const error = createFunctionMap(moduleRegistry.error) as Record<string, ErrorComponent>
-  const default_ = createFunctionMap(moduleRegistry.default) as Record<string, DefaultComponent>
+  const page = createFunctionMap<PageComponent>(moduleRegistry.page)
+  const layout = createFunctionMap<LayoutComponent>(moduleRegistry.layout)
+  const loading = createFunctionMap<LoadingComponent>(moduleRegistry.loading)
+  const error = createFunctionMap<ErrorComponent>(moduleRegistry.error)
+  const default_ = createFunctionMap<DefaultComponent>(moduleRegistry.default)
 
   return {
     componentMap: { page, layout, loading, error, default: default_ },
