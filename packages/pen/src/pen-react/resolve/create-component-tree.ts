@@ -9,7 +9,7 @@ export type ComponentFrame = {
   loading?: LoadingComponent
   error?: ErrorComponent
   default?: DefaultComponent
-  slots?: string[]
+  slotNames?: string[]
   paramCount: number
 }
 
@@ -40,7 +40,7 @@ function createComponentFrame(frame: Frame<PositionNode>, components: ComponentM
     loading: frame.loading ? components.loading[frame.loading] : undefined,
     error: frame.error ? components.error[frame.error] : undefined,
     default: frame.default ? components.default[frame.default] : undefined,
-    slots: frame.slots ? Object.keys(frame.slots) : undefined,
+    slotNames: frame.slots ? Object.keys(frame.slots) : undefined,
     paramCount: frame.paramCount,
   }
 }
