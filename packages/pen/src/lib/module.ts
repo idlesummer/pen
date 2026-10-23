@@ -3,12 +3,6 @@ export type Module<T = unknown> = {
   default: T
 }
 
-/** A constraint matching any function shape, for generics that need to
- *  accept a specific function type `T` as a type argument - `any` here
- *  only widens what's allowed to satisfy the bound; it never appears in
- *  a value position, so it can't leak into what callers actually get. */
-export type AnyFunctionConstraint = (...args: any[]) => unknown // eslint-disable-line @typescript-eslint/no-explicit-any
-
 /** Checks whether a value is a non-null record. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -24,6 +18,6 @@ function hasDefaultExport(value: unknown): value is Module {
 /** Checks whether a value is a module with a function default export.
  *  @param value - The value to check.
  *  @returns Whether the value is a module with a function default export. */
-export function hasFunctionDefaultExport<T extends AnyFunctionConstraint>(value: unknown): value is Module<T> {
+export function hasFunctionDefaultExport<T>(value: unknown): value is Module<T> {
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
