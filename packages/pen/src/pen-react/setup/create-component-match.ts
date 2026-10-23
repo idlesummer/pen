@@ -68,6 +68,5 @@ export function createComponentMatch(match: Match, components: ComponentMap): Co
       parentResolved.slots[slotNameOf.get(child)!] = resolved
     },
   })
-
   return root
 }
