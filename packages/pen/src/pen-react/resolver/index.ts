@@ -1,1 +1,1 @@
-export { createRouteElement } from './create-route-element'
+export { createRouteElement } from './create-element'
