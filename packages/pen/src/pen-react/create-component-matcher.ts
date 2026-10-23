@@ -12,6 +12,6 @@ export function createComponentMatcher(moduleRegistry: ModuleRegistry): (pathnam
   const componentRegistry = createComponentRegistry(moduleRegistry)
   const { componentMap, componentPaths } = createComponentMap(componentRegistry)
   const { routeMatcher } = createRouter(componentPaths)
-
-  return (pathname: string) => createRouteElement(routeMatcher(pathname), componentMap, pathname)
+  const componentMatcher = (pathname: string) => createRouteElement(routeMatcher(pathname), componentMap, pathname)
+  return componentMatcher
 }
