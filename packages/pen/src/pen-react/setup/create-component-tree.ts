@@ -42,9 +42,8 @@ function createComponentMatch(match: Match, components: ComponentMap): Component
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
 export function createComponentTree(match: Match, components: ComponentMap): ComponentMatch {
-  const componentMatchOf = new Map<Match, ComponentMatch>()
   const rootComponentMatch = createComponentMatch(match, components)
-  componentMatchOf.set(match, rootComponentMatch)
+  const componentMatchOf = new Map([[match, rootComponentMatch]])
 
   traverse(match, {
     expand: (node) => node.slots ? Object.values(node.slots) : [],
