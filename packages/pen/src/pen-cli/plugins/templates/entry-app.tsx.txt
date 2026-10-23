@@ -4,7 +4,7 @@ declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 // #endregion
 
 import { render } from 'ink'
-import { PenApp, createAppMatcher } from '@idlesummer/pen/internal'
+import { PenApp, createComponentMatcher } from '@idlesummer/pen/internal'
 
 // Vite's `import.meta.glob` needs literal arguments (anything else silently matches nothing),
 // so there's one typed glob per role. The leading './' keeps `base` scoping active.
@@ -18,6 +18,6 @@ const moduleRegistry = {
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
-const componentMatcher = createAppMatcher(moduleRegistry)
+const componentMatcher = createComponentMatcher(moduleRegistry)
 const { waitUntilExit } = render(<PenApp componentMatcher={componentMatcher} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
