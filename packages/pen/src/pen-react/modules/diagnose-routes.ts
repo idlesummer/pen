@@ -61,12 +61,15 @@ function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>):
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
   // Load modules, classify by role, and build the component map
   const modules = await ssrGlob<Partial<Module<AnyComponent>>>(projectDir, routesDir, server)
-  const { componentMap, allComponents, componentPaths } = createComponentMap(classifyByRole(modules))
+  const { componentMap, componentPaths } = createComponentMap(classifyByRole(modules))
 
   // Create router and collect diagnostics
   const { modulePaths, pageEndpoints, diagnostics } = createRouter(componentPaths)
 
-  // Collect additional runtime diagnostics
+  // Collect additional runtime diagnostics - validateComponentExports doesn't
+  // care which role a path belongs to, so flatten componentMap just for this check
+  const { page, layout, loading, error, default: default_ } = componentMap
+  const allComponents = { ...page, ...layout, ...loading, ...error, ...default_ }
   diagnostics.push(...validateComponentExports(modulePaths, allComponents))
   diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
   return { diagnostics, modulePaths }

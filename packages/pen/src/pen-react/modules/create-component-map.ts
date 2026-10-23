@@ -21,11 +21,9 @@ export type ComponentMap = {
   default:  Record<string, DefaultComponent>
 }
 
-export type BuiltComponentMap = {
+type BuiltComponentMap = {
   /** Each role's components, kept separate - what create-component-matcher.ts's resolveMatch actually looks up from. */
   componentMap: ComponentMap
-  /** Every component merged into one map, regardless of role. */
-  allComponents: Record<string, AnyComponent>
   /** Every discovered path, across all roles - the full input createRouter expects. */
   componentPaths: string[]
 }
@@ -55,7 +53,6 @@ export function createComponentMap(moduleRegistry: ModuleRegistry): BuiltCompone
 
   return {
     componentMap: { page, layout, loading, error, default: default_ },
-    allComponents: { ...page, ...layout, ...loading, ...error, ...default_ },
     componentPaths: [
       ...Object.keys(page),
       ...Object.keys(layout),
