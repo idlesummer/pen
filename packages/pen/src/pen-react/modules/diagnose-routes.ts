@@ -68,9 +68,8 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
 
   // Collect additional runtime diagnostics - validateComponentExports doesn't
   // care which role a path belongs to, so flatten componentMap just for this check
-  const { page, layout, loading, error, default: default_ } = componentMap
-  const allComponents = { ...page, ...layout, ...loading, ...error, ...default_ }
-  diagnostics.push(...validateComponentExports(modulePaths, allComponents))
+  const components = Object.assign({}, ...Object.values(componentMap))
+  diagnostics.push(...validateComponentExports(modulePaths, components))
   diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
   return { diagnostics, modulePaths }
 }
