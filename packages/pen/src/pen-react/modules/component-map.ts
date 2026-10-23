@@ -31,8 +31,8 @@ function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string
 
 /** Creates role-specific component maps and collects their module paths.
  *
- *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role.
- *  @returns The role-separated map, and every discovered path - the full input createRouter expects. */
+ *  @param moduleRegistry - Each role's raw glob'd modules, keyed by role.
+ *  @returns The component map and paths with function default exports. */
 export function createComponentMap(moduleRegistry: ModuleRegistry): [componentMap: ComponentMap, componentPaths: string[]] {
   const componentMap: ComponentMap = {
     page: createFunctionMap<PageComponent>(moduleRegistry.page),
