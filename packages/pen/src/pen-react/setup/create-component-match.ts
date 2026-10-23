@@ -1,6 +1,7 @@
 import type { Match, Frame, Endpoint, PositionNode } from '@/pen-core'
 import type { ComponentFrame, ComponentEndpoint, ComponentMatch } from '@/pen-react/renderer/types/matcher'
 import type { ComponentMap } from './create-component-map'
+import { traverse } from '@/lib/traverse'
 
 // Turns a Match's path strings into the actual components the renderer
 // needs, so the renderer itself never has to know a component map exists.
@@ -28,19 +29,45 @@ function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: Component
   }
 }
 
-/** Creates a component match by resolving its endpoint and recursively resolving its slot matches.
+/** Resolves one match's endpoint, with no slots attached yet. */
+function resolveShell(match: Match, components: ComponentMap): ComponentMatch {
+  return {
+    endpoint: resolveEndpoint(match.endpoint, components),
+    params: match.params,
+  }
+}
+
+/** Creates a component match by resolving its endpoint and every nested slot
+ *  match, walking the slot tree with `traverse` instead of recursing.
+ *  slotNameOf recovers each slot's name, lost when expand flattens the
+ *  slots record into the plain array traverse expects.
+ *
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
 export function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
-  const resolved: ComponentMatch = {
-    endpoint: resolveEndpoint(match.endpoint, components),
-    params: match.params,
-  }
-  if (match.slots) {
-    resolved.slots = {}
-    for (const [name, slotMatch] of Object.entries(match.slots))
-      resolved.slots[name] = createComponentMatch(slotMatch, components)
-  }
-  return resolved
+  const resolvedOf = new Map<Match, ComponentMatch>()
+  const slotNameOf = new Map<Match, string>()
+
+  const root = resolveShell(match, components)
+  resolvedOf.set(match, root)
+
+  traverse(match, {
+    expand: (node) => {
+      if (!node.slots) return []
+      for (const [name, slotMatch] of Object.entries(node.slots))
+        slotNameOf.set(slotMatch, name)
+      return Object.values(node.slots)
+    },
+    attach: (child, parent) => {
+      const resolved = resolveShell(child, components)
+      resolvedOf.set(child, resolved)
+
+      const parentResolved = resolvedOf.get(parent)!
+      parentResolved.slots ??= {}
+      parentResolved.slots[slotNameOf.get(child)!] = resolved
+    },
+  })
+
+  return root
 }
