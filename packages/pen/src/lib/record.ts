@@ -38,3 +38,19 @@ export function pickRecord<T>(record: Record<string, T>, keys: readonly string[]
       newRecord[key] = record[key]! // safe since key is in record
   return newRecord
 }
+
+/** Returns the first `count` entries of a record.
+ *
+ *  @param record - The record to slice.
+ *  @param count - The maximum number of entries to include.
+ *  @returns A new record containing the first `count` entries. */
+export function sliceRecord<T>(record: Record<string, T>, count: number): Record<string, T> {
+  const newRecord: Record<string, T> = {}
+  let index = 0
+
+  for (const key in record) {
+    if (index++ >= count) break
+    newRecord[key] = record[key]!
+  }
+  return newRecord
+}
