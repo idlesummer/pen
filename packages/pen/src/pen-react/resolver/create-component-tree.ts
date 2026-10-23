@@ -3,7 +3,7 @@ import type { ComponentMap } from '@/pen-react/modules'
 import type { PageComponent, DefaultComponent, LayoutComponent, LoadingComponent, ErrorComponent } from '@/pen-react/render'
 import { traverse } from '@/lib/traverse'
 
-/** A frame with every path reference already resolved to a component. */
+/** A frame with component references in place of component paths. */
 export type ComponentFrame = {
   layout?: LayoutComponent
   loading?: LoadingComponent
@@ -13,23 +13,19 @@ export type ComponentFrame = {
   paramCount: number
 }
 
-/** An endpoint with its content and frame chain already resolved. */
+/** An endpoint with its content and frames converted to components. */
 export type ComponentEndpoint = {
   frames: ComponentFrame[]
   content: PageComponent | DefaultComponent
   paramCount: number
 }
 
-/** A route match with every path reference resolved into a real component -
- *  everything the renderer needs to build a React tree, and nothing else. */
+/** A match tree with component references in place of component paths. */
 export type ComponentMatch = {
   endpoint: ComponentEndpoint
   params: Params
   slots?: Record<string, ComponentMatch>
 }
-
-// Turns a Match's path strings into the actual components the renderer
-// needs, so the renderer itself never has to know a component map exists.
 
 /** Replaces a frame's component paths with their actual corresponding components. */
 function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
