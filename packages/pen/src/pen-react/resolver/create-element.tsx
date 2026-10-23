@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Match, Params } from '@/pen-core'
+import type { RouteMatcher, Params } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
 import type { ComponentFrame, ComponentMatch } from './component-tree'
 import { AwaitComponent } from '@/lib/await-component'
@@ -32,7 +32,7 @@ function wrapFrame(frame: ComponentFrame, content: ReactNode, fullParams: Params
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(match: ComponentMatch, slotComponents: ReactNodeMap, pathname: string): ReactNode {
+function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNodeMap): ReactNode {
   const { endpoint, params } = match
   const Content = endpoint.content
   const contentProps = { params: sliceRecord(params, endpoint.paramCount) }
@@ -42,7 +42,7 @@ function renderChain(match: ComponentMatch, slotComponents: ReactNodeMap, pathna
     : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
-    (element, frame) => wrapFrame(frame, element, params, slotComponents, pathname),
+    (element, frame) => wrapFrame(frame, element, params, slotComponents, url),
     contentElement,
   )
 }
@@ -54,11 +54,12 @@ function renderChain(match: ComponentMatch, slotComponents: ReactNodeMap, pathna
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve path references.
  *  @param pathname - The pathname being rendered, passed through to boundaries. */
-export function createRouteElement(match: Match, components: ComponentMap, pathname: string): ReactNode {
-  const mainMatch = createComponentTree(match, components)
+export function createRouteElement(url: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
+  const routeMatch = routeMatcher(url)
+  const mainMatch = createComponentTree(routeMatch, components)
   const slotComponents: ReactNodeMap = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotComponents[slotName] = renderChain(slotMatch, {}, pathname)
-  return renderChain(mainMatch, slotComponents, pathname)
+    slotComponents[slotName] = renderChain(url, slotMatch, {})
+  return renderChain(url, mainMatch, slotComponents)
 }
