@@ -1,13 +1,13 @@
 import type { Module } from '@/lib/module'
 import type { Diagnostic } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
-import type { AnyComponent } from './create-component-map'
+import type { AnyComponent } from './component-map'
 import type { ModuleRegistry } from './module-registry'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, getModuleRole, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { createComponentMap } from './create-component-map'
+import { createComponentMap } from './component-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
 /** The result of compiling and validating the app's routes. */

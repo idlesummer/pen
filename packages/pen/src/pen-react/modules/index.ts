@@ -1,5 +1,5 @@
 export type { ModuleRegistry } from './module-registry'
-export type { ComponentMap } from './create-component-map'
-export { createComponentMap } from './create-component-map'
+export type { ComponentMap } from './component-map'
+export { createComponentMap } from './component-map'
 export { validateComponentExports, validateAsyncPages } from './validate'
 export { reportRouteDiagnostics } from './diagnose-routes'
