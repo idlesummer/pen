@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Match, Params } from '@/pen-core'
-import type { ComponentMap } from '@/pen-react/setup'
+import type { ComponentMap } from '@/pen-react/modules'
 import type { ComponentFrame, ComponentMatch } from './create-component-tree'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary, LoadingBoundary, ErrorBoundary } from '@/pen-react/renderer'

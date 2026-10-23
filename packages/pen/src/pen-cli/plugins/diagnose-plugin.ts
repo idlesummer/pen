@@ -2,7 +2,7 @@ import type { Plugin, ViteDevServer } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { join, relative } from 'node:path'
 import * as log from '@/pen-cli/logger/console'
-import { reportRouteDiagnostics } from '@/pen-react/setup'
+import { reportRouteDiagnostics } from '@/pen-react/modules'
 
 const WATCH_DEBOUNCE_MS = 150
 
