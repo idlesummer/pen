@@ -25,3 +25,16 @@ export function compactMapRecord<T, U>(record: Record<string, T>, mapper: (key: 
   }
   return result
 }
+
+/** Picks the specified keys from a record.
+ *
+ *  @param record - The record to pick entries from.
+ *  @param keys - The keys to include in the result.
+ *  @returns A new record containing the selected entries. */
+export function pickRecord<T>(record: Record<string, T>, keys: readonly string[]): Record<string, T> {
+  const newRecord: typeof record = {}
+  for (const key of keys)
+    if (key in record)
+      newRecord[key] = record[key]! // safe since key is in record
+  return newRecord
+}
