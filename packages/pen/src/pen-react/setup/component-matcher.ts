@@ -9,7 +9,7 @@ import { createRouteElement } from '@/pen-react/resolver'
  *
  *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role. */
 export function createComponentMatcher(moduleRegistry: ModuleRegistry): (url: string) => ReactNode {
-  const { componentMap, componentPaths } = createComponentMap(moduleRegistry)
+  const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
   const { routeMatcher } = createRouter(componentPaths)
   const componentMatcher = (url: string) => createRouteElement(url, routeMatcher, componentMap)
   return componentMatcher
