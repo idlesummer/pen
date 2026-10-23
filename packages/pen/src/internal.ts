@@ -7,7 +7,7 @@ export type {
   LoadingComponent,
   ErrorComponent,
   DefaultComponent,
-} from './pen-react/renderer'
+} from './pen-react/render'
 
-export { PenApp } from './pen-react/renderer'
+export { PenApp } from './pen-react/render'
 export { createComponentMatcher } from './pen-react/component-matcher'
