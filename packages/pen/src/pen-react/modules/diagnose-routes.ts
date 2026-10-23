@@ -1,6 +1,6 @@
+import type { ViteDevServer } from 'vite'
 import type { Module } from '@/lib/module'
 import type { Diagnostic } from '@/pen-core'
-import type { ViteDevServer } from 'vite'
 import type { AnyComponent } from './component-map'
 import type { ModuleRegistry } from './module-registry'
 import { basename, join } from 'node:path'
