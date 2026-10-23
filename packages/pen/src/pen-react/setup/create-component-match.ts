@@ -9,7 +9,7 @@ import { traverse } from '@/lib/traverse'
 /** Resolves one frame's path references into real components. Assertions are
  *  safe because frames and components come from the same createRouter() call -
  *  a missing component indicates a compiler bug. */
-function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
+function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
   return {
     layout: frame.layout ? components.layout[frame.layout] : undefined,
     loading: frame.loading ? components.loading[frame.loading] : undefined,
@@ -21,9 +21,9 @@ function resolveFrame(frame: Frame<PositionNode>, components: ComponentMap): Com
 }
 
 /** Resolves an endpoint's content and frame chain into real components. */
-function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
+function createComponentEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
   return {
-    frames: endpoint.frames.map(frame => resolveFrame(frame, components)),
+    frames: endpoint.frames.map(frame => createComponentFrame(frame, components)),
     content: (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!,
     paramCount: endpoint.paramCount,
   }
@@ -32,7 +32,7 @@ function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: Component
 /** Resolves one match's endpoint, with no slots attached yet. */
 function resolveShell(match: Match, components: ComponentMap): ComponentMatch {
   return {
-    endpoint: resolveEndpoint(match.endpoint, components),
+    endpoint: createComponentEndpoint(match.endpoint, components),
     params: match.params,
   }
 }
