@@ -3,7 +3,7 @@ import type { AnyComponent, ComponentMap } from './create-component-map'
 import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 
 /** Validates that every discovered module has a valid component default export. */
-export function validateComponentExports(modulePaths: string[], allComponents: Record<string, AnyComponent>): Diagnostic[] {
+export function validateComponentExports(modulePaths: string[], components: Record<string, AnyComponent>): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const path of modulePaths) {
@@ -11,7 +11,7 @@ export function validateComponentExports(modulePaths: string[], allComponents: R
     // nothing to validate, and their names get minified in the published build
     if (path === GLOBAL_DEFAULT || path === GLOBAL_ERROR) continue
 
-    const Content = allComponents[path]
+    const Content = components[path]
     if (typeof Content !== 'function') {
       diagnostics.push(createDiagnostic({
         rule: 'invalid-component-export',
