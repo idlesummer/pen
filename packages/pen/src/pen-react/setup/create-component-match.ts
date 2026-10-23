@@ -1,4 +1,4 @@
-import type { Match, RouteMatcher, Frame, Endpoint, PositionNode } from '@/pen-core'
+import type { Match, Frame, Endpoint, PositionNode } from '@/pen-core'
 import type { ComponentFrame, ComponentEndpoint, ComponentMatch } from '@/pen-react/renderer/types/matcher'
 import type { ComponentMap } from './create-component-map'
 
@@ -31,8 +31,11 @@ function resolveEndpoint(endpoint: Endpoint<PositionNode>, components: Component
   }
 }
 
-/** Resolves a match's endpoint and every slot's match, recursively. */
-function resolveMatch(match: Match, components: ComponentMap): ComponentMatch {
+/** Creates a component match by resolving its endpoint and recursively resolving its slot matches.
+ *  @param match - The matched endpoint and its nested slot matches.
+ *  @param components - The component map used to resolve endpoints.
+ *  @returns The component match with resolved components and preserved params. */
+export function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
   const resolved: ComponentMatch = {
     endpoint: resolveEndpoint(match.endpoint, components),
     params: match.params,
@@ -40,17 +43,7 @@ function resolveMatch(match: Match, components: ComponentMap): ComponentMatch {
   if (match.slots) {
     resolved.slots = {}
     for (const [name, slotMatch] of Object.entries(match.slots))
-      resolved.slots[name] = resolveMatch(slotMatch, components)
+      resolved.slots[name] = createComponentMatch(slotMatch, components)
   }
   return resolved
-}
-
-/** Wraps a route matcher so it resolves straight to a renderable match - the
- *  renderer never needs to know a component map exists.
- *
- *  @param routeMatcher - A compiled route matcher, from createRouter.
- *  @param components - The component map to resolve path references against.
- *  @returns A function from pathname straight to a resolved, renderable match. */
-export function createComponentResolver(routeMatcher: RouteMatcher, components: ComponentMap): ComponentMatcher {
-  return pathname => resolveMatch(routeMatcher(pathname), components)
 }
