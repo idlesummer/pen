@@ -3,10 +3,11 @@ export type Module<T = unknown> = {
   default: T
 }
 
-/** A callable accepting unknown arguments and returning an unknown value.
- *  Unlike `Function`, calling it requires arguments compatible with its
- *  signature and does not return `any`. */
-export type FunctionType = (...args: never[]) => unknown
+/** A constraint matching any function shape, for generics that need to
+ *  accept a specific function type `T` as a type argument - `any` here
+ *  only widens what's allowed to satisfy the bound; it never appears in
+ *  a value position, so it can't leak into what callers actually get. */
+export type AnyFunctionConstraint = (...args: any[]) => unknown // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /** Checks whether a value is a non-null record. */
 function isRecord(value: unknown): value is Record<string, unknown> {

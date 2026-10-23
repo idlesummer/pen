@@ -3,7 +3,7 @@ import type { LayoutComponent } from '@/pen-react/render/components/LayoutCompon
 import type { LoadingComponent } from '@/pen-react/render/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/render/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoundary'
-import type { Module, FunctionType } from '@/lib/module'
+import type { Module, AnyFunctionConstraint } from '@/lib/module'
 import type { ModuleRegistry } from './module-registry'
 import { hasDefaultExport } from '@/lib/module'
 
@@ -34,13 +34,13 @@ export type BuiltComponentMap = {
 /** Checks whether a value is a module with a function default export.
  *  @param value - The value to check.
  *  @returns Whether the value is a module with a function default export. */
-function hasFunctionDefaultExport<T extends FunctionType>(value: unknown): value is Module<T> {
+function hasFunctionDefaultExport<T extends AnyFunctionConstraint>(value: unknown): value is Module<T> {
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
 /** Resolves a role's glob entries into components, keyed by normalized path.
  *  Drops entries that don't contain a function default export. */
-function createFunctionMap<T extends FunctionType>(moduleMap: Record<string, unknown>): Record<string, T> {
+function createFunctionMap<T extends AnyFunctionConstraint>(moduleMap: Record<string, unknown>): Record<string, T> {
   const components: Record<string, T> = {}
   for (const [path, module] of Object.entries(moduleMap)) {
     if (hasFunctionDefaultExport<T>(module))
