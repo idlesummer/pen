@@ -3,9 +3,9 @@ export type Module<T = unknown> = {
   default: T
 }
 
-/** Any callable value, with nothing assumed about its parameters or return
- *  type - unlike the built-in `Function`, calling it still requires narrowing
- *  first instead of silently handing back `any`. */
+/** A callable accepting unknown arguments and returning an unknown value.
+ *  Unlike `Function`, calling it requires arguments compatible with its
+ *  signature and does not return `any`. */
 export type AnyFunction = (...args: unknown[]) => unknown
 
 /** Checks whether a value is a non-null record. */
