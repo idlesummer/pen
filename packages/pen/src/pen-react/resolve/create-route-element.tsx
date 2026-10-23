@@ -5,19 +5,14 @@ import type { ComponentFrame, ComponentMatch } from './create-component-tree'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary, LoadingBoundary, ErrorBoundary } from '@/pen-react/render'
 import { createComponentTree } from './create-component-tree'
-import { pickRecord } from '@/lib/record'
+import { pickRecord, sliceRecord } from '@/lib/record'
 
 type ReactNodeMap = Record<string, ReactNode>
-
-/** Returns params up to the given bind depth as an object. */
-function sliceParams(params: Params, depth: number): Params {
-  return Object.fromEntries(Object.entries(params).slice(0, depth))
-}
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
 function wrapFrame(frame: ComponentFrame, content: ReactNode, fullParams: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
-  const params = sliceParams(fullParams, frame.paramCount)
+  const params = sliceRecord(fullParams, frame.paramCount)
 
   if (frame.default) {
     content = <DefaultBoundary Fallback={frame.default} pathname={pathname} params={params}>{content}</DefaultBoundary>
@@ -40,7 +35,7 @@ function wrapFrame(frame: ComponentFrame, content: ReactNode, fullParams: Params
 function renderChain(match: ComponentMatch, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   const { endpoint, params } = match
   const Content = endpoint.content
-  const contentProps = { params: sliceParams(params, endpoint.paramCount) }
+  const contentProps = { params: sliceRecord(params, endpoint.paramCount) }
 
   const contentElement = Content.constructor.name === 'AsyncFunction'
     ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
