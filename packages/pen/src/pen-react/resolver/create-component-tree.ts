@@ -31,9 +31,7 @@ export type ComponentMatch = {
 // Turns a Match's path strings into the actual components the renderer
 // needs, so the renderer itself never has to know a component map exists.
 
-/** Resolves one frame's path references into real components. Assertions are
- *  safe because frames and components come from the same createRouter() call -
- *  a missing component indicates a compiler bug. */
+/** Replaces a frame's component paths with their actual corresponding components. */
 function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
   return {
     layout: frame.layout ? components.layout[frame.layout] : undefined,
@@ -45,7 +43,7 @@ function createComponentFrame(frame: Frame<PositionNode>, components: ComponentM
   }
 }
 
-/** Resolves an endpoint's content and frame chain into real components. */
+/** Replaces an endpoint's content path and frame paths with their corresponding components. */
 function createComponentEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
   const frames = endpoint.frames.map(frame => createComponentFrame(frame, components))
   const content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
@@ -53,15 +51,14 @@ function createComponentEndpoint(endpoint: Endpoint<PositionNode>, components: C
   return { frames, content, paramCount }
 }
 
-/** Resolves one match's endpoint, with no slots attached yet. */
+/** Converts a match into a component match, preserving its params. */
 function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
   const endpoint = createComponentEndpoint(match.endpoint, components)
   const params = match.params
   return { endpoint, params }
 }
 
-/** Creates a component match by resolving its endpoint and every nested slot
- *  match, walking the slot tree with `traverse` instead of recursing.
+/** Converts a match tree's component paths into component references for the renderer.
  *
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
