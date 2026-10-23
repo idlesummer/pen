@@ -3,9 +3,9 @@ import type { LayoutComponent } from '@/pen-react/render/components/LayoutCompon
 import type { LoadingComponent } from '@/pen-react/render/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/render/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoundary'
-import type { Module, AnyFunctionConstraint } from '@/lib/module'
+import type { AnyFunctionConstraint } from '@/lib/module'
 import type { ModuleRegistry } from './module-registry'
-import { hasDefaultExport } from '@/lib/module'
+import { hasFunctionDefaultExport } from '@/lib/module'
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
 export type AnyComponent =
@@ -29,13 +29,6 @@ export type BuiltComponentMap = {
   allComponents: Record<string, AnyComponent>
   /** Every discovered path, across all roles - the full input createRouter expects. */
   componentPaths: string[]
-}
-
-/** Checks whether a value is a module with a function default export.
- *  @param value - The value to check.
- *  @returns Whether the value is a module with a function default export. */
-function hasFunctionDefaultExport<T extends AnyFunctionConstraint>(value: unknown): value is Module<T> {
-  return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
 /** Resolves a role's glob entries into components, keyed by normalized path.

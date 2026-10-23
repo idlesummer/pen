@@ -17,6 +17,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /** Checks that a value is a module with a default export.
  *  @param value - The value to check, typically a glob'd or dynamically imported entry.
  *  @returns Whether the value is a module with a `default` property. */
-export function hasDefaultExport(value: unknown): value is Module {
+function hasDefaultExport(value: unknown): value is Module {
   return isRecord(value) && 'default' in value
+}
+
+/** Checks whether a value is a module with a function default export.
+ *  @param value - The value to check.
+ *  @returns Whether the value is a module with a function default export. */
+export function hasFunctionDefaultExport<T extends AnyFunctionConstraint>(value: unknown): value is Module<T> {
+  return hasDefaultExport(value) && typeof value.default === 'function'
 }
