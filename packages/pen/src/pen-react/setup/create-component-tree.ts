@@ -10,13 +10,14 @@ import { traverse } from '@/lib/traverse'
  *  safe because frames and components come from the same createRouter() call -
  *  a missing component indicates a compiler bug. */
 function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
-  const layout = frame.layout ? components.layout[frame.layout] : undefined
-  const loading = frame.loading ? components.loading[frame.loading] : undefined
-  const error = frame.error ? components.error[frame.error] : undefined
-  const default_ = frame.default ? components.default[frame.default] : undefined
-  const slots = frame.slots ? Object.keys(frame.slots) : undefined
-  const paramCount = frame.paramCount
-  return { layout, loading, error, default: default_, slots, paramCount }
+  return {
+    layout: frame.layout ? components.layout[frame.layout] : undefined,
+    loading: frame.loading ? components.loading[frame.loading] : undefined,
+    error: frame.error ? components.error[frame.error] : undefined,
+    default: frame.default ? components.default[frame.default] : undefined,
+    slots: frame.slots ? Object.keys(frame.slots) : undefined,
+    paramCount: frame.paramCount,
+  }
 }
 
 /** Resolves an endpoint's content and frame chain into real components. */
@@ -43,11 +44,10 @@ function createComponentMatch(match: Match, components: ComponentMap): Component
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
 export function createComponentTree(match: Match, components: ComponentMap): ComponentMatch {
-  const slotComponentMatchOf = new Map<Match, ComponentMatch>()
+  const componentMatchOf = new Map<Match, ComponentMatch>()
   const slotNameOf = new Map<Match, string>()
-
-  const mainComponentMatch = createComponentMatch(match, components)
-  slotComponentMatchOf.set(match, mainComponentMatch)
+  const rootComponentMatch = createComponentMatch(match, components)
+  componentMatchOf.set(match, rootComponentMatch)
 
   traverse(match, {
     expand: (node) => {
@@ -57,13 +57,13 @@ export function createComponentTree(match: Match, components: ComponentMap): Com
       return Object.values(node.slots)
     },
     attach: (child, parent) => {
-      const resolved = createComponentMatch(child, components)
-      slotComponentMatchOf.set(child, resolved)
+      const componentMatch = createComponentMatch(child, components)
+      componentMatchOf.set(child, componentMatch)
 
-      const parentResolved = slotComponentMatchOf.get(parent)!
-      parentResolved.slots ??= {}
-      parentResolved.slots[slotNameOf.get(child)!] = resolved
+      const parentComponentMatch = componentMatchOf.get(parent)!
+      parentComponentMatch.slots ??= {}
+      parentComponentMatch.slots[slotNameOf.get(child)!] = componentMatch
     },
   })
-  return mainComponentMatch
+  return rootComponentMatch
 }
