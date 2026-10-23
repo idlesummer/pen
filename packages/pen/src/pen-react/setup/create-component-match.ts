@@ -10,31 +10,28 @@ import { traverse } from '@/lib/traverse'
  *  safe because frames and components come from the same createRouter() call -
  *  a missing component indicates a compiler bug. */
 function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
-  return {
-    layout: frame.layout ? components.layout[frame.layout] : undefined,
-    loading: frame.loading ? components.loading[frame.loading] : undefined,
-    error: frame.error ? components.error[frame.error] : undefined,
-    default: frame.default ? components.default[frame.default] : undefined,
-    slots: frame.slots ? Object.keys(frame.slots) : undefined,
-    paramCount: frame.paramCount,
-  }
+  const layout = frame.layout ? components.layout[frame.layout] : undefined
+  const loading = frame.loading ? components.loading[frame.loading] : undefined
+  const error = frame.error ? components.error[frame.error] : undefined
+  const default_ = frame.default ? components.default[frame.default] : undefined
+  const slots = frame.slots ? Object.keys(frame.slots) : undefined
+  const paramCount = frame.paramCount
+  return { layout, loading, error, default: default_, slots, paramCount }
 }
 
 /** Resolves an endpoint's content and frame chain into real components. */
 function createComponentEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
-  return {
-    frames: endpoint.frames.map(frame => createComponentFrame(frame, components)),
-    content: (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!,
-    paramCount: endpoint.paramCount,
-  }
+  const frames = endpoint.frames.map(frame => createComponentFrame(frame, components))
+  const content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
+  const paramCount = endpoint.paramCount
+  return { frames, content, paramCount }
 }
 
 /** Resolves one match's endpoint, with no slots attached yet. */
-function resolveShell(match: Match, components: ComponentMap): ComponentMatch {
-  return {
-    endpoint: createComponentEndpoint(match.endpoint, components),
-    params: match.params,
-  }
+function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
+  const endpoint = createComponentEndpoint(match.endpoint, components)
+  const params = match.params
+  return { endpoint, params }
 }
 
 /** Creates a component match by resolving its endpoint and every nested slot
@@ -45,28 +42,28 @@ function resolveShell(match: Match, components: ComponentMap): ComponentMatch {
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
-export function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
-  const resolvedOf = new Map<Match, ComponentMatch>()
+export function createComponentTree(match: Match, components: ComponentMap): ComponentMatch {
+  const slotComponentMatchOf = new Map<Match, ComponentMatch>()
   const slotNameOf = new Map<Match, string>()
 
-  const root = resolveShell(match, components)
-  resolvedOf.set(match, root)
+  const mainComponentMatch = createComponentMatch(match, components)
+  slotComponentMatchOf.set(match, mainComponentMatch)
 
   traverse(match, {
     expand: (node) => {
       if (!node.slots) return []
-      for (const [name, slotMatch] of Object.entries(node.slots))
-        slotNameOf.set(slotMatch, name)
+      for (const [slotName, slotMatch] of Object.entries(node.slots))
+        slotNameOf.set(slotMatch, slotName)
       return Object.values(node.slots)
     },
     attach: (child, parent) => {
-      const resolved = resolveShell(child, components)
-      resolvedOf.set(child, resolved)
+      const resolved = createComponentMatch(child, components)
+      slotComponentMatchOf.set(child, resolved)
 
-      const parentResolved = resolvedOf.get(parent)!
+      const parentResolved = slotComponentMatchOf.get(parent)!
       parentResolved.slots ??= {}
       parentResolved.slots[slotNameOf.get(child)!] = resolved
     },
   })
-  return root
+  return mainComponentMatch
 }

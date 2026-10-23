@@ -3,7 +3,7 @@ import type { ComponentMatcher } from '@/pen-react/renderer'
 import { createRouter } from '@/pen-core'
 import { createComponentRegistry } from './create-component-registry'
 import { createComponentMap } from './create-component-map'
-import { createComponentMatch } from './create-component-match'
+import { createComponentTree } from './create-component-match'
 
 /** Resolves a raw module registry into a component matcher - a function
  *  straight from pathname to a renderable match.
@@ -14,6 +14,6 @@ export function createComponentMatcher(moduleRegistry: ModuleRegistry): Componen
   const { componentMap, componentPaths } = createComponentMap(componentRegistry)
 
   const { routeMatcher } = createRouter(componentPaths)
-  const componentMatcher = (url: string) => createComponentMatch(routeMatcher(url), componentMap)
+  const componentMatcher = (url: string) => createComponentTree(routeMatcher(url), componentMap)
   return componentMatcher
 }
