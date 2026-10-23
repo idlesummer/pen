@@ -45,20 +45,13 @@ function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string
  *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
 export function createComponentMap(moduleRegistry: ModuleRegistry): BuiltComponentMap {
-  const page = createFunctionMap<PageComponent>(moduleRegistry.page)
-  const layout = createFunctionMap<LayoutComponent>(moduleRegistry.layout)
-  const loading = createFunctionMap<LoadingComponent>(moduleRegistry.loading)
-  const error = createFunctionMap<ErrorComponent>(moduleRegistry.error)
-  const default_ = createFunctionMap<DefaultComponent>(moduleRegistry.default)
-
-  return {
-    componentMap: { page, layout, loading, error, default: default_ },
-    componentPaths: [
-      ...Object.keys(page),
-      ...Object.keys(layout),
-      ...Object.keys(loading),
-      ...Object.keys(error),
-      ...Object.keys(default_),
-    ],
+  const componentMap: ComponentMap = {
+    page: createFunctionMap<PageComponent>(moduleRegistry.page),
+    layout: createFunctionMap<LayoutComponent>(moduleRegistry.layout),
+    loading: createFunctionMap<LoadingComponent>(moduleRegistry.loading),
+    error: createFunctionMap<ErrorComponent>(moduleRegistry.error),
+    default: createFunctionMap<DefaultComponent>(moduleRegistry.default),
   }
+  const componentPaths = Object.values(componentMap).flatMap(Object.keys)
+  return { componentMap, componentPaths }
 }
