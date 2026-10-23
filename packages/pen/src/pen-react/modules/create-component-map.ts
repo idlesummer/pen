@@ -3,7 +3,9 @@ import type { LayoutComponent } from '@/pen-react/render/components/LayoutCompon
 import type { LoadingComponent } from '@/pen-react/render/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/render/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoundary'
-import type { ComponentRegistry } from './create-component-registry'
+import type { Module, FunctionType } from '@/lib/module'
+import type { ModuleRegistry } from './module-registry'
+import { hasDefaultExport } from '@/lib/module'
 
 /** Any role's component, once resolved - for checks that don't care which role a path belongs to. */
 export type AnyComponent =
@@ -29,18 +31,35 @@ export type BuiltComponentMap = {
   componentPaths: string[]
 }
 
-/** Assembles an already-cleaned registry into a usable component map,
+/** Checks whether a value is a module with a function default export.
+ *  @param value - The value to check.
+ *  @returns Whether the value is a module with a function default export. */
+function hasFunctionDefaultExport(value: unknown): value is Module<FunctionType> {
+  return hasDefaultExport(value) && typeof value.default === 'function'
+}
+
+/** Resolves a role's glob entries into components, keyed by normalized path.
+ *  Drops entries that don't contain a function default export. */
+function createFunctionMap(registry: Record<string, unknown>): Record<string, FunctionType> {
+  const components: Record<string, FunctionType> = {}
+  for (const [path, value] of Object.entries(registry)) {
+    if (hasFunctionDefaultExport(value))
+      components[path.replace(/^\.\//, '')] = value.default
+  }
+  return components
+}
+
+/** Verifies and assembles a raw module registry into a usable component map,
  *  shared by both the production app-building path and the dev-time diagnostics path.
- *  Each role's entries are already confirmed components - only the role label changes.
  *
- *  @param registry - Each role's cleaned entries, keyed by role.
+ *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role.
  *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
-export function createComponentMap(registry: ComponentRegistry): BuiltComponentMap {
-  const page = registry.page as Record<string, PageComponent>
-  const layout = registry.layout as Record<string, LayoutComponent>
-  const loading = registry.loading as Record<string, LoadingComponent>
-  const error = registry.error as Record<string, ErrorComponent>
-  const default_ = registry.default as Record<string, DefaultComponent>
+export function createComponentMap(moduleRegistry: ModuleRegistry): BuiltComponentMap {
+  const page = createFunctionMap(moduleRegistry.page) as Record<string, PageComponent>
+  const layout = createFunctionMap(moduleRegistry.layout) as Record<string, LayoutComponent>
+  const loading = createFunctionMap(moduleRegistry.loading) as Record<string, LoadingComponent>
+  const error = createFunctionMap(moduleRegistry.error) as Record<string, ErrorComponent>
+  const default_ = createFunctionMap(moduleRegistry.default) as Record<string, DefaultComponent>
 
   return {
     componentMap: { page, layout, loading, error, default: default_ },

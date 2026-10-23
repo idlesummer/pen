@@ -1,5 +1,4 @@
-export type { ModuleRegistry } from './create-component-registry'
-export { createComponentRegistry } from './create-component-registry'
+export type { ModuleRegistry } from './module-registry'
 export type { ComponentMap } from './create-component-map'
 export { createComponentMap } from './create-component-map'
 export { validateComponentExports, validateAsyncPages } from './validate'

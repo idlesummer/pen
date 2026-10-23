@@ -2,12 +2,11 @@ import type { Module } from '@/lib/module'
 import type { Diagnostic } from '@/pen-core'
 import type { ViteDevServer } from 'vite'
 import type { AnyComponent } from './create-component-map'
-import type { ModuleRegistry } from './create-component-registry'
+import type { ModuleRegistry } from './module-registry'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createRouter, getModuleRole, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
-import { createComponentRegistry } from './create-component-registry'
 import { createComponentMap } from './create-component-map'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
@@ -62,8 +61,7 @@ function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>):
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
   // Load modules, classify by role, and build the component map
   const modules = await ssrGlob<Partial<Module<AnyComponent>>>(projectDir, routesDir, server)
-  const cleaned = createComponentRegistry(classifyByRole(modules))
-  const { componentMap, allComponents, componentPaths } = createComponentMap(cleaned)
+  const { componentMap, allComponents, componentPaths } = createComponentMap(classifyByRole(modules))
 
   // Create router and collect diagnostics
   const { modulePaths, pageEndpoints, diagnostics } = createRouter(componentPaths)
