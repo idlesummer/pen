@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
-import type { Params } from '@/pen-core'
-import type { ComponentFrame, ComponentMatch } from './types/matcher'
+import type { Match, Params } from '@/pen-core'
+import type { ComponentMap } from '@/pen-react/setup'
+import type { ComponentFrame, ComponentMatch } from './create-component-tree'
 import { AwaitComponent } from '@/lib/await-component'
-import { DefaultBoundary } from './components/DefaultBoundary'
-import { LoadingBoundary } from './components/LoadingBoundary'
-import { ErrorBoundary } from './components/ErrorBoundary'
+import { DefaultBoundary, LoadingBoundary, ErrorBoundary } from '@/pen-react/renderer'
+import { createComponentTree } from './create-component-tree'
 
 type ReactNodeMap = Record<string, ReactNode>
 
@@ -59,9 +59,15 @@ function renderChain(match: ComponentMatch, slotComponents: ReactNodeMap, pathna
   )
 }
 
-/** Turns a resolved route match into a React element tree, rendering its
- *  slots first and wrapping the main match with its own frame chain. */
-export function createRouteElement(mainMatch: ComponentMatch, pathname: string): ReactNode {
+/** Resolves a match against the component map and turns it into a React
+ *  element tree, rendering its slots first and wrapping the main match
+ *  with its own frame chain.
+ *
+ *  @param match - The matched endpoint and its nested slot matches.
+ *  @param components - The component map used to resolve path references.
+ *  @param pathname - The pathname being rendered, passed through to boundaries. */
+export function createRouteElement(match: Match, components: ComponentMap, pathname: string): ReactNode {
+  const mainMatch = createComponentTree(match, components)
   const slotComponents: ReactNodeMap = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))

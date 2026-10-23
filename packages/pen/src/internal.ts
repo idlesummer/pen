@@ -10,4 +10,4 @@ export type {
 } from './pen-react/renderer'
 
 export { PenApp } from './pen-react/renderer'
-export { createComponentMatcher } from './pen-react/setup'
+export { createComponentMatcher } from './pen-react/create-component-matcher'

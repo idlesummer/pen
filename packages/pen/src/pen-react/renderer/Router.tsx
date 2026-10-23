@@ -1,10 +1,9 @@
-import type { ComponentMatcher } from './types/matcher'
+import type { ReactNode } from 'react'
 import { Fragment, useMemo } from 'react'
 import { useNavigate } from '@/pen-react/navigation/hooks/use-navigate'
-import { createRouteElement } from './render'
 
 export type RouterProps = {
-  componentMatcher: ComponentMatcher
+  componentMatcher: (pathname: string) => ReactNode
 }
 
 /** Re-matches and renders the route on navigation.
@@ -20,8 +19,7 @@ export function Router({ componentMatcher }: RouterProps) {
   // useMemo only triggers on any navigation action calls inside the tree
   return useMemo(
     () => {
-      const match = componentMatcher(pathname)
-      const routeElement = createRouteElement(match, pathname)
+      const routeElement = componentMatcher(pathname)
       return <Fragment key={refreshes}>{routeElement}</Fragment>
     },
     [
