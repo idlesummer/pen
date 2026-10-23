@@ -1,4 +1,4 @@
-import type { Params } from '@/pen-react/renderer/types/params'
+import type { Params } from '@/pen-core'
 import type { FunctionComponent } from 'react'
 
 type PageComponentProps = {

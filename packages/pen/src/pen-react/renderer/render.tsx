@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import type { ParamEntries } from '@/pen-core'
+import type { Params } from '@/pen-core'
 import type { ComponentFrame, ComponentMatch } from './types/matcher'
-import type { Params } from './types/params'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from './components/DefaultBoundary'
 import { LoadingBoundary } from './components/LoadingBoundary'
@@ -9,9 +8,9 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 
 type ReactNodeMap = Record<string, ReactNode>
 
-/** Returns params up to the given depth as an object. */
-function sliceParams(params: ParamEntries, depth: number): Params {
-  return Object.fromEntries(params.slice(0, depth))
+/** Returns params up to the given bind depth as an object. */
+function sliceParams(params: Params, depth: number): Params {
+  return Object.fromEntries(Object.entries(params).slice(0, depth))
 }
 
 /** Picks out the rendered elements for the slots a frame declares. */
@@ -24,7 +23,7 @@ function getSlotProps(slotNames: string[], slotComponents: ReactNodeMap): ReactN
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(frame: ComponentFrame, content: ReactNode, params: ParamEntries, slotComponents: ReactNodeMap, pathname: string): ReactNode {
+function wrapFrame(frame: ComponentFrame, content: ReactNode, params: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   const paramTable = sliceParams(params, frame.paramCount)
 
   if (frame.default) {

@@ -1,4 +1,4 @@
-export type { Params } from './types/params'
+export type { Params } from '@/pen-core'
 export type { PageComponent } from './components/PageComponent'
 export type { LayoutComponent } from './components/LayoutComponent'
 export type { LoadingComponent } from './components/LoadingBoundary'

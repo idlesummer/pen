@@ -1,20 +1,20 @@
 import type { Endpoint, PositionNode } from '../compiler'
 import { traverse } from '@/lib/traverse'
 
-/** Ordered URL parameter bindings. */
-export type ParamEntries = ReadonlyArray<[name: string, value: string | string[]]>
+/** Maps route param names to their captured values. */
+export type Params = Record<string, string | string[]>
 
 /** A matched endpoint, its params, and any matched slots. */
 export type Match = {
   endpoint: Endpoint<PositionNode> // the winning endpoint - page or fallback, same type either way
-  params: ParamEntries            // every param bound reaching this position, in bind order
+  params: Params                  // every param bound reaching this position, in bind order
   slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
   position: PositionNode
-  params: ParamEntries
+  params: Params
   isCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
   isTerminal?: true
 }
@@ -32,20 +32,20 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
 
   if (position.dynamic) {
     const paramName = position.dynamic.param!
-    const newParams: ParamEntries = [...params, [paramName, segment]]
+    const newParams: Params = { ...params, [paramName]: segment }
     candidates.push({ position: position.dynamic, params: newParams })
   }
   if (position.catchall) {
     const paramName = position.catchall.param!
     const segments = url.slice(position.urlDepth)
-    const newParams: ParamEntries = [...params, [paramName, segments]]
+    const newParams: Params = { ...params, [paramName]: segments }
     candidates.push({ position: position.catchall, params: newParams, isCatchall: true })
   }
   return candidates
 }
 
 /** Finds the best endpoint or fallback using static-preferring DFS. */
-function findMatch(position: PositionNode, url: string[], seedParams: ParamEntries): Match {
+function findMatch(position: PositionNode, url: string[], seedParams: Params): Match {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -82,7 +82,7 @@ function normalizeUrl(pathname: string): string[] {
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
-  const mainMatch = findMatch(positionTree, url, [])
+  const mainMatch = findMatch(positionTree, url, {})
 
   for (const frame of mainMatch.endpoint.frames) {
     if (!frame.slots) continue

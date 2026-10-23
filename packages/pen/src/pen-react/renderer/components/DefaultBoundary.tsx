@@ -1,5 +1,5 @@
 import type { FunctionComponent, PropsWithChildren } from 'react'
-import type { Params } from '@/pen-react/renderer/types/params'
+import type { Params } from '@/pen-core'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
 
