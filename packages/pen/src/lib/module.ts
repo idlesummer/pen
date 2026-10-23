@@ -6,7 +6,7 @@ export type Module<T = unknown> = {
 /** A callable accepting unknown arguments and returning an unknown value.
  *  Unlike `Function`, calling it requires arguments compatible with its
  *  signature and does not return `any`. */
-export type AnyFunction = (...args: unknown[]) => unknown
+export type FunctionType = (...args: unknown[]) => unknown
 
 /** Checks whether a value is a non-null record. */
 function isRecord(value: unknown): value is Record<string, unknown> {

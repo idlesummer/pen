@@ -1,5 +1,4 @@
-import type { Module, AnyFunction } from '@/lib/module'
-import { compactMapRecord } from '@/lib/record'
+import type { Module, FunctionType } from '@/lib/module'
 import { hasDefaultExport } from '@/lib/module'
 
 /** Each role's raw glob'd entries, keyed by path - generic over the entry
@@ -14,32 +13,27 @@ export type ModuleRegistry = {
 }
 
 export type ComponentRegistry = {
-  page: Record<string, AnyFunction>
-  layout: Record<string, AnyFunction>
-  loading: Record<string, AnyFunction>
-  error: Record<string, AnyFunction>
-  default: Record<string, AnyFunction>
+  page: Record<string, FunctionType>
+  layout: Record<string, FunctionType>
+  loading: Record<string, FunctionType>
+  error: Record<string, FunctionType>
+  default: Record<string, FunctionType>
 }
 
 /** Checks whether a value is a module with a function default export.
  *  @param value - The value to check.
  *  @returns Whether the value is a module with a function default export. */
-export function isComponentModule(value: unknown): value is Module<AnyFunction> {
+export function hasFunctionDefaultExport(value: unknown): value is Module<FunctionType> {
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
-/** Strips the leading './' Vite's import.meta.glob puts on every key. */
-function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
-  return compactMapRecord(registry, (path, value) => [path.replace(/^\.\//, ''), value])
-}
-
-/** Resolves one role's registry entries into real components, keyed by path.
- *  Drops any entry that doesn't pass the module guard. */
-function extractComponents(registry: Record<string, unknown>): Record<string, AnyFunction> {
-  const components: Record<string, AnyFunction> = {}
+/** Resolves a role's glob entries into components, keyed by normalized path.
+ *  Drops entries that don't contain a function default export. */
+function createFunctionMap(registry: Record<string, unknown>): Record<string, FunctionType> {
+  const components: Record<string, FunctionType> = {}
   for (const [path, value] of Object.entries(registry)) {
-    if (isComponentModule(value))
-      components[path] = value.default
+    if (hasFunctionDefaultExport(value))
+      components[path.replace(/^\.\//, '')] = value.default
   }
   return components
 }
@@ -48,18 +42,11 @@ function extractComponents(registry: Record<string, unknown>): Record<string, An
  *  @param registry - Raw, unconfirmed registry entries keyed by role.
  *  @returns The same role shape, with every entry confirmed to be a real component. */
 export function createComponentRegistry(moduleRegistry: ModuleRegistry): ComponentRegistry {
-  const newModuleRegistry = {
-    page: normalizeGlobPaths(moduleRegistry.page),
-    layout: normalizeGlobPaths(moduleRegistry.layout),
-    loading: normalizeGlobPaths(moduleRegistry.loading),
-    error: normalizeGlobPaths(moduleRegistry.error),
-    default: normalizeGlobPaths(moduleRegistry.default),
-  }
   return {
-    page: extractComponents(newModuleRegistry.page),
-    layout: extractComponents(newModuleRegistry.layout),
-    loading: extractComponents(newModuleRegistry.loading),
-    error: extractComponents(newModuleRegistry.error),
-    default: extractComponents(newModuleRegistry.default),
+    page: createFunctionMap(moduleRegistry.page),
+    layout: createFunctionMap(moduleRegistry.layout),
+    loading: createFunctionMap(moduleRegistry.loading),
+    error: createFunctionMap(moduleRegistry.error),
+    default: createFunctionMap(moduleRegistry.default),
   }
 }
