@@ -6,10 +6,14 @@ export type Params = Record<string, string | string[]>
 
 /** A matched endpoint, its params, and any matched slots. */
 export type Match = {
+  name: string                     // this match's slot name, or '' for the root match
   endpoint: Endpoint<PositionNode> // the winning endpoint - page or fallback, same type either way
   params: Params                  // every param bound reaching this position, in bind order
   slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
 }
+
+/** What findMatch actually computes - name and slots are the caller's to attach. */
+type MatchResult = Pick<Match, 'endpoint' | 'params'>
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
@@ -45,7 +49,7 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
 }
 
 /** Finds the best endpoint or fallback using static-preferring DFS. */
-function findMatch(position: PositionNode, url: string[], seedParams: Params): Match {
+function findMatch(position: PositionNode, url: string[], seedParams: Params): MatchResult {
   const rootCandidate: MatchCandidate = { position, params: seedParams }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -82,14 +86,14 @@ function normalizeUrl(pathname: string): string[] {
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
-  const mainMatch = findMatch(positionTree, url, {})
+  const mainMatch: Match = { ...findMatch(positionTree, url, {}), name: '' }
 
   for (const frame of mainMatch.endpoint.frames) {
     if (!frame.slots) continue
     mainMatch.slots ??= {}
 
     for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
-      const slotMatch = findMatch(slotPosition, url, mainMatch.params)
+      const slotMatch: Match = { ...findMatch(slotPosition, url, mainMatch.params), name: slotName }
       mainMatch.slots[slotName] = slotMatch
     }
   }
