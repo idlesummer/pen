@@ -37,32 +37,24 @@ function createComponentMatch(match: Match, components: ComponentMap): Component
 
 /** Creates a component match by resolving its endpoint and every nested slot
  *  match, walking the slot tree with `traverse` instead of recursing.
- *  slotNameOf recovers each slot's name, lost when expand flattens the
- *  slots record into the plain array traverse expects.
  *
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
 export function createComponentTree(match: Match, components: ComponentMap): ComponentMatch {
   const componentMatchOf = new Map<Match, ComponentMatch>()
-  const slotNameOf = new Map<Match, string>()
   const rootComponentMatch = createComponentMatch(match, components)
   componentMatchOf.set(match, rootComponentMatch)
 
   traverse(match, {
-    expand: (node) => {
-      if (!node.slots) return []
-      for (const [slotName, slotMatch] of Object.entries(node.slots))
-        slotNameOf.set(slotMatch, slotName)
-      return Object.values(node.slots)
-    },
+    expand: (node) => node.slots ? Object.values(node.slots) : [],
     attach: (child, parent) => {
       const componentMatch = createComponentMatch(child, components)
       componentMatchOf.set(child, componentMatch)
 
       const parentComponentMatch = componentMatchOf.get(parent)!
       parentComponentMatch.slots ??= {}
-      parentComponentMatch.slots[slotNameOf.get(child)!] = componentMatch
+      parentComponentMatch.slots[child.name] = componentMatch
     },
   })
   return rootComponentMatch
