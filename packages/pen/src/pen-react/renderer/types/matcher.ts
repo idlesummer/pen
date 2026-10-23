@@ -1,4 +1,4 @@
-import type { ParamEntries } from '@/pen-core'
+import type { Params } from '@/pen-core'
 import type { PageComponent } from '@/pen-react/renderer/components/PageComponent'
 import type { DefaultComponent } from '@/pen-react/renderer/components/DefaultBoundary'
 import type { LayoutComponent } from '@/pen-react/renderer/components/LayoutComponent'
@@ -26,7 +26,7 @@ export type ComponentEndpoint = {
  *  everything the renderer needs to build a React tree, and nothing else. */
 export type ComponentMatch = {
   endpoint: ComponentEndpoint
-  params: ParamEntries
+  params: Params
   slots?: Record<string, ComponentMatch>
 }
 

@@ -1,5 +1,5 @@
 import type { FunctionComponent, ReactNode } from 'react'
-import type { Params } from '@/pen-react/renderer/types/params'
+import type { Params } from '@/pen-core'
 
 /** A layout component's props receiving route params and slot content. */
 type LayoutComponentProps =
