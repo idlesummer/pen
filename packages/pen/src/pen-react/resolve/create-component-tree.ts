@@ -1,7 +1,32 @@
-import type { Match, Frame, Endpoint, PositionNode } from '@/pen-core'
-import type { ComponentFrame, ComponentEndpoint, ComponentMatch } from '@/pen-react/renderer/types/matcher'
-import type { ComponentMap } from './create-component-map'
+import type { Match, Frame, Endpoint, PositionNode, Params } from '@/pen-core'
+import type { ComponentMap } from '@/pen-react/setup'
+import type { PageComponent, DefaultComponent, LayoutComponent, LoadingComponent, ErrorComponent } from '@/pen-react/renderer'
 import { traverse } from '@/lib/traverse'
+
+/** A frame with every path reference already resolved to a component. */
+export type ComponentFrame = {
+  layout?: LayoutComponent
+  loading?: LoadingComponent
+  error?: ErrorComponent
+  default?: DefaultComponent
+  slots?: string[]
+  paramCount: number
+}
+
+/** An endpoint with its content and frame chain already resolved. */
+export type ComponentEndpoint = {
+  frames: ComponentFrame[]
+  content: PageComponent | DefaultComponent
+  paramCount: number
+}
+
+/** A route match with every path reference resolved into a real component -
+ *  everything the renderer needs to build a React tree, and nothing else. */
+export type ComponentMatch = {
+  endpoint: ComponentEndpoint
+  params: Params
+  slots?: Record<string, ComponentMatch>
+}
 
 // Turns a Match's path strings into the actual components the renderer
 // needs, so the renderer itself never has to know a component map exists.

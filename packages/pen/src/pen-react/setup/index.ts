@@ -1,4 +1,6 @@
+export type { ModuleRegistry } from './create-component-registry'
+export { createComponentRegistry } from './create-component-registry'
+export type { ComponentMap } from './create-component-map'
 export { createComponentMap } from './create-component-map'
-export { createComponentMatcher } from './create-component-matcher'
 export { validateComponentExports, validateAsyncPages } from './validate'
 export { reportRouteDiagnostics } from './diagnose-routes'
