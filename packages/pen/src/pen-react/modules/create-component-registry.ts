@@ -1,5 +1,4 @@
-import type { FunctionComponent } from 'react'
-import type { Module } from '@/lib/module'
+import type { Module, AnyFunction } from '@/lib/module'
 import { compactMapRecord } from '@/lib/record'
 import { hasDefaultExport } from '@/lib/module'
 
@@ -15,17 +14,17 @@ export type ModuleRegistry = {
 }
 
 export type ComponentRegistry = {
-  page: Record<string, FunctionComponent<never>>
-  layout: Record<string, FunctionComponent<never>>
-  loading: Record<string, FunctionComponent<never>>
-  error: Record<string, FunctionComponent<never>>
-  default: Record<string, FunctionComponent<never>>
+  page: Record<string, AnyFunction>
+  layout: Record<string, AnyFunction>
+  loading: Record<string, AnyFunction>
+  error: Record<string, AnyFunction>
+  default: Record<string, AnyFunction>
 }
 
 /** Checks whether a value is a module with a function default export.
  *  @param value - The value to check.
  *  @returns Whether the value is a module with a function default export. */
-export function isComponentModule(value: unknown): value is Module<FunctionComponent<never>> {
+export function isComponentModule(value: unknown): value is Module<AnyFunction> {
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
@@ -36,8 +35,8 @@ function normalizeGlobPaths<T>(registry: Record<string, T>): Record<string, T> {
 
 /** Resolves one role's registry entries into real components, keyed by path.
  *  Drops any entry that doesn't pass the module guard. */
-function extractComponents(registry: Record<string, unknown>): Record<string, FunctionComponent<never>> {
-  const components: Record<string, FunctionComponent<never>> = {}
+function extractComponents(registry: Record<string, unknown>): Record<string, AnyFunction> {
+  const components: Record<string, AnyFunction> = {}
   for (const [path, value] of Object.entries(registry)) {
     if (isComponentModule(value))
       components[path] = value.default
