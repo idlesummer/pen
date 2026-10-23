@@ -54,7 +54,7 @@ function createComponentMatch(match: Match, components: ComponentMap): Component
   return { endpoint, params }
 }
 
-/** Converts a match tree's component paths into component references for the renderer.
+/** Converts a route match tree's component paths into component references for the renderer.
  *
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
