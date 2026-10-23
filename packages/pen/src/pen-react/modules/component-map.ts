@@ -21,13 +21,6 @@ export type ComponentMap = {
   default:  Record<string, DefaultComponent>
 }
 
-type BuiltComponentMap = {
-  /** Each role's components, kept separate - what create-component-matcher.ts's resolveMatch actually looks up from. */
-  componentMap: ComponentMap
-  /** Every discovered path, across all roles - the full input createRouter expects. */
-  componentPaths: string[]
-}
-
 /** Resolves a role's glob entries into components, keyed by normalized path.
  *  Drops entries that don't contain a function default export. */
 function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string, T> {
@@ -43,8 +36,8 @@ function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string
  *  shared by both the production app-building path and the dev-time diagnostics path.
  *
  *  @param moduleRegistry - Each role's raw glob'd entries, keyed by role.
- *  @returns The role-separated map, a flat merge of every role, and every discovered path. */
-export function createComponentMap(moduleRegistry: ModuleRegistry): BuiltComponentMap {
+ *  @returns The role-separated map, and every discovered path - the full input createRouter expects. */
+export function createComponentMap(moduleRegistry: ModuleRegistry): [componentMap: ComponentMap, componentPaths: string[]] {
   const componentMap: ComponentMap = {
     page: createFunctionMap<PageComponent>(moduleRegistry.page),
     layout: createFunctionMap<LayoutComponent>(moduleRegistry.layout),
@@ -53,5 +46,5 @@ export function createComponentMap(moduleRegistry: ModuleRegistry): BuiltCompone
     default: createFunctionMap<DefaultComponent>(moduleRegistry.default),
   }
   const componentPaths = Object.values(componentMap).flatMap(Object.keys)
-  return { componentMap, componentPaths }
+  return [componentMap, componentPaths]
 }
