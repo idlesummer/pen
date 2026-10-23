@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import type { ModuleRegistry } from './setup'
+import type { ModuleRegistry } from './modules'
 import { createRouter } from '@/pen-core'
-import { createComponentRegistry, createComponentMap } from './setup'
+import { createComponentRegistry, createComponentMap } from './modules'
 import { createRouteElement } from './resolve'
 
 /** Resolves a raw module registry into a function straight from pathname

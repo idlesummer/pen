@@ -1,5 +1,5 @@
 import type { Match, Frame, Endpoint, PositionNode, Params } from '@/pen-core'
-import type { ComponentMap } from '@/pen-react/setup'
+import type { ComponentMap } from '@/pen-react/modules'
 import type { PageComponent, DefaultComponent, LayoutComponent, LoadingComponent, ErrorComponent } from '@/pen-react/renderer'
 import { traverse } from '@/lib/traverse'
 
