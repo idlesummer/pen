@@ -1,5 +1,5 @@
 import type { Diagnostic, Endpoint, PositionNode } from '@/pen-core'
-import type { AnyComponent, ComponentMap } from './component-map'
+import type { AnyComponent, ComponentMap } from '@/pen-react/modules'
 import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
 
 /** Validates that every discovered module has a valid component default export. */
