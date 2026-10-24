@@ -34,7 +34,6 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
     logLevel: 'silent',
     server: { middlewareMode: true },
   })
-
   try {
     // Load each role's modules directly and build the component map
     const [page, layout, loading, error, default_] = await Promise.all([
