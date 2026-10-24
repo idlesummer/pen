@@ -9,7 +9,7 @@ const WATCH_DEBOUNCE_MS = 150
 /** Re-checks routes outside the initial build - a watcher-triggered check
  *  can't throw to fail a build like buildStart does, so it just logs. */
 async function logRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer) {
-  const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir, server)
+  const [warnings, error] = await reportRouteDiagnostics(projectDir, routesDir, server)
   for (const message of warnings) log.warn(message)
   if (error) log.error(error)
 }
@@ -48,7 +48,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const { warnings, error } = await reportRouteDiagnostics(projectDir, routesDir, devServer)
+        const [warnings, error] = await reportRouteDiagnostics(projectDir, routesDir, devServer)
 
         for (const message of warnings) this.warn(message)
         if (error) this.error(error)
