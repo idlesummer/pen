@@ -1,9 +1,10 @@
 import type { Plugin, ViteDevServer } from 'vite'
 import type { ModuleRegistry } from '@/pen-react/modules'
 import type { PluginOptions } from './types/plugin-options'
-import { join, relative } from 'node:path'
+import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { createServer } from 'vite'
+import { isPathRelativeTo } from '@/lib/path'
 import * as log from '@/pen-cli/logger/console'
 import { ssrGlob } from '@/lib/ssr-glob'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
@@ -37,19 +38,18 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
   if (!existsSync(join(projectDir, routesDir)))
     return [[], `No such directory: '${routesDir}'`]
 
-  const activeServer = server ?? await createServer({
+  const devServer = server ?? await createServer({
     root: projectDir,
     configFile: false,
     logLevel: 'silent',
     server: { middlewareMode: true },
   })
   try {
-    const moduleRegistry = await loadModuleRegistry(routesDir, activeServer)
+    const moduleRegistry = await loadModuleRegistry(routesDir, devServer)
     return createDiagnosticReport(moduleRegistry, routesDir)
   }
   finally {
-    if (!server)
-      await activeServer.close()  // only close servers created for this call
+    await devServer.close()  // only close servers created for this call
   }
 }
 
@@ -87,11 +87,9 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
     configureServer(server) {
       devServer = server
       const projectDir = server.config.root
-      const absRoutesDir = join(projectDir, routesDir)
-
       const onRouteFileChange = (filePath: string) => {
-        if (!filePath.endsWith('.tsx') || relative(absRoutesDir, filePath).startsWith('..'))
-          return
+        if (!filePath.endsWith('.tsx')) return
+        if (!isPathRelativeTo(filePath, join(projectDir, routesDir))) return
 
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
