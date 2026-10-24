@@ -44,16 +44,6 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    buildStart: {
-      sequential: true,
-      async handler() {
-        const projectDir = this.environment.config.root
-        const [warnings, error] = await reportRouteDiagnostics(projectDir, routesDir, devServer)
-
-        for (const message of warnings) this.warn(message)
-        if (error) this.error(error)
-      },
-    },
     configureServer(server) {
       devServer = server
       const projectDir = server.config.root
@@ -69,6 +59,16 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       }
       server.watcher.on('add', onRouteFileChange)
       server.watcher.on('unlink', onRouteFileChange)
+    },
+    buildStart: {
+      sequential: true,
+      async handler() {
+        const projectDir = this.environment.config.root
+        const [warnings, error] = await reportRouteDiagnostics(projectDir, routesDir, devServer)
+
+        for (const message of warnings) this.warn(message)
+        if (error) this.error(error)
+      },
     },
   }
 }
