@@ -1,1 +1,1 @@
-export { createComponentMatcher } from './component-matcher'
+export { createComponentMatcher, ROUTES_CHANGED_EVENT } from './component-matcher'
