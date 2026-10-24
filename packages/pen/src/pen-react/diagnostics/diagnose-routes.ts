@@ -4,11 +4,6 @@ import { createDiagnostic, createRouter } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
-export type DiagnosticReport = [
-  warnings: string[],
-  error?: string
-]
-
 /** Re-derives a diagnostic's message with its files shown relative to the
  *  project root (app dir included) instead of the app dir alone - otherwise
  *  they look route-shaped but aren't actually openable from where the build runs. */
@@ -24,7 +19,7 @@ function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
 *  @param moduleRegistry - Each role's already-loaded route modules, keyed by role.
 *  @param routesDir - App route directory, used only to format file paths in messages.
 *  @returns A formatted summary of route diagnostics. */
-export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir: string): DiagnosticReport {
+export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir: string): [warnings: string[], error?: string] {
   const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
   const { pageEndpoints, diagnostics } = createRouter(componentPaths)
 
