@@ -17,11 +17,6 @@ function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
   return createDiagnostic({ ...diagnostic, files }).message
 }
 
-/** Scans one role's modules, mirroring production's per-role `import.meta.glob` calls. */
-function scanRole(projectDir: string, routesDir: string, role: string, server: ViteDevServer) {
-  return ssrGlob<unknown>(projectDir, routesDir, `**/${role}.tsx`, server)
-}
-
 /**
  * Scans the app directory for route modules and collects diagnostics from
  * route compilation and validation. Shared by `pen build` (once per build)
@@ -43,11 +38,11 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
   try {
     // Load each role's modules directly and build the component map
     const [page, layout, loading, error, default_] = await Promise.all([
-      scanRole(projectDir, routesDir, 'page', activeServer),
-      scanRole(projectDir, routesDir, 'layout', activeServer),
-      scanRole(projectDir, routesDir, 'loading', activeServer),
-      scanRole(projectDir, routesDir, 'error', activeServer),
-      scanRole(projectDir, routesDir, 'default', activeServer),
+      ssrGlob(projectDir, routesDir, '**/page.tsx', activeServer),
+      ssrGlob(projectDir, routesDir, '**/layout.tsx', activeServer),
+      ssrGlob(projectDir, routesDir, '**/loading.tsx', activeServer),
+      ssrGlob(projectDir, routesDir, '**/error.tsx', activeServer),
+      ssrGlob(projectDir, routesDir, '**/default.tsx', activeServer),
     ])
     const moduleRegistry: ModuleRegistry = { page, layout, loading, error, default: default_ }
     const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
