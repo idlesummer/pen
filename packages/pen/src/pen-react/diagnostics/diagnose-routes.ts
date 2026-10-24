@@ -1,11 +1,11 @@
 import type { ViteDevServer } from 'vite'
-import type { Module } from '@/lib/module'
 import type { Diagnostic } from '@/pen-core'
 import type { ModuleRegistry } from '@/pen-react/modules'
-import { basename, join } from 'node:path'
+import { join } from 'node:path'
 import { existsSync } from 'node:fs'
+import { createServer } from 'vite'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { createDiagnostic, createRouter, getModuleRole } from '@/pen-core'
+import { createDiagnostic, createRouter } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
@@ -17,22 +17,9 @@ function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
   return createDiagnostic({ ...diagnostic, files }).message
 }
 
-/** Splits a flat glob scan into the same role-separated shape the production
- *  path already gets for free from Vite's per-role globs. Entries whose
- *  filename isn't a recognized module role (a stray non-route .tsx file, say)
- *  are silently dropped - modulePaths (from createRouter) stays the real
- *  source of truth for which paths are actual routes. */
-function classifyByRole(modules: Record<string, Partial<Module>>): ModuleRegistry {
-  const byRole: ModuleRegistry = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
-  for (const [path, module] of Object.entries(modules)) {
-    const role = getModuleRole(basename(path))
-    if (role === 'page') byRole.page[path] = module
-    else if (role === 'layout') byRole.layout[path] = module
-    else if (role === 'loading') byRole.loading[path] = module
-    else if (role === 'error') byRole.error[path] = module
-    else if (role === 'default') byRole.default[path] = module
-  }
-  return byRole
+/** Scans one role's modules, mirroring production's per-role `import.meta.glob` calls. */
+function scanRole(projectDir: string, routesDir: string, role: string, server: ViteDevServer) {
+  return ssrGlob<unknown>(projectDir, routesDir, `**/${role}.tsx`, server)
 }
 
 /**
@@ -46,17 +33,37 @@ function classifyByRole(modules: Record<string, Partial<Module>>): ModuleRegistr
  * @returns Diagnostics produced while compiling and validating the routes.
  */
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<Diagnostic[]> {
-  // Load modules, classify by role, and build the component map
-  const modules = await ssrGlob<Partial<Module>>(projectDir, routesDir, server)
-  const [componentMap, componentPaths] = createComponentMap(classifyByRole(modules))
+  const activeServer = server ?? await createServer({
+    root: projectDir,
+    configFile: false,
+    logLevel: 'silent',
+    server: { middlewareMode: true },
+  })
 
-  // Create router and collect diagnostics
-  const { pageEndpoints, diagnostics } = createRouter(componentPaths)
+  try {
+    // Load each role's modules directly and build the component map
+    const [page, layout, loading, error, default_] = await Promise.all([
+      scanRole(projectDir, routesDir, 'page', activeServer),
+      scanRole(projectDir, routesDir, 'layout', activeServer),
+      scanRole(projectDir, routesDir, 'loading', activeServer),
+      scanRole(projectDir, routesDir, 'error', activeServer),
+      scanRole(projectDir, routesDir, 'default', activeServer),
+    ])
+    const moduleRegistry: ModuleRegistry = { page, layout, loading, error, default: default_ }
+    const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
 
-  // Collect additional runtime diagnostics
-  diagnostics.push(...validateComponentExports(componentMap))
-  diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
-  return diagnostics
+    // Create router and collect diagnostics
+    const { pageEndpoints, diagnostics } = createRouter(componentPaths)
+
+    // Collect additional runtime diagnostics
+    diagnostics.push(...validateComponentExports(componentMap))
+    diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
+    return diagnostics
+  }
+  finally {
+    if (!server)
+      await activeServer.close()  // only close servers created for this call
+  }
 }
 
 /** Reports route compilation and validation diagnostics for the app directory.

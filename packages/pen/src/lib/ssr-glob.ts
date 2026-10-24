@@ -1,33 +1,20 @@
 import type { ViteDevServer } from 'vite'
 import { globSync } from 'node:fs'
 import { join } from 'node:path'
-import { createServer, normalizePath } from 'vite'
+import { normalizePath } from 'vite'
 
 /**
- * Imports every route module through Vite's transform pipeline.
+ * Imports every module matching a glob pattern through Vite's transform pipeline.
  *
  * @param projectDir - Absolute path to the project directory.
  * @param routesDir - App route directory relative to the project root.
- * @param server - An existing dev server to reuse, if one is already
- *  running. Otherwise a throwaway one is created and closed for this call
- *  alone - the only option when there's no dev server, as during `pen build`.
+ * @param pattern - Glob pattern matched within the routes directory.
+ * @param server - The dev server to load modules through.
  * @returns Imported module values keyed by their sorted route file paths.
  */
-export async function ssrGlob<T>(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<Record<string, T>> {
-  const activeServer = server ?? await createServer({
-    root: projectDir,
-    configFile: false,
-    logLevel: 'silent',
-    server: { middlewareMode: true },
-  })
-  try {
-    const paths = globSync('**/*.tsx', { cwd: join(projectDir, routesDir) }).map(normalizePath).sort()
-    const modules = paths.map(async path => [path, await activeServer.ssrLoadModule(`/${routesDir}/${path}`)] as [string, T])
-    const entries = await Promise.all(modules)
-    return Object.fromEntries(entries)
-  }
-  finally {
-    if (!server)
-      await activeServer.close()  // only close servers created for this call
-  }
+export async function ssrGlob<T>(projectDir: string, routesDir: string, pattern: string, server: ViteDevServer): Promise<Record<string, T>> {
+  const paths = globSync(pattern, { cwd: join(projectDir, routesDir) }).map(normalizePath).sort()
+  const modules = paths.map(async path => [path, await server.ssrLoadModule(`/${routesDir}/${path}`)] as [string, T])
+  const entries = await Promise.all(modules)
+  return Object.fromEntries(entries)
 }
