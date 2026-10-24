@@ -12,19 +12,6 @@ import { createDiagnosticReport } from '@/pen-react/diagnostics'
 
 const WATCH_DEBOUNCE_MS = 150
 
-/** Loads each role's route modules directly, mirroring production's per-role `import.meta.glob` calls. */
-async function createModuleRegistry(routesDir: string, server: ViteDevServer): Promise<ModuleRegistry> {
-  const options = { base: routesDir, server }
-  const [page, layout, loading, error, default_] = await Promise.all([
-    ssrGlob('**/page.tsx', options),
-    ssrGlob('**/layout.tsx', options),
-    ssrGlob('**/loading.tsx', options),
-    ssrGlob('**/error.tsx', options),
-    ssrGlob('**/default.tsx', options),
-  ])
-  return { page, layout, loading, error, default: default_ }
-}
-
 /** Scans the app directory for route modules and reports diagnostics from
  *  route compilation and validation. Shared by `pen build` (once per build)
  *  and `pen dev` (once per file add/delete).
@@ -33,9 +20,9 @@ async function createModuleRegistry(routesDir: string, server: ViteDevServer): P
  *  @param routesDir - App route directory relative to the project directory.
  *  @param server - An existing dev server to reuse, if one is already running.
  *  @returns A formatted summary of route diagnostics. */
-async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<DiagnosticReport> {
+async function createModuleRegistry(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<ModuleRegistry | undefined> {
   if (!existsSync(join(projectDir, routesDir)))
-    return [[], `No such directory: '${routesDir}'`]
+    return
 
   const devServer = server ?? await createServer({
     root: projectDir,
@@ -43,10 +30,16 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
     logLevel: 'silent',
     server: { middlewareMode: true },
   })
+  const options = { base: routesDir, server: devServer }
   try {
-    const moduleRegistry = await createModuleRegistry(routesDir, devServer)
-    const report = createDiagnosticReport(moduleRegistry, routesDir)
-    return report
+    const [page, layout, loading, error, default_] = await Promise.all([
+      ssrGlob('**/page.tsx', options),
+      ssrGlob('**/layout.tsx', options),
+      ssrGlob('**/loading.tsx', options),
+      ssrGlob('**/error.tsx', options),
+      ssrGlob('**/default.tsx', options),
+    ])
+    return { page, layout, loading, error, default: default_ }
   }
   finally {
     if (!server)  // close server only if its created in this function
@@ -102,11 +95,13 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const [warnings, error] = await diagnoseRoutes(projectDir, routesDir, devServer)
+        const moduleRegistry = await createModuleRegistry(projectDir, routesDir, devServer)
+        const [warnings, error] = moduleRegistry
+          ? createDiagnosticReport(moduleRegistry, routesDir)
+          : [[], `No such directory: '${routesDir}'`]
 
         for (const message of warnings)
           this.warn(message)
-
         if (error)
           this.error(error)
       },
