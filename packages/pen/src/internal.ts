@@ -10,4 +10,4 @@ export type {
 } from './pen-react/render'
 
 export { PenApp } from './pen-react/render'
-export { createComponentMatcher } from './pen-react/setup'
+export { createComponentMatcher, ROUTES_CHANGED_EVENT } from './pen-react/setup'

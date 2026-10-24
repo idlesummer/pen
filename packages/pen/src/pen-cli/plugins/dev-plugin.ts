@@ -1,9 +1,12 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { transform } from 'oxc-transform-react'
+import { globRoutePaths } from '@/lib/glob-route-paths'
 import { stripCodegenArtifacts } from '@/lib/strip-codegen-artifacts'
+import { watchRouteFiles } from '@/lib/watch-route-files'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
+import { ROUTES_CHANGED_EVENT } from '@/pen-react/setup'
 import entryAppTemplate from './templates/entry-app.tsx.txt' with { type: 'text' }
 
 /**
@@ -55,6 +58,29 @@ export function penDev(options: PluginOptions): Plugin {
           this.error(transformed.errors.map(e => e.message).join('\n'))
         return transformed
       }
+    },
+    // Keeps the already-running Ink UI in sync with route files added or
+    // removed mid-session - buildStart only loads the registry once, at
+    // server start, and the live Ink session never re-imports the entry
+    // module afterward, so its component matcher would otherwise go stale.
+    //
+    // Only sends paths, not loaded modules: loading them here would go
+    // through this plugin's own `server.ssrLoadModule`, a separate runtime
+    // from the `ServerModuleRunner` actually running the live Ink session -
+    // modules loaded through the wrong one are distinct instances, breaking
+    // identity-sensitive state like React context shared with the running
+    // app. The entry module loads these paths itself once it receives them,
+    // through its own runtime, keeping shared dependencies consistent.
+    configureServer(server) {
+      watchRouteFiles(server, options.routesDir, () => {
+        try {
+          const paths = globRoutePaths(server.config.root, options.routesDir)
+          server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT, paths)
+        }
+        catch (err) {
+          log.error(String(err))
+        }
+      })
     },
     buildStart: {
       sequential: true,
