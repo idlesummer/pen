@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs'
 import { createServer } from 'vite'
 import * as log from '@/pen-cli/logger/console'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { reportRouteDiagnostics } from '@/pen-react/diagnostics'
+import { createDiagnosticReport } from '@/pen-react/diagnostics'
 
 const WATCH_DEBOUNCE_MS = 150
 
@@ -45,7 +45,7 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
   })
   try {
     const moduleRegistry = await loadModuleRegistry(routesDir, activeServer)
-    return reportRouteDiagnostics(moduleRegistry, routesDir)
+    return createDiagnosticReport(moduleRegistry, routesDir)
   }
   finally {
     if (!server)

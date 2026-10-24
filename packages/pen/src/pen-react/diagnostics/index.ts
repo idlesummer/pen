@@ -1,1 +1,1 @@
-export { reportRouteDiagnostics } from './diagnose-routes'
+export { createDiagnosticReport } from './diagnose-routes'

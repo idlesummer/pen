@@ -30,7 +30,7 @@ function diagnoseRoutes(moduleRegistry: ModuleRegistry): Diagnostic[] {
  *  @param moduleRegistry - Each role's already-loaded route modules, keyed by role.
  *  @param routesDir - App route directory, used only to format file paths in messages.
  *  @returns A formatted summary of route diagnostics. */
-export function reportRouteDiagnostics(moduleRegistry: ModuleRegistry, routesDir: string): [warnings: string[], error: string | undefined] {
+export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir: string): [warnings: string[], error: string | undefined] {
   const diagnostics = diagnoseRoutes(moduleRegistry)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
