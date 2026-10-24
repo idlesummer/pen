@@ -49,7 +49,8 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
     return createDiagnosticReport(moduleRegistry, routesDir)
   }
   finally {
-    await devServer.close()  // only close servers created for this call
+    if (!server)  // close server only if its created in this function
+      await devServer.close()  // only close servers created for this call
   }
 }
 
