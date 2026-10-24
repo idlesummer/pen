@@ -1,7 +1,7 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { PACKAGE_NAME } from '@/constants'
-import { stripCodegenArtifacts } from '@/lib/strip-codegen-artifacts'
+import { stripRegion } from '@/lib/strip-regions'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import entryAppTemplate from './templates/entry-app.tsx.txt' with { type: 'text' }
 
@@ -43,7 +43,7 @@ export function penBuild(options: PluginOptions): Plugin {
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
-        return stripCodegenArtifacts(entryAppTemplate)
+        return stripRegion(stripRegion(entryAppTemplate, 'codegen'), 'dev-only')
           .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
     },
