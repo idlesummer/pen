@@ -5,15 +5,16 @@ import type { ModuleRegistry } from '@/pen-react/modules'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { createRouter, getModuleRole } from '@/pen-core'
+import { createDiagnostic, createRouter, getModuleRole } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
-/** A diagnostic's message, with its files shown relative to the project
- *  root (app dir included) instead of the app dir alone - otherwise they
- *  look route-shaped but aren't actually openable from where the build runs. */
-function formatDiagnostic({ severity, rule, description, files }: Diagnostic, routesDir: string): string {
-  return [`[${severity}] ${rule}: ${description}`, ...files.map(file => `  at ${routesDir}/${file}`)].join('\n')
+/** Re-derives a diagnostic's message with its files shown relative to the
+ *  project root (app dir included) instead of the app dir alone - otherwise
+ *  they look route-shaped but aren't actually openable from where the build runs. */
+function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
+  const files = diagnostic.files.map(file => `${routesDir}/${file}`)
+  return createDiagnostic({ ...diagnostic, files }).message
 }
 
 /** Splits a flat glob scan into the same role-separated shape the production
