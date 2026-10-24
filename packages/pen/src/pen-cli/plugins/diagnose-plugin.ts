@@ -1,6 +1,5 @@
 import type { Plugin, ViteDevServer } from 'vite'
 import type { ModuleRegistry } from '@/pen-react/modules'
-import type { DiagnosticReport } from '@/pen-react/diagnostics'
 import type { PluginOptions } from './types/plugin-options'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
