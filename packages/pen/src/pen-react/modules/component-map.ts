@@ -6,10 +6,6 @@ import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoun
 import type { ModuleRegistry } from './module-registry'
 import { hasFunctionDefaultExport } from '@/lib/module'
 
-/** Component type shared across all route module roles. */
-export type AnyComponent =
-  PageComponent | LayoutComponent | LoadingComponent | ErrorComponent | DefaultComponent
-
 /** Components grouped by route module role, keyed by module path. */
 export type ComponentMap = {
   page:     Record<string, PageComponent>
