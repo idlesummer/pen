@@ -80,8 +80,6 @@ function isInside(filePath: string, dir: string): boolean {
  *  `buildStart` alone only runs once, at server start. */
 export function penDiagnose({ routesDir }: PluginOptions): Plugin {
   let debounceTimer: ReturnType<typeof setTimeout> | undefined
-  // Set only in configureServer, which never runs for `pen build` (createBuilder
-  // has no dev server) - buildStart there correctly falls back to a throwaway one.
   let devServer: ViteDevServer | undefined
 
   return {
