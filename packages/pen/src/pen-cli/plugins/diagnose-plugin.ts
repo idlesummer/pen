@@ -1,6 +1,5 @@
 import type { Plugin, ViteDevServer } from 'vite'
 import type { ModuleRegistry } from '@/pen-react/modules'
-import type { DiagnosticReport } from '@/pen-react/diagnostics'
 import type { PluginOptions } from './types/plugin-options'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
@@ -80,8 +79,12 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
           // Outside the initial build, so can't throw to fail it like buildStart does - just logs
-          diagnoseRoutes(projectDir, routesDir, devServer)
-            .then(([warnings, error]) => {
+          createModuleRegistry(projectDir, routesDir, devServer)
+            .then(moduleRegistry => {
+              const [warnings, error] = moduleRegistry
+                ? createDiagnosticReport(moduleRegistry, routesDir)
+                : [[], `No such directory: '${routesDir}'`]
+
               for (const message of warnings) log.warn(message)
               if (error) log.error(error)
             })
