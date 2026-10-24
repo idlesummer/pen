@@ -36,12 +36,13 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
   })
   try {
     // Load each role's modules directly and build the component map
+    const options = { base: routesDir, server: activeServer }
     const [page, layout, loading, error, default_] = await Promise.all([
-      ssrGlob(projectDir, routesDir, '**/page.tsx', activeServer),
-      ssrGlob(projectDir, routesDir, '**/layout.tsx', activeServer),
-      ssrGlob(projectDir, routesDir, '**/loading.tsx', activeServer),
-      ssrGlob(projectDir, routesDir, '**/error.tsx', activeServer),
-      ssrGlob(projectDir, routesDir, '**/default.tsx', activeServer),
+      ssrGlob('**/page.tsx', options),
+      ssrGlob('**/layout.tsx', options),
+      ssrGlob('**/loading.tsx', options),
+      ssrGlob('**/error.tsx', options),
+      ssrGlob('**/default.tsx', options),
     ])
     const moduleRegistry: ModuleRegistry = { page, layout, loading, error, default: default_ }
     const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
