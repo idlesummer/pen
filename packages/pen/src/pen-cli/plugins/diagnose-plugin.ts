@@ -1,15 +1,62 @@
 import type { Plugin, ViteDevServer } from 'vite'
+import type { ModuleRegistry } from '@/pen-react/modules'
 import type { PluginOptions } from './types/plugin-options'
 import { join, relative } from 'node:path'
+import { existsSync } from 'node:fs'
+import { createServer } from 'vite'
 import * as log from '@/pen-cli/logger/console'
+import { ssrGlob } from '@/lib/ssr-glob'
 import { reportRouteDiagnostics } from '@/pen-react/diagnostics'
 
 const WATCH_DEBOUNCE_MS = 150
 
+/** Loads each role's route modules directly, mirroring production's per-role `import.meta.glob` calls. */
+async function loadModuleRegistry(routesDir: string, server: ViteDevServer): Promise<ModuleRegistry> {
+  const options = { base: routesDir, server }
+  const [page, layout, loading, error, default_] = await Promise.all([
+    ssrGlob('**/page.tsx', options),
+    ssrGlob('**/layout.tsx', options),
+    ssrGlob('**/loading.tsx', options),
+    ssrGlob('**/error.tsx', options),
+    ssrGlob('**/default.tsx', options),
+  ])
+  return { page, layout, loading, error, default: default_ }
+}
+
+/**
+ * Scans the app directory for route modules and reports diagnostics from
+ * route compilation and validation. Shared by `pen build` (once per build)
+ * and `pen dev` (once per file add/delete).
+ *
+ * @param projectDir - Project directory containing the app directory.
+ * @param routesDir - App route directory relative to the project directory.
+ * @param server - An existing dev server to reuse, if one is already running.
+ * @returns A formatted summary of route diagnostics.
+ */
+async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<[warnings: string[], error: string | undefined]> {
+  if (!existsSync(join(projectDir, routesDir)))
+    return [[], `No such directory: '${routesDir}'`]
+
+  const activeServer = server ?? await createServer({
+    root: projectDir,
+    configFile: false,
+    logLevel: 'silent',
+    server: { middlewareMode: true },
+  })
+  try {
+    const moduleRegistry = await loadModuleRegistry(routesDir, activeServer)
+    return reportRouteDiagnostics(moduleRegistry, routesDir)
+  }
+  finally {
+    if (!server)
+      await activeServer.close()  // only close servers created for this call
+  }
+}
+
 /** Re-checks routes outside the initial build - a watcher-triggered check
  *  can't throw to fail a build like buildStart does, so it just logs. */
 async function logRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer) {
-  const [warnings, error] = await reportRouteDiagnostics(projectDir, routesDir, server)
+  const [warnings, error] = await diagnoseRoutes(projectDir, routesDir, server)
   for (const message of warnings) log.warn(message)
   if (error) log.error(error)
 }
@@ -64,7 +111,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const [warnings, error] = await reportRouteDiagnostics(projectDir, routesDir, devServer)
+        const [warnings, error] = await diagnoseRoutes(projectDir, routesDir, devServer)
 
         for (const message of warnings) this.warn(message)
         if (error) this.error(error)
