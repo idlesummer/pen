@@ -9,12 +9,6 @@ import { createRouter, getModuleRole } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
 import { validateAsyncPages, validateComponentExports } from './validate'
 
-/** A formatted summary of route diagnostics. */
-type DiagnosticReport = {
-  warnings: string[]
-  error?: string
-}
-
 /** A diagnostic's message, with its files shown relative to the project
  *  root (app dir included) instead of the app dir alone - otherwise they
  *  look route-shaped but aren't actually openable from where the build runs. */
@@ -70,9 +64,9 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
  *  @param routesDir - App route directory relative to the project directory.
  *  @param server - Existing dev server to reuse; otherwise, one is created for this call.
  *  @returns A formatted summary of route diagnostics. */
-export async function reportRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<DiagnosticReport> {
+export async function reportRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<[warnings: string[], error: string | undefined]> {
   if (!existsSync(join(projectDir, routesDir)))
-    return { warnings: [], error: `No such directory: '${routesDir}'` }
+    return [[], `No such directory: '${routesDir}'`]
 
   const diagnostics = await diagnoseRoutes(projectDir, routesDir, server)
   const warnings = diagnostics
@@ -84,5 +78,5 @@ export async function reportRouteDiagnostics(projectDir: string, routesDir: stri
     .map(d => formatDiagnostic(d, routesDir))
     .join('\n\n') || undefined  // Works since empty strings are falsy
 
-  return { warnings, error }
+  return [warnings, error]
 }
