@@ -1,7 +1,7 @@
 import type { ViteDevServer } from 'vite'
 import type { Module } from '@/lib/module'
 import type { Diagnostic } from '@/pen-core'
-import type { AnyComponent, ModuleRegistry } from '@/pen-react/modules'
+import type { ModuleRegistry } from '@/pen-react/modules'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
@@ -34,7 +34,7 @@ function formatDiagnostic({ severity, rule, description, files }: Diagnostic, ro
  *  filename isn't a recognized module role (a stray non-route .tsx file, say)
  *  are silently dropped - modulePaths (from createRouter) stays the real
  *  source of truth for which paths are actual routes. */
-function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>): ModuleRegistry {
+function classifyByRole(modules: Record<string, Partial<Module>>): ModuleRegistry {
   const byRole: ModuleRegistry = { page: {}, layout: {}, loading: {}, error: {}, default: {} }
   for (const [path, module] of Object.entries(modules)) {
     const role = getModuleRole(basename(path))
@@ -59,7 +59,7 @@ function classifyByRole(modules: Record<string, Partial<Module<AnyComponent>>>):
  */
 async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
   // Load modules, classify by role, and build the component map
-  const modules = await ssrGlob<Partial<Module<AnyComponent>>>(projectDir, routesDir, server)
+  const modules = await ssrGlob<Partial<Module>>(projectDir, routesDir, server)
   const [componentMap, componentPaths] = createComponentMap(classifyByRole(modules))
 
   // Create router and collect diagnostics
