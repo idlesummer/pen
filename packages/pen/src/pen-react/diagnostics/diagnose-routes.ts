@@ -5,21 +5,14 @@ import type { ModuleRegistry } from '@/pen-react/modules'
 import { basename, join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { ssrGlob } from '@/lib/ssr-glob'
-import { createRouter, getModuleRole, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
+import { createRouter, getModuleRole } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
 import { validateAsyncPages, validateComponentExports } from './validate'
-
-/** The result of compiling and validating the app's routes. */
-type RouteDiagnosis = {
-  diagnostics: Diagnostic[]
-  modulePaths: string[]
-}
 
 /** A formatted summary of route diagnostics. */
 type DiagnosticReport = {
   warnings: string[]
   error?: string
-  routes: string[]
 }
 
 /** A diagnostic's message, with its files shown relative to the project
@@ -57,18 +50,18 @@ function classifyByRole(modules: Record<string, Partial<Module>>): ModuleRegistr
  * @param server - An existing dev server to reuse, if one is already running.
  * @returns Diagnostics produced while compiling and validating the routes.
  */
-async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<RouteDiagnosis> {
+async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<Diagnostic[]> {
   // Load modules, classify by role, and build the component map
   const modules = await ssrGlob<Partial<Module>>(projectDir, routesDir, server)
   const [componentMap, componentPaths] = createComponentMap(classifyByRole(modules))
 
   // Create router and collect diagnostics
-  const { modulePaths, pageEndpoints, diagnostics } = createRouter(componentPaths)
+  const { pageEndpoints, diagnostics } = createRouter(componentPaths)
 
   // Collect additional runtime diagnostics
   diagnostics.push(...validateComponentExports(componentMap))
   diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
-  return { diagnostics, modulePaths }
+  return diagnostics
 }
 
 /** Reports route compilation and validation diagnostics for the app directory.
@@ -79,9 +72,9 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
  *  @returns A formatted summary of route diagnostics. */
 export async function reportRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<DiagnosticReport> {
   if (!existsSync(join(projectDir, routesDir)))
-    return { warnings: [], error: `No such directory: '${routesDir}'`, routes: [] }
+    return { warnings: [], error: `No such directory: '${routesDir}'` }
 
-  const { diagnostics, modulePaths } = await diagnoseRoutes(projectDir, routesDir, server)
+  const diagnostics = await diagnoseRoutes(projectDir, routesDir, server)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
     .map(d => formatDiagnostic(d, routesDir))
@@ -91,7 +84,5 @@ export async function reportRouteDiagnostics(projectDir: string, routesDir: stri
     .map(d => formatDiagnostic(d, routesDir))
     .join('\n\n') || undefined  // Works since empty strings are falsy
 
-  // The two sentinel keys aren't real files - nothing to list
-  const routes = modulePaths.filter(path => path !== GLOBAL_DEFAULT && path !== GLOBAL_ERROR)
-  return { warnings, error, routes }
+  return { warnings, error }
 }
