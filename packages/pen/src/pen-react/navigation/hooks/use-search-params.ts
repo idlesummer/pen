@@ -7,5 +7,5 @@ import { useNavigate } from './use-navigate'
  *  @returns The current URL search parameters. */
 export function useSearchParams() {
   const { history, position } = useNavigate()
-  return history[position]!.searchParams
+  return history[position]!.state
 }
