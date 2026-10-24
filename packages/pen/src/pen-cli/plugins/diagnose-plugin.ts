@@ -61,11 +61,6 @@ async function logRouteDiagnostics(projectDir: string, routesDir: string, server
   if (error) log.error(error)
 }
 
-/** True for a path inside `dir`. */
-function isInside(filePath: string, dir: string): boolean {
-  return !relative(dir, filePath).startsWith('..')
-}
-
 /** Discovers and validates the app's routes before typechecking and bundling.
  *
  *  Runs only in the SSR environment. Marked `sequential` and ordered before
@@ -92,10 +87,11 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
     configureServer(server) {
       devServer = server
       const projectDir = server.config.root
-      const routesDirAbs = join(projectDir, routesDir)
+      const absRoutesDir = join(projectDir, routesDir)
 
       const onRouteFileChange = (filePath: string) => {
-        if (!filePath.endsWith('.tsx') || !isInside(filePath, routesDirAbs)) return
+        if (!filePath.endsWith('.tsx') || relative(absRoutesDir, filePath).startsWith('..'))
+          return
 
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
@@ -111,8 +107,11 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
         const projectDir = this.environment.config.root
         const [warnings, error] = await diagnoseRoutes(projectDir, routesDir, devServer)
 
-        for (const message of warnings) this.warn(message)
-        if (error) this.error(error)
+        for (const message of warnings)
+          this.warn(message)
+
+        if (error)
+          this.error(error)
       },
     },
   }
