@@ -12,26 +12,20 @@ function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
   return createDiagnostic({ ...diagnostic, files }).message
 }
 
-/** Compiles the route tree from an already-loaded module registry and
- *  collects diagnostics from route compilation and validation. */
-function diagnoseRoutes(moduleRegistry: ModuleRegistry): Diagnostic[] {
+/** Reports route compilation and validation diagnostics for an already-loaded
+ *  module registry. Shared by `pen build` (once per build) and `pen dev`
+ *  (once per file add/delete) - whatever loaded the registry decides how.
+*
+*  @param moduleRegistry - Each role's already-loaded route modules, keyed by role.
+*  @param routesDir - App route directory, used only to format file paths in messages.
+*  @returns A formatted summary of route diagnostics. */
+export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir: string): [warnings: string[], error: string | undefined] {
   const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
   const { pageEndpoints, diagnostics } = createRouter(componentPaths)
 
   diagnostics.push(...validateComponentExports(componentMap))
   diagnostics.push(...validateAsyncPages(pageEndpoints, componentMap))
-  return diagnostics
-}
 
-/** Reports route compilation and validation diagnostics for an already-loaded
- *  module registry. Shared by `pen build` (once per build) and `pen dev`
- *  (once per file add/delete) - whatever loaded the registry decides how.
- *
- *  @param moduleRegistry - Each role's already-loaded route modules, keyed by role.
- *  @param routesDir - App route directory, used only to format file paths in messages.
- *  @returns A formatted summary of route diagnostics. */
-export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir: string): [warnings: string[], error: string | undefined] {
-  const diagnostics = diagnoseRoutes(moduleRegistry)
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
     .map(d => formatDiagnostic(d, routesDir))
