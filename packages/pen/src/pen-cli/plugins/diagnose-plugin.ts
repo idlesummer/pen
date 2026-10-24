@@ -1,5 +1,6 @@
 import type { Plugin, ViteDevServer } from 'vite'
 import type { ModuleRegistry } from '@/pen-react/modules'
+import type { DiagnosticReport } from '@/pen-react/diagnostics'
 import type { PluginOptions } from './types/plugin-options'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
@@ -12,7 +13,7 @@ import { createDiagnosticReport } from '@/pen-react/diagnostics'
 const WATCH_DEBOUNCE_MS = 150
 
 /** Loads each role's route modules directly, mirroring production's per-role `import.meta.glob` calls. */
-async function loadModuleRegistry(routesDir: string, server: ViteDevServer): Promise<ModuleRegistry> {
+async function createModuleRegistry(routesDir: string, server: ViteDevServer): Promise<ModuleRegistry> {
   const options = { base: routesDir, server }
   const [page, layout, loading, error, default_] = await Promise.all([
     ssrGlob('**/page.tsx', options),
@@ -24,17 +25,15 @@ async function loadModuleRegistry(routesDir: string, server: ViteDevServer): Pro
   return { page, layout, loading, error, default: default_ }
 }
 
-/**
- * Scans the app directory for route modules and reports diagnostics from
- * route compilation and validation. Shared by `pen build` (once per build)
- * and `pen dev` (once per file add/delete).
+/** Scans the app directory for route modules and reports diagnostics from
+ *  route compilation and validation. Shared by `pen build` (once per build)
+ *  and `pen dev` (once per file add/delete).
  *
- * @param projectDir - Project directory containing the app directory.
- * @param routesDir - App route directory relative to the project directory.
- * @param server - An existing dev server to reuse, if one is already running.
- * @returns A formatted summary of route diagnostics.
- */
-async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<[warnings: string[], error: string | undefined]> {
+ *  @param projectDir - Project directory containing the app directory.
+ *  @param routesDir - App route directory relative to the project directory.
+ *  @param server - An existing dev server to reuse, if one is already running.
+ *  @returns A formatted summary of route diagnostics. */
+async function diagnoseRoutes(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<DiagnosticReport> {
   if (!existsSync(join(projectDir, routesDir)))
     return [[], `No such directory: '${routesDir}'`]
 
@@ -45,8 +44,9 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
     server: { middlewareMode: true },
   })
   try {
-    const moduleRegistry = await loadModuleRegistry(routesDir, devServer)
-    return createDiagnosticReport(moduleRegistry, routesDir)
+    const moduleRegistry = await createModuleRegistry(routesDir, devServer)
+    const report = createDiagnosticReport(moduleRegistry, routesDir)
+    return report
   }
   finally {
     if (!server)  // close server only if its created in this function
