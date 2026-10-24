@@ -54,14 +54,6 @@ async function diagnoseRoutes(projectDir: string, routesDir: string, server?: Vi
   }
 }
 
-/** Re-checks routes outside the initial build - a watcher-triggered check
- *  can't throw to fail a build like buildStart does, so it just logs. */
-async function logRouteDiagnostics(projectDir: string, routesDir: string, server?: ViteDevServer) {
-  const [warnings, error] = await diagnoseRoutes(projectDir, routesDir, server)
-  for (const message of warnings) log.warn(message)
-  if (error) log.error(error)
-}
-
 /** Discovers and validates the app's routes before typechecking and bundling.
  *
  *  Runs only in the SSR environment. Marked `sequential` and ordered before
@@ -94,7 +86,13 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
 
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
-          logRouteDiagnostics(projectDir, routesDir, devServer).catch(err => log.error(String(err)))
+          // Outside the initial build, so can't throw to fail it like buildStart does - just logs
+          diagnoseRoutes(projectDir, routesDir, devServer)
+            .then(([warnings, error]) => {
+              for (const message of warnings) log.warn(message)
+              if (error) log.error(error)
+            })
+            .catch(err => log.error(String(err)))
         }, WATCH_DEBOUNCE_MS)
       }
       server.watcher.on('add', onRouteFileChange)
