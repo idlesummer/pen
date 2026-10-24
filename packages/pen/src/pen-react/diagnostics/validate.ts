@@ -1,34 +1,31 @@
 import type { Diagnostic, Endpoint, PositionNode } from '@/pen-core'
-import type { AnyComponent, ComponentMap } from '@/pen-react/modules'
-import { createDiagnostic, GLOBAL_DEFAULT, GLOBAL_ERROR } from '@/pen-core'
+import type { ComponentMap } from '@/pen-react/modules'
+import { createDiagnostic } from '@/pen-core'
 
 /** Validates that every discovered module has a valid component default export. */
-export function validateComponentExports(modulePaths: string[], components: Record<string, AnyComponent>): Diagnostic[] {
+export function validateComponentExports(componentMap: ComponentMap): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
-  for (const path of modulePaths) {
-    // The framework's own built-in fallbacks, not a file the user wrote -
-    // nothing to validate, and their names get minified in the published build
-    if (path === GLOBAL_DEFAULT || path === GLOBAL_ERROR) continue
-
-    const Content = components[path]
-    if (typeof Content !== 'function') {
-      diagnostics.push(createDiagnostic({
-        rule: 'invalid-component-export',
-        severity: 'error',
-        description: 'its default export is not a valid React component',
-        files: [path],
-      }))
-    }
-    else if (!/^[A-Z]/.test(Content.name)) {
-      diagnostics.push(createDiagnostic({
-        rule: 'unnamed-component-export',
-        severity: 'warn',
-        description:
-          'its default export is an anonymous or lowercase-named function - ' +
-          '`pen dev`\'s Fast Refresh only recognizes components whose name starts with a capital letter',
-        files: [path],
-      }))
+  for (const components of Object.values(componentMap)) {
+    for (const [path, Content] of Object.entries(components)) {
+      if (typeof Content !== 'function') {
+        diagnostics.push(createDiagnostic({
+          rule: 'invalid-component-export',
+          severity: 'error',
+          description: 'its default export is not a valid React component',
+          files: [path],
+        }))
+      }
+      else if (!/^[A-Z]/.test(Content.name)) {
+        diagnostics.push(createDiagnostic({
+          rule: 'unnamed-component-export',
+          severity: 'warn',
+          description:
+            'its default export is an anonymous or lowercase-named function - ' +
+            '`pen dev`\'s Fast Refresh only recognizes components whose name starts with a capital letter',
+          files: [path],
+        }))
+      }
     }
   }
   return diagnostics
