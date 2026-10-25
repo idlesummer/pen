@@ -1,0 +1,55 @@
+// #region codegen
+/// <reference types="vite/client" />
+declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
+declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
+declare const console: { error: (...args: unknown[]) => void }
+// #endregion
+
+import { render } from 'ink'
+import { PenApp, ComponentMatcherStore, createComponentMatcher, ROUTES_CHANGED_EVENT } from '@idlesummer/pen/internal'
+
+// No static glob here, unlike entry-app-build.tsx.txt - its mere presence
+// in a module Vite transforms is enough for Vite to track these files as
+// a dependency, whether or not the result is ever used. Deleting one
+// would then make Vite fully re-run this whole module on its own, which
+// breaks the hot listener registered below for the rest of the session
+// (new events stop reaching it afterward). Loading paths dynamically, by
+// request, sidesteps that tracking entirely.
+const initialPaths = __PEN_INITIAL_PATHS__
+type RoutePaths = typeof initialPaths
+
+const loadModules = async (paths: string[]) => {
+  const entries = paths.map(async path => [path, await import(/* @vite-ignore */ `/__PEN_APP_DIR__/${path}`)] as const)
+  return Object.fromEntries(await Promise.all(entries))
+}
+
+const loadRegistry = async (paths: RoutePaths) => {
+  const [page, layout, loading, error, default_] = await Promise.all([
+    loadModules(paths.page),
+    loadModules(paths.layout),
+    loadModules(paths.loading),
+    loadModules(paths.error),
+    loadModules(paths.default),
+  ])
+  return { page, layout, loading, error, default: default_ }
+}
+
+const matcherStore = new ComponentMatcherStore(createComponentMatcher(await loadRegistry(initialPaths)))
+const { waitUntilExit } = render(<PenApp matcherStore={matcherStore} />, __PEN_INK_OPTIONS__)
+
+// Pushing each reload into matcherStore, instead of calling Ink's
+// render() again, lets React's own update scheduling handle it - the
+// same way navigation actions already update the app without ever
+// touching render().
+import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
+  try {
+    matcherStore.update(createComponentMatcher(await loadRegistry(paths)))
+  }
+  catch (err) {
+    // A failed reload must not take the current render down with it -
+    // better stale than blank.
+    console.error(err)
+  }
+})
+
+await waitUntilExit()

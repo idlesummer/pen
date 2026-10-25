@@ -7,7 +7,7 @@ import { watchRouteFiles } from '@/lib/watch-route-files'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/setup'
-import entryAppTemplate from './templates/entry-app.tsx.txt' with { type: 'text' }
+import entryAppTemplate from './templates/entry-app-dev.tsx.txt' with { type: 'text' }
 
 /**
  * Loads the app's virtual entry module, which renders the dev server's
@@ -48,7 +48,7 @@ export function penDev(options: PluginOptions): Plugin {
         const projectDir = this.environment.config.root
         const initialPaths = globRoutePaths(projectDir, options.routesDir)
 
-        const source = stripRegion(stripRegion(entryAppTemplate, 'codegen'), 'build-only')
+        const source = stripRegion(entryAppTemplate, 'codegen')
           .replaceAll(APP_DIR_TOKEN, options.routesDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
           .replaceAll(INITIAL_PATHS_TOKEN, JSON.stringify(initialPaths))
@@ -64,9 +64,9 @@ export function penDev(options: PluginOptions): Plugin {
       }
     },
     // Keeps the already-running Ink UI in sync with route files added or
-    // removed mid-session - the entry module's dev-only region loads its
-    // routes once, when it starts, and never re-imports itself afterward,
-    // so its component matcher would otherwise go stale as files change.
+    // removed mid-session - the entry module loads its routes once, when
+    // it starts, and never re-imports itself afterward, so its component
+    // matcher would otherwise go stale as files change.
     //
     // Only sends paths, not loaded modules: loading them here would go
     // through this plugin's own `server.ssrLoadModule`, a separate runtime
