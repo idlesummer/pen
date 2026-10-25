@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react'
 import { Fragment, useMemo } from 'react'
+import type { ComponentMatcher } from '@/pen-react/setup'
 import { useNavigate } from '@/pen-react/navigation'
 
 export type RouterProps = {
-  componentMatcher: (url: string) => ReactNode
+  componentMatcher: ComponentMatcher
 }
 
 /** Re-matches and renders the route on navigation, or whenever the matcher
