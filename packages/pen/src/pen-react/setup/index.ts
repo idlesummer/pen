@@ -1,2 +1,3 @@
 export { createComponentMatcher, ROUTES_CHANGED_EVENT } from './component-matcher'
-export { ComponentMatcherStore } from './component-matcher-store'
+export type { ComponentMatcherStore } from './component-matcher-store'
+export { createComponentMatcherStore } from './component-matcher-store'
