@@ -3,7 +3,7 @@ import type { PluginOptions } from './types/plugin-options'
 import { PACKAGE_NAME } from '@/constants'
 import { stripRegion } from '@/lib/strip-regions'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
-import entryAppTemplate from './templates/entry-app-build.tsx.txt' with { type: 'text' }
+import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 
 /** Bundles the app's entry module for Node.
  *
