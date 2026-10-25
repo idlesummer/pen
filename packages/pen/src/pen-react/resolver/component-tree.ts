@@ -1,6 +1,10 @@
 import type { Match, Frame, Endpoint, PositionNode, Params } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
-import type { PageComponent, DefaultComponent, LayoutComponent, LoadingComponent, ErrorComponent } from '@/pen-react/render'
+import type { PageComponent } from '@/pen-react/render/components/PageComponent'
+import type { LayoutComponent } from '@/pen-react/render/components/LayoutComponent'
+import type { LoadingComponent } from '@/pen-react/render/components/LoadingBoundary'
+import type { ErrorComponent } from '@/pen-react/render/components/ErrorBoundary'
+import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoundary'
 import { traverse } from '@/lib/traverse'
 
 /** A frame with component references in place of component paths. */
