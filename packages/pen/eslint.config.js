@@ -56,10 +56,7 @@ export default defineConfig(
         project: false,
         ecmaFeatures: { jsx: true },
       },
-      // Without project service there's no type info, so no-undef can't see
-      // ambient globals the way it does for real .ts files - templates run
-      // in Node (the dev server, or the bundled app), so list those instead
-      // of faking a `declare` per file for each one a template happens to use.
+      // Provides Node globals for templates
       globals: globals.node,
     },
     rules: {
