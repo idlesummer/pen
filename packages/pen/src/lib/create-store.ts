@@ -1,7 +1,7 @@
 export type Store<T> = {
   subscribe: (listener: () => void) => (() => void)
   getState: () => T
-  setState: (nextState: T) => void
+  setState: (action: (prevState: T) => T) => void
 }
 
 export function createStore<T>(initialState: T): Store<T> {
@@ -16,10 +16,13 @@ export function createStore<T>(initialState: T): Store<T> {
     getState: () => {
       return state
     },
-    setState: (nextState: T) => {
-      if (Object.is(state, nextState)) return
-      state = nextState
-      listeners.forEach(fn => fn())
+    setState: (callback) => {
+      const nextState = callback(state)
+
+      if (!Object.is(state, nextState)) {
+        state = nextState
+        listeners.forEach(fn => fn())
+      }
     },
   }
 }
