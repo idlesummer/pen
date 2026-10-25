@@ -1,12 +1,9 @@
 import type { ReactNode } from 'react'
-import { Fragment, useMemo, useSyncExternalStore } from 'react'
+import { Fragment, useMemo } from 'react'
 import { useNavigate } from '@/pen-react/navigation'
 
 export type RouterProps = {
-  matcherStore: {
-    subscribe: (listener: () => void) => () => void
-    getSnapshot: () => (url: string) => ReactNode
-  }
+  componentMatcher: (url: string) => ReactNode
 }
 
 /** Re-matches and renders the route on navigation, or whenever the matcher
@@ -16,8 +13,7 @@ export type RouterProps = {
  *  Memoization preserves async page promises across Suspense retries.
  *  `refreshes` rebuilds the tree and remounts the subtree on refresh,
  *  even when the pathname is unchanged. */
-export function Router({ matcherStore }: RouterProps) {
-  const componentMatcher = useSyncExternalStore(matcherStore.subscribe, matcherStore.getSnapshot)
+export function Router({ componentMatcher }: RouterProps) {
   const { history, position, refreshes } = useNavigate()
   const pathname = history[position]!.url
 
