@@ -1,11 +1,1 @@
-export type { Params } from '@/pen-core'
-export type { PageComponent } from './components/PageComponent'
-export type { LayoutComponent } from './components/LayoutComponent'
-export type { LoadingComponent } from './components/LoadingBoundary'
-export type { ErrorComponent, ErrorFallbackProps } from './components/ErrorBoundary'
-export type { DefaultComponent } from './components/DefaultBoundary'
-
-export { LoadingBoundary } from './components/LoadingBoundary'
-export { ErrorBoundary } from './components/ErrorBoundary'
-export { DefaultBoundary, notFound, DefaultSignal } from './components/DefaultBoundary'
 export { PenApp } from './App'

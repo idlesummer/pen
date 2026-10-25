@@ -1,12 +1,12 @@
+export type { Params } from '@/pen-core'
 export type {
-  Params,
   ErrorFallbackProps,
   ErrorComponent,
   DefaultComponent,
   LoadingComponent,
   PageComponent,
   LayoutComponent,
-} from './render'
+} from './components'
 
 export { NavigationProvider } from './navigation'
 export {
@@ -22,4 +22,4 @@ export {
   notFound,
   ErrorBoundary,
   LoadingBoundary,
-} from './render'
+} from './components'

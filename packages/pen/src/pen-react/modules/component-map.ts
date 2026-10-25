@@ -1,8 +1,8 @@
-import type { PageComponent } from '@/pen-react/render/components/PageComponent'
-import type { LayoutComponent } from '@/pen-react/render/components/LayoutComponent'
-import type { LoadingComponent } from '@/pen-react/render/components/LoadingBoundary'
-import type { ErrorComponent } from '@/pen-react/render/components/ErrorBoundary'
-import type { DefaultComponent } from '@/pen-react/render/components/DefaultBoundary'
+import type { PageComponent } from '@/pen-react/components/PageComponent'
+import type { LayoutComponent } from '@/pen-react/components/LayoutComponent'
+import type { LoadingComponent } from '@/pen-react/components/LoadingBoundary'
+import type { ErrorComponent } from '@/pen-react/components/ErrorBoundary'
+import type { DefaultComponent } from '@/pen-react/components/DefaultBoundary'
 import type { ModuleRegistry } from './module-registry'
 import { hasFunctionDefaultExport } from '@/lib/module'
 
