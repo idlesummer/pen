@@ -8,14 +8,14 @@ export type {
   LayoutComponent,
 } from './modules/components'
 
-export { NavigationProvider } from './navigation'
+export { NavigationProvider } from './view/navigation'
 export {
   useHistory,
   useNavigate,
   usePathname,
   useRouter,
   useSearchParams,
-} from './navigation'
+} from './view/navigation'
 export {
   DefaultBoundary,
   DefaultSignal,
