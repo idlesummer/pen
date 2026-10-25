@@ -9,7 +9,7 @@ import { PenApp, ComponentMatcherStore, createComponentMatcher } from '@idlesumm
 // Vite's `import.meta.glob` needs literal arguments (anything else silently
 // matches nothing), so there's one typed glob per role. Static and eager
 // because there's no server at build time to load modules dynamically -
-// see entry-app-dev.tsx.txt for why dev uses a different approach.
+// see entry-app.dev.tsx.txt for why dev uses a different approach.
 const moduleRegistry = {
   page:     import.meta.glob('./**/page.tsx',    { base: './__PEN_APP_DIR__', eager: true }),
   layout:   import.meta.glob('./**/layout.tsx',  { base: './__PEN_APP_DIR__', eager: true }),

@@ -8,7 +8,7 @@ declare const console: { error: (...args: unknown[]) => void }
 import { render } from 'ink'
 import { PenApp, ComponentMatcherStore, createComponentMatcher, ROUTES_CHANGED_EVENT } from '@idlesummer/pen/internal'
 
-// No static glob here, unlike entry-app-build.tsx.txt - its mere presence
+// No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
 // a dependency, whether or not the result is ever used. Deleting one
 // would then make Vite fully re-run this whole module on its own, which
