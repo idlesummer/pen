@@ -1,9 +1,12 @@
-import type { ComponentMatcherStore } from '@/pen-react/setup/component-matcher-store'
+import type { ReactNode } from 'react'
 import { Fragment, useMemo, useSyncExternalStore } from 'react'
-import { useNavigate } from '@/pen-react/navigation/hooks/use-navigate'
+import { useNavigate } from '@/pen-react/navigation'
 
 export type RouterProps = {
-  matcherStore: ComponentMatcherStore
+  matcherStore: {
+    subscribe: (listener: () => void) => () => void
+    getSnapshot: () => (url: string) => ReactNode
+  }
 }
 
 /** Re-matches and renders the route on navigation, or whenever the matcher
@@ -14,9 +17,9 @@ export type RouterProps = {
  *  `refreshes` rebuilds the tree and remounts the subtree on refresh,
  *  even when the pathname is unchanged. */
 export function Router({ matcherStore }: RouterProps) {
+  const componentMatcher = useSyncExternalStore(matcherStore.subscribe, matcherStore.getSnapshot)
   const { history, position, refreshes } = useNavigate()
   const pathname = history[position]!.url
-  const componentMatcher = useSyncExternalStore(matcherStore.subscribe, matcherStore.getSnapshot)
 
   // useMemo only triggers on any navigation action calls inside the tree
   return useMemo(
