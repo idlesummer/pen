@@ -1,5 +1,5 @@
 import type { RouterProps } from './Router'
-import { NavigationProvider } from '../navigation/NavigationProvider'
+import { NavigationProvider } from '@/pen-react/navigation'
 import { Router } from './Router'
 
 /** Props for the root Pen app component. */
