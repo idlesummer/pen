@@ -55,6 +55,11 @@ export default defineConfig(
         project: false,
         ecmaFeatures: { jsx: true },
       },
+      // Without project service there's no type info, so no-undef can't see
+      // ambient globals like console the way it does for real .ts files -
+      // list the ones templates actually use instead of faking a `declare`
+      // per file.
+      globals: { console: 'readonly' },
     },
     rules: {
       // The `/// <reference>` targets are stripped at scaffold time, so skip
