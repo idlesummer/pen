@@ -1,8 +1,16 @@
 import type { ViteDevServer } from 'vite'
-import { join } from 'node:path'
-import { isPathRelativeTo } from './path'
+import { join, relative, sep } from 'node:path'
 
 const WATCH_DEBOUNCE_MS = 150
+
+/** Checks whether a path is equal to or contained within a base path.
+ *  @param path - The path to check.
+ *  @param base - The base path.
+ *  @returns Whether the path is relative to the base path. */
+function isPathRelativeTo(path: string, base: string): boolean {
+  const relativePath = relative(base, path)
+  return relativePath !== '..' && !relativePath.startsWith(`..${sep}`)
+}
 
 /** Watches for route `.tsx` files being added or removed under `routesDir`,
  *  debounced into a single call per batch of changes - a multi-file change
