@@ -1,5 +1,5 @@
 import { Fragment, useMemo } from 'react'
-import type { ComponentMatcher } from '@/pen-react/setup'
+import type { ComponentMatcher } from '@/pen-react/store'
 import { useNavigate } from '@/pen-react/navigation'
 
 export type RouterProps = {

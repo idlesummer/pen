@@ -1,6 +1,6 @@
 import type { ModuleRegistry } from '@/pen-react/modules'
-import { createComponentMatcher, createComponentMatcherStore, ROUTES_CHANGED_EVENT, type ComponentMatcherStore } from './setup'
-import { PenApp } from './render'
+import { createComponentMatcher, createComponentMatcherStore, ROUTES_CHANGED_EVENT, type ComponentMatcherStore } from './store'
+import { PenApp } from './view'
 
 export { PenApp, ROUTES_CHANGED_EVENT }
 export type { ComponentMatcherStore }

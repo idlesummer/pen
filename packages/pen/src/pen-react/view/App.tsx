@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { ComponentMatcherStore } from '@/pen-react/setup'
+import type { ComponentMatcherStore } from '@/pen-react/store'
 import { NavigationProvider } from '@/pen-react/navigation'
 import { Router } from './Router'
 
