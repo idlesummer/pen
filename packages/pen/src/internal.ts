@@ -9,6 +9,5 @@ export type {
   DefaultComponent,
 } from './pen-react/render'
 
-export { PenApp } from './pen-react/render'
-export type { ComponentMatcherStore } from './pen-react/setup'
-export { createComponentMatcherStore, createComponentMatcher, ROUTES_CHANGED_EVENT } from './pen-react/setup'
+export { PenApp, createMatcherStore, updateMatcherStore, ROUTES_CHANGED_EVENT } from './pen-react/app'
+export type { ComponentMatcherStore } from './pen-react/app'
