@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import type { ComponentMatcherStore } from '@/pen-react/store'
-import { NavigationProvider } from '@/pen-react/navigation'
+import { NavigationProvider } from './navigation'
 import { Router } from './Router'
 
 export type PenAppProps = {

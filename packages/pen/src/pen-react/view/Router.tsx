@@ -1,6 +1,6 @@
 import { Fragment, useMemo } from 'react'
 import type { ComponentMatcher } from '@/pen-react/store'
-import { useNavigate } from '@/pen-react/navigation'
+import { useNavigate } from './navigation'
 
 export type RouterProps = {
   componentMatcher: ComponentMatcher
