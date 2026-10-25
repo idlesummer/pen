@@ -2,7 +2,6 @@
 /// <reference types="vite/client" />
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
-declare const console: { error: (...args: unknown[]) => void }
 // #endregion
 
 import { render } from 'ink'
