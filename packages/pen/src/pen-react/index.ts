@@ -6,7 +6,7 @@ export type {
   LoadingComponent,
   PageComponent,
   LayoutComponent,
-} from './components'
+} from './modules/components'
 
 export { NavigationProvider } from './navigation'
 export {
@@ -22,4 +22,4 @@ export {
   notFound,
   ErrorBoundary,
   LoadingBoundary,
-} from './components'
+} from './modules/components'

@@ -7,7 +7,7 @@ export type {
   LoadingComponent,
   ErrorComponent,
   DefaultComponent,
-} from './pen-react/components'
+} from './pen-react/modules/components'
 
 export { PenApp, createMatcherStore, updateMatcherStore, ROUTES_CHANGED_EVENT } from './pen-react/app'
 export type { ComponentMatcherStore } from './pen-react/app'
