@@ -2,6 +2,7 @@ import eslintReact from '@eslint-react/eslint-plugin'
 import eslintJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import { defineConfig } from 'eslint/config'
+import globals from 'globals'
 
 export default defineConfig(
   {
@@ -56,10 +57,10 @@ export default defineConfig(
         ecmaFeatures: { jsx: true },
       },
       // Without project service there's no type info, so no-undef can't see
-      // ambient globals like console the way it does for real .ts files -
-      // list the ones templates actually use instead of faking a `declare`
-      // per file.
-      globals: { console: 'readonly' },
+      // ambient globals the way it does for real .ts files - templates run
+      // in Node (the dev server, or the bundled app), so list those instead
+      // of faking a `declare` per file for each one a template happens to use.
+      globals: globals.node,
     },
     rules: {
       // The `/// <reference>` targets are stripped at scaffold time, so skip
