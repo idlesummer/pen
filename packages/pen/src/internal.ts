@@ -10,4 +10,5 @@ export type {
 } from './pen-react/render'
 
 export { PenApp } from './pen-react/render'
-export { ComponentMatcherStore, createComponentMatcher, ROUTES_CHANGED_EVENT } from './pen-react/setup'
+export type { ComponentMatcherStore } from './pen-react/setup'
+export { createComponentMatcherStore, createComponentMatcher, ROUTES_CHANGED_EVENT } from './pen-react/setup'
