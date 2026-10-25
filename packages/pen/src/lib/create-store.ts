@@ -16,8 +16,8 @@ export function createStore<T>(initialState: T): Store<T> {
     getState: () => {
       return state
     },
-    setState: (callback) => {
-      const nextState = callback(state)
+    setState: (action) => {
+      const nextState = action(state)
 
       if (!Object.is(state, nextState)) {
         state = nextState
