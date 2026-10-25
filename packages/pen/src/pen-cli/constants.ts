@@ -12,6 +12,6 @@ export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 export const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 export const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 export const INK_OPTIONS_TOKEN = '__PEN_INK_OPTIONS__'
-// dev-plugin only - the dev-only region has no static glob of its own, so
-// it needs its first registry's paths handed in from outside
+// dev-plugin only - entry-app-dev.tsx.txt has no static glob of its own,
+// so it needs its first registry's paths handed in from outside
 export const INITIAL_PATHS_TOKEN = '__PEN_INITIAL_PATHS__'

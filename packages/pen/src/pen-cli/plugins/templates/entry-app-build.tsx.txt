@@ -1,0 +1,23 @@
+// #region codegen
+/// <reference types="vite/client" />
+declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
+// #endregion
+
+import { render } from 'ink'
+import { PenApp, ComponentMatcherStore, createComponentMatcher } from '@idlesummer/pen/internal'
+
+// Vite's `import.meta.glob` needs literal arguments (anything else silently
+// matches nothing), so there's one typed glob per role. Static and eager
+// because there's no server at build time to load modules dynamically -
+// see entry-app-dev.tsx.txt for why dev uses a different approach.
+const moduleRegistry = {
+  page:     import.meta.glob('./**/page.tsx',    { base: './__PEN_APP_DIR__', eager: true }),
+  layout:   import.meta.glob('./**/layout.tsx',  { base: './__PEN_APP_DIR__', eager: true }),
+  loading:  import.meta.glob('./**/loading.tsx', { base: './__PEN_APP_DIR__', eager: true }),
+  error:    import.meta.glob('./**/error.tsx',   { base: './__PEN_APP_DIR__', eager: true }),
+  default:  import.meta.glob('./**/default.tsx', { base: './__PEN_APP_DIR__', eager: true }),
+}
+
+const matcherStore = new ComponentMatcherStore(createComponentMatcher(moduleRegistry))
+const { waitUntilExit } = render(<PenApp matcherStore={matcherStore} />, __PEN_INK_OPTIONS__)
+await waitUntilExit()
