@@ -2,12 +2,12 @@ import { Navigation } from './navigation-core'
 
 /** Actions returned to consumers via useRouter(). */
 type NavigationActions = {
-  /** @param url - URL to navigate to.
+  /** @param route - Route to navigate to.
    *  @param searchParams - Optional params for the new entry. */
-  push(url: string, searchParams?: unknown): void
-  /** @param url - URL to navigate to.
+  push(route: string, searchParams?: unknown): void
+  /** @param route - Route to navigate to.
    *  @param searchParams - Optional params for the replaced entry. */
-  replace(url: string, searchParams?: unknown): void
+  replace(route: string, searchParams?: unknown): void
   /** Moves back one entry, if possible. */
   back(): void
   /** Moves forward one entry, if possible. */
@@ -31,16 +31,16 @@ export class NavigationStore {
   readonly getSnapshot
   readonly actions: NavigationActions
 
-  constructor(initialUrl: string) {
+  constructor(initialRoute: string) {
     this.listeners = new Set<() => void>()
-    this.navigation = new Navigation(initialUrl)
+    this.navigation = new Navigation(initialRoute)
     this.snapshot = this.navigation.getSnapshot()
 
     this.subscribe = this.subscribeListeners.bind(this)
     this.getSnapshot = this.getNavigationSnapshot.bind(this)
     this.actions = {
-      push:    this.pushUrl.bind(this),
-      replace: this.replaceUrl.bind(this),
+      push:    this.pushRoute.bind(this),
+      replace: this.replaceRoute.bind(this),
       back:    this.goBack.bind(this),
       forward: this.goForward.bind(this),
       refresh: this.refreshRoute.bind(this),
@@ -64,14 +64,14 @@ export class NavigationStore {
   /* Navigation actions */
 
   /** Pushes and notifies. */
-  private pushUrl(url: string, searchParams?: unknown) {
-    this.navigation.push(url, searchParams)
+  private pushRoute(route: string, searchParams?: unknown) {
+    this.navigation.push(route, searchParams)
     this.emit()
   }
 
   /** Replaces and notifies. */
-  private replaceUrl(url: string, searchParams?: unknown) {
-    this.navigation.replace(url, searchParams)
+  private replaceRoute(route: string, searchParams?: unknown) {
+    this.navigation.replace(route, searchParams)
     this.emit()
   }
 

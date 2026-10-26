@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useRouter, usePathname } from '@idlesummer/pen'
+import { useRouter, useRoute } from '@idlesummer/pen'
 
 const FILE_TREE = `
 Routes:
@@ -34,7 +34,7 @@ Routes:
 export default function RootLayout({ children }: PropsWithChildren) {
   const [value, setValue] = useState('')
   const router = useRouter()
-  const pathname = usePathname()
+  const route = useRoute()
 
   useInput((input, key) => {
     if (key.return) {
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <Box flexDirection="column">
       <Text>{FILE_TREE}</Text>
       <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
-        <Text>Current path: {pathname}</Text>
+        <Text>Current path: {route}</Text>
         <Text>Browser url: {value}</Text>
       </Box>
       <Box borderStyle="round" justifyContent="center" paddingY={4} borderColor="green" paddingX={1}>

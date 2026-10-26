@@ -1,6 +1,6 @@
 export { NavigationProvider } from './NavigationProvider'
 export { useHistory } from './hooks/use-history'
 export { useNavigate } from './hooks/use-navigate'
-export { usePathname } from './hooks/use-pathname'
+export { useRoute } from './hooks/use-route'
 export { useRouter } from './hooks/use-router'
 export { useSearchParams } from './hooks/use-search-params'
