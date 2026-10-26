@@ -1,5 +1,5 @@
-export type { ComponentMatcher } from './component-matcher'
-export { createComponentMatcher, ROUTES_CHANGED_EVENT } from './component-matcher'
+export type { RouteRenderer } from './route-renderer'
+export { createRouteRenderer, ROUTES_CHANGED_EVENT } from './route-renderer'
 
-export type { ComponentMatcherStore } from './component-matcher-store'
-export { createComponentMatcherStore } from './component-matcher-store'
+export type { RouteRendererStore } from './route-renderer-store'
+export { createRouteRendererStore } from './route-renderer-store'

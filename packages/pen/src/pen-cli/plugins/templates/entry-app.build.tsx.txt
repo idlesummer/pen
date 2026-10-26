@@ -4,7 +4,7 @@ declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 // #endregion
 
 import { render } from 'ink'
-import { PenApp, createComponentMatcherStore } from '@idlesummer/pen/internal'
+import { PenApp, createRouteRendererStore } from '@idlesummer/pen/internal'
 
 // Vite's `import.meta.glob` needs literal arguments (anything else silently
 // matches nothing), so there's one typed glob per role. Static and eager
@@ -18,6 +18,6 @@ const moduleRegistry = {
   default:  import.meta.glob('./**/default.tsx', { base: './__PEN_APP_DIR__', eager: true }),
 }
 
-const matcherStore = createComponentMatcherStore(moduleRegistry)
-const { waitUntilExit } = render(<PenApp matcherStore={matcherStore} />, __PEN_INK_OPTIONS__)
+const rendererStore = createRouteRendererStore(moduleRegistry)
+const { waitUntilExit } = render(<PenApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
