@@ -13,20 +13,19 @@ type ReactNodeMap = Record<string, ReactNode>
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(frame: ComponentFrame, content: ReactNode, params: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
+function wrapFrame(url: string, frame: ComponentFrame, content: ReactNode, params: Params, slots?: ReactNodeMap): ReactNode {
   if (frame.default) {
-    content = <DefaultBoundary Fallback={frame.default} pathname={pathname} params={params}>{content}</DefaultBoundary>
+    content = <DefaultBoundary Fallback={frame.default} pathname={url} params={params}>{content}</DefaultBoundary>
   }
   if (frame.loading) {
     content = <LoadingBoundary Fallback={frame.loading}>{content}</LoadingBoundary>
   }
   if (frame.error) {
-    content = <ErrorBoundary Fallback={frame.error} pathname={pathname}>{content}</ErrorBoundary>
+    content = <ErrorBoundary Fallback={frame.error} pathname={url}>{content}</ErrorBoundary>
   }
   if (frame.layout) {
     const Layout = frame.layout
-    const slotProps = frame.slotNames ? pickRecord(slotComponents, frame.slotNames) : {}
-    content = <Layout params={params} {...slotProps}>{content}</Layout>
+    content = <Layout params={params} {...slots}>{content}</Layout>
   }
   return content
 }
@@ -44,7 +43,8 @@ function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNo
   return endpoint.frames.reduceRight<ReactNode>(
     (element, frame) => {
       const frameParams = sliceRecord(params, frame.paramCount)
-      const newFrame = wrapFrame(frame, element, frameParams, slotComponents, url)
+      const frameSlots = frame.slotNames && pickRecord(slotComponents, frame.slotNames)
+      const newFrame = wrapFrame(url, frame, element, frameParams, frameSlots)
       return newFrame
     },
     contentElement,
