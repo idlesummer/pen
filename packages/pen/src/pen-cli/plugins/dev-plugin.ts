@@ -6,7 +6,7 @@ import { stripRegion } from '@/lib/strip-regions'
 import { watchRouteFiles } from '@/lib/watch-route-files'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
-import { ROUTES_CHANGED_EVENT } from '@/pen-react/store'
+import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 
 /**

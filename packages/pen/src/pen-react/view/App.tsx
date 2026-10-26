@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { RouteRendererStore } from '@/pen-react/store'
+import type { RouteRendererStore } from '@/pen-react/renderer'
 import { NavigationProvider } from './navigation'
 import { Router } from './Router'
 
