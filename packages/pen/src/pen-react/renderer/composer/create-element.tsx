@@ -14,19 +14,14 @@ type ReactNodeMap = Record<string, ReactNode>
 /** Wraps child with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
 function wrapFrame(url: string, frame: ComponentFrame, child: ReactNode, params: Params, slots?: ReactNodeMap): ReactNode {
-  if (frame.default) {
-    child = <DefaultBoundary Fallback={frame.default} pathname={url} params={params}>{child}</DefaultBoundary>
-  }
-  if (frame.loading) {
-    child = <LoadingBoundary Fallback={frame.loading}>{child}</LoadingBoundary>
-  }
-  if (frame.error) {
-    child = <ErrorBoundary Fallback={frame.error} pathname={url}>{child}</ErrorBoundary>
-  }
-  if (frame.layout) {
-    const Layout = frame.layout
-    child = <Layout params={params} {...slots}>{child}</Layout>
-  }
+  if (frame.Default)
+    child = <DefaultBoundary Fallback={frame.Default} pathname={url} params={params}>{child}</DefaultBoundary>
+  if (frame.Loading)
+    child = <LoadingBoundary Fallback={frame.Loading}>{child}</LoadingBoundary>
+  if (frame.Error)
+    child = <ErrorBoundary Fallback={frame.Error} pathname={url}>{child}</ErrorBoundary>
+  if (frame.Layout)
+    child = <frame.Layout params={params} {...slots}>{child}</frame.Layout>
   return child
 }
 
