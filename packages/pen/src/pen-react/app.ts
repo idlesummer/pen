@@ -7,7 +7,8 @@ export type { ComponentMatcherStore }
 
 /** Builds the reactive store PenApp reads its matcher from, out of a raw module registry. */
 export function createMatcherStore(moduleRegistry: ModuleRegistry): ComponentMatcherStore {
-  return createComponentMatcherStore(createComponentMatcher(moduleRegistry))
+  const componentMatcher = createComponentMatcher(moduleRegistry)
+  return createComponentMatcherStore(componentMatcher)
 }
 
 /** Rebuilds the matcher from a fresh module registry and pushes it into an
