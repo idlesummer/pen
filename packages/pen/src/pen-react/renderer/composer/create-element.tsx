@@ -35,7 +35,7 @@ function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNo
     ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
     : <Content {...contentProps} />
 
-    return endpoint.frames.reduceRight<ReactNode>(
+  return endpoint.frames.reduceRight<ReactNode>(
     (child, frame) => {
       const frameParams = sliceRecord(params, frame.paramCount)
       const frameSlots = frame.slotNames && pickRecord(slotComponents, frame.slotNames)
