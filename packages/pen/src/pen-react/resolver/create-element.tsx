@@ -11,23 +11,23 @@ import { pickRecord, sliceRecord } from '@/lib/record'
 
 type ReactNodeMap = Record<string, ReactNode>
 
-/** Wraps content with a frame's boundaries, layout, and slots. Every
+/** Wraps child with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(url: string, frame: ComponentFrame, content: ReactNode, params: Params, slots?: ReactNodeMap): ReactNode {
+function wrapFrame(url: string, frame: ComponentFrame, child: ReactNode, params: Params, slots?: ReactNodeMap): ReactNode {
   if (frame.default) {
-    content = <DefaultBoundary Fallback={frame.default} pathname={url} params={params}>{content}</DefaultBoundary>
+    child = <DefaultBoundary Fallback={frame.default} pathname={url} params={params}>{child}</DefaultBoundary>
   }
   if (frame.loading) {
-    content = <LoadingBoundary Fallback={frame.loading}>{content}</LoadingBoundary>
+    child = <LoadingBoundary Fallback={frame.loading}>{child}</LoadingBoundary>
   }
   if (frame.error) {
-    content = <ErrorBoundary Fallback={frame.error} pathname={url}>{content}</ErrorBoundary>
+    child = <ErrorBoundary Fallback={frame.error} pathname={url}>{child}</ErrorBoundary>
   }
   if (frame.layout) {
     const Layout = frame.layout
-    content = <Layout params={params} {...slots}>{content}</Layout>
+    child = <Layout params={params} {...slots}>{child}</Layout>
   }
-  return content
+  return child
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
@@ -40,11 +40,11 @@ function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNo
     ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
     : <Content {...contentProps} />
 
-  return endpoint.frames.reduceRight<ReactNode>(
-    (element, frame) => {
+    return endpoint.frames.reduceRight<ReactNode>(
+    (child, frame) => {
       const frameParams = sliceRecord(params, frame.paramCount)
       const frameSlots = frame.slotNames && pickRecord(slotComponents, frame.slotNames)
-      const newFrame = wrapFrame(url, frame, element, frameParams, frameSlots)
+      const newFrame = wrapFrame(url, frame, child, frameParams, frameSlots)
       return newFrame
     },
     contentElement,
