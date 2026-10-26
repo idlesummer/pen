@@ -15,7 +15,7 @@ export type ErrorComponent =
 
 type ErrorBoundaryProps = PropsWithChildren<{
   Fallback?: ErrorComponent
-  pathname: string
+  route: string
 }>
 
 /** Built-in fallback rendered when an app defines no root `error.tsx`. */
@@ -24,10 +24,10 @@ function ErrorFallback({ error }: ErrorFallbackProps) {
 }
 
 /** Catches render errors and renders the route's `error` module. */
-export function ErrorBoundary({ Fallback=ErrorFallback, pathname, children }: ErrorBoundaryProps) {
+export function ErrorBoundary({ Fallback=ErrorFallback, route, children }: ErrorBoundaryProps) {
   return (
     <ReactErrorBoundary
-      resetKeys={[pathname]}
+      resetKeys={[route]}
       fallbackRender={({ error, resetErrorBoundary }) => (
         <Fallback error={normalizeError(error)} reset={resetErrorBoundary} />
       )}

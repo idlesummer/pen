@@ -1,5 +1,5 @@
 type NavigationHistory = {
-  url: string
+  route: string
   state?: unknown // aka search params
 }
 
@@ -19,8 +19,8 @@ export class Navigation {
   private refreshes = 0
   private history: NavigationHistory[]
 
-  constructor(initialUrl: string) {
-    this.history = [{ url: initialUrl }]
+  constructor(initialRoute: string) {
+    this.history = [{ route: initialRoute }]
   }
 
   /* Navigation State */
@@ -34,8 +34,8 @@ export class Navigation {
 
   /* Navigation Actions */
 
-  push(url: string, state?: unknown) {
-    this.history.splice(this.position+1, Infinity, { url, state })
+  push(route: string, state?: unknown) {
+    this.history.splice(this.position+1, Infinity, { route, state })
     this.position++
 
     const overflow = this.history.length - HISTORY_LIMIT
@@ -45,8 +45,8 @@ export class Navigation {
     }
   }
 
-  replace(url: string, state?: unknown) {
-    this.history[this.position] = { url, state }
+  replace(route: string, state?: unknown) {
+    this.history[this.position] = { route, state }
   }
 
   /** Returns whether it actually moved, so the store knows whether to notify. */

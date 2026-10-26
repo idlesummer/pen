@@ -9,7 +9,7 @@ type DefaultFallbackProps = {
 
 type DefaultBoundaryProps = PropsWithChildren<{
   Fallback?: DefaultComponent
-  pathname: string
+  route: string
   params: Params
 }>
 
@@ -23,10 +23,10 @@ function DefaultFallback({ }: DefaultFallbackProps) { // eslint-disable-line no-
 
 /** Catches notFound() and renders this position's default component.
  *  Other errors are re-thrown for the nearest error boundary. */
-export function DefaultBoundary({ Fallback=DefaultFallback, pathname, params, children }: DefaultBoundaryProps) {
+export function DefaultBoundary({ Fallback=DefaultFallback, route, params, children }: DefaultBoundaryProps) {
   return (
     <ReactErrorBoundary
-      resetKeys={[pathname]}
+      resetKeys={[route]}
       fallbackRender={() => <Fallback params={params} />}
       onError={(error) => {
         if (!(error instanceof DefaultSignal))

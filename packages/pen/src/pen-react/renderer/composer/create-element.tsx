@@ -13,20 +13,20 @@ type ReactNodeMap = Record<string, ReactNode>
 
 /** Wraps child with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(url: string, frame: ComponentFrame, child: ReactNode, params: Params, slots?: ReactNodeMap): ReactNode {
+function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, params: Params, slots?: ReactNodeMap): ReactNode {
   if (frame.Default)
-    child = <DefaultBoundary Fallback={frame.Default} pathname={url} params={params}>{child}</DefaultBoundary>
+    child = <DefaultBoundary Fallback={frame.Default} route={route} params={params}>{child}</DefaultBoundary>
   if (frame.Loading)
     child = <LoadingBoundary Fallback={frame.Loading}>{child}</LoadingBoundary>
   if (frame.Error)
-    child = <ErrorBoundary Fallback={frame.Error} pathname={url}>{child}</ErrorBoundary>
+    child = <ErrorBoundary Fallback={frame.Error} route={route}>{child}</ErrorBoundary>
   if (frame.Layout)
     child = <frame.Layout params={params} {...slots}>{child}</frame.Layout>
   return child
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNodeMap): ReactNode {
+function renderChain(route: string, match: ComponentMatch, slotComponents: ReactNodeMap): ReactNode {
   const { endpoint, params } = match
   const Content = endpoint.content
   const contentProps = { params: sliceRecord(params, endpoint.paramCount) }
@@ -39,7 +39,7 @@ function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNo
     (child, frame) => {
       const frameParams = sliceRecord(params, frame.paramCount)
       const frameSlots = frame.slotNames && pickRecord(slotComponents, frame.slotNames)
-      const newFrame = wrapFrame(url, frame, child, frameParams, frameSlots)
+      const newFrame = wrapFrame(route, frame, child, frameParams, frameSlots)
       return newFrame
     },
     contentElement,
@@ -52,13 +52,13 @@ function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNo
  *
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve path references.
- *  @param pathname - The pathname being rendered, passed through to boundaries. */
-export function createRouteElement(url: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
-  const routeMatch = routeMatcher(url)
+ *  @param route - The route being rendered, passed through to boundaries. */
+export function createRouteElement(route: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
+  const routeMatch = routeMatcher(route)
   const mainMatch = createComponentTree(routeMatch, components)
   const slotComponents: ReactNodeMap = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
-    slotComponents[slotName] = renderChain(url, slotMatch, {})
-  return renderChain(url, mainMatch, slotComponents)
+    slotComponents[slotName] = renderChain(route, slotMatch, {})
+  return renderChain(route, mainMatch, slotComponents)
 }

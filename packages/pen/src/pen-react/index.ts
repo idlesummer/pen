@@ -12,7 +12,7 @@ export { NavigationProvider } from './view/navigation'
 export {
   useHistory,
   useNavigate,
-  usePathname,
+  useRoute,
   useRouter,
   useSearchParams,
 } from './view/navigation'
