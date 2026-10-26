@@ -5,7 +5,7 @@ declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'err
 // #endregion
 
 import { render } from 'ink'
-import { PenApp, createComponentMatcherStore, updateMatcherStore, ROUTES_CHANGED_EVENT } from '@idlesummer/pen/internal'
+import { PenApp, createRouteRendererStore, updateRouteRendererStore, ROUTES_CHANGED_EVENT } from '@idlesummer/pen/internal'
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -33,16 +33,16 @@ const loadRegistry = async (paths: RoutePaths) => {
   return { page, layout, loading, error, default: default_ }
 }
 
-const matcherStore = createComponentMatcherStore(await loadRegistry(initialPaths))
-const { waitUntilExit } = render(<PenApp matcherStore={matcherStore} />, __PEN_INK_OPTIONS__)
+const rendererStore = createRouteRendererStore(await loadRegistry(initialPaths))
+const { waitUntilExit } = render(<PenApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
-// Pushing each reload into matcherStore, instead of calling Ink's
+// Pushing each reload into rendererStore, instead of calling Ink's
 // render() again, lets React's own update scheduling handle it - the
 // same way navigation actions already update the app without ever
 // touching render().
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
-    updateMatcherStore(matcherStore, await loadRegistry(paths))
+    updateRouteRendererStore(rendererStore, await loadRegistry(paths))
   }
   catch (err) {
     // A failed reload must not take the current render down with it -

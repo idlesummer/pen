@@ -1,18 +1,18 @@
 import { useSyncExternalStore } from 'react'
-import type { ComponentMatcherStore } from '@/pen-react/store'
+import type { RouteRendererStore } from '@/pen-react/store'
 import { NavigationProvider } from './navigation'
 import { Router } from './Router'
 
 export type PenAppProps = {
-  matcherStore: ComponentMatcherStore
+  rendererStore: RouteRendererStore
 }
 
 /** Root component that provides navigation and renders the matched route. */
-export function PenApp({ matcherStore }: PenAppProps) {
-  const componentMatcher = useSyncExternalStore(matcherStore.subscribe, matcherStore.getState)
+export function PenApp({ rendererStore }: PenAppProps) {
+  const routeRenderer = useSyncExternalStore(rendererStore.subscribe, rendererStore.getState)
   return (
     <NavigationProvider>
-      <Router componentMatcher={componentMatcher} />
+      <Router routeRenderer={routeRenderer} />
     </NavigationProvider>
   )
 }
