@@ -13,9 +13,7 @@ type ReactNodeMap = Record<string, ReactNode>
 
 /** Wraps content with a frame's boundaries, layout, and slots. Every
  *  component is already resolved, so this is pure React tree assembly. */
-function wrapFrame(frame: ComponentFrame, content: ReactNode, fullParams: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
-  const params = sliceRecord(fullParams, frame.paramCount)
-
+function wrapFrame(frame: ComponentFrame, content: ReactNode, params: Params, slotComponents: ReactNodeMap, pathname: string): ReactNode {
   if (frame.default) {
     content = <DefaultBoundary Fallback={frame.default} pathname={pathname} params={params}>{content}</DefaultBoundary>
   }
@@ -44,7 +42,11 @@ function renderChain(url: string, match: ComponentMatch, slotComponents: ReactNo
     : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
-    (element, frame) => wrapFrame(frame, element, params, slotComponents, url),
+    (element, frame) => {
+      const frameParams = sliceRecord(params, frame.paramCount)
+      const newFrame = wrapFrame(frame, element, frameParams, slotComponents, url)
+      return newFrame
+    },
     contentElement,
   )
 }
