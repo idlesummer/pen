@@ -63,11 +63,11 @@ function createComponentMatch(match: Match, componentMap: ComponentMap): Compone
  *  @param match - The matched endpoint and its nested slot matches.
  *  @param components - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
-export function createComponentMatchTree(rootMatch: Match, componentMap: ComponentMap): ComponentMatch {
-  const rootComponentMatch = createComponentMatch(rootMatch, componentMap)
-  const componentMatchOf = new Map([[rootMatch, rootComponentMatch]])
+export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
+  const componentMatchTree = createComponentMatch(matchTree, componentMap)
+  const componentMatchOf = new Map([[matchTree, componentMatchTree]])
 
-  traverse(rootMatch, {
+  traverse(matchTree, {
     expand: (node) => node.slots ? Object.values(node.slots) : [],
     attach: (child, parent) => {
       const componentMatch = createComponentMatch(child, componentMap)
@@ -78,5 +78,5 @@ export function createComponentMatchTree(rootMatch: Match, componentMap: Compone
       parentComponentMatch.slots[child.name] = componentMatch
     },
   })
-  return rootComponentMatch
+  return componentMatchTree
 }
