@@ -17,7 +17,7 @@ export type Frame<P> = {
 export type Endpoint<P> = {
   frames: Frame<P>[]  // last frame is the endpoint's parent
   contentPath: string // either page or default
-  paramCount: number  // which position's params `contentPath` receives
+  params: string[]    // the dynamic param names bound up to the content itself
 }
 
 /** Context for building frames and endpoints, with memoized frame reuse. */
@@ -56,11 +56,11 @@ function createFallbackFrame<P>(frame: Frame<P>): Frame<P> {
 
 // ── endpoints ───────────────────────────────────────────────────────────
 
-/** Creates a page endpoint with its precomputed wrapper chain and parameter count. */
+/** Creates a page endpoint with its precomputed wrapper chain and bound param names. */
 function createEndpoint<P>(pageOwner: RouteNode, contentPath: string, context: FrameContext<P>): Endpoint<P> {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
-  const paramCount = pageOwner.params.length
-  return { frames, contentPath, paramCount }
+  const params = pageOwner.params
+  return { frames, contentPath, params }
 }
 
 /** Creates a fallback endpoint, removing the innermost frame's default. Drops the frame if it doesn't contribute. */
