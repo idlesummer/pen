@@ -4,16 +4,13 @@ import { traverse } from '@/lib/traverse'
 /** Maps route param names to their captured values. */
 export type Params = Record<string, string | string[]>
 
-/** A frame as exposed through Match - each declared slot holds its own
- *  resolved match directly, instead of a position to search from. */
-export type MatchFrame = Omit<Frame<PositionNode>, 'slots'> & {
-  slots?: Record<string, Match>
-}
+/** A frame as exposed through Match - Frame is already generic over what
+ *  a slot holds, so this just parameterizes it with resolved matches
+ *  instead of positions to search from. */
+export type MatchFrame = Frame<Match>
 
 /** An endpoint as exposed through Match, with its frames narrowed the same way. */
-export type MatchEndpoint = Omit<Endpoint<PositionNode>, 'frames'> & {
-  frames: MatchFrame[]
-}
+export type MatchEndpoint = Endpoint<Match>
 
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
@@ -85,13 +82,16 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params) {
   return [endpoint, params] as const
 }
 
-/** Builds a frame as exposed through Match - slot keys known upfront,
- *  values filled in by createMatch once each slot's own match is resolved. */
-function toMatchFrame(frame: Frame<PositionNode>): MatchFrame {
-  const slots = frame.slots && Object.fromEntries(
-    Object.keys(frame.slots).map(name => [name, undefined as unknown as Match]),
-  )
-  return { ...frame, slots }
+/** Converts a slot's own frame chain into its Match-facing shape. A slot's
+ *  chain can never declare further slots - that's a structural error the
+ *  compiler already rejects - so this never needs to look for any. */
+function toLeafFrame(frame: Frame<PositionNode>): MatchFrame {
+  return { ...frame, slots: undefined }
+}
+
+/** Converts a slot's own endpoint into its Match-facing shape. */
+function toLeafEndpoint(endpoint: Endpoint<PositionNode>): MatchEndpoint {
+  return { ...endpoint, frames: endpoint.frames.map(toLeafFrame) }
 }
 
 /** Splits a pathname into non-empty segments. */
@@ -99,23 +99,20 @@ function normalizeUrl(pathname: string): string[] {
   return pathname.split('/').filter(Boolean)
 }
 
-/** Builds a Match for an already-resolved endpoint, then resolves and
- *  attaches each of its frames' own declared slots, recursively - so a
- *  slot's own nested slots get resolved too, not just its first level. */
+/** Builds a Match for an already-resolved endpoint, resolving each of its
+ *  frames' own declared slots along with it. */
 function createMatch(name: string, endpoint: Endpoint<PositionNode>, params: Params, url: string[]): Match {
-  const matchFrames = endpoint.frames.map(toMatchFrame)
-  const match: Match = { name, endpoint: { ...endpoint, frames: matchFrames }, params }
-
-  endpoint.frames.forEach((frame, index) => {
-    if (!frame.slots) return
-    const matchFrame = matchFrames[index]!
-
-    for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
-      const [slotEndpoint, slotParams] = findMatch(slotPosition, url, params)
-      matchFrame.slots![slotName] = createMatch(slotName, slotEndpoint, slotParams, url)
-    }
+  const frames: MatchFrame[] = endpoint.frames.map((frame) => {
+    const slots = frame.slots && Object.fromEntries(
+      Object.entries(frame.slots).map(([slotName, slotPosition]) => {
+        const [slotEndpoint, slotParams] = findMatch(slotPosition, url, params)
+        const slotMatch: Match = { name: slotName, endpoint: toLeafEndpoint(slotEndpoint), params: slotParams }
+        return [slotName, slotMatch]
+      }),
+    )
+    return { ...frame, slots }
   })
-  return match
+  return { name, endpoint: { ...endpoint, frames }, params }
 }
 
 /** Matches a pathname and its declared slots against the position tree. */
