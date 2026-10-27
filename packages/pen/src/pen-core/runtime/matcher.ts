@@ -24,23 +24,23 @@ type MatchCandidate = {
 function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
   const { position, params } = candidate
   const segment = url[position.urlDepth]
-  if (segment === undefined)
-    return []
-
   const candidates: MatchCandidate[] = []
-  if (position.statics?.[segment])
-    candidates.push({ position: position.statics[segment], params })
 
-  if (position.dynamic) {
-    const paramName = position.dynamic.param!
-    const newParams: Params = { ...params, [paramName]: segment }
-    candidates.push({ position: position.dynamic, params: newParams })
-  }
-  if (position.catchall) {
-    const paramName = position.catchall.param!
-    const segments = url.slice(position.urlDepth)
-    const newParams: Params = { ...params, [paramName]: segments }
-    candidates.push({ position: position.catchall, params: newParams, isCatchall: true })
+  if (segment !== undefined) {
+    if (position.statics?.[segment])
+      candidates.push({ position: position.statics[segment], params })
+
+    if (position.dynamic) {
+      const paramName = position.dynamic.param!
+      const newParams: Params = { ...params, [paramName]: segment }
+      candidates.push({ position: position.dynamic, params: newParams })
+    }
+    if (position.catchall) {
+      const paramName = position.catchall.param!
+      const segments = url.slice(position.urlDepth)
+      const newParams: Params = { ...params, [paramName]: segments }
+      candidates.push({ position: position.catchall, params: newParams, isCatchall: true })
+    }
   }
   return candidates
 }
