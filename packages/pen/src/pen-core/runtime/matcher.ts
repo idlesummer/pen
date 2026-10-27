@@ -1,9 +1,16 @@
-import { omitRecord } from '@/lib/record'
 import type { Endpoint, Frame, PositionNode } from '../compiler'
+import { omitRecord } from '@/lib/record'
 import { traverse } from '@/lib/traverse'
 
 /** Maps route param names to their captured values. */
 export type Params = Record<string, string | string[]>
+
+/** A matched endpoint and its params, with every declared slot already resolved. */
+export type Match = {
+  name: string            // this match's slot name, or '' for the root match
+  endpoint: MatchEndpoint // the winning endpoint - page or fallback, same type either way
+  params: Params          // every param bound reaching this position, in bind order
+}
 
 /** A frame as exposed through Match - Frame is already generic over what
  *  a slot holds, so this just parameterizes it with resolved matches
@@ -12,13 +19,6 @@ export type MatchFrame = Frame<Match>
 
 /** An endpoint as exposed through Match, with its frames narrowed the same way. */
 export type MatchEndpoint = Endpoint<Match>
-
-/** A matched endpoint and its params, with every declared slot already resolved. */
-export type Match = {
-  name: string            // this match's slot name, or '' for the root match
-  endpoint: MatchEndpoint // the winning endpoint - page or fallback, same type either way
-  params: Params          // every param bound reaching this position, in bind order
-}
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
@@ -83,33 +83,32 @@ function findMatch(position: PositionNode, url: string[]) {
   return [endpoint, params] as const
 }
 
-/** Converts a slot's own endpoint into its Match-facing shape. */
-function toLeafEndpoint(endpoint: Endpoint<PositionNode>): MatchEndpoint {
-  return { ...endpoint, frames: endpoint.frames.map(frame => omitRecord(frame, 'slots')) }
-}
-
 /** Splits a pathname into non-empty segments. */
 function normalizeUrl(pathname: string): string[] {
   return pathname.split('/').filter(Boolean)
 }
 
+/** Matches a slot without resolving its own slots. */
+function matchSlot(name: string, position: PositionNode, url: string[], mainParams: Params): Match {
+  const [slotEndpoint, slotParams] = findMatch(position, url)
+  const endpoint = { ...slotEndpoint, frames: slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')) }
+  const params = { ...mainParams, ...slotParams }
+  return { name, endpoint, params }
+}
+
+function createMatchFrame(frame: Frame<PositionNode>, url: string[], mainParams: Params): MatchFrame {
+  const slots: Record<string, Match> = {}
+
+  for (const [name, position] of Object.entries(frame.slots ?? {}))
+    slots[name] = matchSlot(name, position, url, mainParams)
+  return { ...frame, slots }
+}
+
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
-  const [endpoint, params] = findMatch(positionTree, url)
+  const [mainEndpoint, mainParams] = findMatch(positionTree, url)
+  const frames = mainEndpoint.frames.map(frame => createMatchFrame(frame, url, mainParams))
 
-  const frames: MatchFrame[] = endpoint.frames.map(frame => {
-    const slots: Record<string, Match> = {}
-
-    for (const [slotName, slotPosition] of Object.entries(frame.slots ?? {})) {
-      const [slotEndpoint, slotParams] = findMatch(slotPosition, url)
-      slots[slotName] = {
-        name: slotName,
-        endpoint: toLeafEndpoint(slotEndpoint),
-        params: { ...params, ...slotParams },
-      }
-    }
-    return { ...frame, slots }
-  })
-  return { name: '', endpoint: { ...endpoint, frames }, params }
+  return { name: '', endpoint: { ...mainEndpoint, frames }, params: mainParams }
 }
