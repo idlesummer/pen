@@ -1,3 +1,4 @@
+import { omitRecord } from '@/lib/record'
 import type { Endpoint, Frame, PositionNode } from '../compiler'
 import { traverse } from '@/lib/traverse'
 
@@ -82,16 +83,9 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params) {
   return [endpoint, params] as const
 }
 
-/** Converts a slot's own frame chain into its Match-facing shape. A slot's
- *  chain can never declare further slots - that's a structural error the
- *  compiler already rejects - so this never needs to look for any. */
-function toLeafFrame(frame: Frame<PositionNode>): MatchFrame {
-  return { ...frame, slots: undefined }
-}
-
 /** Converts a slot's own endpoint into its Match-facing shape. */
 function toLeafEndpoint(endpoint: Endpoint<PositionNode>): MatchEndpoint {
-  return { ...endpoint, frames: endpoint.frames.map(toLeafFrame) }
+  return { ...endpoint, frames: endpoint.frames.map(frame => omitRecord(frame, 'slots')) }
 }
 
 /** Splits a pathname into non-empty segments. */
