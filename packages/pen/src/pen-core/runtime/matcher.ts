@@ -8,17 +8,12 @@ export type Params = Record<string, string | string[]>
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
   name: string            // this match's slot name, or '' for the root match
-  endpoint: MatchEndpoint // the winning endpoint - page or fallback, same type either way
+  endpoint: Endpoint<Match> // the winning endpoint - page or fallback, same type either way
   params: Params          // every param bound reaching this position, in bind order
 }
 
-/** A frame as exposed through Match - Frame is already generic over what
- *  a slot holds, so this just parameterizes it with resolved matches
- *  instead of positions to search from. */
-export type MatchFrame = Frame<Match>
-
-/** An endpoint as exposed through Match, with its frames narrowed the same way. */
-export type MatchEndpoint = Endpoint<Match>
+export type MatchEndpoint = Match['endpoint']
+export type MatchFrame = MatchEndpoint['frames'][number]
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
