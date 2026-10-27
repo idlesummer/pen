@@ -109,9 +109,7 @@ export function match(positionTree: PositionNode, pathname: string): Match {
         params: { ...params, ...slotParams },
       }
     }
-
     return { ...frame, slots }
   })
-
   return { name: '', endpoint: { ...endpoint, frames }, params }
 }
