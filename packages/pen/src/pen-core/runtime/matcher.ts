@@ -7,13 +7,9 @@ export type Params = Record<string, string | string[]>
 
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
-  /** This match's slot name; '' for the root match */
-  name: string
-  endpoint: Omit<Endpoint<Match>, 'frames' | 'params'> & {
-    frames: (Omit<Frame<Match>, 'params'> & { params: Params })[]
-    params: Params
-  }
-  params: Params          // every param bound reaching this position, in bind order
+  name: string    // this match's slot name; '' for the root match
+  endpoint: Endpoint<Match, Params>
+  params: Params  // every param bound reaching this position, in bind order
 }
 
 export type MatchEndpoint = Match['endpoint']
