@@ -7,19 +7,17 @@ export type Params = Record<string, string | string[]>
 
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
-  name: string            // this match's slot name, or '' for the root match
-  endpoint: MatchEndpoint // the winning endpoint - page or fallback, same type either way
+  /** This match's slot name; '' for the root match */
+  name: string
+  endpoint: Omit<Endpoint<Match>, 'frames' | 'params'> & {
+    frames: (Omit<Frame<Match>, 'params'> & { params: Params })[]
+    params: Params
+  }
   params: Params          // every param bound reaching this position, in bind order
 }
 
-/** A frame as exposed through Match - the compile-time frame's bound param
- *  *names* are resolved into their actual values, alongside each declared
- *  slot's resolved match. */
-export type MatchFrame = Omit<Frame<Match>, 'params'> & { params: Params }
-
-/** An endpoint as exposed through Match - its frames are narrowed the same
- *  way, and its own bound param names are resolved into their values too. */
-export type MatchEndpoint = Omit<Endpoint<Match>, 'frames' | 'params'> & { frames: MatchFrame[]; params: Params }
+export type MatchEndpoint = Match['endpoint']
+export type MatchFrame = MatchEndpoint['frames'][number]
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
