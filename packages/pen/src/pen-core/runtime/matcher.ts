@@ -78,13 +78,8 @@ function findMatch(position: PositionNode, url: string[]) {
   return [endpoint, params] as const
 }
 
-/** Splits a pathname into non-empty segments. */
-function normalizeUrl(pathname: string): string[] {
-  return pathname.split('/').filter(Boolean)
-}
-
 /** Matches a slot without resolving its own slots. */
-function matchSlot(name: string, position: PositionNode, url: string[], mainParams: Params): Match {
+function createMatchFrameSlot(name: string, position: PositionNode, url: string[], mainParams: Params): Match {
   const [slotEndpoint, slotParams] = findMatch(position, url)
   const endpoint = { ...slotEndpoint, frames: slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')) }
   const params = { ...mainParams, ...slotParams }
@@ -95,13 +90,13 @@ function createMatchFrame(frame: Frame<PositionNode>, url: string[], mainParams:
   const slots: Record<string, Match> = {}
 
   for (const [name, position] of Object.entries(frame.slots ?? {}))
-    slots[name] = matchSlot(name, position, url, mainParams)
+    slots[name] = createMatchFrameSlot(name, position, url, mainParams)
   return { ...frame, slots }
 }
 
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
-  const url = normalizeUrl(pathname)
+  const url = pathname.split('/').filter(Boolean)
   const [mainEndpoint, mainParams] = findMatch(positionTree, url)
   const frames = mainEndpoint.frames.map(frame => createMatchFrame(frame, url, mainParams))
 
