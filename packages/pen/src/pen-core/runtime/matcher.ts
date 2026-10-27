@@ -1,5 +1,5 @@
 import type { Endpoint, Frame, PositionNode } from '../compiler'
-import { omitRecord } from '@/lib/record'
+import { omitRecord, sliceRecord } from '@/lib/record'
 import { traverse } from '@/lib/traverse'
 
 /** Maps route param names to their captured values. */
@@ -78,19 +78,16 @@ function findMatch(position: PositionNode, url: string[]) {
   return [endpoint, params] as const
 }
 
-/** Matches a slot without resolving its own slots. */
-function createMatchFrameSlot(name: string, position: PositionNode, url: string[], mainParams: Params): Match {
-  const [slotEndpoint, slotParams] = findMatch(position, url)
-  const endpoint = { ...slotEndpoint, frames: slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')) }
-  const params = { ...mainParams, ...slotParams }
-  return { name, endpoint, params }
-}
-
-function createMatchFrame(frame: Frame<PositionNode>, url: string[], mainParams: Params): MatchFrame {
+/** Resolves a frame's slots against the URL. */
+function matchFrame(frame: Frame<PositionNode>, url: string[], params: Params): MatchFrame {
+  const inheritedParams = sliceRecord(params, frame.paramCount)
   const slots: Record<string, Match> = {}
 
-  for (const [name, position] of Object.entries(frame.slots ?? {}))
-    slots[name] = createMatchFrameSlot(name, position, url, mainParams)
+  for (const [name, position] of Object.entries(frame.slots ?? {})) {
+    const [slotEndpoint, slotParams] = findMatch(position, url)
+    const endpoint = { ...slotEndpoint, frames: slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')) }
+    slots[name] = { name, endpoint, params: { ...inheritedParams, ...slotParams } }
+  }
   return { ...frame, slots }
 }
 
@@ -98,7 +95,6 @@ function createMatchFrame(frame: Frame<PositionNode>, url: string[], mainParams:
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = pathname.split('/').filter(Boolean)
   const [mainEndpoint, mainParams] = findMatch(positionTree, url)
-  const frames = mainEndpoint.frames.map(frame => createMatchFrame(frame, url, mainParams))
-
+  const frames = mainEndpoint.frames.map(frame => matchFrame(frame, url, mainParams))
   return { name: '', endpoint: { ...mainEndpoint, frames }, params: mainParams }
 }
