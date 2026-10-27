@@ -32,28 +32,28 @@ export type ComponentMatch = {
 }
 
 /** Replaces a frame's component paths with their actual corresponding components. */
-function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
+function createComponentFrame(frame: Frame<PositionNode>, componentMap: ComponentMap): ComponentFrame {
   return {
-    Layout: frame.layout ? components.layout[frame.layout] : undefined,
-    Loading: frame.loading ? components.loading[frame.loading] : undefined,
-    Error: frame.error ? components.error[frame.error] : undefined,
-    Default: frame.default ? components.default[frame.default] : undefined,
+    Layout: frame.layout ? componentMap.layout[frame.layout] : undefined,
+    Loading: frame.loading ? componentMap.loading[frame.loading] : undefined,
+    Error: frame.error ? componentMap.error[frame.error] : undefined,
+    Default: frame.default ? componentMap.default[frame.default] : undefined,
     slotNames: frame.slots ? Object.keys(frame.slots) : undefined,
     paramCount: frame.paramCount,
   }
 }
 
 /** Replaces an endpoint's content path and frame paths with their corresponding components. */
-function createComponentEndpoint(endpoint: Endpoint<PositionNode>, components: ComponentMap): ComponentEndpoint {
-  const frames = endpoint.frames.map(frame => createComponentFrame(frame, components))
-  const content = (components.page[endpoint.contentPath] ?? components.default[endpoint.contentPath])!
+function createComponentEndpoint(endpoint: Endpoint<PositionNode>, componentMap: ComponentMap): ComponentEndpoint {
+  const frames = endpoint.frames.map(frame => createComponentFrame(frame, componentMap))
+  const content = (componentMap.page[endpoint.contentPath] ?? componentMap.default[endpoint.contentPath])!
   const paramCount = endpoint.paramCount
   return { frames, content, paramCount }
 }
 
 /** Converts a match into a component match, preserving its params. */
-function createComponentMatch(match: Match, components: ComponentMap): ComponentMatch {
-  const endpoint = createComponentEndpoint(match.endpoint, components)
+function createComponentMatch(match: Match, componentMap: ComponentMap): ComponentMatch {
+  const endpoint = createComponentEndpoint(match.endpoint, componentMap)
   const params = match.params
   return { endpoint, params }
 }
