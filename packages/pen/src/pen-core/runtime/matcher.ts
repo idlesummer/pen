@@ -12,9 +12,10 @@ export type Match = {
   params: Params          // every param bound reaching this position, in bind order
 }
 
-/** A frame as exposed through Match, carrying its own params already
- *  sliced to its depth, alongside each declared slot's resolved match. */
-export type MatchFrame = Frame<Match> & { params: Params }
+/** A frame as exposed through Match - the compile-time frame's bound param
+ *  *names* are resolved into their actual values, alongside each declared
+ *  slot's resolved match. */
+export type MatchFrame = Omit<Frame<Match>, 'params'> & { params: Params }
 
 /** An endpoint as exposed through Match, with its frames narrowed the same way. */
 export type MatchEndpoint = Omit<Endpoint<Match>, 'frames'> & { frames: MatchFrame[] }
@@ -98,17 +99,17 @@ function createMatchFrame(frame: Frame<PositionNode>, url: string[], frameParams
   return { ...frame, slots, params: frameParams }
 }
 
-/** Slices params down to each frame's own depth, reusing the same object
+/** Looks up each frame's own bound param names, reusing the same object
  *  across consecutive frames that don't bind a new param. */
 function createMatchFrames(frames: Frame<PositionNode>[], url: string[], fullParams: Params): MatchFrame[] {
-  const paramEntries = Object.entries(fullParams)
+  let boundNames: string[] = []
   let frameParams: Params = {}
-  let boundCount = 0
 
   return frames.map((frame) => {
-    if (boundCount < frame.paramCount) {
-      frameParams = { ...frameParams, ...Object.fromEntries(paramEntries.slice(boundCount, frame.paramCount)) }
-      boundCount = frame.paramCount
+    if (frame.params !== boundNames) {
+      const newNames = frame.params.slice(boundNames.length)
+      frameParams = { ...frameParams, ...Object.fromEntries(newNames.map(name => [name, fullParams[name]!])) }
+      boundNames = frame.params
     }
     return createMatchFrame(frame, url, frameParams)
   })

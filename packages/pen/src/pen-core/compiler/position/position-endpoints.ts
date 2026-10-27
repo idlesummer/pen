@@ -10,7 +10,7 @@ export type Frame<P> = {
   error?: string
   default?: string
   slots?: Record<string, P> // this folder's own declared slots
-  paramCount: number  // is the number of dynamic parameters before the frame
+  params: string[]   // the dynamic param names bound before this frame
 }
 
 /** Renderable route endpoint containing all the data needed for rendering. */
@@ -41,8 +41,8 @@ function createFrame<P>(routeNode: RouteNode, context: FrameContext<P>): Frame<P
   const slots = context.slotsOf.get(routeNode) as Record<string, P> | undefined
 
   if (layout || error || loading || default_ || slots) {
-    const paramCount = routeNode.paramCount
-    const frame = { layout, loading, error, default: default_, slots, paramCount }
+    const params = routeNode.params
+    const frame = { layout, loading, error, default: default_, slots, params }
     frameOf.set(routeNode, frame)
     return frame
   }
@@ -50,8 +50,8 @@ function createFrame<P>(routeNode: RouteNode, context: FrameContext<P>): Frame<P
 
 /** The same frame without its own `default` for an endpoint whose content is that default */
 function createFallbackFrame<P>(frame: Frame<P>): Frame<P> {
-  const { layout, loading, error, slots, paramCount } = frame
-  return { layout, loading, error, slots, paramCount }
+  const { layout, loading, error, slots, params } = frame
+  return { layout, loading, error, slots, params }
 }
 
 // ── endpoints ───────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ function createFallbackFrame<P>(frame: Frame<P>): Frame<P> {
 /** Creates a page endpoint with its precomputed wrapper chain and parameter count. */
 function createEndpoint<P>(pageOwner: RouteNode, contentPath: string, context: FrameContext<P>): Endpoint<P> {
   const frames = compactMapAncestors(pageOwner, node => createFrame(node, context)).reverse()
-  const paramCount = pageOwner.paramCount
+  const paramCount = pageOwner.params.length
   return { frames, contentPath, paramCount }
 }
 
