@@ -1,15 +1,27 @@
-import type { Endpoint, PositionNode } from '../compiler'
+import type { Endpoint, Frame, PositionNode } from '../compiler'
 import { traverse } from '@/lib/traverse'
 
 /** Maps route param names to their captured values. */
 export type Params = Record<string, string | string[]>
 
+/** A frame as exposed through Match - slot names only, no position data.
+ *  Matching is already done by the time a Match exists, so all a consumer
+ *  needs to know about a slot here is its name. */
+export type MatchFrame = Omit<Frame<PositionNode>, 'slots'> & {
+  slots?: readonly string[]
+}
+
+/** An endpoint as exposed through Match, with its frames narrowed the same way. */
+export type MatchEndpoint = Omit<Endpoint<PositionNode>, 'frames'> & {
+  frames: MatchFrame[]
+}
+
 /** A matched endpoint, its params, and any matched slots. */
 export type Match = {
-  name: string                     // this match's slot name, or '' for the root match
-  endpoint: Endpoint<PositionNode> // the winning endpoint - page or fallback, same type either way
-  params: Params                  // every param bound reaching this position, in bind order
-  slots?: Record<string, Match>   // one recursive match per slot this endpoint's frames declare
+  name: string                  // this match's slot name, or '' for the root match
+  endpoint: MatchEndpoint       // the winning endpoint - page or fallback, same type either way
+  params: Params                // every param bound reaching this position, in bind order
+  slots?: Record<string, Match> // one recursive match per slot this endpoint's frames declare
 }
 
 /** A candidate explored during route matching. */
@@ -75,6 +87,16 @@ function findMatch(position: PositionNode, url: string[], seedParams: Params) {
   return [endpoint, params] as const
 }
 
+/** Strips position data from a frame's slots down to just their names. */
+function toMatchFrame(frame: Frame<PositionNode>): MatchFrame {
+  return { ...frame, slots: frame.slots && Object.keys(frame.slots) }
+}
+
+/** Strips position data from every frame in an endpoint's chain the same way. */
+function toMatchEndpoint(endpoint: Endpoint<PositionNode>): MatchEndpoint {
+  return { ...endpoint, frames: endpoint.frames.map(toMatchFrame) }
+}
+
 /** Splits a pathname into non-empty segments. */
 function normalizeUrl(pathname: string): string[] {
   return pathname.split('/').filter(Boolean)
@@ -84,15 +106,15 @@ function normalizeUrl(pathname: string): string[] {
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
   const [endpoint, params] = findMatch(positionTree, url, {})
-  const mainMatch: Match = { endpoint, params, name: '' }
+  const mainMatch: Match = { endpoint: toMatchEndpoint(endpoint), params, name: '' }
 
-  for (const frame of mainMatch.endpoint.frames) {
+  for (const frame of endpoint.frames) {
     if (!frame.slots) continue
     mainMatch.slots ??= {}
 
     for (const [slotName, slotPosition] of Object.entries(frame.slots)) {
       const [endpoint, params] = findMatch(slotPosition, url, mainMatch.params) // var shadowing is ok here
-      const slotMatch: Match = { endpoint, params, name: slotName }
+      const slotMatch: Match = { endpoint: toMatchEndpoint(endpoint), params, name: slotName }
       mainMatch.slots[slotName] = slotMatch
     }
   }

@@ -1,4 +1,4 @@
-import type { Match, Frame, Endpoint, PositionNode, Params } from '@/pen-core'
+import type { Match, MatchFrame, MatchEndpoint, Params } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
 import type { PageComponent } from '@/pen-react/modules/components/PageComponent'
 import type { LayoutComponent } from '@/pen-react/modules/components/LayoutComponent'
@@ -35,9 +35,9 @@ export type ComponentMatch = {
 /** Replaces a frame's component paths with their actual corresponding components.
  *  Slot values start undefined - createComponentMatchTree fills them in once
  *  it resolves each slot's own match. */
-function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
+function createComponentFrame(frame: MatchFrame, components: ComponentMap): ComponentFrame {
   const slots = frame.slots && Object.fromEntries(
-    Object.keys(frame.slots).map(name => [name, undefined as unknown as ComponentMatch]),
+    frame.slots.map(name => [name, undefined as unknown as ComponentMatch]),
   )
   return {
     Layout: frame.layout ? components.layout[frame.layout] : undefined,
@@ -50,7 +50,7 @@ function createComponentFrame(frame: Frame<PositionNode>, components: ComponentM
 }
 
 /** Replaces an endpoint's content path and frame paths with their corresponding components. */
-function createComponentEndpoint(endpoint: Endpoint<PositionNode>, componentMap: ComponentMap): ComponentEndpoint {
+function createComponentEndpoint(endpoint: MatchEndpoint, componentMap: ComponentMap): ComponentEndpoint {
   const frames = endpoint.frames.map(frame => createComponentFrame(frame, componentMap))
   const content = (componentMap.page[endpoint.contentPath] ?? componentMap.default[endpoint.contentPath])!
   const paramCount = endpoint.paramCount
