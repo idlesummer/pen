@@ -93,25 +93,25 @@ function normalizeUrl(pathname: string): string[] {
   return pathname.split('/').filter(Boolean)
 }
 
-/** Builds a Match for an already-resolved endpoint, resolving each of its
- *  frames' own declared slots along with it. */
-function createMatch(name: string, endpoint: Endpoint<PositionNode>, params: Params, url: string[]): Match {
-  const frames: MatchFrame[] = endpoint.frames.map((frame) => {
-    const slots = frame.slots && Object.fromEntries(
-      Object.entries(frame.slots).map(([slotName, slotPosition]) => {
-        const [slotEndpoint, slotParams] = findMatch(slotPosition, url, params)
-        const slotMatch: Match = { name: slotName, endpoint: toLeafEndpoint(slotEndpoint), params: slotParams }
-        return [slotName, slotMatch]
-      }),
-    )
-    return { ...frame, slots }
-  })
-  return { name, endpoint: { ...endpoint, frames }, params }
-}
-
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = normalizeUrl(pathname)
   const [endpoint, params] = findMatch(positionTree, url, {})
-  return createMatch('', endpoint, params, url)
+
+  const frames: MatchFrame[] = endpoint.frames.map(frame => {
+    const slots: Record<string, Match> = {}
+
+    for (const [slotName, slotPosition] of Object.entries(frame.slots ?? {})) {
+      const [slotEndpoint, slotParams] = findMatch(slotPosition, url, params)
+      slots[slotName] = {
+        name: slotName,
+        endpoint: toLeafEndpoint(slotEndpoint),
+        params: slotParams,
+      }
+    }
+
+    return { ...frame, slots }
+  })
+
+  return { name: '', endpoint: { ...endpoint, frames }, params }
 }
