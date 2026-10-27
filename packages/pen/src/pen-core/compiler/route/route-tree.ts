@@ -67,6 +67,7 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   forEach(routeTree, (route) => {
     if (!route.modules.default && !isBoundary(route.type))
       route.defaultFallback = route.parent!.defaultFallback
+
     route.params = isDynamicOrCatchall(route.type)
       ? [...(route.parent?.params ?? []), route.segment]
       : (route.parent?.params ?? []) // no new param bound - reuse the parent's list as-is
