@@ -17,8 +17,9 @@ export type Match = {
  *  slot's resolved match. */
 export type MatchFrame = Omit<Frame<Match>, 'params'> & { params: Params }
 
-/** An endpoint as exposed through Match, with its frames narrowed the same way. */
-export type MatchEndpoint = Omit<Endpoint<Match>, 'frames'> & { frames: MatchFrame[] }
+/** An endpoint as exposed through Match - its frames are narrowed the same
+ *  way, and its own bound param names are resolved into their values too. */
+export type MatchEndpoint = Omit<Endpoint<Match>, 'frames' | 'params'> & { frames: MatchFrame[]; params: Params }
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
@@ -87,8 +88,9 @@ function findMatch(position: PositionNode, url: string[]) {
 function createMatchFrameSlot(name: string, position: PositionNode, url: string[], seedParams: Params): Match {
   const [slotEndpoint, slotParams] = findMatch(position, url)
   const params = { ...seedParams, ...slotParams }
-  const frames = createMatchFrames(slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')), url, params)
-  return { name, endpoint: { ...slotEndpoint, frames }, params }
+  const frames = slotEndpoint.frames.map(frame => omitRecord(frame, 'slots'))
+  const endpoint = createMatchEndpoint({ ...slotEndpoint, frames }, url, params)
+  return { name, endpoint, params }
 }
 
 function createMatchFrame(frame: Frame<PositionNode>, url: string[], frameParams: Params): MatchFrame {
@@ -115,11 +117,18 @@ function createMatchFrames(frames: Frame<PositionNode>[], url: string[], fullPar
   })
 }
 
+/** Resolves an endpoint's frame chain and its own bound param names. */
+function createMatchEndpoint(endpoint: Endpoint<PositionNode>, url: string[], fullParams: Params): MatchEndpoint {
+  const frames = createMatchFrames(endpoint.frames, url, fullParams)
+  const params = Object.fromEntries(endpoint.params.map(name => [name, fullParams[name]!]))
+  return { ...endpoint, frames, params }
+}
+
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = pathname.split('/').filter(Boolean)
   const [mainEndpoint, mainParams] = findMatch(positionTree, url)
-  const frames = createMatchFrames(mainEndpoint.frames, url, mainParams)
+  const endpoint = createMatchEndpoint(mainEndpoint, url, mainParams)
 
-  return { name: '', endpoint: { ...mainEndpoint, frames }, params: mainParams }
+  return { name: '', endpoint, params: mainParams }
 }
