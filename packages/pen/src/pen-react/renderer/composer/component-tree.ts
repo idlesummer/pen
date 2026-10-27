@@ -6,15 +6,16 @@ import type { LoadingComponent } from '@/pen-react/modules/components/LoadingBou
 import type { ErrorComponent } from '@/pen-react/modules/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/modules/components/DefaultBoundary'
 
-/** A frame with component references in place of component paths. Each
- *  declared slot's already-resolved match is converted right along with it. */
+/** A frame with component references in place of component paths, carrying
+ *  its own already-scoped params. Each declared slot's already-resolved
+ *  match is converted right along with it. */
 export type ComponentFrame = {
   Layout?: LayoutComponent
   Loading?: LoadingComponent
   Error?: ErrorComponent
   Default?: DefaultComponent
   slots?: Record<string, ComponentMatch>
-  paramCount: number
+  params: Params
 }
 
 /** An endpoint with its content and frames converted to components. */
@@ -38,7 +39,7 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
     Loading: frame.loading ? componentMap.loading[frame.loading] : undefined,
     Error: frame.error ? componentMap.error[frame.error] : undefined,
     Default: frame.default ? componentMap.default[frame.default] : undefined,
-    paramCount: frame.paramCount,
+    params: frame.params,
   }
 }
 

@@ -1,5 +1,5 @@
 import type { Endpoint, Frame, PositionNode } from '../compiler'
-import { omitRecord, sliceRecord } from '@/lib/record'
+import { omitRecord } from '@/lib/record'
 import { traverse } from '@/lib/traverse'
 
 /** Maps route param names to their captured values. */
@@ -8,12 +8,16 @@ export type Params = Record<string, string | string[]>
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
   name: string            // this match's slot name, or '' for the root match
-  endpoint: Endpoint<Match> // the winning endpoint - page or fallback, same type either way
+  endpoint: MatchEndpoint // the winning endpoint - page or fallback, same type either way
   params: Params          // every param bound reaching this position, in bind order
 }
 
-export type MatchEndpoint = Match['endpoint']
-export type MatchFrame = MatchEndpoint['frames'][number]
+/** A frame as exposed through Match, carrying its own params already
+ *  sliced to its depth, alongside each declared slot's resolved match. */
+export type MatchFrame = Frame<Match> & { params: Params }
+
+/** An endpoint as exposed through Match, with its frames narrowed the same way. */
+export type MatchEndpoint = Omit<Endpoint<Match>, 'frames'> & { frames: MatchFrame[] }
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
@@ -78,23 +82,43 @@ function findMatch(position: PositionNode, url: string[]) {
   return [endpoint, params] as const
 }
 
-/** Resolves a frame's slots against the URL. */
-function matchFrame(frame: Frame<PositionNode>, url: string[], params: Params): MatchFrame {
-  const inheritedParams = sliceRecord(params, frame.paramCount)
+/** Matches a slot without resolving its own slots. */
+function createMatchFrameSlot(name: string, position: PositionNode, url: string[], seedParams: Params): Match {
+  const [slotEndpoint, slotParams] = findMatch(position, url)
+  const params = { ...seedParams, ...slotParams }
+  const frames = createMatchFrames(slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')), url, params)
+  return { name, endpoint: { ...slotEndpoint, frames }, params }
+}
+
+function createMatchFrame(frame: Frame<PositionNode>, url: string[], frameParams: Params): MatchFrame {
   const slots: Record<string, Match> = {}
 
-  for (const [name, position] of Object.entries(frame.slots ?? {})) {
-    const [slotEndpoint, slotParams] = findMatch(position, url)
-    const endpoint = { ...slotEndpoint, frames: slotEndpoint.frames.map(frame => omitRecord(frame, 'slots')) }
-    slots[name] = { name, endpoint, params: { ...inheritedParams, ...slotParams } }
-  }
-  return { ...frame, slots }
+  for (const [name, position] of Object.entries(frame.slots ?? {}))
+    slots[name] = createMatchFrameSlot(name, position, url, frameParams)
+  return { ...frame, slots, params: frameParams }
+}
+
+/** Slices params down to each frame's own depth, reusing the same object
+ *  across consecutive frames that don't bind a new param. */
+function createMatchFrames(frames: Frame<PositionNode>[], url: string[], fullParams: Params): MatchFrame[] {
+  const paramEntries = Object.entries(fullParams)
+  let frameParams: Params = {}
+  let boundCount = 0
+
+  return frames.map((frame) => {
+    if (boundCount < frame.paramCount) {
+      frameParams = { ...frameParams, ...Object.fromEntries(paramEntries.slice(boundCount, frame.paramCount)) }
+      boundCount = frame.paramCount
+    }
+    return createMatchFrame(frame, url, frameParams)
+  })
 }
 
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = pathname.split('/').filter(Boolean)
   const [mainEndpoint, mainParams] = findMatch(positionTree, url)
-  const frames = mainEndpoint.frames.map(frame => matchFrame(frame, url, mainParams))
+  const frames = createMatchFrames(mainEndpoint.frames, url, mainParams)
+
   return { name: '', endpoint: { ...mainEndpoint, frames }, params: mainParams }
 }
