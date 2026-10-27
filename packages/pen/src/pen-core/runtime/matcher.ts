@@ -11,7 +11,6 @@ export type Match = {
   endpoint: Endpoint<Match, Params>
   params: Params  // every param bound reaching this position, in bind order
 }
-
 export type MatchEndpoint = Match['endpoint']
 export type MatchFrame = MatchEndpoint['frames'][number]
 
@@ -64,7 +63,6 @@ function findMatch(position: PositionNode, url: string[]) {
       const position = candidate.position
       const isExhausted = !url[position.urlDepth]
       const isAccepting = isExhausted || candidate.isCatchall // url is exhausted or position is catchall
-
       if (isAccepting && position.endpoint)
         return (winner = candidate, true)
 
@@ -123,6 +121,5 @@ export function match(positionTree: PositionNode, pathname: string): Match {
   const url = pathname.split('/').filter(Boolean)
   const [mainEndpoint, mainParams] = findMatch(positionTree, url)
   const endpoint = createMatchEndpoint(mainEndpoint, url, mainParams)
-
   return { name: '', endpoint, params: mainParams }
 }
