@@ -11,19 +11,51 @@ import { sliceRecord } from '@/lib/record'
 
 type ReactNodeMap = Record<string, ReactNode>
 
-/** Wraps child with a frame's boundaries, layout, and slots. Every slot
- *  already carries its own resolved match, so it's rendered right here,
- *  on the way up through this specific frame. */
-function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, params: Params): ReactNode {
+/** Wraps child with a frame's default/loading/error boundaries - shared by
+ *  both the main and leaf (slot-owned) frame wrapping. */
+function wrapBoundaries(route: string, frame: ComponentFrame, child: ReactNode, params: Params): ReactNode {
   if (frame.Default)
     child = <DefaultBoundary Fallback={frame.Default} route={route} params={params}>{child}</DefaultBoundary>
   if (frame.Loading)
     child = <LoadingBoundary Fallback={frame.Loading}>{child}</LoadingBoundary>
   if (frame.Error)
     child = <ErrorBoundary Fallback={frame.Error} route={route}>{child}</ErrorBoundary>
+  return child
+}
+
+/** Wraps child with a slot-owned frame's boundaries and layout. A slot's own
+ *  chain can never declare further slots, so there's nothing else to render. */
+function wrapLeafFrame(route: string, frame: ComponentFrame, child: ReactNode, params: Params): ReactNode {
+  child = wrapBoundaries(route, frame, child, params)
+  if (frame.Layout)
+    child = <frame.Layout params={params}>{child}</frame.Layout>
+  return child
+}
+
+/** Wraps a slot-owned match's content with its own frame chain, from inner to outer. */
+function renderLeafChain(route: string, match: ComponentMatch): ReactNode {
+  const { endpoint, params } = match
+  const Content = endpoint.content
+  const contentProps = { params: sliceRecord(params, endpoint.paramCount) }
+
+  const contentElement = Content.constructor.name === 'AsyncFunction'
+    ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
+    : <Content {...contentProps} />
+
+  return endpoint.frames.reduceRight<ReactNode>(
+    (child, frame) => wrapLeafFrame(route, frame, child, sliceRecord(params, frame.paramCount)),
+    contentElement,
+  )
+}
+
+/** Wraps child with a frame's boundaries, layout, and slots. Every slot
+ *  already carries its own resolved match, so it's rendered right here,
+ *  on the way up through this specific frame. */
+function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, params: Params): ReactNode {
+  child = wrapBoundaries(route, frame, child, params)
   if (frame.Layout) {
     const slots: ReactNodeMap | undefined = frame.slots && Object.fromEntries(
-      Object.entries(frame.slots).map(([name, slotMatch]) => [name, renderChain(route, slotMatch)]),
+      Object.entries(frame.slots).map(([name, slotMatch]) => [name, renderLeafChain(route, slotMatch)]),
     )
     child = <frame.Layout params={params} {...slots}>{child}</frame.Layout>
   }
@@ -41,11 +73,7 @@ function renderChain(route: string, match: ComponentMatch): ReactNode {
     : <Content {...contentProps} />
 
   return endpoint.frames.reduceRight<ReactNode>(
-    (child, frame) => {
-      const frameParams = sliceRecord(params, frame.paramCount)
-      const newFrame = wrapFrame(route, frame, child, frameParams)
-      return newFrame
-    },
+    (child, frame) => wrapFrame(route, frame, child, sliceRecord(params, frame.paramCount)),
     contentElement,
   )
 }

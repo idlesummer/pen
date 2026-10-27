@@ -31,19 +31,37 @@ export type ComponentMatch = {
 }
 
 /** Replaces a frame's component paths with their actual corresponding
- *  components, converting each of its already-resolved slot matches too. */
-function createComponentFrame(frame: MatchFrame, componentMap: ComponentMap): ComponentFrame {
-  const slots = frame.slots && Object.fromEntries(
-    Object.entries(frame.slots).map(([name, match]) => [name, createComponentMatchTree(match, componentMap)]),
-  )
+ *  components - shared by both the main and leaf (slot-owned) conversions. */
+function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): Omit<ComponentFrame, 'slots'> {
   return {
     Layout: frame.layout ? componentMap.layout[frame.layout] : undefined,
     Loading: frame.loading ? componentMap.loading[frame.loading] : undefined,
     Error: frame.error ? componentMap.error[frame.error] : undefined,
     Default: frame.default ? componentMap.default[frame.default] : undefined,
-    slots,
     paramCount: frame.paramCount,
   }
+}
+
+/** Converts a slot's own endpoint - its frames can never declare further
+ *  slots, so this never needs to look for any. */
+function createLeafComponentEndpoint(endpoint: MatchEndpoint, componentMap: ComponentMap): ComponentEndpoint {
+  const frames = endpoint.frames.map(frame => createFrameComponents(frame, componentMap))
+  const content = (componentMap.page[endpoint.contentPath] ?? componentMap.default[endpoint.contentPath])!
+  return { frames, content, paramCount: endpoint.paramCount }
+}
+
+/** Converts a slot's own resolved match, preserving its params. */
+function createLeafComponentMatch(match: Match, componentMap: ComponentMap): ComponentMatch {
+  return { endpoint: createLeafComponentEndpoint(match.endpoint, componentMap), params: match.params }
+}
+
+/** Replaces a frame's component paths with their actual corresponding
+ *  components, converting each of its already-resolved slot matches too. */
+function createComponentFrame(frame: MatchFrame, componentMap: ComponentMap): ComponentFrame {
+  const slots = frame.slots && Object.fromEntries(
+    Object.entries(frame.slots).map(([name, match]) => [name, createLeafComponentMatch(match, componentMap)]),
+  )
+  return { ...createFrameComponents(frame, componentMap), slots }
 }
 
 /** Replaces an endpoint's content path and frame paths with their corresponding components. */
@@ -55,7 +73,7 @@ function createComponentEndpoint(endpoint: MatchEndpoint, componentMap: Componen
 }
 
 /** Converts a match into a component match, preserving its params. Each of
- *  its frames' own slot matches get converted recursively right along with it.
+ *  its frames' own slot matches get converted along with it.
  *
  *  @param matchTree - The matched endpoint, with slot matches already resolved.
  *  @param componentMap - The component map used to resolve path references.
