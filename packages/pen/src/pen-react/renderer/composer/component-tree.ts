@@ -7,13 +7,15 @@ import type { ErrorComponent } from '@/pen-react/modules/components/ErrorBoundar
 import type { DefaultComponent } from '@/pen-react/modules/components/DefaultBoundary'
 import { traverse } from '@/lib/traverse'
 
-/** A frame with component references in place of component paths. */
+/** A frame with component references in place of component paths. `slots`
+ *  keys are known upfront; their resolved matches get filled in by
+ *  createComponentMatchTree's traversal. */
 export type ComponentFrame = {
   Layout?: LayoutComponent
   Loading?: LoadingComponent
   Error?: ErrorComponent
   Default?: DefaultComponent
-  slotNames?: string[]
+  slots?: Record<string, ComponentMatch>
   paramCount: number
 }
 
@@ -28,17 +30,21 @@ export type ComponentEndpoint = {
 export type ComponentMatch = {
   endpoint: ComponentEndpoint
   params: Params
-  slots?: Record<string, ComponentMatch>
 }
 
-/** Replaces a frame's component paths with their actual corresponding components. */
-function createComponentFrame(frame: Frame<PositionNode>, componentMap: ComponentMap): ComponentFrame {
+/** Replaces a frame's component paths with their actual corresponding components.
+ *  Slot values start undefined - createComponentMatchTree fills them in once
+ *  it resolves each slot's own match. */
+function createComponentFrame(frame: Frame<PositionNode>, components: ComponentMap): ComponentFrame {
+  const slots = frame.slots && Object.fromEntries(
+    Object.keys(frame.slots).map(name => [name, undefined as unknown as ComponentMatch]),
+  )
   return {
-    Layout: frame.layout ? componentMap.layout[frame.layout] : undefined,
-    Loading: frame.loading ? componentMap.loading[frame.loading] : undefined,
-    Error: frame.error ? componentMap.error[frame.error] : undefined,
-    Default: frame.default ? componentMap.default[frame.default] : undefined,
-    slotNames: frame.slots ? Object.keys(frame.slots) : undefined,
+    Layout: frame.layout ? components.layout[frame.layout] : undefined,
+    Loading: frame.loading ? components.loading[frame.loading] : undefined,
+    Error: frame.error ? components.error[frame.error] : undefined,
+    Default: frame.default ? components.default[frame.default] : undefined,
+    slots,
     paramCount: frame.paramCount,
   }
 }
@@ -59,9 +65,11 @@ function createComponentMatch(match: Match, componentMap: ComponentMap): Compone
 }
 
 /** Converts a route match tree's component paths into component references for the renderer.
+ *  Each slot's resolved match is attached directly to the frame that declared it, so
+ *  rendering never needs a separately-threaded map to look slots up by name.
  *
- *  @param match - The matched endpoint and its nested slot matches.
- *  @param components - The component map used to resolve endpoints.
+ *  @param rootMatch - The matched endpoint and its nested slot matches.
+ *  @param componentMap - The component map used to resolve endpoints.
  *  @returns The component match with resolved components and preserved params. */
 export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
   const componentMatchTree = createComponentMatch(matchTree, componentMap)
@@ -74,8 +82,8 @@ export function createComponentMatchTree(matchTree: Match, componentMap: Compone
       componentMatchOf.set(child, componentMatch)
 
       const parentComponentMatch = componentMatchOf.get(parent)!
-      parentComponentMatch.slots ??= {}
-      parentComponentMatch.slots[child.name] = componentMatch
+      const ownerFrame = parentComponentMatch.endpoint.frames.find(frame => frame.slots && child.name in frame.slots)!
+      ownerFrame.slots![child.name] = componentMatch
     },
   })
   return componentMatchTree
