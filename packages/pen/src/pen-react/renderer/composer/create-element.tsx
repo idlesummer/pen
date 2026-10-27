@@ -50,9 +50,9 @@ function renderChain(route: string, match: ComponentMatch, slotComponents: React
  *  element tree, rendering its slots first and wrapping the main match
  *  with its own frame chain.
  *
+ *  @param route - The route being rendered, passed through to boundaries.
  *  @param match - The matched endpoint and its nested slot matches.
- *  @param components - The component map used to resolve path references.
- *  @param route - The route being rendered, passed through to boundaries. */
+ *  @param components - The component map used to resolve path references. */
 export function createRouteElement(route: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
   const routeMatch = routeMatcher(route)
   const mainMatch = createComponentMatchTree(routeMatch, components)
