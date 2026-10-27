@@ -7,7 +7,6 @@ import { DefaultBoundary } from '@/pen-react/modules/components/DefaultBoundary'
 import { LoadingBoundary } from '@/pen-react/modules/components/LoadingBoundary'
 import { ErrorBoundary } from '@/pen-react/modules/components/ErrorBoundary'
 import { createComponentMatchTree } from './component-tree'
-import { sliceRecord } from '@/lib/record'
 
 type ReactNodeMap = Record<string, ReactNode>
 
@@ -34,9 +33,9 @@ function wrapLeafFrame(route: string, frame: ComponentFrame, child: ReactNode): 
 
 /** Wraps a slot-owned match's content with its own frame chain, from inner to outer. */
 function renderLeafChain(route: string, match: ComponentMatch): ReactNode {
-  const { endpoint, params } = match
+  const { endpoint } = match
   const Content = endpoint.content
-  const contentProps = { params: sliceRecord(params, endpoint.paramCount) }
+  const contentProps = { params: endpoint.params }
 
   const contentElement = Content.constructor.name === 'AsyncFunction'
     ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
@@ -64,9 +63,9 @@ function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode): Reac
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
 function renderChain(route: string, match: ComponentMatch): ReactNode {
-  const { endpoint, params } = match
+  const { endpoint } = match
   const Content = endpoint.content
-  const contentProps = { params: sliceRecord(params, endpoint.paramCount) }
+  const contentProps = { params: endpoint.params }
 
   const contentElement = Content.constructor.name === 'AsyncFunction'
     ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />

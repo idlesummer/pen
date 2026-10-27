@@ -18,17 +18,17 @@ export type ComponentFrame = {
   params: Params
 }
 
-/** An endpoint with its content and frames converted to components. */
+/** An endpoint with its content and frames converted to components, carrying
+ *  the content's own already-scoped params. */
 export type ComponentEndpoint = {
   frames: ComponentFrame[]
   content: PageComponent | DefaultComponent
-  paramCount: number
+  params: Params
 }
 
 /** A match tree with component references in place of component paths. */
 export type ComponentMatch = {
   endpoint: ComponentEndpoint
-  params: Params
 }
 
 /** Replaces a frame's component paths with their actual corresponding
@@ -48,12 +48,12 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
 function createLeafComponentEndpoint(endpoint: MatchEndpoint, componentMap: ComponentMap): ComponentEndpoint {
   const frames = endpoint.frames.map(frame => createFrameComponents(frame, componentMap))
   const content = (componentMap.page[endpoint.contentPath] ?? componentMap.default[endpoint.contentPath])!
-  return { frames, content, paramCount: endpoint.paramCount }
+  return { frames, content, params: endpoint.params }
 }
 
-/** Converts a slot's own resolved match, preserving its params. */
+/** Converts a slot's own resolved match. */
 function createLeafComponentMatch(match: Match, componentMap: ComponentMap): ComponentMatch {
-  return { endpoint: createLeafComponentEndpoint(match.endpoint, componentMap), params: match.params }
+  return { endpoint: createLeafComponentEndpoint(match.endpoint, componentMap) }
 }
 
 /** Replaces a frame's component paths with their actual corresponding
@@ -69,18 +69,17 @@ function createComponentFrame(frame: MatchFrame, componentMap: ComponentMap): Co
 function createComponentEndpoint(endpoint: MatchEndpoint, componentMap: ComponentMap): ComponentEndpoint {
   const frames = endpoint.frames.map(frame => createComponentFrame(frame, componentMap))
   const content = (componentMap.page[endpoint.contentPath] ?? componentMap.default[endpoint.contentPath])!
-  const paramCount = endpoint.paramCount
-  return { frames, content, paramCount }
+  const params = endpoint.params
+  return { frames, content, params }
 }
 
-/** Converts a match into a component match, preserving its params. Each of
- *  its frames' own slot matches get converted along with it.
+/** Converts a match into a component match. Each of its frames' own slot
+ *  matches get converted along with it.
  *
  *  @param matchTree - The matched endpoint, with slot matches already resolved.
  *  @param componentMap - The component map used to resolve path references.
- *  @returns The component match with resolved components and preserved params. */
+ *  @returns The component match with resolved components. */
 export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
   const endpoint = createComponentEndpoint(matchTree.endpoint, componentMap)
-  const params = matchTree.params
-  return { endpoint, params }
+  return { endpoint }
 }
