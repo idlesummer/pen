@@ -4,7 +4,7 @@ import type { PartialPositionNode } from './position-partial-tree'
 import { isBoundary, GLOBAL_DEFAULT, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'
 
 /** Folder modules wrapping a page endpoint. `P` is the slot position type. */
-export type Frame<TSlot, TParams = string[]> = {
+export type Frame<TSlot, TParams=string[]> = {
   layout?: string
   loading?: string
   error?: string
@@ -14,10 +14,10 @@ export type Frame<TSlot, TParams = string[]> = {
 }
 
 /** Renderable route endpoint containing all the data needed for rendering. */
-export type Endpoint<P> = {
-  frames: Frame<P>[]  // last frame is the endpoint's parent
+export type Endpoint<TSlot, TParams=string[]> = {
+  frames: Frame<TSlot, TParams>[]  // last frame is the endpoint's parent
   contentPath: string // either page or default
-  params: string[]    // the dynamic param names bound up to the content itself
+  params: TParams     // the dynamic param names bound up to the content itself
 }
 
 /** Context for building frames and endpoints, with memoized frame reuse. */
