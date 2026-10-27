@@ -5,11 +5,9 @@ import type { LayoutComponent } from '@/pen-react/modules/components/LayoutCompo
 import type { LoadingComponent } from '@/pen-react/modules/components/LoadingBoundary'
 import type { ErrorComponent } from '@/pen-react/modules/components/ErrorBoundary'
 import type { DefaultComponent } from '@/pen-react/modules/components/DefaultBoundary'
-import { traverse } from '@/lib/traverse'
 
-/** A frame with component references in place of component paths. `slots`
- *  keys are known upfront; their resolved matches get filled in by
- *  createComponentMatchTree's traversal. */
+/** A frame with component references in place of component paths. Each
+ *  declared slot's already-resolved match is converted right along with it. */
 export type ComponentFrame = {
   Layout?: LayoutComponent
   Loading?: LoadingComponent
@@ -32,18 +30,17 @@ export type ComponentMatch = {
   params: Params
 }
 
-/** Replaces a frame's component paths with their actual corresponding components.
- *  Slot values start undefined - createComponentMatchTree fills them in once
- *  it resolves each slot's own match. */
-function createComponentFrame(frame: MatchFrame, components: ComponentMap): ComponentFrame {
+/** Replaces a frame's component paths with their actual corresponding
+ *  components, converting each of its already-resolved slot matches too. */
+function createComponentFrame(frame: MatchFrame, componentMap: ComponentMap): ComponentFrame {
   const slots = frame.slots && Object.fromEntries(
-    frame.slots.map(name => [name, undefined as unknown as ComponentMatch]),
+    Object.entries(frame.slots).map(([name, match]) => [name, createComponentMatchTree(match, componentMap)]),
   )
   return {
-    Layout: frame.layout ? components.layout[frame.layout] : undefined,
-    Loading: frame.loading ? components.loading[frame.loading] : undefined,
-    Error: frame.error ? components.error[frame.error] : undefined,
-    Default: frame.default ? components.default[frame.default] : undefined,
+    Layout: frame.layout ? componentMap.layout[frame.layout] : undefined,
+    Loading: frame.loading ? componentMap.loading[frame.loading] : undefined,
+    Error: frame.error ? componentMap.error[frame.error] : undefined,
+    Default: frame.default ? componentMap.default[frame.default] : undefined,
     slots,
     paramCount: frame.paramCount,
   }
@@ -57,34 +54,14 @@ function createComponentEndpoint(endpoint: MatchEndpoint, componentMap: Componen
   return { frames, content, paramCount }
 }
 
-/** Converts a match into a component match, preserving its params. */
-function createComponentMatch(match: Match, componentMap: ComponentMap): ComponentMatch {
-  const endpoint = createComponentEndpoint(match.endpoint, componentMap)
-  const params = match.params
-  return { endpoint, params }
-}
-
-/** Converts a route match tree's component paths into component references for the renderer.
- *  Each slot's resolved match is attached directly to the frame that declared it, so
- *  rendering never needs a separately-threaded map to look slots up by name.
+/** Converts a match into a component match, preserving its params. Each of
+ *  its frames' own slot matches get converted recursively right along with it.
  *
- *  @param rootMatch - The matched endpoint and its nested slot matches.
- *  @param componentMap - The component map used to resolve endpoints.
+ *  @param matchTree - The matched endpoint, with slot matches already resolved.
+ *  @param componentMap - The component map used to resolve path references.
  *  @returns The component match with resolved components and preserved params. */
 export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
-  const componentMatchTree = createComponentMatch(matchTree, componentMap)
-  const componentMatchOf = new Map([[matchTree, componentMatchTree]])
-
-  traverse(matchTree, {
-    expand: (node) => node.slots ? Object.values(node.slots) : [],
-    attach: (child, parent) => {
-      const componentMatch = createComponentMatch(child, componentMap)
-      componentMatchOf.set(child, componentMatch)
-
-      const parentComponentMatch = componentMatchOf.get(parent)!
-      const ownerFrame = parentComponentMatch.endpoint.frames.find(frame => frame.slots && child.name in frame.slots)!
-      ownerFrame.slots![child.name] = componentMatch
-    },
-  })
-  return componentMatchTree
+  const endpoint = createComponentEndpoint(matchTree.endpoint, componentMap)
+  const params = matchTree.params
+  return { endpoint, params }
 }
