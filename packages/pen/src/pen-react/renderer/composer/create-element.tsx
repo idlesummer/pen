@@ -6,7 +6,7 @@ import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from '@/pen-react/modules/components/DefaultBoundary'
 import { LoadingBoundary } from '@/pen-react/modules/components/LoadingBoundary'
 import { ErrorBoundary } from '@/pen-react/modules/components/ErrorBoundary'
-import { createComponentTree } from './component-tree'
+import { createComponentMatchTree } from './component-tree'
 import { pickRecord, sliceRecord } from '@/lib/record'
 
 type ReactNodeMap = Record<string, ReactNode>
@@ -55,7 +55,7 @@ function renderChain(route: string, match: ComponentMatch, slotComponents: React
  *  @param route - The route being rendered, passed through to boundaries. */
 export function createRouteElement(route: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
   const routeMatch = routeMatcher(route)
-  const mainMatch = createComponentTree(routeMatch, components)
+  const mainMatch = createComponentMatchTree(routeMatch, components)
   const slotComponents: ReactNodeMap = {}
 
   for (const [slotName, slotMatch] of Object.entries(mainMatch.slots ?? {}))
