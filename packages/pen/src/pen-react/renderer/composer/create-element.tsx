@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { RouteMatcher } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
-import type { ComponentFrame, ComponentMatch } from './component-tree'
+import type { ComponentFrame, ComponentEndpoint } from './component-tree'
 import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from '@/pen-react/modules/components/DefaultBoundary'
 import { LoadingBoundary } from '@/pen-react/modules/components/LoadingBoundary'
@@ -31,9 +31,8 @@ function wrapLeafFrame(route: string, frame: ComponentFrame, child: ReactNode): 
   return child
 }
 
-/** Wraps a slot-owned match's content with its own frame chain, from inner to outer. */
-function renderLeafChain(route: string, match: ComponentMatch): ReactNode {
-  const { endpoint } = match
+/** Wraps a slot-owned endpoint's content with its own frame chain, from inner to outer. */
+function renderLeafChain(route: string, endpoint: ComponentEndpoint): ReactNode {
   const Content = endpoint.content
   const contentProps = { params: endpoint.params }
 
@@ -54,7 +53,7 @@ function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode): Reac
   child = wrapBoundaries(route, frame, child)
   if (frame.Layout) {
     const slots: ReactNodeMap | undefined = frame.slots && Object.fromEntries(
-      Object.entries(frame.slots).map(([name, slotMatch]) => [name, renderLeafChain(route, slotMatch)]),
+      Object.entries(frame.slots).map(([name, slotEndpoint]) => [name, renderLeafChain(route, slotEndpoint)]),
     )
     child = <frame.Layout params={frame.params} {...slots}>{child}</frame.Layout>
   }
@@ -62,8 +61,7 @@ function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode): Reac
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(route: string, match: ComponentMatch): ReactNode {
-  const { endpoint } = match
+function renderChain(route: string, endpoint: ComponentEndpoint): ReactNode {
   const Content = endpoint.content
   const contentProps = { params: endpoint.params }
 
@@ -86,6 +84,6 @@ function renderChain(route: string, match: ComponentMatch): ReactNode {
  *  @param components - The component map used to resolve path references. */
 export function createRouteElement(route: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
   const routeMatch = routeMatcher(route)
-  const mainMatch = createComponentMatchTree(routeMatch, components)
-  return renderChain(route, mainMatch)
+  const mainEndpoint = createComponentMatchTree(routeMatch, components)
+  return renderChain(route, mainEndpoint)
 }
