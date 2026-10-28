@@ -1,7 +1,7 @@
 import type { Endpoint, Frame, PositionNode } from '../../compiler'
-import type { Params } from './find-position-endpoint'
+import type { Params } from './find'
 import { omitRecord } from '@/lib/record'
-import { findPositionEndpoint } from './find-position-endpoint'
+import { findPositionEndpoint } from './find'
 
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
