@@ -76,12 +76,41 @@ function findPositionEndpoint(position: PositionNode, url: string[]) {
   return [endpoint, params] as const
 }
 
+/** Pairs each frame with its own bound params, reusing the same object
+ *  across consecutive frames that don't bind a new param. */
+function withFrameParams(frames: Frame<PositionNode>[], fullParams: Params): [Frame<PositionNode>, Params][] {
+  let boundNames: string[] = []
+  let frameParams: Params = {}
+
+  return frames.map((frame) => {
+    if (frame.params !== boundNames) {
+      const newNames = frame.params.slice(boundNames.length)
+      frameParams = { ...frameParams, ...Object.fromEntries(newNames.map(name => [name, fullParams[name]!])) }
+      boundNames = frame.params
+    }
+    return [frame, frameParams]
+  })
+}
+
+/** Builds a slot's own frames - they can never declare further slots, so
+ *  this never needs to look for any. */
+function createLeafMatchFrames(frames: Frame<PositionNode>[], fullParams: Params): MatchFrame[] {
+  return withFrameParams(frames, fullParams).map(([frame, params]) => ({ ...frame, slots: undefined, params }))
+}
+
+/** Resolves a slot's own endpoint, with its frames narrowed the same way. */
+function createLeafMatchEndpoint(endpoint: Endpoint<PositionNode>, fullParams: Params): MatchEndpoint {
+  const frames = createLeafMatchFrames(endpoint.frames, fullParams)
+  const params = Object.fromEntries(endpoint.params.map(name => [name, fullParams[name]!]))
+  return { ...endpoint, frames, params }
+}
+
 /** Matches a slot without resolving its own slots. */
 function createMatchFrameSlot(name: string, position: PositionNode, url: string[], seedParams: Params): Match {
   const [slotEndpoint, slotParams] = findPositionEndpoint(position, url)
   const params = { ...seedParams, ...slotParams }
   const frames = slotEndpoint.frames.map(frame => omitRecord(frame, 'slots'))
-  const endpoint = createMatchEndpoint({ ...slotEndpoint, frames }, url, params)
+  const endpoint = createLeafMatchEndpoint({ ...slotEndpoint, frames }, params)
   return { name, endpoint, params }
 }
 
@@ -93,20 +122,9 @@ function createMatchFrame(frame: Frame<PositionNode>, url: string[], frameParams
   return { ...frame, slots, params: frameParams }
 }
 
-/** Looks up each frame's own bound param names, reusing the same object
- *  across consecutive frames that don't bind a new param. */
+/** Builds the main chain's frames, resolving each one's own declared slots. */
 function createMatchFrames(frames: Frame<PositionNode>[], url: string[], fullParams: Params): MatchFrame[] {
-  let boundNames: string[] = []
-  let frameParams: Params = {}
-
-  return frames.map((frame) => {
-    if (frame.params !== boundNames) {
-      const newNames = frame.params.slice(boundNames.length)
-      frameParams = { ...frameParams, ...Object.fromEntries(newNames.map(name => [name, fullParams[name]!])) }
-      boundNames = frame.params
-    }
-    return createMatchFrame(frame, url, frameParams)
-  })
+  return withFrameParams(frames, fullParams).map(([frame, params]) => createMatchFrame(frame, url, params))
 }
 
 /** Resolves an endpoint's frame chain and its own bound param names. */
