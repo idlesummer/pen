@@ -7,7 +7,6 @@ import { findPositionEndpoint } from './find'
 export type Match = {
   name: string
   endpoint: Endpoint<Match, Params>
-  params: Params
 }
 export type MatchEndpoint = Match['endpoint']
 export type MatchFrame = MatchEndpoint['frames'][number]
@@ -45,11 +44,11 @@ export function match(positionTree: PositionNode, pathname: string): Match {
       const [slotEndpoint, slotParams] = findPositionEndpoint(position, url)
       const fullParams = { ...params, ...slotParams }
       const endpoint = createMatchEndpoint(slotEndpoint, fullParams)
-      slots[name] = { name, endpoint, params: fullParams }
+      slots[name] = { name, endpoint }
     }
     return { ...frame, slots, params }
   })
   const params = pickRecord(mainParams, mainEndpoint.params)
   const endpoint: MatchEndpoint = { ...mainEndpoint, frames, params }
-  return { name: '', endpoint, params: mainParams }
+  return { name: '', endpoint }
 }
