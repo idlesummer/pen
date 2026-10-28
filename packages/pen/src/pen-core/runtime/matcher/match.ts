@@ -3,13 +3,15 @@ import type { Endpoint, Frame, PositionNode } from '../../compiler'
 import type { Params } from './find'
 import { findPositionEndpoint } from './find'
 
-/** A matched endpoint and its params, with every declared slot already resolved. */
-export type Match = {
-  name: string
-  endpoint: Endpoint<Match, Params>
-}
-export type MatchEndpoint = Match['endpoint']
-export type MatchFrame = MatchEndpoint['frames'][number]
+/** A slot's own resolved endpoint - it can never declare further slots
+ *  (structurally disallowed by the compiler), so its slot type bottoms out
+ *  at `never` instead of looping back to Match. */
+export type LeafEndpoint = Endpoint<never, Params>
+
+/** A matched endpoint and its params, with every declared slot already
+ *  resolved to its own leaf endpoint. */
+export type Match = Endpoint<LeafEndpoint, Params>
+export type MatchFrame = Match['frames'][number]
 
 /** Pairs frames with their scoped params, reusing objects for unchanged scopes. */
 function createMatchParams(frames: Frame<PositionNode>[], fullParams: Params) {
@@ -22,8 +24,8 @@ function createMatchParams(frames: Frame<PositionNode>[], fullParams: Params) {
   })
 }
 
-/** Resolves an endpoint without resolving its frames' slots. */
-function createMatchEndpoint(endpoint: Endpoint<PositionNode>, fullParams: Params): MatchEndpoint {
+/** Resolves a slot's own endpoint - its frames can never declare further slots. */
+function createLeafEndpoint(endpoint: Endpoint<PositionNode>, fullParams: Params): LeafEndpoint {
   const slots = undefined
   const params = createMatchParams(endpoint.frames, fullParams)
   const frames = endpoint.frames.map((frame, index) => ({ ...frame, params: params[index]!, slots }))
@@ -38,17 +40,15 @@ export function match(positionTree: PositionNode, pathname: string): Match {
   const frameParams = createMatchParams(mainEndpoint.frames, mainParams)
   const frames = mainEndpoint.frames.map((frame, index) => {
     const params = frameParams[index]!
-    const slots: Record<string, Match> = {}
+    const slots: Record<string, LeafEndpoint> = {}
 
     for (const [name, position] of Object.entries(frame.slots ?? {})) {
       const [slotEndpoint, slotParams] = findPositionEndpoint(position, url)
       const fullParams = { ...params, ...slotParams }
-      const endpoint = createMatchEndpoint(slotEndpoint, fullParams)
-      slots[name] = { name, endpoint }
+      slots[name] = createLeafEndpoint(slotEndpoint, fullParams)
     }
     return { ...frame, slots, params }
   })
   const params = pickRecord(mainParams, mainEndpoint.params)
-  const endpoint: MatchEndpoint = { ...mainEndpoint, frames, params }
-  return { name: '', endpoint }
+  return { ...mainEndpoint, frames, params }
 }
