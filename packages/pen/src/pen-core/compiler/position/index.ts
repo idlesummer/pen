@@ -5,5 +5,5 @@ export type { Claims } from './position-claims'
 export type { Endpoint, Frame } from './position-endpoints'
 
 // Position tree
-export type { PositionNode } from './position-tree'
+export type { PositionNode, LeafPositionNode } from './position-tree'
 export { createPositionTree } from './position-tree'

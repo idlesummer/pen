@@ -1,12 +1,16 @@
-import type { PositionNode } from '../../compiler'
+import type { LeafPositionNode, PositionNode } from '../../compiler'
 import { traverse } from '@/lib/traverse'
 
 /** Maps route param names to their captured values. */
 export type Params = Record<string, string | string[]>
 
+/** Either a main tree position or a slot's own (never-nested) position -
+ *  searched the same way either way. */
+type AnyPositionNode = PositionNode | LeafPositionNode
+
 /** A candidate explored during route matching. */
 type MatchCandidate = {
-  position: PositionNode
+  position: AnyPositionNode
   params: Params
   isCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
   isTerminal?: true
@@ -38,7 +42,7 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
 }
 
 /** Finds the best endpoint or fallback using static-preferring DFS. */
-export function findPositionEndpoint(position: PositionNode, url: string[]) {
+export function findPositionEndpoint(position: AnyPositionNode, url: string[]) {
   const rootCandidate: MatchCandidate = { position, params: {} }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
