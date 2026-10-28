@@ -48,7 +48,7 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
 }
 
 /** Finds the best endpoint or fallback using static-preferring DFS. */
-function findMatch(position: PositionNode, url: string[]) {
+function findPositionEndpoint(position: PositionNode, url: string[]) {
   const rootCandidate: MatchCandidate = { position, params: {} }
   let winner: MatchCandidate | undefined
   let bestStatic: MatchCandidate | undefined
@@ -78,7 +78,7 @@ function findMatch(position: PositionNode, url: string[]) {
 
 /** Matches a slot without resolving its own slots. */
 function createMatchFrameSlot(name: string, position: PositionNode, url: string[], seedParams: Params): Match {
-  const [slotEndpoint, slotParams] = findMatch(position, url)
+  const [slotEndpoint, slotParams] = findPositionEndpoint(position, url)
   const params = { ...seedParams, ...slotParams }
   const frames = slotEndpoint.frames.map(frame => omitRecord(frame, 'slots'))
   const endpoint = createMatchEndpoint({ ...slotEndpoint, frames }, url, params)
@@ -119,7 +119,7 @@ function createMatchEndpoint(endpoint: Endpoint<PositionNode>, url: string[], fu
 /** Matches a pathname and its declared slots against the position tree. */
 export function match(positionTree: PositionNode, pathname: string): Match {
   const url = pathname.split('/').filter(Boolean)
-  const [mainEndpoint, mainParams] = findMatch(positionTree, url)
+  const [mainEndpoint, mainParams] = findPositionEndpoint(positionTree, url)
   const endpoint = createMatchEndpoint(mainEndpoint, url, mainParams)
   return { name: '', endpoint, params: mainParams }
 }
