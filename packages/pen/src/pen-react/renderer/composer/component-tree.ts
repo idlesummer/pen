@@ -19,8 +19,8 @@ export type ComponentFrame = {
 
 /** An endpoint with its content and frames converted to components. */
 export type ComponentEndpoint = {
+  Content: PageComponent | DefaultComponent
   frames: ComponentFrame[]
-  content: PageComponent | DefaultComponent
   params: MatchParams
 }
 
@@ -44,8 +44,8 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
 function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): ComponentTree {
   const slotEndpoint = slotMatch.endpoint
   const frames = slotEndpoint.frames.map(frame => createFrameComponents(frame, componentMap))
-  const content = (componentMap.page[slotEndpoint.contentPath] ?? componentMap.default[slotEndpoint.contentPath])!
-  const endpoint = { frames, content, params: slotEndpoint.params }
+  const Content = (componentMap.page[slotEndpoint.contentPath] ?? componentMap.default[slotEndpoint.contentPath])!
+  const endpoint = { Content, frames, params: slotEndpoint.params }
   return { endpoint }
 }
 
@@ -61,7 +61,7 @@ export function createComponentTree(matchTree: Match, componentMap: ComponentMap
     }
     return { ...createFrameComponents(frame, componentMap), slots }
   })
-  const content = (componentMap.page[mainEndpoint.contentPath] ?? componentMap.default[mainEndpoint.contentPath])!
-  const endpoint = { frames, content, params: mainEndpoint.params }
+  const Content = (componentMap.page[mainEndpoint.contentPath] ?? componentMap.default[mainEndpoint.contentPath])!
+  const endpoint = { Content, frames, params: mainEndpoint.params }
   return { endpoint }
 }
