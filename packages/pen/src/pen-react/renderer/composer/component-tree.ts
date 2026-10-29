@@ -1,10 +1,12 @@
 import type { Match, MatchFrame, MatchParams } from '@/pen-core'
-import type { ComponentMap } from '@/pen-react/modules'
-import type { PageComponent } from '@/pen-react/modules/components/PageComponent'
-import type { LayoutComponent } from '@/pen-react/modules/components/LayoutComponent'
-import type { LoadingComponent } from '@/pen-react/modules/components/LoadingBoundary'
-import type { ErrorComponent } from '@/pen-react/modules/components/ErrorBoundary'
-import type { DefaultComponent } from '@/pen-react/modules/components/DefaultBoundary'
+import type {
+  PageComponent,
+  LayoutComponent,
+  LoadingComponent,
+  ErrorComponent,
+  DefaultComponent,
+  ComponentMap,
+} from '@/pen-react/modules'
 
 /** A frame with component references in place of component paths, carrying
  *  its own already-scoped params and each declared slot's own converted tree. */
