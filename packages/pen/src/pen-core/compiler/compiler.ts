@@ -10,7 +10,7 @@ export type CompileOutput = {
   /** Every module the tree can render, for the generated component map. */
   modulePaths: string[]
   /** Every page endpoint, for validation that needs each page's own frame chain. */
-  pageEndpoints: Endpoint<unknown>[]
+  pageEndpoints: Endpoint<PositionNode>[]
   /** Problems, each pointing at a file the user can open. */
   diagnostics: Diagnostic[]
 }

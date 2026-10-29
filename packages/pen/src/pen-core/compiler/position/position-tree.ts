@@ -4,31 +4,20 @@ import type { Endpoint, FrameContext } from './position-endpoints'
 import { createPartialPositionTree } from './position-partial-tree'
 import { createPositionEndpoints } from './position-endpoints'
 
-/** A slot's own position - it can never declare further slots. */
-export type LeafPositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'catchall'> & {
-  // Children
-  statics?: Record<string, LeafPositionNode>
-  dynamic?: LeafPositionNode
-  catchall?: LeafPositionNode
-  // Rendering
-  endpoint?: Endpoint<never>
-  fallback: Endpoint<never>
-}
-
 export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'catchall'> & {
   // Children
   statics?: Record<string, PositionNode>
   dynamic?: PositionNode
   catchall?: PositionNode
   // Rendering
-  endpoint?: Endpoint<LeafPositionNode>
-  fallback: Endpoint<LeafPositionNode>
+  endpoint?: Endpoint<PositionNode>
+  fallback: Endpoint<PositionNode>
 }
 
 // ── build ────────────────────────────────────────────────────────────────
 
 /** Collects all unique module paths used by the position tree's endpoints and frames, including slots. */
-function getModulePaths(positions: { endpoint?: Endpoint<unknown>; fallback: Endpoint<unknown> }[]): string[] {
+function getModulePaths(positions: PositionNode[]): string[] {
   const modules = new Set<string>()
   for (const position of positions) {
     for (const endpoint of [position.endpoint, position.fallback]) {
@@ -47,8 +36,8 @@ function getModulePaths(positions: { endpoint?: Endpoint<unknown>; fallback: End
 }
 
 /** Collects real page endpoints, excluding fallbacks that render sentinels. */
-function getPageEndpoints(positions: { endpoint?: Endpoint<unknown> }[]): Endpoint<unknown>[] {
-  const endpoints: Endpoint<unknown>[] = []
+function getPageEndpoints(positions: PositionNode[]): Endpoint<PositionNode>[] {
+  const endpoints: Endpoint<PositionNode>[] = []
   for (const position of positions)
     if (position.endpoint)
       endpoints.push(position.endpoint)
@@ -56,27 +45,18 @@ function getPageEndpoints(positions: { endpoint?: Endpoint<unknown> }[]): Endpoi
 }
 
 export function createPositionTree(routeTree: RouteNode) {
-  const [positionTree, claimsOf, ownershipOf, slotsOf, leafPositions] = createPartialPositionTree(routeTree)
-  const allPositions = [...claimsOf.keys()]
-
-  const mainContext: FrameContext<LeafPositionNode> = { slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
-  const leafContext: FrameContext<never> = { slotsOf, frameOf: new Map(), fallbackFrameOf: new Map() }
-
-  for (const position of allPositions) {
-    if (leafPositions.has(position)) {
-      const leafPosition = position as LeafPositionNode
-      const [fallback, endpoint] = createPositionEndpoints(ownershipOf.get(position)!, leafContext)
-      leafPosition.fallback = fallback
-      leafPosition.endpoint = endpoint
-    }
-    else {
-      const mainPosition = position as PositionNode
-      const [fallback, endpoint] = createPositionEndpoints(ownershipOf.get(position)!, mainContext)
-      mainPosition.fallback = fallback
-      mainPosition.endpoint = endpoint
-    }
+  const [positionTree, claimsOf, ownershipOf, slotsOf] = createPartialPositionTree(routeTree)
+  const positionNodes = [...claimsOf.keys()] as PositionNode[]
+  const context: FrameContext<PositionNode> = {
+    slotsOf,
+    frameOf: new Map(),
+    fallbackFrameOf: new Map(),
   }
-  const positionNodes = allPositions as (PositionNode | LeafPositionNode)[]
+  for (const position of positionNodes) {
+    const [fallback, endpoint] = createPositionEndpoints(ownershipOf.get(position)!, context)
+    position.fallback = fallback
+    position.endpoint = endpoint
+  }
   const modulePaths = getModulePaths(positionNodes)
   const pageEndpoints = getPageEndpoints(positionNodes)
   const claims = [...claimsOf.values()]
