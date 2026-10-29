@@ -63,7 +63,7 @@ function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode): Reac
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
 function renderChain(route: string, tree: ComponentTree): ReactNode {
-  const { endpoint } = tree
+  const endpoint = tree.endpoint
   const Content = endpoint.content
   const contentProps = { params: endpoint.params }
 
