@@ -54,8 +54,8 @@ function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): Comp
 export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
   const mainEndpoint = matchTree.endpoint
   const frames = mainEndpoint.frames.map((frame) => {
-
     const slots: Record<string, ComponentMatch> = {}
+
     for (const [slotName, slotMatch] of Object.entries(frame.slots ?? {})) {
       const componentSlot = createComponentSlot(slotMatch, componentMap)
       slots[slotName] = componentSlot
