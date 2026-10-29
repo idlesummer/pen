@@ -1,8 +1,8 @@
-import type { Params } from '@/pen-core'
+import type { MatchParams } from '@/pen-core'
 import type { FunctionComponent } from 'react'
 
 type PageComponentProps = {
-  params: Params
+  params: MatchParams
 }
 
 export type PageComponent =
