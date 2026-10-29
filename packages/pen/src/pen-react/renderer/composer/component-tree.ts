@@ -7,13 +7,13 @@ import type { ErrorComponent } from '@/pen-react/modules/components/ErrorBoundar
 import type { DefaultComponent } from '@/pen-react/modules/components/DefaultBoundary'
 
 /** A frame with component references in place of component paths, carrying
- *  its own already-scoped params and each declared slot's own converted match. */
+ *  its own already-scoped params and each declared slot's own converted tree. */
 export type ComponentFrame = {
   Layout?: LayoutComponent
   Loading?: LoadingComponent
   Error?: ErrorComponent
   Default?: DefaultComponent
-  slots?: Record<string, ComponentMatch>
+  slots?: Record<string, ComponentTree>
   params: MatchParams
 }
 
@@ -25,7 +25,7 @@ export type ComponentEndpoint = {
 }
 
 /** A matched endpoint with component references, with every declared slot already converted. */
-export type ComponentMatch = {
+export type ComponentTree = {
   endpoint: ComponentEndpoint
 }
 
@@ -41,7 +41,7 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
 }
 
 /** Converts a slot's own resolved match. Its frames can never declare further slots. */
-function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): ComponentMatch {
+function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): ComponentTree {
   const slots = undefined
   const slotEndpoint = slotMatch.endpoint
   const frames = slotEndpoint.frames.map(frame => ({ ...createFrameComponents(frame, componentMap), slots }))
@@ -50,11 +50,11 @@ function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): Comp
   return { endpoint }
 }
 
-/** Converts a match into a component match and resolves its frames' declared slots. */
-export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
+/** Converts a match into a component tree and resolves its frames' declared slots. */
+export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentTree {
   const mainEndpoint = matchTree.endpoint
   const frames = mainEndpoint.frames.map((frame) => {
-    const slots: Record<string, ComponentMatch> = {}
+    const slots: Record<string, ComponentTree> = {}
 
     for (const [slotName, slotMatch] of Object.entries(frame.slots ?? {})) {
       const componentSlot = createComponentSlot(slotMatch, componentMap)
