@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
-import { loadPenConfig } from '@/pen-cli/config'
+import { loadPenConfig } from '@/pen-cli/load-config'
 
 /** Loads the project's `pen.config.ts` and replaces `options.config` with
  *  it, for penBuild/penDev/penRefresh/penReactCompiler to read later.
