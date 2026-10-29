@@ -42,9 +42,8 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
 
 /** Converts a slot's own resolved match. Its frames can never declare further slots. */
 function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): ComponentTree {
-  const slots = undefined
   const slotEndpoint = slotMatch.endpoint
-  const frames = slotEndpoint.frames.map(frame => ({ ...createFrameComponents(frame, componentMap), slots }))
+  const frames = slotEndpoint.frames.map(frame => createFrameComponents(frame, componentMap))
   const content = (componentMap.page[slotEndpoint.contentPath] ?? componentMap.default[slotEndpoint.contentPath])!
   const endpoint = { frames, content, params: slotEndpoint.params }
   return { endpoint }
