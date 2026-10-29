@@ -15,8 +15,8 @@ export type Frame<TSlot, TParams=string[]> = {
 
 /** Renderable route endpoint containing all the data needed for rendering. */
 export type Endpoint<TSlot, TParams=string[]> = {
-  frames: Frame<TSlot, TParams>[]  // last frame is the endpoint's parent
   contentPath: string // either page or default
+  frames: Frame<TSlot, TParams>[]  // last frame is the endpoint's parent
   params: TParams     // the dynamic param names bound up to the content itself
 }
 
