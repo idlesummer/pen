@@ -1,18 +1,18 @@
 import { pickRecord } from '@/lib/record'
 import type { Endpoint, Frame, PositionNode } from '../../compiler'
-import type { Params } from './find'
+import type { MatchParams } from './find'
 import { findPositionEndpoint } from './find'
 
 /** A matched endpoint and its params, with every declared slot already resolved. */
 export type Match = {
-  endpoint: Endpoint<Match, Params>
+  endpoint: Endpoint<Match, MatchParams>
 }
 export type MatchEndpoint = Match['endpoint']
 export type MatchFrame = MatchEndpoint['frames'][number]
 
 /** Pairs frames with their scoped params, reusing objects for unchanged scopes. */
-function createMatchParams(frames: Frame<PositionNode>[], fullParams: Params) {
-  let params: Params = {}
+function createMatchParamsForFrames(frames: Frame<PositionNode>[], fullParams: MatchParams) {
+  let params: MatchParams = {}
 
   return frames.map((frame, index) => { // frames with the same values share the same params array
     if (frame.params !== frames[index-1]?.params) // only pickRecord if frames differ
@@ -22,31 +22,32 @@ function createMatchParams(frames: Frame<PositionNode>[], fullParams: Params) {
 }
 
 /** Resolves a slot's own match. Its frames can never declare further slots. */
-function createMatchSlot(endpoint: Endpoint<PositionNode>, fullParams: Params): Match {
+function createMatchSlot(slotEndpoint: Endpoint<PositionNode>, fullParams: MatchParams): Match {
   const slots = undefined
-  const params = createMatchParams(endpoint.frames, fullParams)
-  const frames = endpoint.frames.map((frame, index) => ({ ...frame, params: params[index]!, slots }))
-  return { endpoint: { ...endpoint, params: pickRecord(fullParams, endpoint.params), frames } }
+  const params = createMatchParamsForFrames(slotEndpoint.frames, fullParams)
+  const frames = slotEndpoint.frames.map((frame, index) => ({ ...frame, params: params[index]!, slots }))
+  const endpoint = { ...slotEndpoint, params: pickRecord(fullParams, slotEndpoint.params), frames }
+  return { endpoint }
 }
 
 /** Matches a pathname and resolves its frames and declared slots. */
 export function match(positionTree: PositionNode, urlString: string): Match {
   const url = urlString.split('/').filter(Boolean)
-  const [positionEndpoint, mainParams] = findPositionEndpoint(positionTree, url)
+  const [mainEndpoint, mainParams] = findPositionEndpoint(positionTree, url)
 
-  const frameParams = createMatchParams(positionEndpoint.frames, mainParams)
-  const frames = positionEndpoint.frames.map((frame, index) => {
-    const params = frameParams[index]!  // get corresponding params
+  const matchParamsForFrames = createMatchParamsForFrames(mainEndpoint.frames, mainParams)
+  const frames = mainEndpoint.frames.map((frame, index) => {
+    const matchParams = matchParamsForFrames[index]!  // get corresponding params
     const slots: Record<string, Match> = {}
 
     for (const [slotName, slotBoundary] of Object.entries(frame.slots ?? {})) {
       const [slotEndpoint, slotParams] = findPositionEndpoint(slotBoundary, url)
-      const fullParams = { ...params, ...slotParams }
-      slots[slotName] = createMatchSlot(slotEndpoint, fullParams)
+      const fullSlotParams = { ...matchParams, ...slotParams }
+      slots[slotName] = createMatchSlot(slotEndpoint, fullSlotParams)
     }
     return { ...frame, slots, params }
   })
-  const params = pickRecord(mainParams, positionEndpoint.params)
-  const endpoint = { ...positionEndpoint, frames, params }
+  const params = pickRecord(mainParams, mainEndpoint.params)
+  const endpoint = { ...mainEndpoint, frames, params }
   return { endpoint }
 }
