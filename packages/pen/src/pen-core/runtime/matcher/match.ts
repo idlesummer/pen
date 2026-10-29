@@ -21,7 +21,7 @@ function createMatchParams(frames: Frame<PositionNode>[], fullParams: Params) {
   })
 }
 
-/** Resolves a slot's own match - its frames can never declare further slots. */
+/** Resolves a slot's own match. Its frames can never declare further slots. */
 function createMatchSlot(endpoint: Endpoint<PositionNode>, fullParams: Params): Match {
   const slots = undefined
   const params = createMatchParams(endpoint.frames, fullParams)
@@ -30,8 +30,8 @@ function createMatchSlot(endpoint: Endpoint<PositionNode>, fullParams: Params): 
 }
 
 /** Matches a pathname and resolves its frames and declared slots. */
-export function match(positionTree: PositionNode, pathname: string): Match {
-  const url = pathname.split('/').filter(Boolean)
+export function match(positionTree: PositionNode, urlString: string): Match {
+  const url = urlString.split('/').filter(Boolean)
   const [positionEndpoint, mainParams] = findPositionEndpoint(positionTree, url)
 
   const frameParams = createMatchParams(positionEndpoint.frames, mainParams)
