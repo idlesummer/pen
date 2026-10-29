@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { ModuleRegistry } from '@/pen-react/modules'
 import { createRouter } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
-import { createRouteElement } from '@/pen-react/renderer/composer'
+import { createRouteElement } from './composer/create-element'
 
 /** Custom HMR event name a dev server sends a freshly-loaded `ModuleRegistry`
  *  under, after a route file is added or removed, so the running app can
