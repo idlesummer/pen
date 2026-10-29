@@ -8,8 +8,6 @@ import { LoadingBoundary } from '@/pen-react/modules/components/LoadingBoundary'
 import { ErrorBoundary } from '@/pen-react/modules/components/ErrorBoundary'
 import { createComponentTree } from './component-tree'
 
-type ReactNodeMap = Record<string, ReactNode>
-
 /** Renders endpoint content, awaiting async components when necessary. */
 function renderContent(endpoint: ComponentEndpoint): ReactNode {
   const { Content, params } = endpoint
@@ -20,7 +18,7 @@ function renderContent(endpoint: ComponentEndpoint): ReactNode {
 }
 
 /** Wraps child with a frame's boundaries and layout. */
-function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, slots?: ReactNodeMap): ReactNode {
+function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, slots?: Record<string, ReactNode>): ReactNode {
   if (frame.Default)
     child = <DefaultBoundary Fallback={frame.Default} route={route} params={frame.params}>{child}</DefaultBoundary>
   if (frame.Loading)
@@ -41,8 +39,8 @@ function renderSlotChain(route: string, endpoint: ComponentEndpoint): ReactNode 
 }
 
 /** Renders each slot endpoint into a map of React nodes. */
-function renderSlots(route: string, frame: ComponentFrame): ReactNodeMap {
-  const slots: ReactNodeMap = {}
+function renderSlots(route: string, frame: ComponentFrame): Record<string, ReactNode> {
+  const slots: Record<string, ReactNode> = {}
   for (const [slotName, slotComponentTree] of Object.entries(frame.slots ?? {}))
     slots[slotName] = renderSlotChain(route, slotComponentTree.endpoint)
   return slots
