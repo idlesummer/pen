@@ -1,4 +1,7 @@
+// pen-core
 export type { MatchParams } from '@/pen-core'
+
+// pen-react/modules
 export type {
   ErrorFallbackProps,
   ErrorComponent,
@@ -6,8 +9,16 @@ export type {
   LoadingComponent,
   PageComponent,
   LayoutComponent,
-} from './modules/components'
+} from './modules'
+export {
+  DefaultBoundary,
+  DefaultSignal,
+  notFound,
+  ErrorBoundary,
+  LoadingBoundary,
+} from './modules'
 
+// pen-react/view
 export { NavigationProvider } from './view/navigation'
 export {
   useHistory,
@@ -16,10 +27,3 @@ export {
   useRouter,
   useSearchParams,
 } from './view/navigation'
-export {
-  DefaultBoundary,
-  DefaultSignal,
-  notFound,
-  ErrorBoundary,
-  LoadingBoundary,
-} from './modules/components'
