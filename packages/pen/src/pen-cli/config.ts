@@ -1,8 +1,4 @@
 import type { RenderOptions as InkRenderOptions } from 'ink'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { loadConfigFromFile, mergeConfig } from 'vite'
-import * as log from '@/pen-cli/logger/console'
 
 /** Settings read from the project's `pen.config.ts`. */
 export type PenConfig = {
@@ -14,9 +10,6 @@ export type PenConfig = {
   /** Options forwarded to Ink's own `render()` call. */
   ink?: InkRenderOptions
 }
-
-/** Project config filename. */
-const CONFIG_FILENAME = 'pen.config.ts'
 
 /** Defaults applied when the project's config omits them, and the initial
  *  value of `PluginOptions.config` before `pen:config`'s hook replaces it. */
@@ -30,34 +23,4 @@ export const DEFAULT_PEN_CONFIG: PenConfig = {
 /** Type-checks config objects and provides editor autocomplete. */
 export function defineConfig(config: PenConfig): PenConfig {
   return config
-}
-
-/** Loads `pen.config.ts` if present, merged over pen's own defaults.
- *
- *  Uses Vite's esbuild-based loader for TypeScript without requiring a
- *  project tsconfig. Vite's config type is not enforced by the loader.
- *  Load errors are reported without citty's raw stack trace.
- *
- *  The default loader ('bundle') writes a temporary file under
- *  node_modules/.vite-temp to import the compiled config - 'runner' loads
- *  it through Vite's own module runner instead, entirely in memory.
- *
- *  @param projectDir - Project root.
- *  @param command - Vite-compatible command.
- *  @returns The loaded config, merged over defaults. */
-export async function loadPenConfig(projectDir: string, command: 'build' | 'serve'): Promise<PenConfig> {
-  if (!existsSync(join(projectDir, CONFIG_FILENAME)))
-    return DEFAULT_PEN_CONFIG
-
-  try {
-    const mode = command === 'build' ? 'production' : 'development'
-    const configLoader = 'runner'
-    const file = await loadConfigFromFile({ command, mode }, CONFIG_FILENAME, projectDir, undefined, undefined, configLoader)
-    const config = (file?.config ?? {}) as PenConfig
-    return mergeConfig(DEFAULT_PEN_CONFIG, config)
-  }
-  catch (err) {
-    log.error(`Failed to load ${CONFIG_FILENAME}: ${Error.isError(err) ? err.message : err}`)
-    process.exit(1)
-  }
 }
