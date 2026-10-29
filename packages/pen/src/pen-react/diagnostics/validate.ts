@@ -1,4 +1,4 @@
-import type { Diagnostic, Endpoint } from '@/pen-core'
+import type { Diagnostic, Endpoint, PositionNode } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
 import { createDiagnostic } from '@/pen-core'
 
@@ -32,7 +32,7 @@ export function validateComponentExports(componentMap: ComponentMap): Diagnostic
 }
 
 /** Validates that every async page has a loading.tsx in its frame chain. */
-export function validateAsyncPages(pageEndpoints: Endpoint<unknown>[], componentMap: ComponentMap): Diagnostic[] {
+export function validateAsyncPages(pageEndpoints: Endpoint<PositionNode>[], componentMap: ComponentMap): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   for (const endpoint of pageEndpoints) {

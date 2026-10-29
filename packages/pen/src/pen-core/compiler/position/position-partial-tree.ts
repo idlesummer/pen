@@ -21,7 +21,6 @@ export type PartialPositionNode = {
 type PositionContext = {
   positionOf: Map<RouteNode, PartialPositionNode>              // route -> the position it belongs to
   slotsOf: Map<RouteNode, Record<string, PartialPositionNode>> // route -> its declared slots, by name
-  leafPositions: Set<PartialPositionNode>                      // positions reached through a slot - can never declare further slots
 }
 
 function isTraversable(route: RouteNode) {
@@ -49,20 +48,13 @@ function getOrCreatePosition(route: RouteNode, context: PositionContext): Partia
   const parentPosition = context.positionOf.get(parentRoute)!
   const slotsOf = context.slotsOf
 
-  const position = (() => {
-    switch (route.type) {
-      default:         return parentPosition  // group
-      case 'static':   return (parentPosition.statics ??= dict())[route.segment] ??= createPosition(route, parentPosition)
-      case 'dynamic':  return parentPosition.dynamic ??= createPosition(route, parentPosition)
-      case 'catchall': return parentPosition.catchall ??= createPosition(route, parentPosition)
-      case 'slot':     return slotsOf.getOrInsertComputed(parentRoute, dict)[route.segment] ??= createPosition(route, parentPosition)
-    }
-  })()
-
-  // A slot's own root, or anything reached through one, can never declare further slots.
-  if (route.type === 'slot' || context.leafPositions.has(parentPosition))
-    context.leafPositions.add(position)
-  return position
+  switch (route.type) {
+    default:         return parentPosition  // group
+    case 'static':   return (parentPosition.statics ??= dict())[route.segment] ??= createPosition(route, parentPosition)
+    case 'dynamic':  return parentPosition.dynamic ??= createPosition(route, parentPosition)
+    case 'catchall': return parentPosition.catchall ??= createPosition(route, parentPosition)
+    case 'slot':     return slotsOf.getOrInsertComputed(parentRoute, dict)[route.segment] ??= createPosition(route, parentPosition)
+  }
 }
 
 /** Represents a URL position in the route tree before rendering information is attached. */
@@ -71,7 +63,6 @@ export function createPartialPositionTree(routeTree: RouteNode) {
   const context: PositionContext = {
     positionOf: new Map([[routeTree, positionTree]]),
     slotsOf: new Map(),
-    leafPositions: new Set(),
   }
   const claimsOf = new Map<PartialPositionNode, Claims>() // map of all position nodes and their claims
   const ownershipOf = new Map<PartialPositionNode, Ownership>()
@@ -91,5 +82,5 @@ export function createPartialPositionTree(routeTree: RouteNode) {
       context.positionOf.set(childRoute, childPosition)
     },
   })
-  return [positionTree, claimsOf, ownershipOf, context.slotsOf, context.leafPositions] as const
+  return [positionTree, claimsOf, ownershipOf, context.slotsOf] as const
 }

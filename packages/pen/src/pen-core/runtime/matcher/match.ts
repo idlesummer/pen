@@ -1,5 +1,5 @@
 import { pickRecord } from '@/lib/record'
-import type { Endpoint, PositionNode } from '../../compiler'
+import type { Endpoint, Frame, PositionNode } from '../../compiler'
 import type { Params } from './find'
 import { findPositionEndpoint } from './find'
 
@@ -14,7 +14,7 @@ export type Match = Endpoint<LeafEndpoint, Params>
 export type MatchFrame = Match['frames'][number]
 
 /** Pairs frames with their scoped params, reusing objects for unchanged scopes. */
-function createMatchParams(frames: { params: string[] }[], fullParams: Params) {
+function createMatchParams(frames: Frame<PositionNode>[], fullParams: Params) {
   let params: Params = {}
 
   return frames.map((frame, index) => { // frames with the same values share the same params array
@@ -25,7 +25,7 @@ function createMatchParams(frames: { params: string[] }[], fullParams: Params) {
 }
 
 /** Resolves a slot's own endpoint - its frames can never declare further slots. */
-function createLeafEndpoint(endpoint: Endpoint<unknown>, fullParams: Params): LeafEndpoint {
+function createLeafEndpoint(endpoint: Endpoint<PositionNode>, fullParams: Params): LeafEndpoint {
   const slots = undefined
   const params = createMatchParams(endpoint.frames, fullParams)
   const frames = endpoint.frames.map((frame, index) => ({ ...frame, params: params[index]!, slots }))
