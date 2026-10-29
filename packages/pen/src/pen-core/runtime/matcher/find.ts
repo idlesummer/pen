@@ -2,12 +2,12 @@ import type { PositionNode } from '../../compiler'
 import { traverse } from '@/lib/traverse'
 
 /** Maps route param names to their captured values. */
-export type Params = Record<string, string | string[]>
+export type MatchParams = Record<string, string | string[]>
 
 /** A candidate explored during route matching. */
 type MatchCandidate = {
   position: PositionNode
-  params: Params
+  params: MatchParams
   isCatchall?: true // catchall always accepts, regardless of urlDepth-based exhaustion - see leave() below
   isTerminal?: true
 }
@@ -24,13 +24,13 @@ function expand(candidate: MatchCandidate, url: string[]): MatchCandidate[] {
 
     if (position.dynamic) {
       const paramName = position.dynamic.param!
-      const newParams: Params = { ...params, [paramName]: segment }
+      const newParams: MatchParams = { ...params, [paramName]: segment }
       candidates.push({ position: position.dynamic, params: newParams })
     }
     if (position.catchall) {
       const paramName = position.catchall.param!
       const segments = url.slice(position.urlDepth)
-      const newParams: Params = { ...params, [paramName]: segments }
+      const newParams: MatchParams = { ...params, [paramName]: segments }
       candidates.push({ position: position.catchall, params: newParams, isCatchall: true })
     }
   }
