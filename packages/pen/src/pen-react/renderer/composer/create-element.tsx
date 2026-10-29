@@ -49,8 +49,8 @@ function renderSlotChain(route: string, componentTree: ComponentTree): ReactNode
 /** Renders each slot tree into a map of React nodes. */
 function renderSlots(route: string, frame: ComponentFrame): ReactNodeMap {
   const slots: ReactNodeMap = {}
-  for (const [name, tree] of Object.entries(frame.slots ?? {}))
-    slots[name] = renderSlotChain(route, tree)
+  for (const [slotName, slotComponentTree] of Object.entries(frame.slots ?? {}))
+    slots[slotName] = renderSlotChain(route, slotComponentTree)
   return slots
 }
 
