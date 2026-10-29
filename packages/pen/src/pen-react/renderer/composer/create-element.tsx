@@ -3,7 +3,7 @@ import type { RouteMatcher } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
 import type { ComponentEndpoint, ComponentFrame } from './component-tree'
 import { AwaitComponent } from '@/lib/await-component'
-import { DefaultBoundary, ErrorBoundary, LoadingBoundary } from '@/pen-react/modules/components'
+import { DefaultBoundary, ErrorBoundary, LoadingBoundary } from '@/pen-react/modules'
 import { createComponentTree } from './component-tree'
 
 /** Renders endpoint content, awaiting async components when necessary. */
