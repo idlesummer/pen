@@ -10,8 +10,16 @@ import { createComponentTree } from './component-tree'
 
 type ReactNodeMap = Record<string, ReactNode>
 
-/** Wraps child with a frame's default/loading/error boundaries - shared by
- *  both the main and leaf (slot-owned) frame wrapping. */
+/** Renders endpoint content, awaiting async components when necessary. */
+function renderContent(tree: ComponentTree): ReactNode {
+  const { content: Content, params } = tree.endpoint
+  const props = { params }
+  return Content.constructor.name === 'AsyncFunction'
+    ? <AwaitComponent resolve={Content(props) as Promise<ReactNode>} />
+    : <Content {...props} />
+}
+
+/** Wraps child with a frame's default/loading/error boundaries. */
 function wrapBoundaries(route: string, frame: ComponentFrame, child: ReactNode): ReactNode {
   if (frame.Default)
     child = <DefaultBoundary Fallback={frame.Default} route={route} params={frame.params}>{child}</DefaultBoundary>
@@ -22,68 +30,45 @@ function wrapBoundaries(route: string, frame: ComponentFrame, child: ReactNode):
   return child
 }
 
-/** Wraps child with a slot-owned frame's boundaries and layout. A slot's own
- *  chain can never declare further slots, so there's nothing else to render. */
-function wrapLeafFrame(route: string, frame: ComponentFrame, child: ReactNode): ReactNode {
-  child = wrapBoundaries(route, frame, child)
-  if (frame.Layout)
-    child = <frame.Layout params={frame.params}>{child}</frame.Layout>
-  return child
+/** Wraps child with a frame's boundaries and layout. */
+function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, slots?: ReactNodeMap): ReactNode {
+  const wrappedChild = wrapBoundaries(route, frame, child)
+  return frame.Layout
+    ? <frame.Layout params={frame.params} {...slots}>{wrappedChild}</frame.Layout>
+    : wrappedChild
 }
 
-/** Wraps a slot-owned tree's content with its own frame chain, from inner to outer. */
-function renderLeafChain(route: string, tree: ComponentTree): ReactNode {
-  const { endpoint } = tree
-  const Content = endpoint.content
-  const contentProps = { params: endpoint.params }
-
-  const contentElement = Content.constructor.name === 'AsyncFunction'
-    ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
-    : <Content {...contentProps} />
-
-  return endpoint.frames.reduceRight<ReactNode>(
-    (child, frame) => wrapLeafFrame(route, frame, child),
-    contentElement,
-  )
-}
-
-/** Wraps child with a frame's boundaries, layout, and slots. Every slot
- *  already carries its own resolved match, so it's rendered right here,
- *  on the way up through this specific frame. */
-function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode): ReactNode {
-  child = wrapBoundaries(route, frame, child)
-  if (frame.Layout) {
-    const slots: ReactNodeMap | undefined = frame.slots && Object.fromEntries(
-      Object.entries(frame.slots).map(([name, slotTree]) => [name, renderLeafChain(route, slotTree)]),
-    )
-    child = <frame.Layout params={frame.params} {...slots}>{child}</frame.Layout>
-  }
-  return child
-}
-
-/** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(route: string, componentTree: ComponentTree): ReactNode {
-  const endpoint = componentTree.endpoint
-  const Content = endpoint.content
-  const contentProps = { params: endpoint.params }
-
-  const contentElement = Content.constructor.name === 'AsyncFunction'
-    ? <AwaitComponent resolve={Content(contentProps) as Promise<ReactNode>} />
-    : <Content {...contentProps} />
-
-  return endpoint.frames.reduceRight<ReactNode>(
+/** Renders a slot-owned tree's content with its frame chain, from inner to outer. */
+function renderSlotChain(route: string, componentTree: ComponentTree): ReactNode {
+  return componentTree.endpoint.frames.reduceRight<ReactNode>(
     (child, frame) => wrapFrame(route, frame, child),
-    contentElement,
+    renderContent(componentTree),
   )
 }
 
-/** Resolves a match against the component map and turns it into a React
- *  element tree, wrapping the main chain and rendering each frame's own
- *  slots inline as it goes.
+/** Renders each slot tree into a map of React nodes. */
+function renderSlots(route: string, frame: ComponentFrame): ReactNodeMap {
+  const slots: ReactNodeMap = {}
+  for (const [name, tree] of Object.entries(frame.slots ?? {}))
+    slots[name] = renderSlotChain(route, tree)
+  return slots
+}
+
+/** Renders endpoint content with its frame chain, from inner to outer. */
+function renderChain(route: string, componentTree: ComponentTree): ReactNode {
+  return componentTree.endpoint.frames.reduceRight<ReactNode>(
+    (child, frame) => wrapFrame(route, frame, child, frame.Layout && renderSlots(route, frame)),
+    renderContent(componentTree),
+  )
+}
+
+/** Resolves a route match into a React element tree, rendering the main frame
+ *  chain and each frame's slots.
  *
  *  @param route - The route being rendered, passed through to boundaries.
  *  @param routeMatcher - Matches the route against the position tree.
- *  @param componentMap - The component map used to resolve path references. */
+ *  @param componentMap - The component map used to resolve path references.
+ */
 export function createRouteElement(route: string, routeMatcher: RouteMatcher, componentMap: ComponentMap): ReactNode {
   const routeMatch = routeMatcher(route)
   const componentTree = createComponentTree(routeMatch, componentMap)
