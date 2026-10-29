@@ -22,11 +22,11 @@ function createMatchParamsForFrames(frames: Frame<PositionNode>[], fullParams: M
 }
 
 /** Resolves a slot's own match. Its frames can never declare further slots. */
-function createMatchSlot(slotEndpoint: Endpoint<PositionNode>, fullParams: MatchParams): Match {
+function createMatchSlot(slotEndpoint: Endpoint<PositionNode>, fullSlotParams: MatchParams): Match {
   const slots = undefined
-  const params = createMatchParamsForFrames(slotEndpoint.frames, fullParams)
+  const params = createMatchParamsForFrames(slotEndpoint.frames, fullSlotParams)
   const frames = slotEndpoint.frames.map((frame, index) => ({ ...frame, params: params[index]!, slots }))
-  const endpoint = { ...slotEndpoint, params: pickRecord(fullParams, slotEndpoint.params), frames }
+  const endpoint = { ...slotEndpoint, params: pickRecord(fullSlotParams, slotEndpoint.params), frames }
   return { endpoint }
 }
 
