@@ -1,16 +1,16 @@
 import type { FunctionComponent, PropsWithChildren } from 'react'
-import type { Params } from '@/pen-core'
+import type { MatchParams } from '@/pen-core'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
 
 type DefaultFallbackProps = {
-  params: Params
+  params: MatchParams
 }
 
 type DefaultBoundaryProps = PropsWithChildren<{
   Fallback?: DefaultComponent
   route: string
-  params: Params
+  params: MatchParams
 }>
 
 export type DefaultComponent =

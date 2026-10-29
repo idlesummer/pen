@@ -1,4 +1,4 @@
-import type { Match, MatchEndpoint, MatchFrame, Params } from '@/pen-core'
+import type { Match, MatchEndpoint, MatchFrame, MatchParams } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
 import type { PageComponent } from '@/pen-react/modules/components/PageComponent'
 import type { LayoutComponent } from '@/pen-react/modules/components/LayoutComponent'
@@ -15,7 +15,7 @@ export type ComponentFrame = {
   Error?: ErrorComponent
   Default?: DefaultComponent
   slots?: Record<string, ComponentMatch>
-  params: Params
+  params: MatchParams
 }
 
 /** An endpoint with its content and frames converted to components, carrying
@@ -23,7 +23,7 @@ export type ComponentFrame = {
 export type ComponentEndpoint = {
   frames: ComponentFrame[]
   content: PageComponent | DefaultComponent
-  params: Params
+  params: MatchParams
 }
 
 /** A match tree with component references in place of component paths. */

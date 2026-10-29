@@ -1,4 +1,4 @@
-export type { Params } from '@/pen-core'
+export type { MatchParams } from '@/pen-core'
 export type {
   ErrorFallbackProps,
   ErrorComponent,
