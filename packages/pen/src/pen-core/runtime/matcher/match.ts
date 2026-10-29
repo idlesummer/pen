@@ -10,7 +10,7 @@ export type Match = {
 export type MatchEndpoint = Match['endpoint']
 export type MatchFrame = MatchEndpoint['frames'][number]
 
-/** Pairs frames with their scoped params, reusing objects for unchanged scopes. */
+/** Creates scoped params for each frame, reusing objects for unchanged scopes. */
 function createMatchParamsForFrames(frames: Frame<PositionNode>[], fullParams: MatchParams) {
   let params: MatchParams = {}
 
@@ -45,7 +45,7 @@ export function match(positionTree: PositionNode, urlString: string): Match {
       const fullSlotParams = { ...matchParams, ...slotParams }
       slots[slotName] = createMatchSlot(slotEndpoint, fullSlotParams)
     }
-    return { ...frame, slots, params }
+    return { ...frame, slots, params: matchParams }
   })
   const params = pickRecord(mainParams, mainEndpoint.params)
   const endpoint = { ...mainEndpoint, frames, params }
