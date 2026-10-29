@@ -11,8 +11,8 @@ import { createComponentTree } from './component-tree'
 type ReactNodeMap = Record<string, ReactNode>
 
 /** Renders endpoint content, awaiting async components when necessary. */
-function renderContent(tree: ComponentTree): ReactNode {
-  const { content: Content, params } = tree.endpoint
+function renderContent(componentTree: ComponentTree): ReactNode {
+  const { content: Content, params } = componentTree.endpoint
   const props = { params }
   return Content.constructor.name === 'AsyncFunction'
     ? <AwaitComponent resolve={Content(props) as Promise<ReactNode>} />
