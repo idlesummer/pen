@@ -53,13 +53,13 @@ function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): Comp
 /** Converts a match into a component match and resolves its frames' declared slots. */
 export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentMatch {
   const mainEndpoint = matchTree.endpoint
-
   const frames = mainEndpoint.frames.map((frame) => {
+
     const slots: Record<string, ComponentMatch> = {}
-
-    for (const [slotName, slotMatch] of Object.entries(frame.slots ?? {}))
-      slots[slotName] = createComponentSlot(slotMatch, componentMap)
-
+    for (const [slotName, slotMatch] of Object.entries(frame.slots ?? {})) {
+      const componentSlot = createComponentSlot(slotMatch, componentMap)
+      slots[slotName] = componentSlot
+    }
     return { ...createFrameComponents(frame, componentMap), slots }
   })
   const content = (componentMap.page[mainEndpoint.contentPath] ?? componentMap.default[mainEndpoint.contentPath])!
