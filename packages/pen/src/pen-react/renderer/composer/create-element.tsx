@@ -6,7 +6,7 @@ import { AwaitComponent } from '@/lib/await-component'
 import { DefaultBoundary } from '@/pen-react/modules/components/DefaultBoundary'
 import { LoadingBoundary } from '@/pen-react/modules/components/LoadingBoundary'
 import { ErrorBoundary } from '@/pen-react/modules/components/ErrorBoundary'
-import { createComponentMatchTree } from './component-tree'
+import { createComponentTree } from './component-tree'
 
 type ReactNodeMap = Record<string, ReactNode>
 
@@ -62,8 +62,8 @@ function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode): Reac
 }
 
 /** Wraps endpoint content with its frame chain, from inner to outer. */
-function renderChain(route: string, tree: ComponentTree): ReactNode {
-  const endpoint = tree.endpoint
+function renderChain(route: string, componentTree: ComponentTree): ReactNode {
+  const endpoint = componentTree.endpoint
   const Content = endpoint.content
   const contentProps = { params: endpoint.params }
 
@@ -83,9 +83,9 @@ function renderChain(route: string, tree: ComponentTree): ReactNode {
  *
  *  @param route - The route being rendered, passed through to boundaries.
  *  @param routeMatcher - Matches the route against the position tree.
- *  @param components - The component map used to resolve path references. */
-export function createRouteElement(route: string, routeMatcher: RouteMatcher, components: ComponentMap): ReactNode {
+ *  @param componentMap - The component map used to resolve path references. */
+export function createRouteElement(route: string, routeMatcher: RouteMatcher, componentMap: ComponentMap): ReactNode {
   const routeMatch = routeMatcher(route)
-  const mainTree = createComponentMatchTree(routeMatch, components)
-  return renderChain(route, mainTree)
+  const componentTree = createComponentTree(routeMatch, componentMap)
+  return renderChain(route, componentTree)
 }

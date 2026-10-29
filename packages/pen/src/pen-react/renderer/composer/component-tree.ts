@@ -50,7 +50,7 @@ function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): Comp
 }
 
 /** Converts a match into a component tree and resolves its frames' declared slots. */
-export function createComponentMatchTree(matchTree: Match, componentMap: ComponentMap): ComponentTree {
+export function createComponentTree(matchTree: Match, componentMap: ComponentMap): ComponentTree {
   const mainEndpoint = matchTree.endpoint
   const frames = mainEndpoint.frames.map((frame) => {
     const slots: Record<string, ComponentTree> = {}
