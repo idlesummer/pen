@@ -1,4 +1,5 @@
 import type { NavigationState } from './navigation-core'
+import { createListeners } from '@/lib/create-store'
 import {
   createNavigation,
   push,
@@ -33,28 +34,25 @@ export type NavigationStore = {
 
 export function createNavigationStore(initialRoute: string): NavigationStore {
   const state = createNavigation(initialRoute)
-  const listeners = new Set<() => void>()
+  const { subscribe, notify } = createListeners()
   let version = 0
 
   /** Bumps the version and notifies - only called once an action actually applied. */
-  function notify() {
+  function applyChange() {
     version++
-    listeners.forEach(listener => listener())
+    notify()
   }
 
   const actions: NavigationStore['actions'] = {
-    push:    route => (push(state, route), notify()),
-    replace: route => (replace(state, route), notify()),
-    back:    () => back(state) && notify(),
-    forward: () => forward(state) && notify(),
-    refresh: () => (refresh(state), notify()),
+    push:    route => (push(state, route), applyChange()),
+    replace: route => (replace(state, route), applyChange()),
+    back:    () => back(state) && applyChange(),
+    forward: () => forward(state) && applyChange(),
+    refresh: () => (refresh(state), applyChange()),
   }
 
   return {
-    subscribe: (listener) => {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
-    },
+    subscribe,
     getVersion: () => version,
     getState: () => state,
     actions,

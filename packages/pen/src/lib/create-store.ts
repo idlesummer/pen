@@ -1,3 +1,20 @@
+/** Tracks a set of listeners and notifies them, independent of what changed. */
+export function createListeners() {
+  const listeners = new Set<() => void>()
+  return {
+    /** Subscribes to notifications.
+     *  @param listener - The function to call when notified.
+     *  @returns A function that unsubscribes the listener.
+     */
+    subscribe: (listener: () => void) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    /** Calls every subscribed listener. */
+    notify: () => listeners.forEach(listener => listener()),
+  }
+}
+
 /** A store that holds state and notifies subscribers when it changes. */
 export type Store<T> = {
   /** Subscribes to state changes.
@@ -21,14 +38,11 @@ export type Store<T> = {
  *  @returns A store that exposes state access, updates, and subscriptions.
  */
 export function createStore<T>(initialState: T): Store<T> {
-  const listeners = new Set<() => void>()
+  const { subscribe, notify } = createListeners()
   let state = initialState
 
   return {
-    subscribe: (listener: () => void) => {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
-    },
+    subscribe,
     getState: () => {
       return state
     },
@@ -37,7 +51,7 @@ export function createStore<T>(initialState: T): Store<T> {
 
       if (!Object.is(state, nextState)) {
         state = nextState
-        listeners.forEach(fn => fn())
+        notify()
       }
     },
   }
