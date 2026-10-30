@@ -3,6 +3,7 @@ import type { ModuleRegistry } from '@/pen-react/modules'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { createServer } from 'vite'
+import { assembleModuleRegistry } from '@/pen-react/modules'
 import { ssrGlob } from '@/lib/ssr-glob'
 
 /** Loads each role's route modules, mirroring production's per-role
@@ -27,14 +28,16 @@ export async function createModuleRegistry(projectDir: string, routesDir: string
   })
   const options = { base: routesDir, server: devServer }
   try {
-    const [page, layout, loading, error, default_] = await Promise.all([
-      ssrGlob('**/page.tsx', options),
-      ssrGlob('**/layout.tsx', options),
-      ssrGlob('**/loading.tsx', options),
-      ssrGlob('**/error.tsx', options),
-      ssrGlob('**/default.tsx', options),
-    ])
-    return { page, layout, loading, error, default: default_ }
+    return await assembleModuleRegistry(
+      {
+        page: '**/page.tsx',
+        layout: '**/layout.tsx',
+        loading: '**/loading.tsx',
+        error: '**/error.tsx',
+        default: '**/default.tsx',
+      },
+      pattern => ssrGlob(pattern, options),
+    )
   }
   finally {
     if (!server)  // close server only if its created in this function
