@@ -1,4 +1,4 @@
-import { useNavigate } from './use-navigate'
+import { useNavigate } from '../NavigationProvider'
 
 /** Returns the visited-route stack and the current position within it.
  *  @returns The visited-route stack and current position.
