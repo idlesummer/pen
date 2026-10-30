@@ -7,7 +7,6 @@ const NavigationContext =
   createContext<NavigationStore | null>(null)
 
 /** Connects the framework-agnostic navigation logic to React.
- *
  *  Uses useState to maintain a stable navigation store instance,
  *  and context to share it with descendants.
  */
