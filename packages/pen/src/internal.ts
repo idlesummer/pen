@@ -10,8 +10,8 @@ export type {
 } from './pen-react/modules/components'
 
 import { createRouteRenderer, ROUTES_CHANGED_EVENT, type RouteRendererStore } from './pen-react/renderer'
-import { PenApp } from './pen-react/view'
+import { PenApp, PenDevApp } from './pen-react/view'
 
 export { createRouteRendererStore } from './pen-react/renderer'
-export { PenApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
+export { PenApp, PenDevApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
 export type { RouteRendererStore }
