@@ -36,19 +36,13 @@ async function loadRegistry (paths: RoutePaths) {
 const rendererStore = createRouteRendererStore(await loadRegistry(initialPaths))
 const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
-// Pushing each reload into rendererStore, instead of calling Ink's
-// render() again, lets React's own update scheduling handle it - the
-// same way navigation actions already update the app without ever
-// touching render().
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
     const moduleRegistry = await loadRegistry(paths)
     rendererStore.setState(() => createRouteRenderer(moduleRegistry))
   }
   catch (err) {
-    // A failed reload must not take the current render down with it -
-    // better stale than blank.
-    console.error(err)
+    console.error(err)  // a failed reload shouldn't take the current render down with it
   }
 })
 
