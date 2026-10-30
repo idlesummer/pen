@@ -1,5 +1,5 @@
 import { use, useSyncExternalStore } from 'react'
-import { NavigationContext } from '../NavigationProvider'
+import { NavigationContext } from '@/pen-react/view/navigation/NavigationProvider'
 
 /** Returns the current navigation snapshot.
  *
@@ -10,5 +10,5 @@ export function useNavigate() {
   const store = use(NavigationContext)
   if (!store)
     throw new Error('useNavigate must be used within a NavigationProvider')
-  return useSyncExternalStore(store.subscribe, store.getSnapshot)
+  return useSyncExternalStore(store.subscribe, store.getState)
 }
