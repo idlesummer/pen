@@ -1,4 +1,4 @@
-import { useNavigate } from '../NavigationProvider'
+import { useNavigate } from './use-navigate'
 
 /** Returns the current route.
  *  The returned value updates when navigation changes the route.
