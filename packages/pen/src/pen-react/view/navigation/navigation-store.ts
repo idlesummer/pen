@@ -1,5 +1,5 @@
-import type { NavigationState } from './navigation-core'
 import type { Store } from '@/lib/create-store'
+import type { NavigationState } from './navigation-core'
 import { createStore } from '@/lib/create-store'
 import {
   createNavigation,
