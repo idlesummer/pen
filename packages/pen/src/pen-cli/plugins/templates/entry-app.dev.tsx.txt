@@ -6,7 +6,7 @@ declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'err
 
 import { useSyncExternalStore } from 'react'
 import { render } from 'ink'
-import { PenApp, createRouteRendererStore, updateRouteRendererStore, ROUTES_CHANGED_EVENT } from '@idlesummer/pen/internal'
+import { PenApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer } from '@idlesummer/pen/internal'
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -51,7 +51,8 @@ const { waitUntilExit } = render(<DevApp />, __PEN_INK_OPTIONS__)
 // touching render().
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
-    updateRouteRendererStore(rendererStore, await loadRegistry(paths))
+    const moduleRegistry = await loadRegistry(paths)
+    rendererStore.setState(() => createRouteRenderer(moduleRegistry))
   }
   catch (err) {
     // A failed reload must not take the current render down with it -
