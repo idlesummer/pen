@@ -4,6 +4,7 @@ declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
 // #endregion
 
+import { useSyncExternalStore } from 'react'
 import { render } from 'ink'
 import { PenApp, createRouteRendererStore, updateRouteRendererStore, ROUTES_CHANGED_EVENT } from '@idlesummer/pen/internal'
 
@@ -34,7 +35,15 @@ const loadRegistry = async (paths: RoutePaths) => {
 }
 
 const rendererStore = createRouteRendererStore(await loadRegistry(initialPaths))
-const { waitUntilExit } = render(<PenApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
+
+// PenApp itself takes a plain RouteRenderer - only dev needs to turn the
+// store's live updates into one, so the subscription lives here instead.
+function DevApp() {
+  const routeRenderer = useSyncExternalStore(rendererStore.subscribe, rendererStore.getState)
+  return <PenApp routeRenderer={routeRenderer} />
+}
+
+const { waitUntilExit } = render(<DevApp />, __PEN_INK_OPTIONS__)
 
 // Pushing each reload into rendererStore, instead of calling Ink's
 // render() again, lets React's own update scheduling handle it - the
