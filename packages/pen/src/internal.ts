@@ -9,17 +9,9 @@ export type {
   DefaultComponent,
 } from './pen-react/modules/components'
 
-import type { ModuleRegistry } from '@/pen-react/modules'
 import { createRouteRenderer, ROUTES_CHANGED_EVENT, type RouteRendererStore } from './pen-react/renderer'
 import { PenApp } from './pen-react/view'
 
 export { createRouteRendererStore } from './pen-react/renderer'
 export { PenApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
 export type { RouteRendererStore }
-
-/** Rebuilds the renderer from a fresh module registry and pushes it into an
- *  already-running store, so a live app picks up added or removed routes
- *  without restarting. */
-export function updateRouteRendererStore(store: RouteRendererStore, moduleRegistry: ModuleRegistry): void {
-  store.setState(() => createRouteRenderer(moduleRegistry))
-}
