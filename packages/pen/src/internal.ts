@@ -14,7 +14,7 @@ import { createRouteRenderer, ROUTES_CHANGED_EVENT, type RouteRendererStore } fr
 import { PenApp } from './pen-react/view'
 
 export { createRouteRendererStore } from './pen-react/renderer'
-export { PenApp, ROUTES_CHANGED_EVENT }
+export { PenApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
 export type { RouteRendererStore }
 
 /** Rebuilds the renderer from a fresh module registry and pushes it into an
