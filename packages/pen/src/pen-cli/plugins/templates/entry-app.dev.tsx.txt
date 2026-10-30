@@ -22,7 +22,7 @@ async function loadModules(paths: string[]) {
   return Object.fromEntries(await Promise.all(entries))
 }
 
-async function loadRegistry (paths: RoutePaths) {
+async function loadRegistry(paths: RoutePaths) {
   const [page, layout, loading, error, default_] = await Promise.all([
     loadModules(paths.page),
     loadModules(paths.layout),
