@@ -2,12 +2,10 @@ import { Navigation } from './navigation-core'
 
 /** Actions returned to consumers via useRouter(). */
 type NavigationActions = {
-  /** @param route - Route to navigate to.
-   *  @param searchParams - Optional params for the new entry. */
-  push(route: string, searchParams?: unknown): void
-  /** @param route - Route to navigate to.
-   *  @param searchParams - Optional params for the replaced entry. */
-  replace(route: string, searchParams?: unknown): void
+  /** @param route - Route to navigate to. */
+  push(route: string): void
+  /** @param route - Route to navigate to. */
+  replace(route: string): void
   /** Moves back one entry, if possible. */
   back(): void
   /** Moves forward one entry, if possible. */
@@ -64,14 +62,14 @@ export class NavigationStore {
   /* Navigation actions */
 
   /** Pushes and notifies. */
-  private pushRoute(route: string, searchParams?: unknown) {
-    this.navigation.push(route, searchParams)
+  private pushRoute(route: string) {
+    this.navigation.push(route)
     this.emit()
   }
 
   /** Replaces and notifies. */
-  private replaceRoute(route: string, searchParams?: unknown) {
-    this.navigation.replace(route, searchParams)
+  private replaceRoute(route: string) {
+    this.navigation.replace(route)
     this.emit()
   }
 

@@ -25,5 +25,4 @@ export {
   useNavigate,
   useRoute,
   useRouter,
-  useSearchParams,
 } from './view/navigation'

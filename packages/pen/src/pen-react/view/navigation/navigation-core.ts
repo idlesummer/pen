@@ -1,14 +1,9 @@
-type NavigationHistory = {
-  route: string
-  state?: unknown // aka search params
-}
-
 /** Caps how many entries `history` can grow to - without this, a
  *  long-running session that pushes often would grow it forever. */
 const HISTORY_LIMIT = 500
 
 type NavigationSnapshot = {
-  history: Readonly<NavigationHistory[]>
+  history: Readonly<string[]>
   position: number
   refreshes: number
 }
@@ -17,10 +12,10 @@ type NavigationSnapshot = {
 export class Navigation {
   private position = 0
   private refreshes = 0
-  private history: NavigationHistory[]
+  private history: string[]
 
   constructor(initialRoute: string) {
-    this.history = [{ route: initialRoute }]
+    this.history = [initialRoute]
   }
 
   /* Navigation State */
@@ -34,8 +29,8 @@ export class Navigation {
 
   /* Navigation Actions */
 
-  push(route: string, state?: unknown) {
-    this.history.splice(this.position+1, Infinity, { route, state })
+  push(route: string) {
+    this.history.splice(this.position+1, Infinity, route)
     this.position++
 
     const overflow = this.history.length - HISTORY_LIMIT
@@ -45,8 +40,8 @@ export class Navigation {
     }
   }
 
-  replace(route: string, state?: unknown) {
-    this.history[this.position] = { route, state }
+  replace(route: string) {
+    this.history[this.position] = route
   }
 
   /** Returns whether it actually moved, so the store knows whether to notify. */
