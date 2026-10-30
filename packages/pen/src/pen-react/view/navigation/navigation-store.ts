@@ -1,6 +1,4 @@
-import type { Store } from '@/lib/create-store'
 import type { NavigationState } from './navigation-core'
-import { createStore } from '@/lib/create-store'
 import {
   createNavigation,
   push,
@@ -10,7 +8,15 @@ import {
   refresh,
 } from './navigation-core'
 
-export type NavigationStore = Omit<Store<NavigationState>, 'setState'> & {
+export type NavigationStore = {
+  /** @param listener - Called after any navigation action that actually changed state.
+   *  @returns A function that unsubscribes the listener. */
+  subscribe: (listener: () => void) => (() => void)
+  /** Bumped on every applied change - the value useSyncExternalStore tracks,
+   *  so navigation state itself never has to be rebuilt just to be observed. */
+  getVersion: () => number
+  /** Returns the live, mutable navigation state. */
+  getState: () => NavigationState
   actions: {
     /** @param route - Route to navigate to. */
     push(route: string): void
@@ -26,17 +32,31 @@ export type NavigationStore = Omit<Store<NavigationState>, 'setState'> & {
 }
 
 export function createNavigationStore(initialRoute: string): NavigationStore {
-  const store = createStore(createNavigation(initialRoute))
-  const actions: NavigationStore['actions'] = {
-    push: route =>    store.setState(state => push(state, route)),
-    replace: route => store.setState(state => replace(state, route)),
-    back: () =>       store.setState(back),
-    forward: () =>    store.setState(forward),
-    refresh: () =>    store.setState(refresh),
+  const state = createNavigation(initialRoute)
+  const listeners = new Set<() => void>()
+  let version = 0
+
+  /** Bumps the version and notifies - only called once an action actually applied. */
+  function notify() {
+    version++
+    listeners.forEach(listener => listener())
   }
+
+  const actions: NavigationStore['actions'] = {
+    push:    route => (push(state, route), notify()),
+    replace: route => (replace(state, route), notify()),
+    back:    () => back(state) && notify(),
+    forward: () => forward(state) && notify(),
+    refresh: () => (refresh(state), notify()),
+  }
+
   return {
-    subscribe: store.subscribe,
-    getState: store.getState,
+    subscribe: (listener) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    getVersion: () => version,
+    getState: () => state,
     actions,
   }
 }
