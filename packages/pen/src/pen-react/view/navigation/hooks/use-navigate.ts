@@ -9,6 +9,7 @@ import { useNavigationStore } from '../NavigationProvider'
  */
 export function useNavigate(): NavigationState {
   const store = useNavigationStore()
+  // Subscribe to version changes to trigger re-renders
   useSyncExternalStore(store.subscribe, store.getVersion)
   return store.getState()
 }
