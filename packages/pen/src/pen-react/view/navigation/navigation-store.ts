@@ -35,9 +35,9 @@ export function createNavigationStore(initialRoute: string): NavigationStore {
     refresh: () => store.mutate(refresh),
   }
   return {
-    subscribe: store.subscribe,
+    subscribe:  store.subscribe,
     getVersion: store.getVersion,
-    getState: store.getState,
+    getState:   store.getState,
     actions,
   }
 }
