@@ -1,62 +1,52 @@
-/** Caps how many entries `history` can grow to - without this, a
- *  long-running session that pushes often would grow it forever. */
-const HISTORY_LIMIT = 500
-
-type NavigationSnapshot = {
+export type NavigationState = {
   history: Readonly<string[]>
   position: number
   refreshes: number
 }
 
-/** Manages navigation history and exposes its current state. */
-export class Navigation {
-  private position = 0
-  private refreshes = 0
-  private history: string[]
+/** Caps how many entries `history` can grow to. */
+const HISTORY_LIMIT = 500
 
-  constructor(initialRoute: string) {
-    this.history = [initialRoute]
+export function createNavigation(initialRoute: string): NavigationState {
+  return {
+    history: [initialRoute],
+    position: 0,
+    refreshes: 0,
   }
+}
 
-  /* Navigation State */
+export function push(state: NavigationState, route: string): NavigationState {
+  const history = state.history.slice(0, state.position+1)
+  history.push(route)
 
-  getSnapshot(): NavigationSnapshot {
-    const history = this.history
-    const position = this.position
-    const refreshes = this.refreshes
-    return { history, position, refreshes }
-  }
+  const overflow = history.length - HISTORY_LIMIT
+  if (overflow > 0)
+    history.splice(0, overflow)
+  return { ...state, history, position: history.length-1 }
+}
 
-  /* Navigation Actions */
+/** Replaces the current navigation history entry. */
+export function replace(state: NavigationState, route: string): NavigationState {
+  const history = [...state.history]
+  history[state.position] = route
+  return { ...state, history }
+}
 
-  push(route: string) {
-    this.history.splice(this.position+1, Infinity, route)
-    this.position++
+/** Moves backward in navigation history. */
+export function back(state: NavigationState): NavigationState {
+  return state.position > 0
+    ? { ...state, position: state.position - 1 }
+    : state
+}
 
-    const overflow = this.history.length - HISTORY_LIMIT
-    if (overflow > 0) {
-      this.history.splice(0, overflow)
-      this.position -= overflow
-    }
-  }
+/** Moves forward in navigation history. */
+export function forward(state: NavigationState): NavigationState {
+  return state.position < state.history.length - 1
+    ? { ...state, position: state.position + 1 }
+    : state
+}
 
-  replace(route: string) {
-    this.history[this.position] = route
-  }
-
-  /** Returns whether it actually moved, so the store knows whether to notify. */
-  back(): boolean {
-    return this.position > 0 && (this.position--, true)
-  }
-
-  /** Returns whether it actually moved, so the store knows whether to notify. */
-  forward(): boolean {
-    return this.position < this.history.length-1 && (this.position++, true)
-  }
-
-  /** Bumps the refresh count without touching history, so the current route
-   *  re-renders in place. */
-  refresh() {
-    this.refreshes++
-  }
+/** Refreshes the current route without changing history. */
+export function refresh(state: NavigationState): NavigationState {
+  return { ...state, refreshes: state.refreshes + 1 }
 }
