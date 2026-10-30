@@ -41,7 +41,7 @@ export function back(state: NavigationState): boolean {
 /** Moves forward in navigation history.
  *  @returns Whether it actually moved. */
 export function forward(state: NavigationState): boolean {
-  return state.position < state.history.length - 1 && (state.position++, true)
+  return state.position < state.history.length-1 && (state.position++, true)
 }
 
 /** Refreshes the current route without changing history. Mutates state in place. */
