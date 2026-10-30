@@ -5,7 +5,7 @@ declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'err
 // #endregion
 
 import { render } from 'ink'
-import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer } from '@idlesummer/pen/internal'
+import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, assembleModuleRegistry } from '@idlesummer/pen/internal'
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -22,15 +22,8 @@ async function loadModules(paths: string[]) {
   return Object.fromEntries(await Promise.all(entries))
 }
 
-async function loadRegistry(paths: RoutePaths) {
-  const [page, layout, loading, error, default_] = await Promise.all([
-    loadModules(paths.page),
-    loadModules(paths.layout),
-    loadModules(paths.loading),
-    loadModules(paths.error),
-    loadModules(paths.default),
-  ])
-  return { page, layout, loading, error, default: default_ }
+function loadRegistry(paths: RoutePaths) {
+  return assembleModuleRegistry(paths, loadModules)
 }
 const moduleRegistry = await loadRegistry(initialPaths)
 const rendererStore = createRouteRendererStore(moduleRegistry)
