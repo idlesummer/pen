@@ -33,7 +33,7 @@ export function NavigationProvider({ children }: PropsWithChildren) {
 function useNavigationStore(): NavigationStore {
   const store = use(NavigationContext)
   if (!store)
-    throw new Error('useNavigate must be used within a NavigationProvider')
+    throw new Error('Navigation hooks must be used within a NavigationProvider')
   return store
 }
 
