@@ -16,11 +16,10 @@ export type Store<T> = {
    *  @param action - A function that receives the current state and returns the next state.
    */
   setState: (action: (prevState: T) => T) => void
-  /** Mutates the current state in place, for state too costly to rebuild wholesale.
-   *  Subscribers are notified unless the action reports no change by returning false.
-   *  @param action - A function that mutates the current state, returning false if it didn't change.
+  /** Mutates the current state in place and always notifies subscribers.
+   *  @param action - A function that mutates the current state.
    */
-  mutate: (action: (state: T) => boolean | void) => void
+  mutate: (action: (state: T) => void) => void
 }
 
 /** Creates a store with an initial state.
@@ -37,11 +36,9 @@ export function createStore<T>(initialState: T): Store<T> {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },
+    // Immutable operations
     getState: () => {
       return state
-    },
-    getVersion: () => {
-      return version
     },
     setState: (action) => {
       const nextState = action(state)
@@ -51,11 +48,14 @@ export function createStore<T>(initialState: T): Store<T> {
         listeners.forEach(fn => fn())
       }
     },
+    // Mutable operations
+    getVersion: () => {
+      return version
+    },
     mutate: (action) => {
-      if (action(state) === false) {
-        version++
-        listeners.forEach(fn => fn())
-      }
+      action(state)
+      version++
+      listeners.forEach(fn => fn())
     },
   }
 }
