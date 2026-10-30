@@ -28,8 +28,8 @@ export type NavigationStore = Omit<Store<NavigationState>, 'setState' | 'mutate'
 export function createNavigationStore(initialRoute: string): NavigationStore {
   const store = createStore(createNavigation(initialRoute))
   const actions: NavigationStore['actions'] = {
-    push:    route => store.mutate(state => push(state, route)),
-    replace: route => store.mutate(state => replace(state, route)),
+    push:    (route) => store.mutate(state => push(state, route)),
+    replace: (route) => store.mutate(state => replace(state, route)),
     back:    () => store.mutate(back),
     forward: () => store.mutate(forward),
     refresh: () => store.mutate(refresh),
