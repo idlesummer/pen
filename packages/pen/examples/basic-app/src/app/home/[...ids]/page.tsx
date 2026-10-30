@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
-import type { Params } from '@idlesummer/pen'
+import type { MatchParams } from '@idlesummer/pen'
 
-export default function HomeItemsPage({ params }: { params: Params }) {
+export default function HomeItemsPage({ params }: { params: MatchParams }) {
   return (
     <Box flexDirection="column">
       <Box>
