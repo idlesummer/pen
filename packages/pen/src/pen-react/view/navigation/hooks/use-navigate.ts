@@ -2,10 +2,9 @@ import { use, useSyncExternalStore } from 'react'
 import { NavigationContext } from '@/pen-react/view/navigation/NavigationProvider'
 
 /** Returns the current navigation snapshot.
- *
  *  Subscribes the calling component to re-render whenever it changes.
- *
- *  @returns The current navigation snapshot. */
+ *  @returns The current navigation snapshot.
+ */
 export function useNavigate() {
   const store = use(NavigationContext)
   if (!store)

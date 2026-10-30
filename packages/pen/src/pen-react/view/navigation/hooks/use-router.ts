@@ -2,10 +2,9 @@ import { use } from 'react'
 import { NavigationContext } from '../NavigationProvider'
 
 /** Returns navigation actions - push, replace, back, forward, refresh.
- *
  *  Doesn't subscribe to navigation state, so calling this never triggers a re-render.
- *
- *  @returns The navigation actions. */
+ *  @returns The navigation actions.
+ */
 export function useRouter() {
   const store = use(NavigationContext)
   if (!store)
