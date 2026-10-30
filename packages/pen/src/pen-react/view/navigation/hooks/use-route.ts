@@ -7,5 +7,5 @@ import { useNavigate } from './use-navigate'
  *  @returns The current route. */
 export function useRoute() {
   const { history, position } = useNavigate()
-  return history[position]!.route
+  return history[position]!
 }

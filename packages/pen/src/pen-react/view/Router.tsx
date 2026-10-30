@@ -15,7 +15,7 @@ export type RouterProps = {
  *  even when the route is unchanged. */
 export function Router({ routeRenderer }: RouterProps) {
   const { history, position, refreshes } = useNavigate()
-  const route = history[position]!.route
+  const route = history[position]!
 
   // useMemo only triggers on any navigation action calls inside the tree
   return useMemo(

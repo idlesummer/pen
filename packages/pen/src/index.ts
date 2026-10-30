@@ -17,7 +17,6 @@ export {
   useNavigate,
   useRoute,
   useRouter,
-  useSearchParams,
   DefaultBoundary,
   DefaultSignal,
   notFound,
