@@ -1,20 +1,3 @@
-/** Tracks a set of listeners and notifies them, independent of what changed. */
-function createListeners() {
-  const listeners = new Set<() => void>()
-  return {
-    /** Subscribes to notifications.
-     *  @param listener - The function to call when notified.
-     *  @returns A function that unsubscribes the listener.
-     */
-    subscribe: (listener: () => void) => {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
-    },
-    /** Calls every subscribed listener. */
-    notify: () => listeners.forEach(listener => listener()),
-  }
-}
-
 /** A store that holds state and notifies subscribers when it changes. */
 export type Store<T> = {
   /** Subscribes to state changes.
@@ -22,12 +5,11 @@ export type Store<T> = {
    *  @returns A function that unsubscribes the listener.
    */
   subscribe: (listener: () => void) => (() => void)
-  /** Returns the current state.
-   *  @returns The current state.
-   */
+  /** @returns The current state. */
   getState: () => T
   /** Bumped every time setState or mutate actually applies a change.
-   *  @returns The current version. */
+   *  @returns The current version.
+   */
   getVersion: () => number
   /** Computes and sets the next state.
    *  Subscribers are notified only when the next state differs from the current state.
@@ -44,35 +26,34 @@ export type Store<T> = {
 /** Creates a store with an initial state.
  *  @param initialState - The initial state.
  *  @returns A store that exposes state access, updates, and subscriptions.
- */
+*/
 export function createStore<T>(initialState: T): Store<T> {
-  const { subscribe, notify } = createListeners()
+  const listeners = new Set<() => void>()
   let state = initialState
   let version = 0
 
-  /** Bumps the version and notifies - only called once a change actually applied. */
-  function applyChange() {
-    version++
-    notify()
-  }
-
   return {
-    subscribe,
+    subscribe: (listener: () => void) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
     getState: () => {
       return state
     },
-    getVersion: () => version,
+    getVersion: () => {
+      return version
+    },
     setState: (action) => {
       const nextState = action(state)
-
-      if (!Object.is(state, nextState)) {
-        state = nextState
-        applyChange()
-      }
+      if (Object.is(state, nextState)) return
+      state = nextState
+      version++
+      listeners.forEach(listener => listener())
     },
     mutate: (action) => {
-      if (action(state) !== false)
-        applyChange()
+      if (action(state) === false) return
+      version++
+      listeners.forEach(listener => listener())
     },
   }
 }
