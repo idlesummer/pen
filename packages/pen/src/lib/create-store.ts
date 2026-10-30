@@ -45,15 +45,17 @@ export function createStore<T>(initialState: T): Store<T> {
     },
     setState: (action) => {
       const nextState = action(state)
-      if (Object.is(state, nextState)) return
-      state = nextState
-      version++
-      listeners.forEach(listener => listener())
+      if (Object.is(state, nextState)) {
+        state = nextState
+        version++
+        listeners.forEach(fn => fn())
+      }
     },
     mutate: (action) => {
-      if (action(state) === false) return
-      version++
-      listeners.forEach(listener => listener())
+      if (action(state) === false) {
+        version++
+        listeners.forEach(fn => fn())
+      }
     },
   }
 }
