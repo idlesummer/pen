@@ -4,9 +4,8 @@ declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
 // #endregion
 
-import { useSyncExternalStore } from 'react'
 import { render } from 'ink'
-import { PenApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer } from '@idlesummer/pen/internal'
+import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer } from '@idlesummer/pen/internal'
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -35,15 +34,10 @@ const loadRegistry = async (paths: RoutePaths) => {
 }
 
 const rendererStore = createRouteRendererStore(await loadRegistry(initialPaths))
-
-// PenApp itself takes a plain RouteRenderer - only dev needs to turn the
-// store's live updates into one, so the subscription lives here instead.
-function DevApp() {
-  const routeRenderer = useSyncExternalStore(rendererStore.subscribe, rendererStore.getState)
-  return <PenApp routeRenderer={routeRenderer} />
-}
-
-const { waitUntilExit } = render(<DevApp />, __PEN_INK_OPTIONS__)
+const { waitUntilExit } = render(
+  <PenDevApp rendererStore={rendererStore} />,
+  __PEN_INK_OPTIONS__,
+)
 
 // Pushing each reload into rendererStore, instead of calling Ink's
 // render() again, lets React's own update scheduling handle it - the
