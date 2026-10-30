@@ -7,15 +7,15 @@ export type Store<T> = {
   subscribe: (listener: () => void) => (() => void)
   /** @returns The current state. */
   getState: () => T
-  /** Bumped every time setState or mutate actually applies a change.
-   *  @returns The current version.
-   */
-  getVersion: () => number
   /** Computes and sets the next state.
    *  Subscribers are notified only when the next state differs from the current state.
    *  @param action - A function that receives the current state and returns the next state.
-   */
+  */
   setState: (action: (prevState: T) => T) => void
+  /** Bumped every time setState or mutate actually applies a change.
+    *  @returns The current version.
+    */
+  getVersion: () => number
   /** Mutates the current state in place and always notifies subscribers.
    *  @param action - A function that mutates the current state.
    */
