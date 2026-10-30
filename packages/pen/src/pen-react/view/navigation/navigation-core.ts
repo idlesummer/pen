@@ -1,5 +1,5 @@
 export type NavigationState = {
-  history: Readonly<string[]>
+  history: string[]
   position: number
   refreshes: number
 }
@@ -15,38 +15,36 @@ export function createNavigation(initialRoute: string): NavigationState {
   }
 }
 
-export function push(state: NavigationState, route: string): NavigationState {
-  const history = state.history.slice(0, state.position+1)
-  history.push(route)
+/** Pushes a new route, truncating any forward history. Mutates state in place. */
+export function push(state: NavigationState, route: string): void {
+  state.history.splice(state.position + 1, Infinity, route)
+  state.position++
 
-  const overflow = history.length - HISTORY_LIMIT
-  if (overflow > 0)
-    history.splice(0, overflow)
-  return { ...state, history, position: history.length-1 }
+  const overflow = state.history.length - HISTORY_LIMIT
+  if (overflow > 0) {
+    state.history.splice(0, overflow)
+    state.position -= overflow
+  }
 }
 
-/** Replaces the current navigation history entry. */
-export function replace(state: NavigationState, route: string): NavigationState {
-  const history = [...state.history]
-  history[state.position] = route
-  return { ...state, history }
+/** Replaces the current navigation history entry. Mutates state in place. */
+export function replace(state: NavigationState, route: string): void {
+  state.history[state.position] = route
 }
 
-/** Moves backward in navigation history. */
-export function back(state: NavigationState): NavigationState {
-  return state.position > 0
-    ? { ...state, position: state.position - 1 }
-    : state
+/** Moves backward in navigation history.
+ *  @returns Whether it actually moved. */
+export function back(state: NavigationState): boolean {
+  return state.position > 0 && (state.position--, true)
 }
 
-/** Moves forward in navigation history. */
-export function forward(state: NavigationState): NavigationState {
-  return state.position < state.history.length - 1
-    ? { ...state, position: state.position + 1 }
-    : state
+/** Moves forward in navigation history.
+ *  @returns Whether it actually moved. */
+export function forward(state: NavigationState): boolean {
+  return state.position < state.history.length - 1 && (state.position++, true)
 }
 
-/** Refreshes the current route without changing history. */
-export function refresh(state: NavigationState): NavigationState {
-  return { ...state, refreshes: state.refreshes + 1 }
+/** Refreshes the current route without changing history. Mutates state in place. */
+export function refresh(state: NavigationState): void {
+  state.refreshes++
 }

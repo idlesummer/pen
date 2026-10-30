@@ -3,10 +3,12 @@ import { useSyncExternalStore } from 'react'
 import { useNavigationStore } from '../NavigationProvider'
 
 /** Returns the current navigation state.
- *  Subscribes the calling component to navigation changes via `useSyncExternalStore`.
+ *  Subscribes the calling component to navigation changes via `useSyncExternalStore`,
+ *  tracking the store's version rather than the (mutable) state itself.
  *  @returns The current navigation state.
  */
 export function useNavigate(): NavigationState {
   const store = useNavigationStore()
-  return useSyncExternalStore(store.subscribe, store.getState)
+  useSyncExternalStore(store.subscribe, store.getVersion)
+  return store.getState()
 }
