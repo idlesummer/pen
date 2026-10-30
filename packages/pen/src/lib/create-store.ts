@@ -1,5 +1,5 @@
 /** Tracks a set of listeners and notifies them, independent of what changed. */
-export function createListeners() {
+function createListeners() {
   const listeners = new Set<() => void>()
   return {
     /** Subscribes to notifications.
@@ -26,11 +26,19 @@ export type Store<T> = {
    *  @returns The current state.
    */
   getState: () => T
+  /** Bumped every time setState or mutate actually applies a change.
+   *  @returns The current version. */
+  getVersion: () => number
   /** Computes and sets the next state.
    *  Subscribers are notified only when the next state differs from the current state.
    *  @param action - A function that receives the current state and returns the next state.
    */
   setState: (action: (prevState: T) => T) => void
+  /** Mutates the current state in place, for state too costly to rebuild wholesale.
+   *  Subscribers are notified unless the action reports no change by returning false.
+   *  @param action - A function that mutates the current state, returning false if it didn't change.
+   */
+  mutate: (action: (state: T) => boolean | void) => void
 }
 
 /** Creates a store with an initial state.
@@ -40,19 +48,31 @@ export type Store<T> = {
 export function createStore<T>(initialState: T): Store<T> {
   const { subscribe, notify } = createListeners()
   let state = initialState
+  let version = 0
+
+  /** Bumps the version and notifies - only called once a change actually applied. */
+  function applyChange() {
+    version++
+    notify()
+  }
 
   return {
     subscribe,
     getState: () => {
       return state
     },
+    getVersion: () => version,
     setState: (action) => {
       const nextState = action(state)
 
       if (!Object.is(state, nextState)) {
         state = nextState
-        notify()
+        applyChange()
       }
+    },
+    mutate: (action) => {
+      if (action(state) !== false)
+        applyChange()
     },
   }
 }
