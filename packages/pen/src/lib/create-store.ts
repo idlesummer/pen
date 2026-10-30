@@ -16,10 +16,11 @@ export type Store<T> = {
     *  @returns The current version.
     */
   getVersion: () => number
-  /** Mutates the current state in place and always notifies subscribers.
-   *  @param action - A function that mutates the current state.
+  /** Mutates the current state in place.
+   *  Subscribers are notified unless the action reports no change by returning false.
+   *  @param action - A function that mutates the current state, returning false if it didn't change.
    */
-  mutate: (action: (state: T) => void) => void
+  mutate: (action: (state: T) => boolean | void) => void
 }
 
 /** Creates a store with an initial state.
@@ -42,7 +43,7 @@ export function createStore<T>(initialState: T): Store<T> {
     },
     setState: (action) => {
       const nextState = action(state)
-      if (Object.is(state, nextState)) {
+      if (!Object.is(state, nextState)) {
         state = nextState
         version++
         listeners.forEach(fn => fn())
@@ -53,9 +54,10 @@ export function createStore<T>(initialState: T): Store<T> {
       return version
     },
     mutate: (action) => {
-      action(state)
-      version++
-      listeners.forEach(fn => fn())
+      if (action(state) !== false) {
+        version++
+        listeners.forEach(fn => fn())
+      }
     },
   }
 }
