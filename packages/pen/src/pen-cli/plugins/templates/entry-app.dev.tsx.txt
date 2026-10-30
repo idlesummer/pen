@@ -17,12 +17,12 @@ import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteR
 const initialPaths = __PEN_INITIAL_PATHS__
 type RoutePaths = typeof initialPaths
 
-const loadModules = async (paths: string[]) => {
+async function loadModules(paths: string[]) {
   const entries = paths.map(async path => [path, await import(/* @vite-ignore */ `/__PEN_APP_DIR__/${path}`)] as const)
   return Object.fromEntries(await Promise.all(entries))
 }
 
-const loadRegistry = async (paths: RoutePaths) => {
+async function loadRegistry (paths: RoutePaths) {
   const [page, layout, loading, error, default_] = await Promise.all([
     loadModules(paths.page),
     loadModules(paths.layout),
@@ -34,10 +34,7 @@ const loadRegistry = async (paths: RoutePaths) => {
 }
 
 const rendererStore = createRouteRendererStore(await loadRegistry(initialPaths))
-const { waitUntilExit } = render(
-  <PenDevApp rendererStore={rendererStore} />,
-  __PEN_INK_OPTIONS__,
-)
+const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
 // Pushing each reload into rendererStore, instead of calling Ink's
 // render() again, lets React's own update scheduling handle it - the
