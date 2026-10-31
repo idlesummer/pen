@@ -22,16 +22,13 @@ async function loadModules(paths: string[]) {
   return Object.fromEntries(await Promise.all(entries))
 }
 
-function loadRegistry(paths: RoutePaths) {
-  return assembleModuleRegistry(paths, loadModules)
-}
-const moduleRegistry = await loadRegistry(initialPaths)
+const moduleRegistry = await assembleModuleRegistry(initialPaths, loadModules)
 const rendererStore = createRouteRendererStore(moduleRegistry)
 const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
-    const newModuleRegistry = await loadRegistry(paths)
+    const newModuleRegistry = await assembleModuleRegistry(paths, loadModules)
     rendererStore.setState(() => createRouteRenderer(newModuleRegistry))
   }
   catch (err) {
