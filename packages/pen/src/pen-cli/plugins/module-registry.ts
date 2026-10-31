@@ -8,9 +8,9 @@ import { ssrGlob } from '@/lib/ssr-glob'
 
 /** Loads each role's route modules, mirroring production's per-role
  *  `import.meta.glob` calls, but through Vite's dev-time SSR pipeline so the
- *  result reflects whichever route files exist right now. Shared by
- *  `pen:diagnose` (to validate routes) and `pen:dev` (to keep the live Ink
- *  UI in sync) - both need the same fresh-off-disk registry.
+ *  result reflects whichever route files exist right now. Used by
+ *  `pen:diagnose` (build) and `pen:dev` (dev) for their own initial route
+ *  validation - neither has anything else loaded yet to check against.
  *
  *  @param projectDir - Project directory containing the app directory.
  *  @param routesDir - App route directory relative to the project directory.

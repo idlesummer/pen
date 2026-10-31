@@ -5,7 +5,7 @@ import { findPackageDir } from '@/lib/find-package-dir'
 import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
-import { penConfig, penDev, penDiagnose, penRefresh } from '@/pen-cli/plugins'
+import { penConfig, penDev, penRefresh } from '@/pen-cli/plugins'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
@@ -34,7 +34,6 @@ export function createPenDevServer(srcDir: string) {
     clearScreen: false,  // Ink owns the terminal, not Vite
     plugins: [
       penConfig(options),
-      penDiagnose(options),
       penDev(options),
       penRefresh(options),
     ],
