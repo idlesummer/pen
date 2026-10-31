@@ -12,11 +12,9 @@ export type ModuleRegistry = {
  *  through Vite's SSR pipeline, a path list loaded through dynamic import, etc.
  *
  *  @param roles - Each role's own input to loadRole.
- *  @param loadRole - Loads one role's modules. */
-export async function assembleModuleRegistry<T>(
-  roles: { page: T; layout: T; loading: T; error: T; default: T },
-  loadRole: (role: T) => Promise<Record<string, unknown>>,
-): Promise<ModuleRegistry> {
+ *  @param loadRole - Loads one role's modules.
+ */
+export async function createModuleRegistry<T>(roles: { page: T; layout: T; loading: T; error: T; default: T }, loadRole: (role: T) => Promise<Record<string, unknown>>): Promise<ModuleRegistry> {
   const [page, layout, loading, error, default_] = await Promise.all([
     loadRole(roles.page),
     loadRole(roles.layout),
