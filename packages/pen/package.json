@@ -45,21 +45,21 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@eslint-react/eslint-plugin": "^5.18.6",
-    "@eslint/js": "^10.0.1",
+    "@eslint-react/eslint-plugin": "^4.2.3",
+    "@eslint/js": "^9.39.5",
     "citty": "^0.2.2",
     "oxc-transform-react": "^0.153.0",
     "picocolors": "^1.1.1",
     "react-error-boundary": "^6.1.6",
     "react-refresh": "^0.19.0",
-    "typescript-eslint": "^8.67.0",
+    "typescript-eslint": "^8.14.0",
     "vite": "^8.2.1"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-refresh": "^0.14.7",
-    "eslint": "^10.8.1",
+    "eslint": "^4.0.0",
     "globals": "^17.13.0",
     "ink": "^7.1.1",
     "react": "^19.2.8",
@@ -67,7 +67,7 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "eslint": "^10.8.1",
+    "eslint": "^4.0.0",
     "ink": "^7.1.1",
     "react": "^19.2.8"
   },
