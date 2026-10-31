@@ -18,7 +18,6 @@ import {
 
 const appDir = __PEN_APP_DIR__
 const initialPaths = __PEN_INITIAL_PATHS__
-type RoutePaths = typeof initialPaths
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -41,7 +40,7 @@ const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __
 // render() again, lets React's own update scheduling handle it - the
 // same way navigation actions already update the app without ever
 // touching render().
-import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
+import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: typeof initialPaths) => {
   try {
     const newModuleRegistry = await createModuleRegistry({
       page: loadModules(appDir, paths.page),
