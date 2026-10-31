@@ -12,7 +12,7 @@ export type {
 import { createRouteRenderer, ROUTES_CHANGED_EVENT, type RouteRendererStore } from './pen-react/renderer'
 import { PenApp, PenDevApp } from './pen-react/view'
 
-export { createModuleRegistry } from './pen-react/modules'
+export { createModuleRegistry, loadModules } from './pen-react/modules'
 export { createRouteRendererStore } from './pen-react/renderer'
 export { PenApp, PenDevApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
 export type { RouteRendererStore }

@@ -1,11 +1,10 @@
-// #region codegen
 /// <reference types="vite/client" />
-declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
-declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
-// #endregion
 
 import { render } from 'ink'
-import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, createModuleRegistry } from '@idlesummer/pen/internal'
+import { appDir, inkOptions, initialPaths } from 'virtual:pen/runtime-config'
+import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, createModuleRegistry, loadModules } from '@idlesummer/pen/internal'
+
+type RoutePaths = typeof initialPaths
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -14,21 +13,17 @@ import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteR
 // breaks the hot listener registered below for the rest of the session
 // (new events stop reaching it afterward). Loading paths dynamically, by
 // request, sidesteps that tracking entirely.
-const initialPaths = __PEN_INITIAL_PATHS__
-type RoutePaths = typeof initialPaths
-
-async function loadModules(paths: string[]) {
-  const entries = paths.map(async path => [path, await import(/* @vite-ignore */ `/__PEN_APP_DIR__/${path}`)] as const)
-  return Object.fromEntries(await Promise.all(entries))
-}
-
-const moduleRegistry = await createModuleRegistry(initialPaths, loadModules)
+const moduleRegistry = await createModuleRegistry(initialPaths, paths => loadModules(appDir, paths))
 const rendererStore = createRouteRendererStore(moduleRegistry)
-const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
+const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, inkOptions)
 
+// Pushing each reload into rendererStore, instead of calling Ink's
+// render() again, lets React's own update scheduling handle it - the
+// same way navigation actions already update the app without ever
+// touching render().
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
-    const newModuleRegistry = await createModuleRegistry(paths, loadModules)
+    const newModuleRegistry = await createModuleRegistry(paths, p => loadModules(appDir, p))
     rendererStore.setState(() => createRouteRenderer(newModuleRegistry))
   }
   catch (err) {
