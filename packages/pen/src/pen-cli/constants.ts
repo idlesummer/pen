@@ -7,11 +7,17 @@ export const OUT_DIR = '.pen/dist'
 export const ENTRY_FILE = 'main.js'
 
 // vite/plugins/build-plugin, vite/plugins/dev-plugin - both resolve/load
-// the same virtual entry module and substitute the same token into its source
+// the same virtual entry module
 export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.tsx'
 export const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
+
+// build-plugin only - entry-app.build.tsx.txt's import.meta.glob calls need
+// a literal base path, so these get substituted directly into its source
 export const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 export const INK_OPTIONS_TOKEN = '__PEN_INK_OPTIONS__'
-// dev-plugin only - entry-app.dev.tsx.txt has no static glob of its own,
-// so it needs its first registry's paths handed in from outside
-export const INITIAL_PATHS_TOKEN = '__PEN_INITIAL_PATHS__'
+
+// dev-plugin only - a second virtual module supplying appDir/inkOptions/
+// initialPaths as real exports, so the dev entry template's own source
+// never needs rewriting (unlike build, nothing in it requires a literal)
+export const RUNTIME_CONFIG_MODULE_ID = 'virtual:pen/runtime-config'
+export const RESOLVED_RUNTIME_CONFIG_MODULE_ID = `\0${RUNTIME_CONFIG_MODULE_ID}`
