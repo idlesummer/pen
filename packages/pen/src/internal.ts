@@ -1,6 +1,7 @@
 // Framework-internal exports - for pen's own generated/bundled code
 
 export type { Module } from '@/lib/module'
+export type { ModuleRole } from '@/pen-core'
 export type {
   PageComponent,
   LayoutComponent,
