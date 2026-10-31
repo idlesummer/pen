@@ -1,41 +1,32 @@
-import type { Plugin, ViteDevServer } from 'vite'
+import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { transform } from 'oxc-transform-react'
 import { globRoutePaths } from '@/lib/glob-route-paths'
 import { stripRegion } from '@/lib/strip-regions'
 import { watchRouteFiles } from '@/lib/watch-route-files'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID, START_TIME_TOKEN } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
-import { createDiagnosticReport } from '@/pen-react/diagnostics'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
-import { loadModuleRegistry } from './module-registry'
 
 /**
- * Validates the app's routes, then loads its virtual entry module, which
- * renders the dev server's live Ink UI.
+ * Loads the virtual entry module, which validates the app's routes itself
+ * on its first load and renders the dev server's live Ink UI.
  *
- * Runs only in the SSR environment. `buildStart` validates first and fails
- * fast via `this.error`, so "Ready" only prints once that passes. Later
- * route changes are validated differently: the entry module's own
- * ROUTES_CHANGED_EVENT handler already loads a fresh registry to re-render
- * with, so it reports diagnostics on that same registry (see
- * entry-app.dev.tsx.txt) instead of this plugin loading a second copy
- * just to check it.
- *
- * `perEnvironmentStartEndDuringDev` is needed because Vite otherwise only
- * invokes `buildStart` for the client environment during development.
+ * Runs only in the SSR environment. The entry module fails fast on a bad
+ * route before it ever renders, and reports "Ready" itself once that
+ * passes (see entry-app.dev.tsx.txt) - this plugin has nothing left to
+ * validate ahead of it. Later route changes go through the same entry
+ * module's own ROUTES_CHANGED_EVENT handler, reusing the registry it
+ * already loads to re-render with.
  *
  * `options.config` is read lazily inside `load()` rather than destructured
  * here, since pen:config's `config` hook replaces it with the real
  * settings sometime after this factory itself is called.
  */
 export function penDev(options: PluginOptions): Plugin {
-  let devServer: ViteDevServer | undefined
-
   return {
     name: 'pen:dev',
-    perEnvironmentStartEndDuringDev: true,
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
@@ -63,6 +54,7 @@ export function penDev(options: PluginOptions): Plugin {
           .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.routesDir))
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
           .replaceAll(INITIAL_PATHS_TOKEN, JSON.stringify(initialPaths))
+          .replaceAll(START_TIME_TOKEN, JSON.stringify(options.startTime))
 
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
@@ -74,12 +66,10 @@ export function penDev(options: PluginOptions): Plugin {
         return transformed
       }
     },
-    // Captures the running server so buildStart's validation load can reuse
-    // it instead of spinning up its own throwaway one, and watches route
-    // files to keep the already-running Ink UI in sync with ones added or
-    // removed mid-session - the entry module loads its routes once, when
-    // it starts, and never re-imports itself afterward, so its component
-    // matcher would otherwise go stale as files change.
+    // Watches route files to keep the already-running Ink UI in sync with
+    // ones added or removed mid-session - the entry module loads its
+    // routes once, when it starts, and never re-imports itself afterward,
+    // so its component matcher would otherwise go stale as files change.
     //
     // Only sends paths, not loaded modules: loading them here would go
     // through this plugin's own `server.ssrLoadModule`, a separate runtime
@@ -89,7 +79,6 @@ export function penDev(options: PluginOptions): Plugin {
     // app. The entry module loads these paths itself once it receives them,
     // through its own runtime, keeping shared dependencies consistent.
     configureServer(server) {
-      devServer = server
       watchRouteFiles(server, options.routesDir, () => {
         try {
           const paths = globRoutePaths(server.config.root, options.routesDir)
@@ -99,28 +88,6 @@ export function penDev(options: PluginOptions): Plugin {
           log.error(String(err))
         }
       })
-    },
-    // Validates the route tree before anything boots - sequential so
-    // "Ready" only prints once diagnostics pass.
-    buildStart: {
-      sequential: true,
-      async handler() {
-        const projectDir = this.environment.config.root
-
-        // Non-null: configureServer always runs before buildStart in dev, so
-        // devServer is already set by the time this handler runs.
-        const moduleRegistry = await loadModuleRegistry(projectDir, options.routesDir, devServer!)
-        const [warnings, error] = moduleRegistry
-          ? createDiagnosticReport(moduleRegistry, options.routesDir)
-          : [[], `No such directory: '${options.routesDir}'`]
-
-        for (const message of warnings)
-          this.warn(message)
-        if (error)
-          this.error(error)
-
-        log.ready(`ready in ${Date.now() - options.startTime}ms`)
-      },
     },
   }
 }
