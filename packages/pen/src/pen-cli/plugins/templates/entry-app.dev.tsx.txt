@@ -3,6 +3,7 @@
 declare const __PEN_APP_DIR__: string
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 declare const __PEN_INITIAL_PATHS__: Record<import('@idlesummer/pen/internal').ModuleRole, string[]>
+declare const __PEN_START_TIME__: number
 // #endregion
 
 import { render } from 'ink'
@@ -18,6 +19,7 @@ import {
 
 const appDir = __PEN_APP_DIR__
 const initialPaths = __PEN_INITIAL_PATHS__
+const startTime = __PEN_START_TIME__
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -26,14 +28,33 @@ const initialPaths = __PEN_INITIAL_PATHS__
 // breaks the hot listener registered below for the rest of the session
 // (new events stop reaching it afterward). Loading paths dynamically, by
 // request, sidesteps that tracking entirely.
-const moduleRegistry = await createModuleRegistry({
-  page: loadModules(appDir, initialPaths.page),
-  layout: loadModules(appDir, initialPaths.layout),
-  loading: loadModules(appDir, initialPaths.loading),
-  error: loadModules(appDir, initialPaths.error),
-  default: loadModules(appDir, initialPaths.default),
-})
-const rendererStore = createRouteRendererStore(moduleRegistry)
+async function loadRegistry(paths: typeof initialPaths) {
+  const moduleRegistry = await createModuleRegistry({
+    page: loadModules(appDir, paths.page),
+    layout: loadModules(appDir, paths.layout),
+    loading: loadModules(appDir, paths.loading),
+    error: loadModules(appDir, paths.error),
+    default: loadModules(appDir, paths.default),
+  })
+  const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
+  return { moduleRegistry, warnings, error }
+}
+
+// Validated here instead of pen:dev's buildStart - that hook runs a full
+// step before this module is even loaded (see commands/dev/index.ts), so
+// it had nothing of its own to check against yet. This is the first point
+// anything has actually loaded the routes, so it's also the only point
+// that can fail fast before the Ink UI ever renders.
+const initial = await loadRegistry(initialPaths)
+for (const message of initial.warnings)
+  console.warn(message)
+if (initial.error) {
+  console.error(initial.error)  // no previous render to fall back to - exit outright
+  process.exit(1)
+}
+console.log(`ready in ${Date.now() - startTime}ms`)
+
+const rendererStore = createRouteRendererStore(initial.moduleRegistry)
 const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
 // Pushing each reload into rendererStore, instead of calling Ink's
@@ -42,22 +63,12 @@ const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __
 // touching render().
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: typeof initialPaths) => {
   try {
-    const newModuleRegistry = await createModuleRegistry({
-      page: loadModules(appDir, paths.page),
-      layout: loadModules(appDir, paths.layout),
-      loading: loadModules(appDir, paths.loading),
-      error: loadModules(appDir, paths.error),
-      default: loadModules(appDir, paths.default),
-    })
-
-    // Reports diagnostics on this same reload instead of pen:dev's watcher
-    // loading a second copy of the registry just to check it.
-    const [warnings, error] = createDiagnosticReport(newModuleRegistry, appDir)
+    const { moduleRegistry, warnings, error } = await loadRegistry(paths)
     for (const message of warnings)
       console.warn(message)
     if (error)
       return console.error(error)  // a failed reload shouldn't take the current render down with it
-    rendererStore.setState(() => createRouteRenderer(newModuleRegistry))
+    rendererStore.setState(() => createRouteRenderer(moduleRegistry))
   }
   catch (err) {
     console.error(err)  // a failed reload shouldn't take the current render down with it
