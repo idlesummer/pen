@@ -3,7 +3,7 @@ import type { ModuleRegistry } from '@/pen-react/modules'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { createServer } from 'vite'
-import { assembleModuleRegistry } from '@/pen-react/modules'
+import { createModuleRegistry } from '@/pen-react/modules'
 import { ssrGlob } from '@/lib/ssr-glob'
 
 /** Loads each role's route modules, mirroring production's per-role
@@ -28,7 +28,7 @@ export async function createModuleRegistry(projectDir: string, routesDir: string
   })
   const options = { base: routesDir, server: devServer }
   try {
-    return await assembleModuleRegistry(
+    return await createModuleRegistry(
       {
         page: '**/page.tsx',
         layout: '**/layout.tsx',
