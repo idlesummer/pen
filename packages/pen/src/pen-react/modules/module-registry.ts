@@ -10,7 +10,7 @@ export type ModuleRegistry = Record<ModuleRole, Record<string, unknown>>
  *  @param roles - Each role's own input to loader.
  *  @param loader - Loads one role's modules.
  */
-export async function createModuleRegistry<T>(roles: Record<ModuleRole, T>, loader: (role: T) => Promise<Record<string, unknown>>): Promise<ModuleRegistry> {
+export async function createModuleRegistry<T>(roles: Record<ModuleRole, T>, loader: (role: T) => Promise<ModuleRegistry[ModuleRole]>): Promise<ModuleRegistry> {
   const [page, layout, loading, error, _default] = await Promise.all([
     loader(roles.page),
     loader(roles.layout),
