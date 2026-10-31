@@ -1,5 +1,6 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
+import { createServer } from 'vite'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
 import { loadModuleRegistry } from './module-registry'
 
@@ -26,15 +27,29 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const moduleRegistry = await loadModuleRegistry(projectDir, routesDir)
-        const [warnings, error] = moduleRegistry
-          ? createDiagnosticReport(moduleRegistry, routesDir)
-          : [[], `No such directory: '${routesDir}'`]
 
-        for (const message of warnings)
-          this.warn(message)
-        if (error)
-          this.error(error)
+        // No dev server already running during build, unlike pen:dev - this
+        // plugin always creates its own throwaway one just for this call.
+        const server = await createServer({
+          root: projectDir,
+          configFile: false,
+          logLevel: 'silent',
+          server: { middlewareMode: true },
+        })
+        try {
+          const moduleRegistry = await loadModuleRegistry(projectDir, routesDir, server)
+          const [warnings, error] = moduleRegistry
+            ? createDiagnosticReport(moduleRegistry, routesDir)
+            : [[], `No such directory: '${routesDir}'`]
+
+          for (const message of warnings)
+            this.warn(message)
+          if (error)
+            this.error(error)
+        }
+        finally {
+          await server.close()
+        }
       },
     },
   }
