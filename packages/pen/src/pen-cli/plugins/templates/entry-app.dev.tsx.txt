@@ -2,7 +2,7 @@
 
 import { render } from 'ink'
 import { appDir, inkOptions, initialPaths } from 'virtual:pen/runtime-config'
-import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, createModuleRegistry, loadModules } from '@idlesummer/pen/internal'
+import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, createModuleRegistry, loadModules, createDiagnosticReport } from '@idlesummer/pen/internal'
 
 type RoutePaths = typeof initialPaths
 
@@ -24,6 +24,17 @@ const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, in
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
     const newModuleRegistry = await createModuleRegistry(paths, p => loadModules(appDir, p))
+
+    // Reports diagnostics on this same reload instead of pen:dev's watcher
+    // loading a second copy of the registry just to check it.
+    const [warnings, error] = createDiagnosticReport(newModuleRegistry, appDir)
+    for (const message of warnings)
+      console.warn(message)
+
+    if (error) {
+      console.error(error)  // a failed reload shouldn't take the current render down with it
+      return
+    }
     rendererStore.setState(() => createRouteRenderer(newModuleRegistry))
   }
   catch (err) {
