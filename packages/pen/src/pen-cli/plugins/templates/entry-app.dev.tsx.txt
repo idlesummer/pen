@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 declare const __PEN_APP_DIR__: string
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
-declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
+declare const __PEN_INITIAL_PATHS__: Record<import('@idlesummer/pen/internal').ModuleRole, string[]>
 // #endregion
 
 import { render } from 'ink'
