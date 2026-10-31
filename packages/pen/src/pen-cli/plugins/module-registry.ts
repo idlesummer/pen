@@ -19,17 +19,12 @@ export async function loadModuleRegistry(projectDir: string, routesDir: string, 
   if (!existsSync(join(projectDir, routesDir)))
     return
 
-  return createModuleRegistry(
-    {
-      page: '**/page.tsx',
-      layout: '**/layout.tsx',
-      loading: '**/loading.tsx',
-      error: '**/error.tsx',
-      default: '**/default.tsx',
-    },
-    pattern => ssrGlob(pattern, {
-      base: routesDir,
-      server,
-    }),
-  )
+  const loadRole = (pattern: string) => ssrGlob(pattern, { base: routesDir, server })
+  return createModuleRegistry({
+    page: loadRole('**/page.tsx'),
+    layout: loadRole('**/layout.tsx'),
+    loading: loadRole('**/loading.tsx'),
+    error: loadRole('**/error.tsx'),
+    default: loadRole('**/default.tsx'),
+  })
 }
