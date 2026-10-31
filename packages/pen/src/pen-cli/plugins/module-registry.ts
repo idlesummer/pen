@@ -16,7 +16,7 @@ import { ssrGlob } from '@/lib/ssr-glob'
  *  @param server - Dev server to load route modules through.
  *  @returns The loaded registry, or undefined if the routes directory doesn't exist. */
 export async function loadModuleRegistry(projectDir: string, routesDir: string, server: ViteDevServer): Promise<ModuleRegistry | undefined> {
-  if (existsSync(join(projectDir, routesDir))) {
+  if (!existsSync(join(projectDir, routesDir))) {
     return
   }
   const options = { base: routesDir, server }
