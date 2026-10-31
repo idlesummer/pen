@@ -106,7 +106,10 @@ export function penDev(options: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const moduleRegistry = await loadModuleRegistry(projectDir, options.routesDir, devServer)
+
+        // Non-null: configureServer always runs before buildStart in dev, so
+        // devServer is already set by the time this handler runs.
+        const moduleRegistry = await loadModuleRegistry(projectDir, options.routesDir, devServer!)
         const [warnings, error] = moduleRegistry
           ? createDiagnosticReport(moduleRegistry, options.routesDir)
           : [[], `No such directory: '${options.routesDir}'`]

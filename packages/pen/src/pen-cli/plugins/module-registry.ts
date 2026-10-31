@@ -2,7 +2,6 @@ import type { ViteDevServer } from 'vite'
 import type { ModuleRegistry } from '@/pen-react/modules'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
-import { createServer } from 'vite'
 import { createModuleRegistry } from '@/pen-react/modules'
 import { ssrGlob } from '@/lib/ssr-glob'
 
@@ -14,35 +13,23 @@ import { ssrGlob } from '@/lib/ssr-glob'
  *
  *  @param projectDir - Project directory containing the app directory.
  *  @param routesDir - App route directory relative to the project directory.
- *  @param server - An existing dev server to reuse, if one is already running.
+ *  @param server - Dev server to load route modules through.
  *  @returns The loaded registry, or undefined if the routes directory doesn't exist. */
-export async function loadModuleRegistry(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<ModuleRegistry | undefined> {
+export async function loadModuleRegistry(projectDir: string, routesDir: string, server: ViteDevServer): Promise<ModuleRegistry | undefined> {
   if (!existsSync(join(projectDir, routesDir)))
     return
 
-  const devServer = server ?? await createServer({
-    root: projectDir,
-    configFile: false,
-    logLevel: 'silent',
-    server: { middlewareMode: true },
-  })
-  try {
-    return await createModuleRegistry(
-      {
-        page: '**/page.tsx',
-        layout: '**/layout.tsx',
-        loading: '**/loading.tsx',
-        error: '**/error.tsx',
-        default: '**/default.tsx',
-      },
-      pattern => ssrGlob(pattern, {
-        base: routesDir,
-        server: devServer,
-      }),
-    )
-  }
-  finally {
-    if (!server)  // close server only if its created in this function
-      await devServer.close()  // only close servers created for this call
-  }
+  return createModuleRegistry(
+    {
+      page: '**/page.tsx',
+      layout: '**/layout.tsx',
+      loading: '**/loading.tsx',
+      error: '**/error.tsx',
+      default: '**/default.tsx',
+    },
+    pattern => ssrGlob(pattern, {
+      base: routesDir,
+      server,
+    }),
+  )
 }
