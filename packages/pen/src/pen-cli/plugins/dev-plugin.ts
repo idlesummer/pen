@@ -4,7 +4,7 @@ import { transform } from 'oxc-transform-react'
 import { globRoutePaths } from '@/lib/glob-route-paths'
 import { stripRegion } from '@/lib/strip-regions'
 import { watchRouteFiles } from '@/lib/watch-route-files'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID, START_TIME_TOKEN } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
@@ -13,12 +13,15 @@ import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 't
  * Loads the virtual entry module, which validates the app's routes itself
  * on its first load and renders the dev server's live Ink UI.
  *
- * Runs only in the SSR environment. The entry module fails fast on a bad
- * route before it ever renders, and reports "Ready" itself once that
- * passes (see entry-app.dev.tsx.txt) - this plugin has nothing left to
- * validate ahead of it. Later route changes go through the same entry
- * module's own ROUTES_CHANGED_EVENT handler, reusing the registry it
- * already loads to re-render with.
+ * Runs only in the SSR environment. The entry module validates and fails
+ * fast on a bad route before it ever renders (see entry-app.dev.tsx.txt) -
+ * this plugin doesn't validate anything itself, it just announces the
+ * server is up. Later route changes go through the same entry module's
+ * own ROUTES_CHANGED_EVENT handler, reusing the registry it already loads
+ * to re-render with.
+ *
+ * `perEnvironmentStartEndDuringDev` is needed because Vite otherwise only
+ * invokes `buildStart` for the client environment during development.
  *
  * `options.config` is read lazily inside `load()` rather than destructured
  * here, since pen:config's `config` hook replaces it with the real
@@ -27,6 +30,7 @@ import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 't
 export function penDev(options: PluginOptions): Plugin {
   return {
     name: 'pen:dev',
+    perEnvironmentStartEndDuringDev: true,
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
@@ -54,7 +58,6 @@ export function penDev(options: PluginOptions): Plugin {
           .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.routesDir))
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
           .replaceAll(INITIAL_PATHS_TOKEN, JSON.stringify(initialPaths))
-          .replaceAll(START_TIME_TOKEN, JSON.stringify(options.startTime))
 
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
@@ -88,6 +91,11 @@ export function penDev(options: PluginOptions): Plugin {
           log.error(String(err))
         }
       })
+    },
+    // Just announces the server is up - the entry module validates routes
+    // and reports its own failures once it actually loads, a step later.
+    buildStart() {
+      log.ready(`ready in ${Date.now() - options.startTime}ms`)
     },
   }
 }

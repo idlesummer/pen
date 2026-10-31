@@ -3,7 +3,6 @@
 declare const __PEN_APP_DIR__: string
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 declare const __PEN_INITIAL_PATHS__: Record<import('@idlesummer/pen/internal').ModuleRole, string[]>
-declare const __PEN_START_TIME__: number
 // #endregion
 
 import { render } from 'ink'
@@ -19,7 +18,6 @@ import {
 
 const appDir = __PEN_APP_DIR__
 const initialPaths = __PEN_INITIAL_PATHS__
-const startTime = __PEN_START_TIME__
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
 // in a module Vite transforms is enough for Vite to track these files as
@@ -52,7 +50,6 @@ if (initial.error) {
   console.error(initial.error)  // no previous render to fall back to - exit outright
   process.exit(1)
 }
-console.log(`ready in ${Date.now() - startTime}ms`)
 
 const rendererStore = createRouteRendererStore(initial.moduleRegistry)
 const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)

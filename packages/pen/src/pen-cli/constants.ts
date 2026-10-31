@@ -21,6 +21,3 @@ export const INK_OPTIONS_TOKEN = '__PEN_INK_OPTIONS__'
 // dev-plugin only - entry-app.dev.tsx.txt has no static glob of its own,
 // so it needs its first registry's paths handed in from outside
 export const INITIAL_PATHS_TOKEN = '__PEN_INITIAL_PATHS__'
-// dev-plugin only - the entry module reports its own "ready in Xms" once
-// its first load validates, so it needs the server's start time too
-export const START_TIME_TOKEN = '__PEN_START_TIME__'
