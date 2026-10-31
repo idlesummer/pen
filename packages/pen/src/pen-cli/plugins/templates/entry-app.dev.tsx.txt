@@ -1,9 +1,15 @@
+// #region codegen
 /// <reference types="vite/client" />
+declare const __PEN_APP_DIR__: string
+declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
+declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'error' | 'default', string[]>
+// #endregion
 
 import { render } from 'ink'
-import { appDir, inkOptions, initialPaths } from 'virtual:pen/runtime-config'
 import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, createModuleRegistry, loadModules, createDiagnosticReport } from '@idlesummer/pen/internal'
 
+const appDir = __PEN_APP_DIR__
+const initialPaths = __PEN_INITIAL_PATHS__
 type RoutePaths = typeof initialPaths
 
 // No static glob here, unlike entry-app.build.tsx.txt - its mere presence
@@ -15,7 +21,7 @@ type RoutePaths = typeof initialPaths
 // request, sidesteps that tracking entirely.
 const moduleRegistry = await createModuleRegistry(initialPaths, paths => loadModules(appDir, paths))
 const rendererStore = createRouteRendererStore(moduleRegistry)
-const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, inkOptions)
+const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
 // Pushing each reload into rendererStore, instead of calling Ink's
 // render() again, lets React's own update scheduling handle it - the
