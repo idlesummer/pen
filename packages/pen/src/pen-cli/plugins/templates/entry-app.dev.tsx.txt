@@ -55,11 +55,8 @@ import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: typeof initialPaths) => 
     const [warnings, error] = createDiagnosticReport(newModuleRegistry, appDir)
     for (const message of warnings)
       console.warn(message)
-
-    if (error) {
-      console.error(error)  // a failed reload shouldn't take the current render down with it
-      return
-    }
+    if (error)
+      return console.error(error)  // a failed reload shouldn't take the current render down with it
     rendererStore.setState(() => createRouteRenderer(newModuleRegistry))
   }
   catch (err) {
