@@ -3,20 +3,20 @@ import type { ModuleRole } from '@/pen-core'
 /** Raw glob entries grouped by route module role, keyed by file path. */
 export type ModuleRegistry = Record<ModuleRole, Record<string, unknown>>
 
-/** Loads each role in parallel and assembles the result into a ModuleRegistry.
- *  Agnostic to how a single role actually gets loaded - a glob pattern loaded
- *  through Vite's SSR pipeline, a path list loaded through dynamic import, etc.
+/** Waits on each role's already-started load and assembles the results into
+ *  a ModuleRegistry. Agnostic to how a role actually gets loaded - the
+ *  caller starts each promise however it needs to (a glob pattern loaded
+ *  through Vite's SSR pipeline, a path list loaded through dynamic import,
+ *  etc.) before handing them over here.
  *
- *  @param roles - Each role's own input to loader.
- *  @param loader - Loads one role's modules.
- */
-export async function createModuleRegistry<T>(roles: Record<ModuleRole, T>, loader: (role: T) => Promise<ModuleRegistry[ModuleRole]>): Promise<ModuleRegistry> {
+ *  @param promises - Each role's own in-flight load. */
+export async function createModuleRegistry(promises: Record<ModuleRole, Promise<ModuleRegistry[ModuleRole]>>): Promise<ModuleRegistry> {
   const [page, layout, loading, error, _default] = await Promise.all([
-    loader(roles.page),
-    loader(roles.layout),
-    loader(roles.loading),
-    loader(roles.error),
-    loader(roles.default),
+    promises.page,
+    promises.layout,
+    promises.loading,
+    promises.error,
+    promises.default,
   ])
   return { page, layout, loading, error, default: _default }
 }
