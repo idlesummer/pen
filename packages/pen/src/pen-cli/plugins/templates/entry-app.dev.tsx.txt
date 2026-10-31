@@ -27,13 +27,12 @@ type RoutePaths = typeof initialPaths
 // breaks the hot listener registered below for the rest of the session
 // (new events stop reaching it afterward). Loading paths dynamically, by
 // request, sidesteps that tracking entirely.
-const loadRole = (paths: string[]) => loadModules(appDir, paths)
 const moduleRegistry = await createModuleRegistry({
-  page: loadRole(initialPaths.page),
-  layout: loadRole(initialPaths.layout),
-  loading: loadRole(initialPaths.loading),
-  error: loadRole(initialPaths.error),
-  default: loadRole(initialPaths.default),
+  page: loadModules(appDir, initialPaths.page),
+  layout: loadModules(appDir, initialPaths.layout),
+  loading: loadModules(appDir, initialPaths.loading),
+  error: loadModules(appDir, initialPaths.error),
+  default: loadModules(appDir, initialPaths.default),
 })
 const rendererStore = createRouteRendererStore(moduleRegistry)
 const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
@@ -45,11 +44,11 @@ const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async (paths: RoutePaths) => {
   try {
     const newModuleRegistry = await createModuleRegistry({
-      page: loadRole(paths.page),
-      layout: loadRole(paths.layout),
-      loading: loadRole(paths.loading),
-      error: loadRole(paths.error),
-      default: loadRole(paths.default),
+      page: loadModules(appDir, paths.page),
+      layout: loadModules(appDir, paths.layout),
+      loading: loadModules(appDir, paths.loading),
+      error: loadModules(appDir, paths.error),
+      default: loadModules(appDir, paths.default),
     })
 
     // Reports diagnostics on this same reload instead of pen:dev's watcher
