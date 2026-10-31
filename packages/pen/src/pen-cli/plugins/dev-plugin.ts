@@ -2,8 +2,9 @@ import type { Plugin, ViteDevServer } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { transform } from 'oxc-transform-react'
 import { globRoutePaths } from '@/lib/glob-route-paths'
+import { stripRegion } from '@/lib/strip-regions'
 import { watchRouteFiles } from '@/lib/watch-route-files'
-import { ENTRY_MODULE_ID, RESOLVED_ENTRY_MODULE_ID, RESOLVED_RUNTIME_CONFIG_MODULE_ID, RUNTIME_CONFIG_MODULE_ID } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
@@ -46,26 +47,24 @@ export function penDev(options: PluginOptions): Plugin {
     resolveId(id) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
-      if (id === RUNTIME_CONFIG_MODULE_ID)
-        return RESOLVED_RUNTIME_CONFIG_MODULE_ID
     },
     // Same first-hit search again, but over the resolved id, not the
-    // original one. This is why it checks the resolved ids below.
+    // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     async load(id) {
-      // Supplies appDir/inkOptions/initialPaths as real exports, generated
-      // fresh each time this module loads - lets the entry template import
-      // them normally instead of having its own source textually rewritten.
-      if (id === RESOLVED_RUNTIME_CONFIG_MODULE_ID) {
+      if (id === RESOLVED_ENTRY_MODULE_ID) {
         const projectDir = this.environment.config.root
         const initialPaths = globRoutePaths(projectDir, options.routesDir)
-        return [
-          `export const appDir = ${JSON.stringify(options.routesDir)}`,
-          `export const inkOptions = ${JSON.stringify(options.config.ink)}`,
-          `export const initialPaths = ${JSON.stringify(initialPaths)}`,
-        ].join('\n')
-      }
-      if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const transformed = await transform(ENTRY_MODULE_ID, entryAppTemplate, {
+
+        // appDir is JSON-quoted here (unlike build-plugin's own raw
+        // substitution of the same token) since it becomes a real `const
+        // appDir = ...` the entry template passes around as a value, not
+        // just a path fragment embedded in one string.
+        const source = stripRegion(entryAppTemplate, 'codegen')
+          .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.routesDir))
+          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
+          .replaceAll(INITIAL_PATHS_TOKEN, JSON.stringify(initialPaths))
+
+        const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
           reactCompiler: false,  // since oxc-transform-react defaults to true
           sourcemap: true,  // transformWithOxc generates one by default
