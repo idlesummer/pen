@@ -6,7 +6,15 @@ declare const __PEN_INITIAL_PATHS__: Record<'page' | 'layout' | 'loading' | 'err
 // #endregion
 
 import { render } from 'ink'
-import { PenDevApp, createRouteRendererStore, ROUTES_CHANGED_EVENT, createRouteRenderer, createModuleRegistry, loadModules, createDiagnosticReport } from '@idlesummer/pen/internal'
+import {
+  PenDevApp,
+  createRouteRendererStore,
+  ROUTES_CHANGED_EVENT,
+  createRouteRenderer,
+  createModuleRegistry,
+  loadModules,
+  createDiagnosticReport,
+} from '@idlesummer/pen/internal'
 
 const appDir = __PEN_APP_DIR__
 const initialPaths = __PEN_INITIAL_PATHS__
