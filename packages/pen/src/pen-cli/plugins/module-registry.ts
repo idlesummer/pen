@@ -16,7 +16,7 @@ import { ssrGlob } from '@/lib/ssr-glob'
  *  @param routesDir - App route directory relative to the project directory.
  *  @param server - An existing dev server to reuse, if one is already running.
  *  @returns The loaded registry, or undefined if the routes directory doesn't exist. */
-export async function createModuleRegistry(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<ModuleRegistry | undefined> {
+export async function loadModuleRegistry(projectDir: string, routesDir: string, server?: ViteDevServer): Promise<ModuleRegistry | undefined> {
   if (!existsSync(join(projectDir, routesDir)))
     return
 
@@ -26,7 +26,6 @@ export async function createModuleRegistry(projectDir: string, routesDir: string
     logLevel: 'silent',
     server: { middlewareMode: true },
   })
-  const options = { base: routesDir, server: devServer }
   try {
     return await createModuleRegistry(
       {
@@ -36,7 +35,10 @@ export async function createModuleRegistry(projectDir: string, routesDir: string
         error: '**/error.tsx',
         default: '**/default.tsx',
       },
-      pattern => ssrGlob(pattern, options),
+      pattern => ssrGlob(pattern, {
+        base: routesDir,
+        server: devServer,
+      }),
     )
   }
   finally {
