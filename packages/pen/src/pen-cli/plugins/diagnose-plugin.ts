@@ -3,7 +3,7 @@ import type { PluginOptions } from './types/plugin-options'
 import * as log from '@/pen-cli/logger/console'
 import { watchRouteFiles } from '@/lib/watch-route-files'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
-import { createModuleRegistry } from './module-registry'
+import { loadModuleRegistry } from './module-registry'
 
 /** Discovers and validates the app's routes before typechecking and bundling.
  *
@@ -32,7 +32,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       const projectDir = server.config.root
       watchRouteFiles(server, routesDir, () => {
         // Outside the initial build, so can't throw to fail it like buildStart does - just logs
-        createModuleRegistry(projectDir, routesDir, devServer)
+        loadModuleRegistry(projectDir, routesDir, devServer)
           .then(moduleRegistry => {
             const [warnings, error] = moduleRegistry
               ? createDiagnosticReport(moduleRegistry, routesDir)
@@ -48,7 +48,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        const moduleRegistry = await createModuleRegistry(projectDir, routesDir, devServer)
+        const moduleRegistry = await loadModuleRegistry(projectDir, routesDir, devServer)
         const [warnings, error] = moduleRegistry
           ? createDiagnosticReport(moduleRegistry, routesDir)
           : [[], `No such directory: '${routesDir}'`]
