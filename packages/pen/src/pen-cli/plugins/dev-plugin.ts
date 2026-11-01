@@ -4,6 +4,7 @@ import { globSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { stripRegion } from '@/lib/strip-regions'
+import { debounce } from '@/lib/debounce'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
@@ -47,14 +48,12 @@ function isPathRelativeTo(path: string, base: string): boolean {
  *  @param onChange - Called once, after 150ms of no further route file changes. */
 function watchRouteFiles(server: ViteDevServer, routesDir: string, onChange: () => void): void {
   const routesPath = join(server.config.root, routesDir)
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined
+  const scheduleChange = debounce(onChange, WATCH_DEBOUNCE_MS)
 
   const onRouteFileChange = (filePath: string) => {
     if (!filePath.endsWith('.tsx')) return
     if (!isPathRelativeTo(filePath, routesPath)) return
-
-    clearTimeout(debounceTimer)
-    debounceTimer = setTimeout(onChange, WATCH_DEBOUNCE_MS)
+    scheduleChange()
   }
   server.watcher.on('add', onRouteFileChange)
   server.watcher.on('unlink', onRouteFileChange)
