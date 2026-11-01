@@ -1,14 +1,15 @@
-import type { Plugin } from 'vite'
+import type { Plugin, ViteDevServer } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { globSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, relative, sep } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { stripRegion } from '@/lib/strip-regions'
-import { watchRouteFiles } from '@/lib/watch-route-files'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
+
+const WATCH_DEBOUNCE_MS = 150
 
 /** Lists each role's currently-matching route file paths, without loading
  *  them - just a fresh-off-disk directory scan.
@@ -25,6 +26,38 @@ function globRoutePaths(projectDir: string, routesDir: string) {
     error: glob('**/error.tsx'),
     default: glob('**/default.tsx'),
   }
+}
+
+/** Checks whether a path is equal to or contained within a base path.
+ *  @param path - The path to check.
+ *  @param base - The base path.
+ *  @returns Whether the path is relative to the base path. */
+function isPathRelativeTo(path: string, base: string): boolean {
+  const relativePath = relative(base, path)
+  return relativePath !== '..' && !relativePath.startsWith(`..${sep}`)
+}
+
+/** Watches for route `.tsx` files being added or removed under `routesDir`,
+ *  debounced into a single call per batch of changes - a multi-file change
+ *  (a git checkout, a directory delete) would otherwise trigger the callback
+ *  once per file instead of once for the whole batch.
+ *
+ *  @param server - The dev server whose watcher to listen on.
+ *  @param routesDir - App route directory relative to the project directory.
+ *  @param onChange - Called once, after 150ms of no further route file changes. */
+function watchRouteFiles(server: ViteDevServer, routesDir: string, onChange: () => void): void {
+  const routesPath = join(server.config.root, routesDir)
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+  const onRouteFileChange = (filePath: string) => {
+    if (!filePath.endsWith('.tsx')) return
+    if (!isPathRelativeTo(filePath, routesPath)) return
+
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(onChange, WATCH_DEBOUNCE_MS)
+  }
+  server.watcher.on('add', onRouteFileChange)
+  server.watcher.on('unlink', onRouteFileChange)
 }
 
 /**
