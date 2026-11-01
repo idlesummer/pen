@@ -1,13 +1,31 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
+import { globSync } from 'node:fs'
+import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
-import { globRoutePaths } from '@/lib/glob-route-paths'
 import { stripRegion } from '@/lib/strip-regions'
 import { watchRouteFiles } from '@/lib/watch-route-files'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
+
+/** Lists each role's currently-matching route file paths, without loading
+ *  them - just a fresh-off-disk directory scan.
+ *
+ *  @param projectDir - Project directory containing the app directory.
+ *  @param routesDir - App route directory relative to the project directory. */
+function globRoutePaths(projectDir: string, routesDir: string) {
+  const cwd = join(projectDir, routesDir)
+  const glob = (pattern: string) => globSync(pattern, { cwd }).sort()
+  return {
+    page: glob('**/page.tsx'),
+    layout: glob('**/layout.tsx'),
+    loading: glob('**/loading.tsx'),
+    error: glob('**/error.tsx'),
+    default: glob('**/default.tsx'),
+  }
+}
 
 /**
  * Loads the virtual entry module, which validates the app's routes itself
