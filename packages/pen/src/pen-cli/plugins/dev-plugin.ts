@@ -1,4 +1,4 @@
-import type { Plugin, ViteDevServer } from 'vite'
+import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { globSync } from 'node:fs'
 import { join } from 'node:path'
@@ -28,25 +28,6 @@ function globRoutePaths(projectDir: string, routesDir: string) {
     error: glob('**/error.tsx'),
     default: glob('**/default.tsx'),
   }
-}
-
-/** Watches for route `.tsx` files being added or removed under `routesDir`,
- *  debounced into a single call per batch of changes - a multi-file change
- *  (a git checkout, a directory delete) would otherwise trigger the callback
- *  once per file instead of once for the whole batch.
- *
- *  @param server - The dev server whose watcher to listen on.
- *  @param appDir - App route directory relative to the project directory.
- *  @param onChange - Called once, after 150ms of no further route file changes. */
-function watchRouteFiles(server: ViteDevServer, appDir: string, onChange: () => void): void {
-  const appDirAbsolute = join(server.config.root, appDir)
-  const scheduleChange = debounce(onChange, WATCH_DEBOUNCE_MS)
-  const onRouteFileChange = (filePath: string) => {
-    if (filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute))
-      scheduleChange()
-  }
-  server.watcher.on('add', onRouteFileChange)
-  server.watcher.on('unlink', onRouteFileChange)
 }
 
 /**
@@ -114,6 +95,10 @@ export function penDev(options: PluginOptions): Plugin {
     // routes once, when it starts, and never re-imports itself afterward,
     // so its component matcher would otherwise go stale as files change.
     //
+    // Debounced into a single call per batch of changes - a multi-file
+    // change (a git checkout, a directory delete) would otherwise trigger
+    // this once per file instead of once for the whole batch.
+    //
     // Only sends paths, not loaded modules: loading them here would go
     // through this plugin's own `server.ssrLoadModule`, a separate runtime
     // from the `ServerModuleRunner` actually running the live Ink session -
@@ -122,7 +107,8 @@ export function penDev(options: PluginOptions): Plugin {
     // app. The entry module loads these paths itself once it receives them,
     // through its own runtime, keeping shared dependencies consistent.
     configureServer(server) {
-      watchRouteFiles(server, options.routesDir, () => {
+      const routesPathAbsolute = join(server.config.root, options.routesDir)
+      const scheduleChange = debounce(() => {
         try {
           const paths = globRoutePaths(server.config.root, options.routesDir)
           server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT, paths)
@@ -130,7 +116,14 @@ export function penDev(options: PluginOptions): Plugin {
         catch (err) {
           log.error(String(err))
         }
-      })
+      }, WATCH_DEBOUNCE_MS)
+
+      const onRouteFileChange = (filePath: string) => {
+        if (filePath.endsWith('.tsx') && isPathInside(filePath, routesPathAbsolute))
+          scheduleChange()
+      }
+      server.watcher.on('add', onRouteFileChange)
+      server.watcher.on('unlink', onRouteFileChange)
     },
     // Just announces the server is up - the entry module validates routes
     // and reports its own failures once it actually loads, a step later.
