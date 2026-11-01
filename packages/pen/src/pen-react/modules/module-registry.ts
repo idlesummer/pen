@@ -3,6 +3,17 @@ import type { ModuleRole } from '@/pen-core'
 /** Raw glob entries grouped by route module role, keyed by file path. */
 export type ModuleRegistry = Record<ModuleRole, Record<string, unknown>>
 
+/** Dynamically imports each path, relative to appDir, and returns the
+ *  loaded modules keyed by their path.
+ *
+ *  @param appDir - Directory the paths are resolved within.
+ *  @param paths - File paths to import, relative to appDir.
+ */
+export async function loadModules(appDir: string, paths: string[]): Promise<ModuleRegistry[ModuleRole]> {
+  const entries = paths.map(async path => [path, await import(/* @vite-ignore */ `/${appDir}/${path}`)] as const)
+  return Object.fromEntries(await Promise.all(entries))
+}
+
 /** Waits on each role's already-started load and assembles the results into
  *  a ModuleRegistry. Agnostic to how a role actually gets loaded - the
  *  caller starts each promise however it needs to (a glob pattern loaded
