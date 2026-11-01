@@ -42,7 +42,7 @@ function watchRouteFiles(server: ViteDevServer, appDir: string, onChange: () => 
   const appDirAbsolute = join(server.config.root, appDir)
   const scheduleChange = debounce(onChange, WATCH_DEBOUNCE_MS)
   const onRouteFileChange = (filePath: string) => {
-    if (filePath.endsWith('.tsx') && isPathInside(appDirAbsolute, filePath))
+    if (filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute))
       scheduleChange()
   }
   server.watcher.on('add', onRouteFileChange)
