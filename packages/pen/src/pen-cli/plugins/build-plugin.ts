@@ -5,12 +5,7 @@ import { stripRegion } from '@/lib/strip-regions'
 import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 
-/** Bundles the app's entry module for Node.
- *
- *  Runs only in the SSR environment. `options.config` is read lazily
- *  inside `load()` rather than destructured here, since pen:config's
- *  `config` hook replaces it with the real settings sometime after this
- *  factory itself is called. */
+/** Bundles the app's entry module for Node. */
 export function penBuild(options: PluginOptions): Plugin {
   return {
     name: 'pen:build',
