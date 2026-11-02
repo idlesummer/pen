@@ -1,46 +1,26 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
-import { glob } from 'node:fs/promises'
 import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
 import { stripRegion } from '@/lib/strip-regions'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INITIAL_PATHS_TOKEN, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 
 const WATCH_DEBOUNCE_MS = 150
 
-/** Lists each role's currently-matching route file paths, without loading
- *  them - just a fresh-off-disk directory scan.
- *
- *  @param projectDir - Project directory containing the app directory.
- *  @param appDir - App route directory relative to the project directory.
- */
-async function globRoutePaths(projectDir: string, appDir: string) {
-  const options = { cwd: join(projectDir, appDir) }
-  const [page, layout, loading, error, _default] = await Promise.all([
-    Array.fromAsync(glob('**/page.tsx', options)).then(paths => paths.sort()),
-    Array.fromAsync(glob('**/layout.tsx', options)).then(paths => paths.sort()),
-    Array.fromAsync(glob('**/loading.tsx', options)).then(paths => paths.sort()),
-    Array.fromAsync(glob('**/error.tsx', options)).then(paths => paths.sort()),
-    Array.fromAsync(glob('**/default.tsx', options)).then(paths => paths.sort()),
-  ])
-  return { page, layout, loading, error, default: _default }
-}
-
 /**
  * Loads the virtual entry module, which validates the app's routes itself
  * on its first load and renders the dev server's live Ink UI.
  *
- * Runs only in the SSR environment. The entry module validates and fails
- * fast on a bad route before it ever renders (see entry-app.dev.tsx.txt) -
- * this plugin doesn't validate anything itself, it just announces the
- * server is up. Later route changes go through the same entry module's
- * own ROUTES_CHANGED_EVENT handler, reusing the registry it already loads
- * to re-render with.
+ * Runs only in the SSR environment. The entry module globs, loads, and
+ * validates its own routes (see entry-app.dev.tsx.txt) - this plugin
+ * doesn't touch the route tree at all, it just announces the server is up
+ * and tells the entry module when to redo that work. Later route changes
+ * go through the same entry module's own ROUTES_CHANGED_EVENT handler.
  *
  * `perEnvironmentStartEndDuringDev` is needed because Vite otherwise only
  * invokes `buildStart` for the client environment during development.
@@ -69,9 +49,6 @@ export function penDev(options: PluginOptions): Plugin {
     // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const projectDir = this.environment.config.root
-        const initialPaths = await globRoutePaths(projectDir, options.appDir)
-
         // appDir is JSON-quoted here (unlike build-plugin's own raw
         // substitution of the same token) since it becomes a real `const
         // appDir = ...` the entry template passes around as a value, not
@@ -79,7 +56,6 @@ export function penDev(options: PluginOptions): Plugin {
         const source = stripRegion(entryAppTemplate, 'codegen')
           .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.appDir))
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
-          .replaceAll(INITIAL_PATHS_TOKEN, JSON.stringify(initialPaths))
 
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
@@ -100,23 +76,17 @@ export function penDev(options: PluginOptions): Plugin {
     // change (a git checkout, a directory delete) would otherwise trigger
     // this once per file instead of once for the whole batch.
     //
-    // Only sends paths, not loaded modules: loading them here would go
-    // through this plugin's own `server.ssrLoadModule`, a separate runtime
-    // from the `ServerModuleRunner` actually running the live Ink session -
-    // modules loaded through the wrong one are distinct instances, breaking
-    // identity-sensitive state like React context shared with the running
-    // app. The entry module loads these paths itself once it receives them,
-    // through its own runtime, keeping shared dependencies consistent.
+    // Sends a bare event, nothing else - the entry module re-globs and
+    // reloads everything itself on receipt. Doing that here instead would
+    // go through this plugin's own `server.ssrLoadModule`, a separate
+    // runtime from the `ServerModuleRunner` actually running the live Ink
+    // session - modules loaded through the wrong one are distinct
+    // instances, breaking identity-sensitive state like React context
+    // shared with the running app.
     configureServer(server) {
       const appDirAbsolute = join(server.config.root, options.appDir)
-      const scheduleChange = debounce(async () => {
-        try {
-          const paths = await globRoutePaths(server.config.root, options.appDir)
-          server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT, paths)
-        }
-        catch (err) {
-          log.error(String(err))
-        }
+      const scheduleChange = debounce(() => {
+        server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT)
       }, WATCH_DEBOUNCE_MS)
 
       const onRouteFileChange = (filePath: string) => {

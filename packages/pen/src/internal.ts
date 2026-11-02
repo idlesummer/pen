@@ -14,7 +14,7 @@ import { createRouteRenderer, ROUTES_CHANGED_EVENT, type RouteRendererStore } fr
 import { PenApp, PenDevApp } from './pen-react/view'
 
 export { createDiagnosticReport } from './pen-react/diagnostics'
-export { createModuleRegistry, loadModules } from './pen-react/modules'
+export { globModuleRegistry } from './pen-react/modules'
 export { createRouteRendererStore } from './pen-react/renderer'
 export { PenApp, PenDevApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
 export type { RouteRendererStore }
