@@ -1,18 +1,13 @@
 import type { Plugin } from 'vite'
-import type { PenConfig } from '@/pen-cli/config'
+import type { BuildPluginOptions } from './index'
 import { PACKAGE_NAME } from '@/constants'
 import { stripRegion } from '@/lib/strip-regions'
 import { ENTRY_FILE } from '@/pen-cli/constants'
 import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/entry-module'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 
-type Options = {
-  appDir: string
-  config: PenConfig
-}
-
 /** Bundles the app's entry module for Node. */
-export function penBuild({ appDir, config }: Options): Plugin {
+export function penBuild({ appDir, config }: BuildPluginOptions): Plugin {
   return {
     name: 'pen:build',
 

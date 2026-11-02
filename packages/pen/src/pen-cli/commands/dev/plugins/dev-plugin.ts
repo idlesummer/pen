@@ -1,5 +1,5 @@
 import type { Plugin, ViteDevServer } from 'vite'
-import type { PenConfig } from '@/pen-cli/config'
+import type { DevPluginOptions } from './index'
 import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
@@ -13,14 +13,8 @@ import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 't
 /** Delay after the last file change before triggering a reload, in milliseconds. */
 const DEBOUNCE_MS = 150
 
-type Options = {
-  appDir: string
-  startTime: number
-  config: PenConfig
-}
-
 /** Loads the dev entry module and notifies it of route changes. */
-export function penDev({ appDir, startTime, config }: Options): Plugin {
+export function penDev({ appDir, startTime, config }: DevPluginOptions): Plugin {
   return {
     name: 'pen:dev',
     perEnvironmentStartEndDuringDev: true,

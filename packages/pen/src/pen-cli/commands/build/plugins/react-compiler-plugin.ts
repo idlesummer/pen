@@ -1,13 +1,9 @@
 import type { Plugin } from 'vite'
-import type { PenConfig } from '@/pen-cli/config'
+import type { BuildPluginOptions } from './index'
 import { transform } from 'oxc-transform-react'
 
-type Options = {
-  config: PenConfig
-}
-
 /** Runs React Compiler over app components during `pen build`. */
-export function penReactCompiler({ config }: Options): Plugin {
+export function penReactCompiler({ config }: BuildPluginOptions): Plugin {
   return {
     name: 'pen:react-compiler',
     enforce: 'pre',
