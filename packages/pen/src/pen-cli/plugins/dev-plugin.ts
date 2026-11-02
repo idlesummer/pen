@@ -19,14 +19,13 @@ const WATCH_DEBOUNCE_MS = 150
  *  @param projectDir - Project directory containing the app directory.
  *  @param routesDir - App route directory relative to the project directory. */
 function globRoutePaths(projectDir: string, routesDir: string) {
-  const cwd = join(projectDir, routesDir)
-  const glob = (pattern: string) => globSync(pattern, { cwd }).sort()
+  const options = { cwd: join(projectDir, routesDir) }
   return {
-    page: glob('**/page.tsx'),
-    layout: glob('**/layout.tsx'),
-    loading: glob('**/loading.tsx'),
-    error: glob('**/error.tsx'),
-    default: glob('**/default.tsx'),
+    page: globSync('**/page.tsx', options).sort(),
+    layout: globSync('**/layout.tsx', options).sort(),
+    loading: globSync('**/loading.tsx', options).sort(),
+    error: globSync('**/error.tsx', options).sort(),
+    default: globSync('**/default.tsx', options).sort(),
   }
 }
 
