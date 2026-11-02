@@ -1,3 +1,6 @@
+/** The shape of an ES module namespace object. */
+export type ModuleNamespace = Record<string, unknown>
+
 /** The shape of an ES module namespace object that has a default export. */
 export type Module<T = unknown> = {
   default: T
