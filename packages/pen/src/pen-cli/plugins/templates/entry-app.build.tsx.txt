@@ -3,6 +3,7 @@
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 // #endregion
 
+import type { ModuleRegistry } from '@idlesummer/pen/internal'
 import { render } from 'ink'
 import { PenApp, createRouteRenderer } from '@idlesummer/pen/internal'
 
@@ -11,7 +12,7 @@ import { PenApp, createRouteRenderer } from '@idlesummer/pen/internal'
 // ─────────────────────────────────────────────────────────────────────────
 
 // Step 1: Load and validate the routes with Vite's builtin glob `import.meta.glob`
-const moduleRegistry = {  // `import.meta.glob` needs literal arguments
+const moduleRegistry: ModuleRegistry = {  // `import.meta.glob` needs literal arguments
   page:     import.meta.glob('./**/page.tsx',    { base: './__PEN_APP_DIR__', eager: true }),
   layout:   import.meta.glob('./**/layout.tsx',  { base: './__PEN_APP_DIR__', eager: true }),
   loading:  import.meta.glob('./**/loading.tsx', { base: './__PEN_APP_DIR__', eager: true }),
