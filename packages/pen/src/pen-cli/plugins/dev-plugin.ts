@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
-import { globSync } from 'node:fs'
+import { glob } from 'node:fs/promises'
 import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
@@ -17,16 +17,18 @@ const WATCH_DEBOUNCE_MS = 150
  *  them - just a fresh-off-disk directory scan.
  *
  *  @param projectDir - Project directory containing the app directory.
- *  @param routesDir - App route directory relative to the project directory. */
-function globRoutePaths(projectDir: string, routesDir: string) {
-  const options = { cwd: join(projectDir, routesDir) }
-  return {
-    page: globSync('**/page.tsx', options).sort(),
-    layout: globSync('**/layout.tsx', options).sort(),
-    loading: globSync('**/loading.tsx', options).sort(),
-    error: globSync('**/error.tsx', options).sort(),
-    default: globSync('**/default.tsx', options).sort(),
-  }
+ *  @param routesDir - App route directory relative to the project directory.
+ */
+async function globRoutePaths(projectDir: string, appDir: string) {
+  const options = { cwd: join(projectDir, appDir) }
+  const [page, layout, loading, error, _default] = await Promise.all([
+    Array.fromAsync(glob('**/page.tsx', options)).then(paths => paths.sort()),
+    Array.fromAsync(glob('**/layout.tsx', options)).then(paths => paths.sort()),
+    Array.fromAsync(glob('**/loading.tsx', options)).then(paths => paths.sort()),
+    Array.fromAsync(glob('**/error.tsx', options)).then(paths => paths.sort()),
+    Array.fromAsync(glob('**/default.tsx', options)).then(paths => paths.sort()),
+  ])
+  return { page, layout, loading, error, default: _default }
 }
 
 /**
