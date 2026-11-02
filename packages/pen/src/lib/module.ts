@@ -43,8 +43,8 @@ function importModule(path: string): Promise<ModuleNamespace> {
  * @param moduleLoader - Function used to import each discovered module.
  */
 export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader=importModule): Promise<Record<string, ModuleNamespace>> {
-  const paths = await Array.fromAsync(glob(pattern, { cwd }))
-  const entriesPromises = paths.sort().map(async path => [path, await moduleLoader(join(cwd, path))] as const)
+  const paths = (await Array.fromAsync(glob(pattern, { cwd }))).sort()
+  const entriesPromises = paths.map(async path => [path, await moduleLoader(join(cwd, path))] as const)
   const entries = await Promise.all(entriesPromises)
   return Object.fromEntries(entries)
 }
