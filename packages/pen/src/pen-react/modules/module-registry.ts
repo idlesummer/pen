@@ -1,7 +1,6 @@
-import type { ModuleNamespace } from '@/lib/module'
+import { globModules, type ModuleLoader } from '@/lib/module'
 import type { ModuleRole } from '@/pen-core'
 import { glob } from 'node:fs/promises'
-import { join } from 'node:path'
 
 /** Raw glob entries grouped by route module role, keyed by file path. */
 export type ModuleRegistry = Record<ModuleRole, Record<string, unknown>>
@@ -54,21 +53,6 @@ export async function createModuleRegistryFromGlob(appDir: string): Promise<Modu
     error: loadRole('**/error.tsx'),
     default: loadRole('**/default.tsx'),
   })
-}
-
-export type ModuleLoader = (filePath: string) => Promise<ModuleNamespace>
-
-/** Discovers and loads modules matching a glob pattern.
- *
- * @param cwd - Directory to search within.
- * @param pattern - Glob pattern used to discover modules.
- * @param moduleLoader - Function used to import each discovered module.
- */
-export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader): Promise<Record<string, ModuleNamespace>> {
-  const matchedPaths = (await Array.fromAsync(glob(pattern, { cwd }))).sort()
-  const entriesPromises = matchedPaths.map(async path => [path, await moduleLoader(join(cwd, path))] as const)
-  const entries = await Promise.all(entriesPromises)
-  return Object.fromEntries(entries)
 }
 
 export async function _createModuleRegistry(appDir: string, moduleLoader: ModuleLoader): Promise<ModuleRegistry> {
