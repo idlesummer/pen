@@ -2,15 +2,7 @@ import type { Plugin } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { transform } from 'oxc-transform-react'
 
-/** Runs React Compiler over the app's component modules during `pen build`,
- *  when `options.config.reactCompiler` is enabled.
- *
- *  Only intercepts a `.tsx` file once the compiler is actually on - with it
- *  off, the handler returns nothing so Rolldown's own default JSX/TS
- *  transform handles the file exactly as before, leaving the (default,
- *  compiler-off) build path unaffected.
- *
- *  No Fast Refresh here - that's a dev-only concept, see refresh-plugin.ts. */
+/** Runs React Compiler over app components during `pen build`. */
 export function penReactCompiler(options: PluginOptions): Plugin {
   return {
     name: 'pen:react-compiler',
