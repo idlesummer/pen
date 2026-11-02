@@ -10,7 +10,7 @@ import { render } from 'ink'
 import {
   PenDevApp,
   createRouteRendererStore,
-  ROUTES_CHANGED_EVENT,
+  PEN_ROUTES_CHANGED_EVENT,
   createRouteRenderer,
   createDiagnosticReport,
   createModuleRegistry,
@@ -44,7 +44,7 @@ if (!moduleRegistry)
 const rendererStore = createRouteRendererStore(moduleRegistry)
 
 // Step 3: Register the HMR listener
-import.meta.hot?.on(ROUTES_CHANGED_EVENT, async () => {
+import.meta.hot?.on(PEN_ROUTES_CHANGED_EVENT, async () => {
   try {
     const moduleRegistry = await createAndValidateModuleRegistry(__PEN_APP_DIR__)
     if (!moduleRegistry)  // keep rendering with the previous state
