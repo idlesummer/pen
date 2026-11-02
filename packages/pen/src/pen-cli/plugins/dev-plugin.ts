@@ -85,14 +85,6 @@ export function penDev(options: PluginOptions): Plugin {
     // shared with the running app.
     configureServer(server) {
       const appDirAbsolute = join(server.config.root, options.appDir)
-      const scheduleChange = debounce(async () => {
-        try {
-          const paths = await createPathRegistry(server.config.root, options.appDir)
-          server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT, paths)
-        }
-        catch (err) {
-          log.error(String(err))
-        }
       const scheduleChange = debounce(() => {
         server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT)
       }, WATCH_DEBOUNCE_MS)
