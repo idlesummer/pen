@@ -7,17 +7,13 @@ import { createServer, normalizePath } from 'vite'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
 import { createModuleRegistry } from '@/pen-react/modules'
 
-/** Discovers and validates the app's routes before typechecking and bundling.
+/** Discovers and validates routes before typechecking and bundling.
  *
- *  Runs only during `pen build`, in the SSR environment - `pen dev` does its
- *  own equivalent validation directly in dev-plugin.ts, reusing the dev
- *  server it already has instead of this plugin spinning up a throwaway one.
+ *  Runs only during `pen build` in the SSR environment. `pen dev` performs
+ *  its own validation using the existing dev server.
  *
- *  Marked `sequential` and ordered before `penTypecheck` so route errors
- *  fail fast before the more expensive `tsc` run.
- *
- *  `perEnvironmentStartEndDuringDev` is required because Vite otherwise only
- *  invokes `buildStart` for the client environment during development. */
+ *  Runs sequentially before `penTypecheck` to fail fast on route errors.
+ */
 export function penDiagnose({ appDir }: PluginOptions): Plugin {
   return {
     name: 'pen:diagnose',
@@ -41,7 +37,7 @@ export function penDiagnose({ appDir }: PluginOptions): Plugin {
           server: { middlewareMode: true },
         })
         try {
-          const moduleLoader: ModuleLoader = path => server.ssrLoadModule(`/${normalizePath(path)}`)
+          const moduleLoader: ModuleLoader = (path) => server.ssrLoadModule(`/${normalizePath(path)}`)
           const moduleRegistry = await createModuleRegistry(appDir, moduleLoader)
           const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
 
