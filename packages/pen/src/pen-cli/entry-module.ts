@@ -25,7 +25,7 @@ export function resolveEntryModuleId(id: string): string | undefined {
  *  position (dev, a variable declaration), raw where it sits inside a
  *  string the template already quotes (build, an `import.meta.glob` base
  *  path). */
-export function substituteEntryTemplate(template: string, appDirLiteral: string, ink: InkRenderOptions | undefined): string {
+export function substituteEntryTemplate(template: string, appDirLiteral: string, ink?: InkRenderOptions): string {
   return stripRegion(template, 'codegen')
     .replaceAll(APP_DIR_TOKEN, appDirLiteral)
     .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(ink))
