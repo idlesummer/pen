@@ -11,8 +11,7 @@ export type PenConfig = {
   ink?: InkRenderOptions
 }
 
-/** Defaults applied when the project's config omits them, and the initial
- *  value of `PluginOptions.config` before `pen:config`'s hook replaces it. */
+/** Defaults applied when the project's config omits them. */
 export const DEFAULT_PEN_CONFIG: PenConfig = {
   reactCompiler: false,
   ink: {

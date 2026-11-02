@@ -1,12 +1,18 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './types/plugin-options'
+import type { PenConfig } from '@/pen-cli/config'
 import { PACKAGE_NAME } from '@/constants'
 import { stripRegion } from '@/lib/strip-regions'
-import { APP_DIR_TOKEN, ENTRY_FILE, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import { ENTRY_FILE } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/entry-module'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 
+type Options = {
+  appDir: string
+  config: PenConfig
+}
+
 /** Bundles the app's entry module for Node. */
-export function penBuild(options: PluginOptions): Plugin {
+export function penBuild({ appDir, config }: Options): Plugin {
   return {
     name: 'pen:build',
 
@@ -39,8 +45,8 @@ export function penBuild(options: PluginOptions): Plugin {
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return stripRegion(entryAppTemplate, 'codegen')
-          .replaceAll(APP_DIR_TOKEN, options.appDir)
-          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
+          .replaceAll(APP_DIR_TOKEN, appDir)
+          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(config.ink))
     },
   }
 }

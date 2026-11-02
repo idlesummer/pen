@@ -1,11 +1,10 @@
-import type { PluginOptions } from '@/pen-cli/plugins'
 import { createServer } from 'vite'
 import { PEN_VERSION } from '@/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
-import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
+import { loadPenConfig } from '@/pen-cli/config'
 import { createPenLogger } from '@/pen-cli/logger/adapter'
 import * as log from '@/pen-cli/logger/console'
-import { penConfig, penDev, penRefresh } from '@/pen-cli/plugins'
+import { penDevPlugins } from './plugins'
 
 /** Creates a Vite dev server configured with the `pen` plugin, ready to
  *  serve the app's SSR environment.
@@ -15,7 +14,7 @@ import { penConfig, penDev, penRefresh } from '@/pen-cli/plugins'
  *  through a module runner instead.
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root. */
-export function createPenDevServer(srcDir: string) {
+export async function createPenDevServer(srcDir: string) {
   log.banner(`pen v${PEN_VERSION}`)
 
   const projectDir = findPackageDir(process.cwd())
@@ -25,18 +24,14 @@ export function createPenDevServer(srcDir: string) {
   }
   const appDir = `${srcDir}/app`
   const startTime = Date.now()
-  const options: PluginOptions = { appDir, startTime, config: DEFAULT_PEN_CONFIG }
+  const config = await loadPenConfig(projectDir, 'serve')
 
   return createServer({
     root: projectDir,
     configFile: false,
     customLogger: createPenLogger(),
     clearScreen: false,  // Ink owns the terminal, not Vite
-    plugins: [
-      penConfig(options),
-      penDev(options),
-      penRefresh(options),
-    ],
+    plugins: penDevPlugins({ appDir, startTime, config }),
     server: {
       middlewareMode: true,  // don't open an HTTP server
       ws: false,  // no HMR socket; the ssr environment's HMR is in-process

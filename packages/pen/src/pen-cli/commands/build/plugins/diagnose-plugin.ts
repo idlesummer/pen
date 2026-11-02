@@ -1,11 +1,14 @@
 import type { Plugin } from 'vite'
 import type { ModuleLoader } from '@/lib/module'
-import type { PluginOptions } from './types/plugin-options'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { createServer, normalizePath } from 'vite'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
 import { createModuleRegistry } from '@/pen-react/modules'
+
+type Options = {
+  appDir: string
+}
 
 /** Discovers and validates routes before typechecking and bundling.
  *
@@ -14,7 +17,7 @@ import { createModuleRegistry } from '@/pen-react/modules'
  *
  *  Runs sequentially before `penTypecheck` to fail fast on route errors.
  */
-export function penDiagnose({ appDir }: PluginOptions): Plugin {
+export function penDiagnose({ appDir }: Options): Plugin {
   return {
     name: 'pen:diagnose',
     perEnvironmentStartEndDuringDev: true,

@@ -1,11 +1,10 @@
 import type { ViteBuilder } from 'vite'
-import type { PluginOptions } from '@/pen-cli/plugins'
 import { createBuilder } from 'vite'
 import { PEN_VERSION } from '@/constants'
 import { findPackageDir } from '@/lib/find-package-dir'
-import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
+import { loadPenConfig } from '@/pen-cli/config'
 import * as log from '@/pen-cli/logger/console'
-import { penBuild, penConfig, penDiagnose, penReactCompiler, penTypecheck } from '@/pen-cli/plugins'
+import { penBuildPlugins } from './plugins'
 
 /** Creates a Vite builder configured with the `pen` plugin, ready to build
  *  the app's SSR environment.
@@ -21,7 +20,7 @@ import { penBuild, penConfig, penDiagnose, penReactCompiler, penTypecheck } from
  *
  *  @param srcDir - Directory containing the app directory, relative to the project root.
  *  @param outDir - Build output directory relative to the project root. */
-export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBuilder> {
+export async function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBuilder> {
   log.banner(`pen v${PEN_VERSION}`)
 
   const projectDir = findPackageDir(process.cwd())
@@ -29,21 +28,13 @@ export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBu
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-  const options: PluginOptions = {
-    startTime: 0,
-    appDir: `${srcDir}/app`,
-    config: DEFAULT_PEN_CONFIG,
-  }
+  const appDir = `${srcDir}/app`
+  const config = await loadPenConfig(projectDir, 'build')
+
   return createBuilder({
     root: projectDir,
     configFile: false,
-    plugins: [
-      penConfig(options),
-      penDiagnose(options),
-      penTypecheck(),
-      penReactCompiler(options),
-      penBuild(options),
-    ],
+    plugins: penBuildPlugins({ appDir, config }),
     build: { outDir },
   })
 }
