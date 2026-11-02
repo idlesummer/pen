@@ -10,19 +10,10 @@ import * as log from '@/pen-cli/logger/console'
 import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 
-const WATCH_DEBOUNCE_MS = 150
+/** Delay after the last file change before triggering a reload, in milliseconds. */
+const DEBOUNCE_MS = 150
 
-/** Loads the virtual entry module and announces route changes to it.
- *
- *  Runs only in the SSR environment. The entry module handles route
- *  loading and validation; this plugin only triggers reloads.
- *
- *  `perEnvironmentStartEndDuringDev` ensures `buildStart` runs for
- *  the SSR environment during development.
- *
- *  `options.config` is read lazily because `pen:config` replaces it
- *  with the resolved settings after this factory is called.
- */
+/** Loads the dev entry module and notifies it of route changes. */
 export function penDev(options: PluginOptions): Plugin {
   return {
     name: 'pen:dev',
@@ -55,10 +46,8 @@ export function penDev(options: PluginOptions): Plugin {
     // Starts the dev server
     configureServer(server: ViteDevServer) {
       const appDirAbsolute = join(server.config.root, options.appDir)
-      const scheduleChange = debounce(() => {
-        server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT)
-      }, WATCH_DEBOUNCE_MS)
-
+      const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
+      const scheduleChange = debounce(() => ssrEnvironment.hot.send(ROUTES_CHANGED_EVENT), DEBOUNCE_MS)
       const onRouteFileChange = (filePath: string) => {
         if (filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute))
           scheduleChange()
