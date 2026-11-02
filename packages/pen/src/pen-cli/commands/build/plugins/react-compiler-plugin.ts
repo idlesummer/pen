@@ -1,9 +1,13 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './types/plugin-options'
+import type { PenConfig } from '@/pen-cli/config'
 import { transform } from 'oxc-transform-react'
 
+type Options = {
+  config: PenConfig
+}
+
 /** Runs React Compiler over app components during `pen build`. */
-export function penReactCompiler(options: PluginOptions): Plugin {
+export function penReactCompiler({ config }: Options): Plugin {
   return {
     name: 'pen:react-compiler',
     enforce: 'pre',
@@ -21,7 +25,7 @@ export function penReactCompiler(options: PluginOptions): Plugin {
         },
       },
       async handler(code, id) {
-        if (!options.config.reactCompiler) // let Rolldown's own default transform handle it
+        if (!config.reactCompiler) // let Rolldown's own default transform handle it
           return
         const filename = id.split('?')[0]!
         const transformed = await transform(filename, code, {

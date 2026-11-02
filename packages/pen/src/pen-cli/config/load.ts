@@ -1,9 +1,9 @@
-import type { PenConfig } from '@/pen-cli/config'
+import type { PenConfig } from './schema'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { loadConfigFromFile, mergeConfig } from 'vite'
-import { DEFAULT_PEN_CONFIG } from '@/pen-cli/config'
 import * as log from '@/pen-cli/logger/console'
+import { DEFAULT_PEN_CONFIG } from './schema'
 
 /** Project config filename. */
 const CONFIG_FILENAME = 'pen.config.ts'

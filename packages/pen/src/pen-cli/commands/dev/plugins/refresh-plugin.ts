@@ -1,14 +1,16 @@
 import type { Plugin } from 'vite'
-import type { PluginOptions } from './types/plugin-options'
-import { installRefreshRuntime, transformInkComponent } from '@/pen-cli/refresh'
+import type { PenConfig } from '@/pen-cli/config'
+import { installRefreshRuntime, transformInkComponent } from './refresh'
+
+type Options = {
+  config: PenConfig
+}
 
 /** Enables React Fast Refresh for Ink during development.
  *
- *  Also enables React Compiler when `options.config.reactCompiler` is set.
- *  Reads it lazily since pen:config's hook replaces `options.config` with
- *  the real settings sometime after this factory itself is called.
+ *  Also enables React Compiler when `config.reactCompiler` is set.
  *  Used for dev only, not used during builds. */
-export function penRefresh(options: PluginOptions): Plugin {
+export function penRefresh({ config }: Options): Plugin {
   return {
     name: 'pen:refresh',
     enforce: 'pre',
@@ -34,7 +36,7 @@ export function penRefresh(options: PluginOptions): Plugin {
       async handler(code, id) {
         const filename = id.split('?')[0]!
         const transformed = await transformInkComponent(filename, code, {
-          reactCompiler: options.config.reactCompiler,
+          reactCompiler: config.reactCompiler,
           refresh: true,
         })
         if (transformed.fatal)

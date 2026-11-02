@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty'
 import { createServerModuleRunner } from 'vite'
-import { ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import { ENTRY_MODULE_ID } from '@/pen-cli/entry-module'
 import * as log from '@/pen-cli/logger/console'
 import { createPenDevServer } from './create-dev-server'
 
