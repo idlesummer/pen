@@ -19,7 +19,7 @@ import {
 
 /** Creates a module registry and validates its routes. */
 async function createAndValidateModuleRegistry(appDir: string) {
-  const moduleLoader: ModuleLoader = path => import(/* @vite-ignore */ pathToFileURL(path).href)
+  const moduleLoader: ModuleLoader = (path) => import(/* @vite-ignore */ pathToFileURL(path).href)
   const moduleRegistry = await createModuleRegistry(appDir, moduleLoader)
   const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
 
