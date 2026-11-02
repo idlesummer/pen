@@ -10,6 +10,12 @@ import { error, event, warn } from './console'
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
 
+// Not a Vite-internal message - pen:dev-entry routes its own file-watcher
+// events through server.config.logger (the same Logger instance this
+// adapter returns), so every dev-time terminal line, pen's own or Vite's,
+// decides how it looks in exactly one place.
+const FILE_WATCH = /^file (add|unlink) (.+)$/
+
 /**
  * Adapts Vite's logger to pen's terminal output.
  *
@@ -34,6 +40,10 @@ export function createPenLogger(): Logger {
       if ((match = strippedMessage.match(HMR_UPDATE))) {
         const path = match[1]!
         return event(`Updated ${pc.dim(path)}`)
+      }
+      if ((match = strippedMessage.match(FILE_WATCH))) {
+        const [, kind, path] = match
+        return event(`${kind === 'add' ? 'Added' : 'Removed'} ${pc.dim(path!)}`)
       }
       // Anything else Vite's own logger emits is internal noise pen's
       // dev output doesn't show - dropped rather than printed as-is.
