@@ -42,12 +42,13 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       const appDirAbsolute = join(server.config.root, appDir)
       const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
       const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), DEBOUNCE_MS)
-      const onRouteFileChange = (filePath: string) => {
-        if (filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute))
-          scheduleChange()
+      const onRouteFileChange = (event: 'add' | 'unlink', filePath: string) => {
+        if (!filePath.endsWith('.tsx') || !isPathInside(filePath, appDirAbsolute)) return
+        server.config.logger.info(`file ${event} ${filePath}`)
+        scheduleChange()
       }
-      server.watcher.on('add', onRouteFileChange)
-      server.watcher.on('unlink', onRouteFileChange)
+      server.watcher.on('add', path => onRouteFileChange('add', path))
+      server.watcher.on('unlink', path => onRouteFileChange('unlink', path))
     },
     buildStart() {
       log.ready(`ready in ${Date.now() - startTime}ms`)
