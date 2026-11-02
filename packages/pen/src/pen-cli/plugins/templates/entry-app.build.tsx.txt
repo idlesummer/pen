@@ -10,8 +10,8 @@ import { PenApp, createRouteRenderer } from '@idlesummer/pen/internal'
 // Main entry point
 // ─────────────────────────────────────────────────────────────────────────
 
-// Vite's `import.meta.glob` needs literal arguments
-const moduleRegistry = {
+// Step 1: Load and validate the routes with Vite's builtin glob `import.meta.glob`
+const moduleRegistry = {  // `import.meta.glob` needs literal arguments
   page:     import.meta.glob('./**/page.tsx',    { base: './__PEN_APP_DIR__', eager: true }),
   layout:   import.meta.glob('./**/layout.tsx',  { base: './__PEN_APP_DIR__', eager: true }),
   loading:  import.meta.glob('./**/loading.tsx', { base: './__PEN_APP_DIR__', eager: true }),
@@ -19,6 +19,7 @@ const moduleRegistry = {
   default:  import.meta.glob('./**/default.tsx', { base: './__PEN_APP_DIR__', eager: true }),
 }
 
+// Step 2: Start the app and wait for it to exit
 const routeRenderer = createRouteRenderer(moduleRegistry)
 const { waitUntilExit } = render(<PenApp routeRenderer={routeRenderer} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
