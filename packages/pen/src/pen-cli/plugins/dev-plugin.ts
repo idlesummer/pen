@@ -5,9 +5,8 @@ import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
 import { stripRegion } from '@/lib/strip-regions'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, PEN_ROUTES_CHANGED_EVENT, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
-import { ROUTES_CHANGED_EVENT } from '@/pen-react/renderer'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 
 /** Delay after the last file change before triggering a reload, in milliseconds. */
@@ -47,7 +46,7 @@ export function penDev(options: PluginOptions): Plugin {
     configureServer(server: ViteDevServer) {
       const appDirAbsolute = join(server.config.root, options.appDir)
       const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
-      const scheduleChange = debounce(() => ssrEnvironment.hot.send(ROUTES_CHANGED_EVENT), DEBOUNCE_MS)
+      const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), DEBOUNCE_MS)
       const onRouteFileChange = (filePath: string) => {
         if (filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute))
           scheduleChange()
