@@ -17,14 +17,12 @@ export default defineConfig(
       tseslint.configs.recommended,
       eslintReact.configs['recommended-typescript'],
     ],
-
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         projectService: true,
       },
     },
-
     rules: {
       '@eslint-react/no-missing-key': 'warn',
       // bans <Foo>x casts in favor of x as Foo, which doesn't collide with JSX
