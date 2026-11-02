@@ -18,7 +18,7 @@ import {
 } from '@idlesummer/pen/internal'
 
 
-async function createModuleRegistryAndValidate(appDir: string) {
+async function createAndValidateModuleRegistry(appDir: string) {
   const moduleLoader: ModuleLoader = path => import(/* @vite-ignore */ pathToFileURL(path).href)
   const moduleRegistry = await _createModuleRegistry(appDir, moduleLoader)
   const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
@@ -35,7 +35,7 @@ async function createModuleRegistryAndValidate(appDir: string) {
 // Main entry point
 // ─────────────────────────────────────────────────────────────────────────
 
-const moduleRegistry = await createModuleRegistryAndValidate(__PEN_APP_DIR__)
+const moduleRegistry = await createAndValidateModuleRegistry(__PEN_APP_DIR__)
 if (!moduleRegistry)
   process.exit(1)
 
@@ -44,7 +44,7 @@ const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __
 
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async () => {
   try {
-    const moduleRegistry = await createModuleRegistryAndValidate(__PEN_APP_DIR__)
+    const moduleRegistry = await createAndValidateModuleRegistry(__PEN_APP_DIR__)
     if (!moduleRegistry)  // keep rendering with the previous state
       return
     else  // updating the store lets React handle rerendering
