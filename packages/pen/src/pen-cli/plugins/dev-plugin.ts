@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite'
+import type { Plugin, ViteDevServer } from 'vite'
 import type { PluginOptions } from './types/plugin-options'
 import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
@@ -12,22 +12,16 @@ import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 't
 
 const WATCH_DEBOUNCE_MS = 150
 
-/**
- * Loads the virtual entry module, which validates the app's routes itself
- * on its first load and renders the dev server's live Ink UI.
+/** Loads the virtual entry module and announces route changes to it.
  *
- * Runs only in the SSR environment. The entry module globs, loads, and
- * validates its own routes (see entry-app.dev.tsx.txt) - this plugin
- * doesn't touch the route tree at all, it just announces the server is up
- * and tells the entry module when to redo that work. Later route changes
- * go through the same entry module's own ROUTES_CHANGED_EVENT handler.
+ *  Runs only in the SSR environment. The entry module handles route
+ *  loading and validation; this plugin only triggers reloads.
  *
- * `perEnvironmentStartEndDuringDev` is needed because Vite otherwise only
- * invokes `buildStart` for the client environment during development.
+ *  `perEnvironmentStartEndDuringDev` ensures `buildStart` runs for
+ *  the SSR environment during development.
  *
- * `options.config` is read lazily inside `load()` rather than destructured
- * here, since pen:config's `config` hook replaces it with the real
- * settings sometime after this factory itself is called.
+ *  `options.config` is read lazily because `pen:config` replaces it
+ *  with the resolved settings after this factory is called.
  */
 export function penDev(options: PluginOptions): Plugin {
   return {
@@ -38,21 +32,12 @@ export function penDev(options: PluginOptions): Plugin {
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    // Each plugin's resolveId is called and stops at the first one
-    // that returns any string. Any string marks it as claimed, the `\0`
-    // is just a convention marking the id as a virtual module.
-    resolveId(id) {
+    resolveId(id: string) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
-    // Same first-hit search again, but over the resolved id, not the
-    // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
-    async load(id) {
+    async load(id: string) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        // appDir is JSON-quoted here (unlike build-plugin's own raw
-        // substitution of the same token) since it becomes a real `const
-        // appDir = ...` the entry template passes around as a value, not
-        // just a path fragment embedded in one string.
         const source = stripRegion(entryAppTemplate, 'codegen')
           .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.appDir))
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
@@ -67,23 +52,8 @@ export function penDev(options: PluginOptions): Plugin {
         return transformed
       }
     },
-    // Watches route files to keep the already-running Ink UI in sync with
-    // ones added or removed mid-session - the entry module loads its
-    // routes once, when it starts, and never re-imports itself afterward,
-    // so its component matcher would otherwise go stale as files change.
-    //
-    // Debounced into a single call per batch of changes - a multi-file
-    // change (a git checkout, a directory delete) would otherwise trigger
-    // this once per file instead of once for the whole batch.
-    //
-    // Sends a bare event, nothing else - the entry module re-globs and
-    // reloads everything itself on receipt. Doing that here instead would
-    // go through this plugin's own `server.ssrLoadModule`, a separate
-    // runtime from the `ServerModuleRunner` actually running the live Ink
-    // session - modules loaded through the wrong one are distinct
-    // instances, breaking identity-sensitive state like React context
-    // shared with the running app.
-    configureServer(server) {
+    // Starts the dev server
+    configureServer(server: ViteDevServer) {
       const appDirAbsolute = join(server.config.root, options.appDir)
       const scheduleChange = debounce(() => {
         server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT)
@@ -96,8 +66,6 @@ export function penDev(options: PluginOptions): Plugin {
       server.watcher.on('add', onRouteFileChange)
       server.watcher.on('unlink', onRouteFileChange)
     },
-    // Just announces the server is up - the entry module validates routes
-    // and reports its own failures once it actually loads, a step later.
     buildStart() {
       log.ready(`ready in ${Date.now() - options.startTime}ms`)
     },
