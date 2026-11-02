@@ -23,9 +23,9 @@ export function createPenDevServer(srcDir: string) {
     log.error('Could not find a package.json from the current directory.')
     process.exit(1)
   }
-  const routesDir = `${srcDir}/app`
+  const appDir = `${srcDir}/app`
   const startTime = Date.now()
-  const options: PluginOptions = { routesDir, startTime, config: DEFAULT_PEN_CONFIG }
+  const options: PluginOptions = { appDir, startTime, config: DEFAULT_PEN_CONFIG }
 
   return createServer({
     root: projectDir,

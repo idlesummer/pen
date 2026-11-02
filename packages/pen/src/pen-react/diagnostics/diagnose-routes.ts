@@ -7,8 +7,8 @@ import { validateAsyncPages, validateComponentExports } from './validate'
 /** Re-derives a diagnostic's message with its files shown relative to the
  *  project root (app dir included) instead of the app dir alone - otherwise
  *  they look route-shaped but aren't actually openable from where the build runs. */
-function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
-  const files = diagnostic.files.map(file => `${routesDir}/${file}`)
+function formatDiagnostic(diagnostic: Diagnostic, appDir: string): string {
+  const files = diagnostic.files.map(file => `${appDir}/${file}`)
   return createDiagnostic({ ...diagnostic, files }).message
 }
 
@@ -17,9 +17,9 @@ function formatDiagnostic(diagnostic: Diagnostic, routesDir: string): string {
  *  (once per file add/delete) - whatever loaded the registry decides how.
 *
 *  @param moduleRegistry - Each role's already-loaded route modules, keyed by role.
-*  @param routesDir - App route directory, used only to format file paths in messages.
+*  @param appDir - App route directory, used only to format file paths in messages.
 *  @returns A formatted summary of route diagnostics. */
-export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir: string): [warnings: string[], error?: string] {
+export function createDiagnosticReport(moduleRegistry: ModuleRegistry, appDir: string): [warnings: string[], error?: string] {
   const [componentMap, componentPaths] = createComponentMap(moduleRegistry)
   const { pageEndpoints, diagnostics } = createRouter(componentPaths)
 
@@ -28,11 +28,11 @@ export function createDiagnosticReport(moduleRegistry: ModuleRegistry, routesDir
 
   const warnings = diagnostics
     .filter(d => d.severity === 'warn')
-    .map(d => formatDiagnostic(d, routesDir))
+    .map(d => formatDiagnostic(d, appDir))
 
   const error = diagnostics
     .filter(d => d.severity === 'error')
-    .map(d => formatDiagnostic(d, routesDir))
+    .map(d => formatDiagnostic(d, appDir))
     .join('\n\n') || undefined  // Works since empty strings are falsy
 
   return [warnings, error]

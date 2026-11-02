@@ -18,7 +18,7 @@ import { createModuleRegistry } from '@/pen-react/modules'
  *
  *  `perEnvironmentStartEndDuringDev` is required because Vite otherwise only
  *  invokes `buildStart` for the client environment during development. */
-export function penDiagnose({ routesDir }: PluginOptions): Plugin {
+export function penDiagnose({ appDir }: PluginOptions): Plugin {
   return {
     name: 'pen:diagnose',
     perEnvironmentStartEndDuringDev: true,
@@ -30,8 +30,8 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
       sequential: true,
       async handler() {
         const projectDir = this.environment.config.root
-        if (!existsSync(join(projectDir, routesDir)))
-          this.error(`No such directory: '${routesDir}'`)
+        if (!existsSync(join(projectDir, appDir)))
+          this.error(`No such directory: '${appDir}'`)
 
         // No dev server already running during build, unlike pen:dev - this
         // plugin always creates its own throwaway one just for this call.
@@ -47,7 +47,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
           // pipeline so the result reflects whichever route files exist
           // right now - this build-time check is the only thing that has
           // loaded anything yet to validate against.
-          const options = { base: routesDir, server }
+          const options = { base: appDir, server }
           const moduleRegistry = await createModuleRegistry({
             page: ssrGlob('**/page.tsx', options),
             layout: ssrGlob('**/layout.tsx', options),
@@ -55,7 +55,7 @@ export function penDiagnose({ routesDir }: PluginOptions): Plugin {
             error: ssrGlob('**/error.tsx', options),
             default: ssrGlob('**/default.tsx', options),
           })
-          const [warnings, error] = createDiagnosticReport(moduleRegistry, routesDir)
+          const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
 
           for (const message of warnings)
             this.warn(message)
