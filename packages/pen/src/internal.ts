@@ -10,6 +10,7 @@ export type {
   DefaultComponent,
 } from './pen-react/modules/components'
 
+export { _createModuleRegistry } from './pen-react/modules/module-registry'
 import { createRouteRenderer, ROUTES_CHANGED_EVENT, type RouteRendererStore } from './pen-react/renderer'
 import { PenApp, PenDevApp } from './pen-react/view'
 
