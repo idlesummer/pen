@@ -19,7 +19,7 @@ const WATCH_DEBOUNCE_MS = 150
  *  @param projectDir - Project directory containing the app directory.
  *  @param appDir - App route directory relative to the project directory.
  */
-async function globRoutePaths(projectDir: string, appDir: string) {
+async function createPathRegistry(projectDir: string, appDir: string) {
   const options = { cwd: join(projectDir, appDir) }
   const [page, layout, loading, error, _default] = await Promise.all([
     Array.fromAsync(glob('**/page.tsx', options)).then(paths => paths.sort()),
@@ -70,7 +70,7 @@ export function penDev(options: PluginOptions): Plugin {
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const projectDir = this.environment.config.root
-        const initialPaths = await globRoutePaths(projectDir, options.appDir)
+        const initialPaths = await createPathRegistry(projectDir, options.appDir)
 
         // appDir is JSON-quoted here (unlike build-plugin's own raw
         // substitution of the same token) since it becomes a real `const
@@ -111,7 +111,7 @@ export function penDev(options: PluginOptions): Plugin {
       const appDirAbsolute = join(server.config.root, options.appDir)
       const scheduleChange = debounce(async () => {
         try {
-          const paths = await globRoutePaths(server.config.root, options.appDir)
+          const paths = await createPathRegistry(server.config.root, options.appDir)
           server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT, paths)
         }
         catch (err) {
