@@ -19,3 +19,4 @@ export { createRouteRendererStore } from './pen-react/renderer'
 export { PenApp, PenDevApp, createRouteRenderer, ROUTES_CHANGED_EVENT }
 export type { RouteRendererStore }
 export type { ModuleLoader } from './lib/module'
+export type { ModuleRegistry } from './pen-react/modules'
