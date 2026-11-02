@@ -17,7 +17,7 @@ import {
   type ModuleLoader,
 } from '@idlesummer/pen/internal'
 
-
+/** Creates a module registry and validates its routes. */
 async function createAndValidateModuleRegistry(appDir: string) {
   const moduleLoader: ModuleLoader = path => import(/* @vite-ignore */ pathToFileURL(path).href)
   const moduleRegistry = await _createModuleRegistry(appDir, moduleLoader)
@@ -35,23 +35,27 @@ async function createAndValidateModuleRegistry(appDir: string) {
 // Main entry point
 // ─────────────────────────────────────────────────────────────────────────
 
+// Step 1: Load and validate the initial routes
 const moduleRegistry = await createAndValidateModuleRegistry(__PEN_APP_DIR__)
 if (!moduleRegistry)
   process.exit(1)
 
+// Step 2: Initialize the renderer store
 const rendererStore = createRouteRendererStore(moduleRegistry)
-const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
+// Step 3: Register the HMR listener
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async () => {
   try {
     const moduleRegistry = await createAndValidateModuleRegistry(__PEN_APP_DIR__)
-    if (!moduleRegistry)  // keep rendering with the previous state
-      return
-    else  // updating the store lets React handle rerendering
+    if (moduleRegistry) // updating the store lets React handle rerendering
       rendererStore.setState(() => createRouteRenderer(moduleRegistry))
+    // else, keep rendering with the previous state
   }
-  catch (err) {
-    console.error(err) // a failed reload shouldn't take the current render down with it
+  catch (err) { // a failed reload shouldn't take the current render down with it
+    console.error(err)
   }
 })
+
+// Step 4: Start the app and wait for it to exit
+const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 await waitUntilExit()
