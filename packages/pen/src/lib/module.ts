@@ -1,6 +1,5 @@
 import { glob } from 'node:fs/promises'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
 
 /** The shape of an ES module namespace object. */
 export type ModuleNamespace = Record<string, unknown>
@@ -9,7 +8,6 @@ export type ModuleNamespace = Record<string, unknown>
 export type ModuleNamespaceWithDefault<T = unknown> = ModuleNamespace & {
   default: T
 }
-
 /** Loads a module from the given file path. */
 export type ModuleLoader = (path: string) => Promise<ModuleNamespace>
 
@@ -32,17 +30,12 @@ export function hasFunctionDefaultExport<T>(value: unknown): value is ModuleName
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
-/** Loads a module from the given file path. */
-function importModule(path: string): Promise<ModuleNamespace> {
-  return import(pathToFileURL(path).href)
-}
-
 /** Discovers and loads modules matching a glob pattern.
  * @param cwd - Directory to search within.
  * @param pattern - Glob pattern used to discover modules.
  * @param moduleLoader - Function used to import each discovered module.
  */
-export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader=importModule): Promise<Record<string, ModuleNamespace>> {
+export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader): Promise<Record<string, ModuleNamespace>> {
   const paths = (await Array.fromAsync(glob(pattern, { cwd }))).sort()
   const entriesPromises = paths.map(async path => [path, await moduleLoader(join(cwd, path))] as const)
   const entries = await Promise.all(entriesPromises)

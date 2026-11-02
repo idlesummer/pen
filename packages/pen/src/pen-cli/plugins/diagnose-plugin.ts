@@ -1,30 +1,11 @@
-import type { Plugin, ViteDevServer } from 'vite'
+import type { Plugin } from 'vite'
+import type { ModuleLoader } from '@/lib/module'
 import type { PluginOptions } from './types/plugin-options'
-import type { ModuleRegistry } from '@/pen-react/modules'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { createServer } from 'vite'
-import { ssrGlob } from '@/lib/ssr-glob'
+import { createServer, normalizePath } from 'vite'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
-import { createModuleRegistry } from '@/pen-react/modules'
-
-/** Globs each role's route files under appDir and loads them through
- *  Vite's SSR pipeline, assembling the result into a ModuleRegistry -
- *  mirrors production's per-role `import.meta.glob` calls, but reflects
- *  whichever route files exist right now instead of a static snapshot.
- *
- *  @param appDir - App route directory relative to the project root.
- *  @param server - Dev server to load route modules through. */
-async function createModuleRegistryFromSsrGlob(appDir: string, server: ViteDevServer): Promise<ModuleRegistry> {
-  const options = { base: appDir, server }
-  return createModuleRegistry({
-    page: ssrGlob('**/page.tsx', options),
-    layout: ssrGlob('**/layout.tsx', options),
-    loading: ssrGlob('**/loading.tsx', options),
-    error: ssrGlob('**/error.tsx', options),
-    default: ssrGlob('**/default.tsx', options),
-  })
-}
+import { _createModuleRegistry } from '@/pen-react/modules'
 
 /** Discovers and validates the app's routes before typechecking and bundling.
  *
@@ -61,7 +42,8 @@ export function penDiagnose({ appDir }: PluginOptions): Plugin {
           server: { middlewareMode: true },
         })
         try {
-          const moduleRegistry = await createModuleRegistryFromSsrGlob(appDir, server)
+          const moduleLoader: ModuleLoader = path => server.ssrLoadModule(`/${normalizePath(path)}`)
+          const moduleRegistry = await _createModuleRegistry(appDir, moduleLoader)
           const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
 
           for (const message of warnings)
