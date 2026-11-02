@@ -1,16 +1,12 @@
 import type { Plugin } from 'vite'
-import type { PenConfig } from '@/pen-cli/config'
+import type { DevPluginOptions } from './index'
 import { installRefreshRuntime, transformInkComponent } from './refresh'
-
-type Options = {
-  config: PenConfig
-}
 
 /** Enables React Fast Refresh for Ink during development.
  *
  *  Also enables React Compiler when `config.reactCompiler` is set.
  *  Used for dev only, not used during builds. */
-export function penRefresh({ config }: Options): Plugin {
+export function penRefresh({ config }: DevPluginOptions): Plugin {
   return {
     name: 'pen:refresh',
     enforce: 'pre',
