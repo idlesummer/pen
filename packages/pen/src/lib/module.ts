@@ -2,7 +2,7 @@
 export type ModuleNamespace = Record<string, unknown>
 
 /** The shape of an ES module namespace object that has a default export. */
-export type Module<T = unknown> = {
+export type ModuleNamespaceWithDefault<T = unknown> = ModuleNamespace & {
   default: T
 }
 
@@ -14,13 +14,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /** Checks that a value is a module with a default export.
  *  @param value - The value to check, typically a glob'd or dynamically imported entry.
  *  @returns Whether the value is a module with a `default` property. */
-function hasDefaultExport(value: unknown): value is Module {
+function hasDefaultExport(value: unknown): value is ModuleNamespaceWithDefault {
   return isRecord(value) && 'default' in value
 }
 
 /** Checks whether a value is a module with a function default export.
  *  @param value - The value to check.
  *  @returns Whether the value is a module with a function default export. */
-export function hasFunctionDefaultExport<T>(value: unknown): value is Module<T> {
+export function hasFunctionDefaultExport<T>(value: unknown): value is ModuleNamespaceWithDefault<T> {
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
