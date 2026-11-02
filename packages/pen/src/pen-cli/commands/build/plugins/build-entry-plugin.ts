@@ -1,15 +1,14 @@
 import type { Plugin } from 'vite'
 import type { BuildPluginOptions } from './index'
 import { PACKAGE_NAME } from '@/constants'
-import { stripRegion } from '@/lib/strip-regions'
 import { ENTRY_FILE } from '@/pen-cli/constants'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/entry-module'
+import { ENTRY_MODULE_ID, resolveEntryModuleId, RESOLVED_ENTRY_MODULE_ID, substituteEntryTemplate } from '@/pen-cli/entry-module'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 
 /** Bundles the app's entry module for Node. */
-export function penBuild({ appDir, config }: BuildPluginOptions): Plugin {
+export function penBuildEntry({ appDir, config }: BuildPluginOptions): Plugin {
   return {
-    name: 'pen:build',
+    name: 'pen:build-entry',
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
@@ -28,20 +27,10 @@ export function penBuild({ appDir, config }: BuildPluginOptions): Plugin {
         },
       }
     },
-    // Each plugin's resolveId is called and stops at the first one
-    // that returns any string. Any string marks it as claimed, the `\0`
-    // is just a convention marking the id as a virtual module.
-    resolveId(id) {
-      if (id === ENTRY_MODULE_ID)
-        return RESOLVED_ENTRY_MODULE_ID
-    },
-    // Same first-hit search again, but over the resolved id, not the
-    // original one. This is why it checks RESOLVED_ENTRY_MODULE_ID.
+    resolveId: resolveEntryModuleId,
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
-        return stripRegion(entryAppTemplate, 'codegen')
-          .replaceAll(APP_DIR_TOKEN, appDir)
-          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(config.ink))
+        return substituteEntryTemplate(entryAppTemplate, appDir, config.ink, false)
     },
   }
 }

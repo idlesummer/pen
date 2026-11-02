@@ -4,9 +4,8 @@ import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
-import { stripRegion } from '@/lib/strip-regions'
 import { PEN_ROUTES_CHANGED_EVENT } from '@/pen-cli/constants'
-import { APP_DIR_TOKEN, ENTRY_MODULE_ID, INK_OPTIONS_TOKEN, RESOLVED_ENTRY_MODULE_ID } from '@/pen-cli/entry-module'
+import { ENTRY_MODULE_ID, resolveEntryModuleId, RESOLVED_ENTRY_MODULE_ID, substituteEntryTemplate } from '@/pen-cli/entry-module'
 import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 
@@ -14,24 +13,19 @@ import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 't
 const DEBOUNCE_MS = 150
 
 /** Loads the dev entry module and notifies it of route changes. */
-export function penDev({ appDir, startTime, config }: DevPluginOptions): Plugin {
+export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Plugin {
   return {
-    name: 'pen:dev',
+    name: 'pen:dev-entry',
     perEnvironmentStartEndDuringDev: true,
 
     // Only runs this plugin's hooks for the SSR environment, not the client one
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    resolveId(id: string) {
-      if (id === ENTRY_MODULE_ID)
-        return RESOLVED_ENTRY_MODULE_ID
-    },
+    resolveId: resolveEntryModuleId,
     async load(id: string) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = stripRegion(entryAppTemplate, 'codegen')
-          .replaceAll(APP_DIR_TOKEN, JSON.stringify(appDir))
-          .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(config.ink))
+        const source = substituteEntryTemplate(entryAppTemplate, appDir, config.ink, true)
 
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
