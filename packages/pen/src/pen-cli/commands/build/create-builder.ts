@@ -31,7 +31,7 @@ export function createPenBuilder(srcDir: string, outDir: string): Promise<ViteBu
   }
   const options: PluginOptions = {
     startTime: 0,
-    routesDir: `${srcDir}/app`,
+    appDir: `${srcDir}/app`,
     config: DEFAULT_PEN_CONFIG,
   }
   return createBuilder({

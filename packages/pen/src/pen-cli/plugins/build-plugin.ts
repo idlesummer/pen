@@ -44,7 +44,7 @@ export function penBuild(options: PluginOptions): Plugin {
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return stripRegion(entryAppTemplate, 'codegen')
-          .replaceAll(APP_DIR_TOKEN, options.routesDir)
+          .replaceAll(APP_DIR_TOKEN, options.appDir)
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
     },
   }

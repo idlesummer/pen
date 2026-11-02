@@ -17,7 +17,7 @@ const WATCH_DEBOUNCE_MS = 150
  *  them - just a fresh-off-disk directory scan.
  *
  *  @param projectDir - Project directory containing the app directory.
- *  @param routesDir - App route directory relative to the project directory.
+ *  @param appDir - App route directory relative to the project directory.
  */
 async function globRoutePaths(projectDir: string, appDir: string) {
   const options = { cwd: join(projectDir, appDir) }
@@ -70,14 +70,14 @@ export function penDev(options: PluginOptions): Plugin {
     async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const projectDir = this.environment.config.root
-        const initialPaths = globRoutePaths(projectDir, options.routesDir)
+        const initialPaths = await globRoutePaths(projectDir, options.appDir)
 
         // appDir is JSON-quoted here (unlike build-plugin's own raw
         // substitution of the same token) since it becomes a real `const
         // appDir = ...` the entry template passes around as a value, not
         // just a path fragment embedded in one string.
         const source = stripRegion(entryAppTemplate, 'codegen')
-          .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.routesDir))
+          .replaceAll(APP_DIR_TOKEN, JSON.stringify(options.appDir))
           .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(options.config.ink))
           .replaceAll(INITIAL_PATHS_TOKEN, JSON.stringify(initialPaths))
 
@@ -108,10 +108,10 @@ export function penDev(options: PluginOptions): Plugin {
     // app. The entry module loads these paths itself once it receives them,
     // through its own runtime, keeping shared dependencies consistent.
     configureServer(server) {
-      const routesPathAbsolute = join(server.config.root, options.routesDir)
-      const scheduleChange = debounce(() => {
+      const appDirAbsolute = join(server.config.root, options.appDir)
+      const scheduleChange = debounce(async () => {
         try {
-          const paths = globRoutePaths(server.config.root, options.routesDir)
+          const paths = await globRoutePaths(server.config.root, options.appDir)
           server.environments.ssr!.hot.send(ROUTES_CHANGED_EVENT, paths)
         }
         catch (err) {
@@ -120,7 +120,7 @@ export function penDev(options: PluginOptions): Plugin {
       }, WATCH_DEBOUNCE_MS)
 
       const onRouteFileChange = (filePath: string) => {
-        if (filePath.endsWith('.tsx') && isPathInside(filePath, routesPathAbsolute))
+        if (filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute))
           scheduleChange()
       }
       server.watcher.on('add', onRouteFileChange)
