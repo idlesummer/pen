@@ -20,7 +20,10 @@ export { createDiagnosticReport } from './pen-react/diagnostics'
 
 // Rendering
 export type { RouteRendererStore } from './pen-react/renderer'
-export { createRouteRenderer, createRouteRendererStore, ROUTES_CHANGED_EVENT } from './pen-react/renderer'
+export { createRouteRenderer, createRouteRendererStore } from './pen-react/renderer'
 
 // Runtime
 export { PenApp, PenDevApp } from './pen-react/view'
+
+// CLI
+export { PEN_ROUTES_CHANGED_EVENT } from './pen-cli/constants'

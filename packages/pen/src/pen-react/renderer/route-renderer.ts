@@ -4,12 +4,6 @@ import { createRouter } from '@/pen-core'
 import { createComponentMap } from '@/pen-react/modules'
 import { createRouteElement } from './composer/create-element'
 
-/** Custom HMR event name a dev server sends a freshly-loaded `ModuleRegistry`
- *  under, after a route file is added or removed, so the running app can
- *  rebuild its route renderer and push it into the already-running UI.
- */
-export const ROUTES_CHANGED_EVENT = 'pen:routes-changed'
-
 /** Resolves a route straight to its rendered route element. */
 export type RouteRenderer = (route: string) => ReactNode
 
