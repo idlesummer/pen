@@ -6,10 +6,11 @@ declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 import { render } from 'ink'
 import { PenApp, createRouteRenderer } from '@idlesummer/pen/internal'
 
-// Vite's `import.meta.glob` needs literal arguments (anything else silently
-// matches nothing), so there's one typed glob per role. Static and eager
-// because there's no server at build time to load modules dynamically -
-// see entry-app.dev.tsx.txt for why dev uses a different approach.
+// ─────────────────────────────────────────────────────────────────────────
+// Main entry point
+// ─────────────────────────────────────────────────────────────────────────
+
+// Vite's `import.meta.glob` needs literal arguments
 const moduleRegistry = {
   page:     import.meta.glob('./**/page.tsx',    { base: './__PEN_APP_DIR__', eager: true }),
   layout:   import.meta.glob('./**/layout.tsx',  { base: './__PEN_APP_DIR__', eager: true }),

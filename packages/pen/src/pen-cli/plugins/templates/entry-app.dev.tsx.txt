@@ -5,64 +5,53 @@ declare const __PEN_APP_DIR__: string
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 // #endregion
 
+import { pathToFileURL } from 'node:url'
 import { render } from 'ink'
 import {
   PenDevApp,
   createRouteRendererStore,
   ROUTES_CHANGED_EVENT,
   createRouteRenderer,
-  createModuleRegistryFromGlob,
   createDiagnosticReport,
+  _createModuleRegistry,
+  type ModuleLoader,
 } from '@idlesummer/pen/internal'
 
-const appDir = __PEN_APP_DIR__
 
-// No static glob here, unlike entry-app.build.tsx.txt - its mere presence
-// in a module Vite transforms is enough for Vite to track these files as
-// a dependency, whether or not the result is ever used. Deleting one
-// would then make Vite fully re-run this whole module on its own, which
-// breaks the hot listener registered below for the rest of the session
-// (new events stop reaching it afterward). createModuleRegistryFromGlob
-// globs through plain Node, not import.meta.glob, sidestepping that
-// tracking entirely - so it's safe to call fresh on every reload too.
-async function loadRegistry() {
-  const moduleRegistry = await createModuleRegistryFromGlob(appDir)
+async function createModuleRegistryAndValidate(appDir: string) {
+  const moduleLoader: ModuleLoader = path => import(pathToFileURL(path).href)
+  const moduleRegistry = await _createModuleRegistry(appDir, moduleLoader)
   const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
-  return { moduleRegistry, warnings, error }
+
+  for (const message of warnings)
+    console.warn(message)
+  if (error)
+    console.error(error)
+  else
+    return moduleRegistry
 }
 
-// Validated here instead of pen:dev's buildStart - that hook runs a full
-// step before this module is even loaded (see commands/dev/index.ts), so
-// it had nothing of its own to check against yet. This is the first point
-// anything has actually loaded the routes, so it's also the only point
-// that can fail fast before the Ink UI ever renders.
-const initial = await loadRegistry()
-for (const message of initial.warnings)
-  console.warn(message)
-if (initial.error) {
-  console.error(initial.error)  // no previous render to fall back to - exit outright
+// ─────────────────────────────────────────────────────────────────────────
+// Main entry point
+// ─────────────────────────────────────────────────────────────────────────
+
+const moduleRegistry = await createModuleRegistryAndValidate(__PEN_APP_DIR__)
+if (!moduleRegistry)
   process.exit(1)
-}
 
-const rendererStore = createRouteRendererStore(initial.moduleRegistry)
+const rendererStore = createRouteRendererStore(moduleRegistry)
 const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
 
-// Pushing each reload into rendererStore, instead of calling Ink's
-// render() again, lets React's own update scheduling handle it - the
-// same way navigation actions already update the app without ever
-// touching render().
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async () => {
   try {
-    const { moduleRegistry, warnings, error } = await loadRegistry()
-    for (const message of warnings)
-      console.warn(message)
-    if (error)
-      return console.error(error)  // a failed reload shouldn't take the current render down with it
-    rendererStore.setState(() => createRouteRenderer(moduleRegistry))
+    const moduleRegistry = await createModuleRegistryAndValidate(__PEN_APP_DIR__)
+    if (!moduleRegistry)  // keep rendering with the previous state
+      return
+    else  // updating the store lets React handle rerendering
+      rendererStore.setState(() => createRouteRenderer(moduleRegistry))
   }
   catch (err) {
-    console.error(err)  // a failed reload shouldn't take the current render down with it
+    console.error(err) // a failed reload shouldn't take the current render down with it
   }
 })
-
 await waitUntilExit()
