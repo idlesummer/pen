@@ -33,8 +33,7 @@ export function penDiagnose({ appDir }: PluginOptions): Plugin {
         if (!existsSync(join(projectDir, appDir)))
           this.error(`No such directory: '${appDir}'`)
 
-        // No dev server already running during build, unlike pen:dev - this
-        // plugin always creates its own throwaway one just for this call.
+        // No dev server running during build
         const server = await createServer({
           root: projectDir,
           configFile: false,
