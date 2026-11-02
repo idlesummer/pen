@@ -36,7 +36,12 @@ export function hasFunctionDefaultExport<T>(value: unknown): value is ModuleName
  * @param moduleLoader - Function used to import each discovered module.
  */
 export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader): Promise<Record<string, ModuleNamespace>> {
-  const paths = (await Array.fromAsync(glob(pattern, { cwd }))).sort()
+  // node:fs/promises' glob returns paths using the OS's own separator - '\'
+  // on Windows. Route paths are split on '/' downstream, so without this
+  // normalization every path collapses to a single part on Windows.
+  const paths = (await Array.fromAsync(glob(pattern, { cwd })))
+    .map(path => path.replaceAll('\\', '/'))
+    .sort()
   const entriesPromises = paths.map(async path => [path, await moduleLoader(join(cwd, path))] as const)
   const entries = await Promise.all(entriesPromises)
   return Object.fromEntries(entries)
