@@ -18,6 +18,3 @@ export const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 // appDir const).
 export const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 export const INK_OPTIONS_TOKEN = '__PEN_INK_OPTIONS__'
-// dev-plugin only - entry-app.dev.tsx.txt has no static glob of its own,
-// so it needs its first registry's paths handed in from outside
-export const INITIAL_PATHS_TOKEN = '__PEN_INITIAL_PATHS__'
