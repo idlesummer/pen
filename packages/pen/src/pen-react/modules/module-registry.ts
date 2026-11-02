@@ -40,7 +40,7 @@ export async function createModuleRegistry(promises: Record<ModuleRole, Promise<
  *
  *  @param appDir - App route directory, resolved against the current
  *  working directory. */
-export async function globModuleRegistry(appDir: string): Promise<ModuleRegistry> {
+export async function createModuleRegistryFromGlob(appDir: string): Promise<ModuleRegistry> {
   const loadRole = async (pattern: string) => {
     const paths = (await Array.fromAsync(glob(pattern, { cwd: appDir }))).sort()
     return loadModules(appDir, paths)
