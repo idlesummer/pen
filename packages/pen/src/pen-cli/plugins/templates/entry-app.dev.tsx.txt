@@ -13,14 +13,14 @@ import {
   ROUTES_CHANGED_EVENT,
   createRouteRenderer,
   createDiagnosticReport,
-  _createModuleRegistry,
+  createModuleRegistry,
   type ModuleLoader,
 } from '@idlesummer/pen/internal'
 
 /** Creates a module registry and validates its routes. */
 async function createAndValidateModuleRegistry(appDir: string) {
   const moduleLoader: ModuleLoader = path => import(/* @vite-ignore */ pathToFileURL(path).href)
-  const moduleRegistry = await _createModuleRegistry(appDir, moduleLoader)
+  const moduleRegistry = await createModuleRegistry(appDir, moduleLoader)
   const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
 
   for (const message of warnings)

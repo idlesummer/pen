@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { createServer, normalizePath } from 'vite'
 import { createDiagnosticReport } from '@/pen-react/diagnostics'
-import { _createModuleRegistry } from '@/pen-react/modules'
+import { createModuleRegistry } from '@/pen-react/modules'
 
 /** Discovers and validates the app's routes before typechecking and bundling.
  *
@@ -43,7 +43,7 @@ export function penDiagnose({ appDir }: PluginOptions): Plugin {
         })
         try {
           const moduleLoader: ModuleLoader = path => server.ssrLoadModule(`/${normalizePath(path)}`)
-          const moduleRegistry = await _createModuleRegistry(appDir, moduleLoader)
+          const moduleRegistry = await createModuleRegistry(appDir, moduleLoader)
           const [warnings, error] = createDiagnosticReport(moduleRegistry, appDir)
 
           for (const message of warnings)
