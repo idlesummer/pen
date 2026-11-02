@@ -3,12 +3,7 @@ import type { Plugin } from 'vite'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
 
-/** Resolves the project's own locally installed `typescript` package, so
- *  type checking always runs against the user's own TypeScript version and
- *  tsconfig - never a version pen itself depends on.
- *
- *  @param projectDir - Project directory to resolve `typescript` from.
- *  @returns The resolved typescript module, or `undefined` if the project has no typescript installed. */
+/** Resolves the project's locally installed TypeScript module. */
 async function resolveTypescript(projectDir: string): Promise<typeof import('typescript') | undefined> {
   try {
     const require = createRequire(join(projectDir, 'package.json'))
@@ -21,10 +16,7 @@ async function resolveTypescript(projectDir: string): Promise<typeof import('typ
   }
 }
 
-/** Type-checks the project using the resolved TypeScript's own compiler
- *  API, so errors come from the exact TypeScript version and config the
- *  editor already uses. Returns formatted diagnostic output on failure,
- *  or `undefined` if it passed or the project has no TypeScript installed. */
+/** Runs the project's TypeScript compiler and returns formatted errors, if any. */
 async function runTypecheck(projectDir: string): Promise<string | undefined> {
   const ts = await resolveTypescript(projectDir)
   if (!ts) return
@@ -47,13 +39,7 @@ async function runTypecheck(projectDir: string): Promise<string | undefined> {
     return ts.formatDiagnosticsWithColorAndContext(diagnostics, formatHost)
 }
 
-/**
- * Type-checks the project before the real build starts.
- *
- * Runs only in the SSR environment. Marked `sequential` so a future
- * buildStart hook on another plugin can never silently race this one -
- * Vite dispatches buildStart in parallel across plugins by default.
- */
+/** Type-checks the project before bundling, using its own TypeScript installation. */
 export function penTypecheck(): Plugin {
   return {
     name: 'pen:typecheck',
