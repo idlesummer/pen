@@ -5,7 +5,7 @@ import { globModules } from '@/lib/module'
 /** Raw glob entries grouped by route module role, keyed by file path. */
 export type ModuleRegistry = Record<ModuleRole, Record<string, unknown>>
 
-export async function _createModuleRegistry(appDir: string, moduleLoader: ModuleLoader): Promise<ModuleRegistry> {
+export async function createModuleRegistry(appDir: string, moduleLoader: ModuleLoader): Promise<ModuleRegistry> {
   const [page, layout, loading, error, _default] = await Promise.all([
     globModules(appDir, '**/page.tsx', moduleLoader),
     globModules(appDir, '**/layout.tsx', moduleLoader),
