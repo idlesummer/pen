@@ -32,22 +32,19 @@ export function hasFunctionDefaultExport<T>(value: unknown): value is ModuleName
   return hasDefaultExport(value) && typeof value.default === 'function'
 }
 
-/** Loads a module from the given file path.
- *  @param filePath - Path to the module to load.
- */
-function importModule(filePath: string): Promise<ModuleNamespace> {
-  return import(pathToFileURL(filePath).href)
+/** Loads a module from the given file path. */
+function importModule(path: string): Promise<ModuleNamespace> {
+  return import(pathToFileURL(path).href)
 }
 
 /** Discovers and loads modules matching a glob pattern.
- *
  * @param cwd - Directory to search within.
  * @param pattern - Glob pattern used to discover modules.
  * @param moduleLoader - Function used to import each discovered module.
  */
-export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader = importModule): Promise<Record<string, ModuleNamespace>> {
-  const matchedPaths = (await Array.fromAsync(glob(pattern, { cwd }))).sort()
-  const entriesPromises = matchedPaths.map(async path => [path, await moduleLoader(join(cwd, path))] as const)
+export async function globModules(cwd: string, pattern: string, moduleLoader: ModuleLoader=importModule): Promise<Record<string, ModuleNamespace>> {
+  const paths = await Array.fromAsync(glob(pattern, { cwd }))
+  const entriesPromises = paths.sort().map(async path => [path, await moduleLoader(join(cwd, path))] as const)
   const entries = await Promise.all(entriesPromises)
   return Object.fromEntries(entries)
 }
