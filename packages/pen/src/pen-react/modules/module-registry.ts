@@ -1,4 +1,5 @@
 import type { ModuleRole } from '@/pen-core'
+import { glob } from 'node:fs/promises'
 
 /** Raw glob entries grouped by route module role, keyed by file path. */
 export type ModuleRegistry = Record<ModuleRole, Record<string, unknown>>
@@ -30,4 +31,25 @@ export async function createModuleRegistry(promises: Record<ModuleRole, Promise<
     promises.default,
   ])
   return { page, layout, loading, error, default: _default }
+}
+
+/** Globs each role's route files under appDir and loads them directly into
+ *  a ModuleRegistry - the dev-time fused equivalent of production's static,
+ *  eager `import.meta.glob` calls. Pure Node (glob + dynamic import), so
+ *  unlike `ssrGlob` it needs no Vite server to run.
+ *
+ *  @param appDir - App route directory, resolved against the current
+ *  working directory. */
+export async function globModuleRegistry(appDir: string): Promise<ModuleRegistry> {
+  const loadRole = async (pattern: string) => {
+    const paths = (await Array.fromAsync(glob(pattern, { cwd: appDir }))).sort()
+    return loadModules(appDir, paths)
+  }
+  return createModuleRegistry({
+    page: loadRole('**/page.tsx'),
+    layout: loadRole('**/layout.tsx'),
+    loading: loadRole('**/loading.tsx'),
+    error: loadRole('**/error.tsx'),
+    default: loadRole('**/default.tsx'),
+  })
 }
