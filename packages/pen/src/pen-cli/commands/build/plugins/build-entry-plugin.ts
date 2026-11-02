@@ -30,7 +30,7 @@ export function penBuildEntry({ appDir, config }: BuildPluginOptions): Plugin {
     resolveId: resolveEntryModuleId,
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
-        return substituteEntryTemplate(entryAppTemplate, appDir, config.ink, false)
+        return substituteEntryTemplate(entryAppTemplate, appDir, config.ink)
     },
   }
 }

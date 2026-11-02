@@ -20,11 +20,13 @@ export function resolveEntryModuleId(id: string): string | undefined {
 /** Strips the codegen region from an entry template and substitutes the
  *  app directory and Ink options into it.
  *
- *  @param quoteAppDir - true to substitute `appDir` as a JSON-quoted JS
- *  string (dev, into a variable declaration); false to substitute it raw
- *  (build, into an `import.meta.glob` base path). */
-export function substituteEntryTemplate(template: string, appDir: string, ink: InkRenderOptions | undefined, quoteAppDir: boolean): string {
+ *  @param appDirLiteral - `appDir`, pre-formatted for this template's own
+ *  substitution site: JSON-quoted where the token sits in an expression
+ *  position (dev, a variable declaration), raw where it sits inside a
+ *  string the template already quotes (build, an `import.meta.glob` base
+ *  path). */
+export function substituteEntryTemplate(template: string, appDirLiteral: string, ink: InkRenderOptions | undefined): string {
   return stripRegion(template, 'codegen')
-    .replaceAll(APP_DIR_TOKEN, quoteAppDir ? JSON.stringify(appDir) : appDir)
+    .replaceAll(APP_DIR_TOKEN, appDirLiteral)
     .replaceAll(INK_OPTIONS_TOKEN, JSON.stringify(ink))
 }

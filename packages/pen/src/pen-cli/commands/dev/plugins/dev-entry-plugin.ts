@@ -25,7 +25,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     resolveId: resolveEntryModuleId,
     async load(id: string) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = substituteEntryTemplate(entryAppTemplate, appDir, config.ink, true)
+        const source = substituteEntryTemplate(entryAppTemplate, JSON.stringify(appDir), config.ink)
 
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
