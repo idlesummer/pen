@@ -47,9 +47,9 @@ const rendererStore = createRouteRendererStore(moduleRegistry)
 import.meta.hot?.on(ROUTES_CHANGED_EVENT, async () => {
   try {
     const moduleRegistry = await createAndValidateModuleRegistry(__PEN_APP_DIR__)
-    if (!moduleRegistry) // updating the store lets React handle rerendering
+    if (!moduleRegistry)  // keep rendering with the previous state
       return
-    else  // keep rendering with the previous state
+    else  // updating the store lets React handle rerendering
       rendererStore.setState(() => createRouteRenderer(moduleRegistry))
   }
   catch (err) { // a failed reload shouldn't take the current render down with it
