@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { PenConfig } from '@/pen-cli/config'
-import { penBuild } from './build-plugin'
+import { penBuildEntry } from './build-entry-plugin'
 import { penDiagnose } from './diagnose-plugin'
 import { penReactCompiler } from './react-compiler-plugin'
 import { penTypecheck } from './typecheck-plugin'
@@ -19,6 +19,6 @@ export function penBuildPlugins(options: BuildPluginOptions): Plugin[] {
     penDiagnose(options),
     penTypecheck(),
     penReactCompiler(options),
-    penBuild(options),
+    penBuildEntry(options),
   ]
 }
