@@ -2,9 +2,12 @@ import type { Plugin } from 'vite'
 import type { BuildPluginOptions } from './index'
 import { PACKAGE_NAME } from '@/constants'
 import { ENTRY_FILE } from '@/pen-cli/constants'
-import { ENTRY_MODULE_ID, resolveEntryModuleId, RESOLVED_ENTRY_MODULE_ID, APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
+import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 import { substituteTemplate } from '@/lib/template'
+
+const ENTRY_MODULE_ID = 'virtual:pen/entry-app.build.tsx'
+const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 
 /** Bundles the app's entry module for Node. */
 export function penBuildEntry({ appDir, config }: BuildPluginOptions): Plugin {
@@ -28,7 +31,10 @@ export function penBuildEntry({ appDir, config }: BuildPluginOptions): Plugin {
         },
       }
     },
-    resolveId: resolveEntryModuleId,
+    resolveId(id: string) {
+      if (id === ENTRY_MODULE_ID)
+        return RESOLVED_ENTRY_MODULE_ID
+    },
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
         return substituteTemplate(entryAppTemplate, {
