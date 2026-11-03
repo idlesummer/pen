@@ -1,4 +1,4 @@
-import type { Plugin, ViteDevServer } from 'vite'
+import type { Plugin } from 'vite'
 import type { DevPluginOptions } from './index'
 import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
@@ -27,11 +27,11 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     applyToEnvironment(environment) {
       return environment.name === 'ssr'
     },
-    resolveId(id: string) {
+    resolveId(id) {
       if (id === ENTRY_MODULE_ID)
         return RESOLVED_ENTRY_MODULE_ID
     },
-    async load(id: string) {
+    async load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const source = substituteTemplate(stripRegion(entryAppTemplate, 'codegen'), {
           [APP_DIR_TOKEN]: JSON.stringify(appDir),
@@ -48,25 +48,23 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       }
     },
     // Starts the dev server
-    configureServer(server: ViteDevServer) {
+    configureServer(server) {
       const appDirAbsolute = join(server.config.root, appDir)
       const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
-      const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), 150)  // waits 150ms before reloading routes
+      const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), 150)  // waits 150ms before reloading
+
+      // Watches for route file additions and deletions to trigger a route reload
       const onRouteFileChange = (event: 'add' | 'unlink', filePath: string) => {
-        if (!isAppRouteFile(filePath, appDirAbsolute)) return
-        server.config.logger.info(`file ${event} ${filePath}`)
-        scheduleChange()
+        if (!isAppRouteFile(filePath, appDirAbsolute)) {
+          server.config.logger.info(`file ${event} ${filePath}`)
+          scheduleChange()
+        }
       }
       server.watcher.on('add', path => onRouteFileChange('add', path))
       server.watcher.on('unlink', path => onRouteFileChange('unlink', path))
     },
-    // A deleted route file is already fully handled above via
-    // PEN_ROUTES_CHANGED_EVENT - this only stops Vite's own default HMR
-    // propagation from separately trying (and failing) to reload a file
-    // that's gone, which otherwise prints a misleading "failed to reload,
-    // could be a syntax error" message for a plain, expected deletion.
-    // handleHotUpdate (legacy) only runs for type: 'update', never for
-    // create/delete - hotUpdate is the one Vite actually calls for those.
+    // Handles create/delete events
+    // Suppress Vite's HMR for deleted route files since route reloads are handled above
     hotUpdate(options) {
       const appDirAbsolute = join(options.server.config.root, appDir)
       if (options.type === 'delete' && isAppRouteFile(options.file, appDirAbsolute))
