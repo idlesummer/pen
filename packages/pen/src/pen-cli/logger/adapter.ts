@@ -35,15 +35,15 @@ export function createPenLogger(): Logger {
 
       if ((match = strippedMessage.match(HMR_INVALIDATE))) {
         const [, path, reason] = match
-        return warn(reason ? `${reason} ${pc.dim(path)}` : pc.dim(path!))
+        warn(reason ? `${reason} ${pc.dim(path)}` : pc.dim(path!))
       }
-      if ((match = strippedMessage.match(HMR_UPDATE))) {
+      else if ((match = strippedMessage.match(HMR_UPDATE))) {
         const path = match[1]!
-        return event(`Updated ${pc.dim(path)}`)
+        event(`Updated ${pc.dim(path)}`)
       }
-      if ((match = strippedMessage.match(FILE_WATCH))) {
+      else if ((match = strippedMessage.match(FILE_WATCH))) {
         const [, kind, path] = match
-        return event(`${kind === 'add' ? 'Added' : 'Removed'} ${pc.dim(path!)}`)
+        event(`${kind === 'add' ? 'Added' : 'Removed'} ${pc.dim(path!)}`)
       }
       // Anything else Vite's own logger emits is internal noise pen's
       // dev output doesn't show - dropped rather than printed as-is.
