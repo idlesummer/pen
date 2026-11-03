@@ -70,7 +70,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
         return []
     },
     buildStart() {
-      log.ready(`ready in ${Date.now() - startTime}ms`)
+      this.info(`ready in ${Date.now() - startTime}ms`)
     },
   }
 }
