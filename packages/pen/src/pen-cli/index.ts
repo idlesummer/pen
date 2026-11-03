@@ -1,7 +1,5 @@
 import { defineCommand, runMain } from 'citty'
 import { DESCRIPTION, PEN_VERSION } from '@/constants'
-import { buildCommand } from './commands/build'
-import { createCommand } from './commands/create'
 
 const main = defineCommand({
   meta: {
@@ -11,8 +9,12 @@ const main = defineCommand({
   },
   // Lazily load subcommands so unused command modules aren't imported
   subCommands: {
-    build: buildCommand,
-    create: createCommand,
+    build: async () =>
+      (await import('./commands/build')).buildCommand,
+
+    create: async () =>
+      (await import('./commands/create')).createCommand,
+
     dev: async () => {
       // Dynamically import because react-refresh reads NODE_ENV at import time
       process.env.NODE_ENV = 'development'
@@ -20,10 +22,8 @@ const main = defineCommand({
       const { devCommand } = await import('./commands/dev')
       return devCommand
     },
-    start: async () => {
-      const { startCommand } = await import('./commands/start')
-      return startCommand
-    },
+    start: async () =>
+      (await import('./commands/start')).startCommand,
   },
 })
 
