@@ -1,5 +1,5 @@
 import type { RenderOptions as InkRenderOptions } from 'ink'
-import { stripRegion } from '@/lib/strip-regions'
+import { stripRegion } from '@/lib/template'
 
 // commands/dev/plugins, commands/build/plugins - both resolve/load the
 // same virtual entry module
