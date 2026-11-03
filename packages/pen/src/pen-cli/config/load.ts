@@ -20,7 +20,8 @@ const CONFIG_FILENAME = 'pen.config.ts'
  *
  *  @param projectDir - Project root.
  *  @param command - Vite-compatible command.
- *  @returns The loaded config, merged over defaults. */
+ *  @returns The loaded config, merged over defaults.
+ */
 export async function loadPenConfig(projectDir: string, command: 'build' | 'serve'): Promise<PenConfig> {
   if (!existsSync(join(projectDir, CONFIG_FILENAME)))
     return DEFAULT_PEN_CONFIG
