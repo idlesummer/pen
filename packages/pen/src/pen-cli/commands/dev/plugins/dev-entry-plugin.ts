@@ -47,7 +47,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
         return transformed
       }
     },
-    // Starts the dev server
+    // Watch route files and notify the running app
     configureServer(server) {
       const appDirAbsolute = join(server.config.root, appDir)
       const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
@@ -63,8 +63,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       server.watcher.on('add', path => onRouteFileChange('add', path))
       server.watcher.on('unlink', path => onRouteFileChange('unlink', path))
     },
-    // Handles create/delete events
-    // Suppress Vite's HMR for deleted route files since route reloads are handled above
+    // Suppress Vite's HMR for deleted route files
     hotUpdate(options) {
       const appDirAbsolute = join(options.server.config.root, appDir)
       if (options.type === 'delete' && isAppRouteFile(options.file, appDirAbsolute))
