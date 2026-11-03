@@ -50,7 +50,8 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     configureServer(server) {
       const appDirAbsolute = join(server.config.root, appDir)
       const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
-      const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), 150)  // waits 150ms before reloading
+      const onChange = () => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT)
+      const scheduleChange = debounce(onChange, 150)  // waits 150ms before reloading
 
       // Watches for route file additions and deletions to trigger a route reload
       const onRouteFileChange = (event: 'add' | 'unlink', filePath: string) => {
