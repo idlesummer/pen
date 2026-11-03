@@ -1,8 +1,7 @@
 import type { Plugin } from 'vite'
 import type { BuildPluginOptions } from './types'
 import { PACKAGE_NAME } from '@/constants'
-import { ENTRY_FILE } from '@/pen-cli/constants'
-import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
+import { APP_DIR_TOKEN, ENTRY_FILE, INK_OPTIONS_TOKEN } from '@/pen-cli/constants'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
 import { stripRegion, substituteTemplate } from '@/lib/template'
 
