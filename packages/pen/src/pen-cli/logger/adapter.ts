@@ -11,21 +11,13 @@ import { error, event, warn } from './console'
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
 
-// Vite identifies file-based modules by their file:// URL internally (it's
-// the exact import specifier the SSR loader uses), so that's the id its
-// own hmr messages carry - unlike FILE_WATCH's path below, which comes
-// straight from the watcher as a plain OS path. Converts back to one for
-// a consistent display, passing anything else (a virtual module id)
-// through unchanged.
+// Vite identifies file-based modules by their file:// URL internally -
+// that's the id its own hmr messages carry. Converts back to a plain path
+// for display, passing anything else (a virtual module id) through
+// unchanged.
 function toDisplayPath(id: string): string {
   return id.startsWith('file://') ? fileURLToPath(id) : id
 }
-
-// Not a Vite-internal message - pen:dev-entry routes its own file-watcher
-// events through server.config.logger (the same Logger instance this
-// adapter returns), so every dev-time terminal line, pen's own or Vite's,
-// decides how it looks in exactly one place.
-const FILE_WATCH = /^file (add|unlink) (.+)$/
 
 /**
  * Adapts Vite's logger to pen's terminal output.
@@ -50,12 +42,7 @@ export function createPenLogger(): Logger {
         warn(reason ? `${reason} ${pc.dim(displayPath)}` : pc.dim(displayPath))
       }
       else if ((match = strippedMessage.match(HMR_UPDATE))) {
-        const path = match[1]!
-        event(`Updated ${pc.dim(toDisplayPath(path))}`)
-      }
-      else if ((match = strippedMessage.match(FILE_WATCH))) {
-        const [, kind, path] = match
-        event(`${kind === 'add' ? 'Added' : 'Removed'} ${pc.dim(path!)}`)
+        event('Updated', toDisplayPath(match[1]!))
       }
       // Anything else Vite's own logger emits is internal noise pen's
       // dev output doesn't show - dropped rather than printed as-is.
