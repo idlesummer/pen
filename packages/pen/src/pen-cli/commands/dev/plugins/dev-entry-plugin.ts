@@ -55,7 +55,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
 
       // Watches for route file additions and deletions to trigger a route reload
       const onRouteFileChange = (event: string, filePath: string) => {
-        if (!isAppRouteFile(filePath, appDirAbsolute)) {
+        if (isAppRouteFile(filePath, appDirAbsolute)) {
           server.config.logger.info(`file ${event} ${filePath}`)
           scheduleChange()
         }
