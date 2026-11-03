@@ -45,9 +45,9 @@ function createPackageJson(projectName: string) {
 *   @param targetDir - Directory to create the project files in.
 *   @param name - Project name used as the package name. */
 export async function createProjectScaffold(targetDir: string, name: string) {
+  await mkdir(join(targetDir, 'src/app'), { recursive: true })
   await Promise.all([
-    mkdir(join(targetDir, 'src/app'), { recursive: true })
-      .then(() => writeFile(join(targetDir, 'src/app/page.tsx'), pageTemplate)),
+    writeFile(join(targetDir, 'src/app/page.tsx'), pageTemplate),
     writeFile(join(targetDir, 'package.json'), createPackageJson(name)),
     writeFile(join(targetDir, 'tsconfig.json'), tsconfigTemplate),
     writeFile(join(targetDir, '.gitignore'), gitignoreTemplate),
