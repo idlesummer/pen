@@ -10,9 +10,10 @@ export function ready(message: string) {
   console.log(pc.green(`\n✓ ${message}`))
 }
 
-/** A unit of work (a Fast Refresh update) finished successfully. */
-export function event(message: string) {
-  console.log(pc.green('✓'), message)
+/** A unit of work finished successfully. Pass a path to show it dimmed
+ *  after the message, e.g. event('Updated', path). */
+export function event(message: string, path?: string) {
+  console.log(pc.green('✓'), path ? `${message} ${pc.dim(path)}` : message)
 }
 
 /** Non-fatal - the app keeps running. */
