@@ -1,7 +1,9 @@
 import type { Plugin } from 'vite'
 import type { PenConfig } from '@/pen-cli/config'
-import { penDevEntry } from './dev-entry-plugin'
+import { ENTRY_MODULE_ID, penDevEntry } from './dev-entry-plugin'
 import { penRefresh } from './refresh-plugin'
+
+export { ENTRY_MODULE_ID }
 
 /** Shared construction options for pen:dev's own plugins. */
 export type DevPluginOptions = {
