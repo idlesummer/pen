@@ -4,10 +4,11 @@ import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
+import { stripRegion, substituteTemplate } from '@/lib/template'
 import { PEN_ROUTES_CHANGED_EVENT } from '@/pen-cli/constants'
 import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
+import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
-import { stripRegion, substituteTemplate } from '@/lib/template'
 
 export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.dev.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
@@ -69,7 +70,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
         return []
     },
     buildStart() {
-      this.info(`ready in ${Date.now() - startTime}ms`)
+      log.ready(`ready in ${Date.now() - startTime}ms`)
     },
   }
 }
