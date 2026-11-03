@@ -19,8 +19,7 @@ const main = defineCommand({
       // Dynamically import because react-refresh reads NODE_ENV at import time
       process.env.NODE_ENV = 'development'
       process.env.DEV = 'true'
-      const { devCommand } = await import('./commands/dev')
-      return devCommand
+      return (await import('./commands/dev')).devCommand
     },
     start: async () =>
       (await import('./commands/start')).startCommand,
