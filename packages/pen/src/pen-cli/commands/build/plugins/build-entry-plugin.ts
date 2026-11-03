@@ -4,7 +4,7 @@ import { PACKAGE_NAME } from '@/constants'
 import { ENTRY_FILE } from '@/pen-cli/constants'
 import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
 import entryAppTemplate from './templates/entry-app.build.tsx.txt' with { type: 'text' }
-import { substituteTemplate } from '@/lib/template'
+import { stripRegion, substituteTemplate } from '@/lib/template'
 
 const ENTRY_MODULE_ID = 'virtual:pen/entry-app.build.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
@@ -37,7 +37,7 @@ export function penBuildEntry({ appDir, config }: BuildPluginOptions): Plugin {
     },
     load(id) {
       if (id === RESOLVED_ENTRY_MODULE_ID)
-        return substituteTemplate(entryAppTemplate, {
+        return substituteTemplate(stripRegion(entryAppTemplate, 'codegen'), {
           [APP_DIR_TOKEN]: appDir,
           [INK_OPTIONS_TOKEN]: JSON.stringify(config.ink),
         })

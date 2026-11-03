@@ -8,9 +8,9 @@ import { PEN_ROUTES_CHANGED_EVENT } from '@/pen-cli/constants'
 import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
 import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
-import { substituteTemplate } from '@/lib/template'
+import { stripRegion, substituteTemplate } from '@/lib/template'
 
-const ENTRY_MODULE_ID = 'virtual:pen/entry-app.dev.tsx'
+export const ENTRY_MODULE_ID = 'virtual:pen/entry-app.dev.tsx'
 const RESOLVED_ENTRY_MODULE_ID = `\0${ENTRY_MODULE_ID}`
 
 function isAppRouteFile(filePath: string, appDirAbsolute: string) {
@@ -33,7 +33,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     },
     async load(id: string) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = substituteTemplate(entryAppTemplate, {
+        const source = substituteTemplate(stripRegion(entryAppTemplate, 'codegen'), {
           [APP_DIR_TOKEN]: JSON.stringify(appDir),
           [INK_OPTIONS_TOKEN]: JSON.stringify(config.ink),
         })
@@ -69,7 +69,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     // create/delete - hotUpdate is the one Vite actually calls for those.
     hotUpdate(options) {
       const appDirAbsolute = join(options.server.config.root, appDir)
-      if (isAppRouteFile(options.file, appDirAbsolute))
+      if (options.type === 'delete' && isAppRouteFile(options.file, appDirAbsolute))
         return []
     },
     buildStart() {
