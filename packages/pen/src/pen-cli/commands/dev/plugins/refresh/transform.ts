@@ -1,6 +1,6 @@
 import type { TransformResult } from 'oxc-transform-react'
 import { transform } from 'oxc-transform-react'
-import { stripRegion } from '@/lib/strip-regions'
+import { stripRegion } from '@/lib/template'
 import refreshBoundaryTemplate from './templates/refresh-boundary.ts.txt' with { type: 'text' }
 
 const refreshBoundarySource = stripRegion(refreshBoundaryTemplate, 'codegen')
