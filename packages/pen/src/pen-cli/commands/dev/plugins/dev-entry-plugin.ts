@@ -6,7 +6,6 @@ import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
 import { PEN_ROUTES_CHANGED_EVENT } from '@/pen-cli/constants'
 import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
-import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 import { stripRegion, substituteTemplate } from '@/lib/template'
 
