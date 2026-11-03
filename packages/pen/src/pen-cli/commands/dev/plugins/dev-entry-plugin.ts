@@ -50,6 +50,18 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       server.watcher.on('add', path => onRouteFileChange('add', path))
       server.watcher.on('unlink', path => onRouteFileChange('unlink', path))
     },
+    // A deleted route file is already fully handled above via
+    // PEN_ROUTES_CHANGED_EVENT - this only stops Vite's own default HMR
+    // propagation from separately trying (and failing) to reload a file
+    // that's gone, which otherwise prints a misleading "failed to reload,
+    // could be a syntax error" message for a plain, expected deletion.
+    // handleHotUpdate (legacy) only runs for type: 'update', never for
+    // create/delete - hotUpdate is the one Vite actually calls for those.
+    hotUpdate(options) {
+      const appDirAbsolute = join(options.server.config.root, appDir)
+      if (options.type === 'delete' && options.file.endsWith('.tsx') && isPathInside(options.file, appDirAbsolute))
+        return []
+    },
     buildStart() {
       log.ready(`ready in ${Date.now() - startTime}ms`)
     },
