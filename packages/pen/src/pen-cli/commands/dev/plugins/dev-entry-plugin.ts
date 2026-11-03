@@ -54,7 +54,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), 150)  // waits 150ms before reloading
 
       // Watches for route file additions and deletions to trigger a route reload
-      const onRouteFileChange = (event: 'add' | 'unlink', filePath: string) => {
+      const onRouteFileChange = (event: string, filePath: string) => {
         if (!isAppRouteFile(filePath, appDirAbsolute)) {
           server.config.logger.info(`file ${event} ${filePath}`)
           scheduleChange()
