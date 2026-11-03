@@ -1,5 +1,7 @@
 import { defineCommand, runMain } from 'citty'
 import { DESCRIPTION, PEN_VERSION } from '@/constants'
+import { buildCommand } from './commands/build'
+import { createCommand } from './commands/create'
 
 const main = defineCommand({
   meta: {
@@ -9,18 +11,10 @@ const main = defineCommand({
   },
   // Lazily load subcommands so unused command modules aren't imported
   subCommands: {
-    build: async () => {
-      const { buildCommand } = await import('./commands/build')
-      return buildCommand
-    },
-    create: async () => {
-      const { createCommand } = await import('./commands/create')
-      return createCommand
-    },
+    build: buildCommand,
+    create: createCommand,
     dev: async () => {
-      // react-refresh/runtime reads NODE_ENV at import time, so set it before
-      // importing the dev command. Ink reads DEV when render() runs, so it only
-      // needs to be set before running the app entry module.
+      // Dynamically import because react-refresh reads NODE_ENV at import time
       process.env.NODE_ENV = 'development'
       process.env.DEV = 'true'
       const { devCommand } = await import('./commands/dev')
