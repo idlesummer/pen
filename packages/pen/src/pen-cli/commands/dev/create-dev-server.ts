@@ -35,6 +35,7 @@ export async function createPenDevServer(srcDir: string) {
     server: {
       middlewareMode: true,  // don't open an HTTP server
       ws: false,  // no HMR socket; the ssr environment's HMR is in-process
+      watch: { usePolling: config.watch?.usePolling },
     },
     // Vite always creates an unused browser-style `client` environment.
     // Without this its dependency optimizer starts and writes
