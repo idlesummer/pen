@@ -5,9 +5,10 @@ import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
 import { PEN_ROUTES_CHANGED_EVENT } from '@/pen-cli/constants'
-import { ENTRY_MODULE_ID, resolveEntryModuleId, RESOLVED_ENTRY_MODULE_ID, substituteEntryTemplate } from '@/pen-cli/entry-module'
+import { ENTRY_MODULE_ID, resolveEntryModuleId, RESOLVED_ENTRY_MODULE_ID, APP_DIR_TOKEN, INK_OPTIONS_TOKEN } from '@/pen-cli/entry-module'
 import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
+import { substituteTemplate } from '@/lib/template'
 
 /** Delay after the last file change before triggering a reload, in milliseconds. */
 const DEBOUNCE_MS = 150
@@ -29,7 +30,10 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     resolveId: resolveEntryModuleId,
     async load(id: string) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
-        const source = substituteEntryTemplate(entryAppTemplate, JSON.stringify(appDir), config.ink)
+        const source = substituteTemplate(entryAppTemplate, {
+          [APP_DIR_TOKEN]: JSON.stringify(appDir),
+          [INK_OPTIONS_TOKEN]: JSON.stringify(config.ink),
+        })
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
           reactCompiler: false,  // since oxc-transform-react defaults to true
