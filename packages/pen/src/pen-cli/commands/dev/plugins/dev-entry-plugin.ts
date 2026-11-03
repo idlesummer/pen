@@ -12,6 +12,10 @@ import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 't
 /** Delay after the last file change before triggering a reload, in milliseconds. */
 const DEBOUNCE_MS = 150
 
+function isAppRouteFile(filePath: string, appDirAbsolute: string) {
+  return filePath.endsWith('.tsx') && isPathInside(filePath, appDirAbsolute)
+}
+
 /** Loads the dev entry module and notifies it of route changes. */
 export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Plugin {
   return {
@@ -26,7 +30,6 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     async load(id: string) {
       if (id === RESOLVED_ENTRY_MODULE_ID) {
         const source = substituteEntryTemplate(entryAppTemplate, JSON.stringify(appDir), config.ink)
-
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },
           reactCompiler: false,  // since oxc-transform-react defaults to true
@@ -43,7 +46,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       const ssrEnvironment = server.environments.ssr! // guaranteed by applyToEnvironment
       const scheduleChange = debounce(() => ssrEnvironment.hot.send(PEN_ROUTES_CHANGED_EVENT), DEBOUNCE_MS)
       const onRouteFileChange = (event: 'add' | 'unlink', filePath: string) => {
-        if (!filePath.endsWith('.tsx') || !isPathInside(filePath, appDirAbsolute)) return
+        if (!isAppRouteFile(filePath, appDirAbsolute)) return
         server.config.logger.info(`file ${event} ${filePath}`)
         scheduleChange()
       }
@@ -59,7 +62,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
     // create/delete - hotUpdate is the one Vite actually calls for those.
     hotUpdate(options) {
       const appDirAbsolute = join(options.server.config.root, appDir)
-      if (options.type === 'delete' && options.file.endsWith('.tsx') && isPathInside(options.file, appDirAbsolute))
+      if (isAppRouteFile(options.file, appDirAbsolute))
         return []
     },
     buildStart() {
