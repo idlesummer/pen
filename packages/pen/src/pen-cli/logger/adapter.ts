@@ -1,4 +1,5 @@
 import type { Logger } from 'vite'
+import { fileURLToPath } from 'node:url'
 import { stripVTControlCharacters } from 'node:util'
 import pc from 'picocolors'
 import { error, event, warn } from './console'
@@ -9,6 +10,16 @@ import { error, event, warn } from './console'
 // severity, not buried in routine info output.
 const HMR_INVALIDATE = /^hmr invalidate (\S+)(?: (.+))?$/
 const HMR_UPDATE = /^hmr update (.+)$/
+
+// Vite identifies file-based modules by their file:// URL internally (it's
+// the exact import specifier the SSR loader uses), so that's the id its
+// own hmr messages carry - unlike FILE_WATCH's path below, which comes
+// straight from the watcher as a plain OS path. Converts back to one for
+// a consistent display, passing anything else (a virtual module id)
+// through unchanged.
+function toDisplayPath(id: string): string {
+  return id.startsWith('file://') ? fileURLToPath(id) : id
+}
 
 // Not a Vite-internal message - pen:dev-entry routes its own file-watcher
 // events through server.config.logger (the same Logger instance this
@@ -35,11 +46,12 @@ export function createPenLogger(): Logger {
 
       if ((match = strippedMessage.match(HMR_INVALIDATE))) {
         const [, path, reason] = match
-        return warn(reason ? `${reason} ${pc.dim(path)}` : pc.dim(path!))
+        const displayPath = toDisplayPath(path!)
+        return warn(reason ? `${reason} ${pc.dim(displayPath)}` : pc.dim(displayPath))
       }
       if ((match = strippedMessage.match(HMR_UPDATE))) {
         const path = match[1]!
-        return event(`Updated ${pc.dim(path)}`)
+        return event(`Updated ${pc.dim(toDisplayPath(path))}`)
       }
       if ((match = strippedMessage.match(FILE_WATCH))) {
         const [, kind, path] = match
