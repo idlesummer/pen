@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { BuildPluginOptions } from './index'
+import type { BuildPluginOptions } from './types'
 import { transform } from 'oxc-transform-react'
 
 /** Runs React Compiler over app components during `pen build`. */

@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { ModuleLoader } from '@/lib/module'
-import type { BuildPluginOptions } from './index'
+import type { BuildPluginOptions } from './types'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { createServer, normalizePath } from 'vite'
