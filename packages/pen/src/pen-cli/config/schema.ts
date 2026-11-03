@@ -9,6 +9,16 @@ export type PenConfig = {
   reactCompiler?: boolean
   /** Options forwarded to Ink's own `render()` call. */
   ink?: InkRenderOptions
+  /** Dev server file-watching options. */
+  watch?: {
+    /** Poll the filesystem for changes instead of relying on native OS
+     *  events. Native events on Windows can stop reporting changes after
+     *  a watched directory is removed - affecting every route folder
+     *  deletion - so polling defaults to on there despite its added CPU
+     *  cost. Same tradeoff applies to Docker/network-mounted volumes on
+     *  any OS, where this can be set explicitly. */
+    usePolling?: boolean
+  }
 }
 
 /** Defaults applied when the project's config omits them. */
@@ -16,6 +26,9 @@ export const DEFAULT_PEN_CONFIG: PenConfig = {
   reactCompiler: false,
   ink: {
     maxFps: 75,
+  },
+  watch: {
+    usePolling: process.platform === 'win32',
   },
 }
 
