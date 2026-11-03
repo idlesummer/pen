@@ -69,6 +69,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
       if (options.type === 'delete' && isAppRouteFile(options.file, appDirAbsolute))
         return []
     },
+    // Runs when the dev server starts
     buildStart() {
       log.ready(`ready in ${Date.now() - startTime}ms`)
     },
