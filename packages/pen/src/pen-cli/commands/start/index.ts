@@ -25,7 +25,6 @@ export const startCommand = defineCommand({
       log.error(`No build found at '${OUT_DIR}' - run \`pen build\` first.`)
       process.exit(1)
     }
-
     await import(pathToFileURL(entryPath).href)
   },
 })
