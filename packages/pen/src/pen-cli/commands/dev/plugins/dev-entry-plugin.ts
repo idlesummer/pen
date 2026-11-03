@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { DevPluginOptions } from './index'
+import type { DevPluginOptions } from './types'
 import { join } from 'node:path'
 import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
