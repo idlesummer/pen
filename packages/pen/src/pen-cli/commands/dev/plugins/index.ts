@@ -1,10 +1,10 @@
 import type { Plugin } from 'vite'
 import type { DevPluginOptions } from './types'
-import { ENTRY_MODULE_ID, penDevEntry } from './dev-entry-plugin'
+import { penDevEntry, ENTRY_MODULE_ID } from './dev-entry-plugin'
 import { penRefresh } from './refresh-plugin'
 
-export { ENTRY_MODULE_ID }
 export type { DevPluginOptions }
+export { ENTRY_MODULE_ID }
 
 /** All plugins `pen dev` needs, in the order Vite should run them. */
 export function penDevPlugins(options: DevPluginOptions): Plugin[] {
