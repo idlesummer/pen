@@ -12,5 +12,12 @@
   },
   "allowScripts": {
     "electron@23.3.13": true
+  },
+  "overrides": {
+    "@idlesummer/pen": {
+      "react-devtools": {
+        "electron": "^42.11.3"
+      }
+    }
   }
 }
