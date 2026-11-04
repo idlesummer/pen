@@ -1,6 +1,6 @@
 # @idlesummer/pen
 
-> A React framework for building terminal UIs, with file-based routing modeled on Next.js's App Router.
+> A React framework for building terminal UIs, with file-based routing based on Next.js's App Router.
 
 Pen renders React components to the terminal via [Ink](https://github.com/vadimdemedes/ink), and adds the pieces Ink doesn't have on its own: file-based routing, a dev server with Fast Refresh, and a production build.
 
@@ -11,7 +11,7 @@ Pen renders React components to the terminal via [Ink](https://github.com/vadimd
 import { Text } from 'ink'
 
 export default function RootPage() {
-  return <Text color="green">Hello from pen</Text>
+  return <Text color="green">Hello world from pen!</Text>
 }
 ```
 
@@ -22,20 +22,10 @@ pen v0.3.1
 
 ✓ ready in 81ms
 
-Routes:
-  /
-  ├─ about/
-  │  └─ page
-  ├─ layout
-  └─ page
-
 ╭──────────────────────────╮
-│ Current path: /           │
-╰──────────────────────────╯
-╭──────────────────────────╮
-│                            │
-│   Hello from pen           │
-│                            │
+│                          │
+│   Hello world from pen!  │
+│                          │
 ╰──────────────────────────╯
 ```
 
