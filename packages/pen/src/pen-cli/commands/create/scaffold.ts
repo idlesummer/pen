@@ -8,6 +8,7 @@ import {
   TYPES_NODE_VERSION,
   TYPES_REACT_VERSION,
   TYPESCRIPT_VERSION,
+  REACT_DEVTOOLS_CORE_VERSION,
 } from '@/constants'
 import configTemplate from './templates/pen.config.ts.txt' with { type: 'text' }
 import eslintConfigTemplate from './templates/eslint.config.js.txt' with { type: 'text' }
@@ -24,6 +25,7 @@ const ESLINT_VERSION_TOKEN = '__ESLINT_VERSION__'
 const TYPES_NODE_VERSION_TOKEN = '__TYPES_NODE_VERSION__'
 const TYPES_REACT_VERSION_TOKEN = '__TYPES_REACT_VERSION__'
 const TYPESCRIPT_VERSION_TOKEN = '__TYPESCRIPT_VERSION__'
+const REACT_DEVTOOLS_CORE_VERSION_TOKEN = '__REACT_DEVTOOLS_CORE_VERSION__'
 
 function createPackageJson(projectName: string) {
   return packageTemplate
@@ -35,6 +37,7 @@ function createPackageJson(projectName: string) {
     .replaceAll(TYPES_NODE_VERSION_TOKEN, () => TYPES_NODE_VERSION)
     .replaceAll(TYPES_REACT_VERSION_TOKEN, () => TYPES_REACT_VERSION)
     .replaceAll(TYPESCRIPT_VERSION_TOKEN, () => TYPESCRIPT_VERSION)
+    .replaceAll(REACT_DEVTOOLS_CORE_VERSION_TOKEN, () => REACT_DEVTOOLS_CORE_VERSION)
 }
 
 /** Creates a fresh Pen project scaffold in `targetDir`.
