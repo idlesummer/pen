@@ -6,17 +6,17 @@ declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
 declare const __PEN_STRICT_MODE__: boolean
 // #endregion
 
+import type { ModuleLoader } from '@idlesummer/pen/internal'
 import { pathToFileURL } from 'node:url'
 import { StrictMode } from 'react'
 import { render } from 'ink'
 import {
   PenDevApp,
   createRouteRendererStore,
-  PEN_ROUTES_CHANGED_EVENT,
   createRouteRenderer,
   createDiagnosticReport,
   createModuleRegistry,
-  type ModuleLoader,
+  PEN_ROUTES_CHANGED_EVENT,
 } from '@idlesummer/pen/internal'
 
 /** Creates a module registry and validates its routes. */
