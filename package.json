@@ -10,10 +10,11 @@
     "lint": "npm run lint --workspace=packages/pen",
     "lint:fix": "npm run lint:fix --workspace=packages/pen"
   },
+  "// react-devtools electron override": "react-devtools@8.0.0's electron@23.3.13 fails to install on Node 24.16+/26.1+ (electron/electron#51619). Bumped to ^42.11.3 to fix. Remove once react-devtools updates its own electron dep.",
   "overrides": {
     "@idlesummer/pen": {
       "react-devtools": {
-        "electron": "^42.11.3"
+        "electron": "^45.2.2"
       }
     }
   }
