@@ -1,7 +1,7 @@
 import type { Logger } from 'vite'
 import { fileURLToPath } from 'node:url'
 import { stripVTControlCharacters } from 'node:util'
-import { dim } from 'picocolors'
+import pc from 'picocolors'
 import { error, event, warn } from './console'
 
 // Matches Vite's HMR invalidation messages.
@@ -34,7 +34,7 @@ export function createPenLogger(): Logger {
       if ((match = strippedMessage.match(HMR_INVALIDATE))) {
         const [, path, reason] = match
         const displayPath = toDisplayPath(path!)
-        warn(reason ? `${reason} ${dim(displayPath)}` : dim(displayPath))
+        warn(reason ? `${reason} ${pc.dim(displayPath)}` : pc.dim(displayPath))
       }
       else if ((match = strippedMessage.match(HMR_UPDATE))) {
         event('Updated', toDisplayPath(match[1]!))
