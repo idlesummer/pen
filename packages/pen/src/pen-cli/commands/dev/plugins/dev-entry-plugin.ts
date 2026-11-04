@@ -5,7 +5,7 @@ import { transform } from 'oxc-transform-react'
 import { debounce } from '@/lib/debounce'
 import { isPathInside } from '@/lib/path'
 import { stripRegion, substituteTemplate } from '@/lib/template'
-import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN, PEN_ROUTES_CHANGED_EVENT } from '@/pen-cli/constants'
+import { APP_DIR_TOKEN, INK_OPTIONS_TOKEN, PEN_ROUTES_CHANGED_EVENT, STRICT_MODE_TOKEN } from '@/pen-cli/constants'
 import * as log from '@/pen-cli/logger/console'
 import entryAppTemplate from './templates/entry-app.dev.tsx.txt' with { type: 'text' }
 
@@ -35,6 +35,7 @@ export function penDevEntry({ appDir, startTime, config }: DevPluginOptions): Pl
         const source = substituteTemplate(stripRegion(entryAppTemplate, 'codegen'), {
           [APP_DIR_TOKEN]: JSON.stringify(appDir),
           [INK_OPTIONS_TOKEN]: JSON.stringify(config.ink),
+          [STRICT_MODE_TOKEN]: JSON.stringify(config.reactStrictMode),
         })
         const transformed = await transform(ENTRY_MODULE_ID, source, {
           jsx: { development: true },

@@ -8,6 +8,12 @@ export type PenConfig = {
    *  README before enabling it.
    */
   reactCompiler?: boolean
+  /** Wraps the app in React's `StrictMode` during `pen dev`.
+   *
+   *  Dev-only, same as Next.js's own `reactStrictMode` option - on by
+   *  default, set to `false` to opt out.
+   */
+  reactStrictMode?: boolean
   /** Options forwarded to Ink's own `render()` call. */
   ink?: InkRenderOptions
   /** Dev server file-watching options. */
@@ -25,6 +31,7 @@ export type PenConfig = {
 /** Defaults applied when the project's config omits them. */
 export const DEFAULT_PEN_CONFIG: PenConfig = {
   reactCompiler: false,
+  reactStrictMode: true,
   ink: {
     maxFps: 75,
   },

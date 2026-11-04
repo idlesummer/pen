@@ -3,9 +3,11 @@
 /// <reference types="vite/client" />
 declare const __PEN_APP_DIR__: string
 declare const __PEN_INK_OPTIONS__: import('ink').RenderOptions
+declare const __PEN_STRICT_MODE__: boolean
 // #endregion
 
 import { pathToFileURL } from 'node:url'
+import { StrictMode } from 'react'
 import { render } from 'ink'
 import {
   PenDevApp,
@@ -58,5 +60,6 @@ import.meta.hot?.on(PEN_ROUTES_CHANGED_EVENT, async () => {
 })
 
 // Step 4: Start the app and wait for it to exit
-const { waitUntilExit } = render(<PenDevApp rendererStore={rendererStore} />, __PEN_INK_OPTIONS__)
+const app = <PenDevApp rendererStore={rendererStore} />
+const { waitUntilExit } = render(__PEN_STRICT_MODE__ ? <StrictMode>{app}</StrictMode> : app, __PEN_INK_OPTIONS__)
 await waitUntilExit()

@@ -233,6 +233,7 @@ import { defineConfig } from '@idlesummer/pen'
 
 export default defineConfig({
   reactCompiler: false,
+  reactStrictMode: true,
   ink: { maxFps: 75 },
   watch: { usePolling: false },
 })
@@ -244,6 +245,13 @@ Type: `boolean`\
 Default: `false`
 
 Runs React Compiler over your components. Experimental - see [oxc-transform-react](https://www.npmjs.com/package/oxc-transform-react)'s own README before enabling it.
+
+### reactStrictMode
+
+Type: `boolean`\
+Default: `true`
+
+Wraps the app in React's `StrictMode` during `pen dev` - same idea as Next.js's own `reactStrictMode` option. Dev-only; set to `false` to opt out.
 
 ### ink
 
