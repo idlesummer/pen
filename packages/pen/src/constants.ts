@@ -10,3 +10,4 @@ export const ESLINT_VERSION = pkg.peerDependencies.eslint as string
 export const TYPES_NODE_VERSION = pkg.devDependencies['@types/node'] as string
 export const TYPES_REACT_VERSION = pkg.devDependencies['@types/react'] as string
 export const TYPESCRIPT_VERSION = pkg.devDependencies.typescript as string
+export const REACT_DEVTOOLS_CORE_VERSION = pkg.devDependencies['react-devtools-core'] as string
