@@ -13,3 +13,4 @@ export const PEN_ROUTES_CHANGED_EVENT = 'pen:routes-changed'
 // dev-entry-plugin and build-entry-plugin substitute them when loading
 export const APP_DIR_TOKEN = '__PEN_APP_DIR__'
 export const INK_OPTIONS_TOKEN = '__PEN_INK_OPTIONS__'
+export const STRICT_MODE_TOKEN = '__PEN_STRICT_MODE__'
