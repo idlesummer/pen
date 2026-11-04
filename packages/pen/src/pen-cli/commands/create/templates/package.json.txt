@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "eslint": "__ESLINT_VERSION__",
-    "react-devtools-core": "__REACT_DEVTOOLS_CORE_VERSION__",
+    "react-devtools-core": "^8.0.0",
     "typescript": "__TYPESCRIPT_VERSION__"
   },
   "engines": {
