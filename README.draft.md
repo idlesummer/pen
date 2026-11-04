@@ -287,18 +287,9 @@ Ink supports [React DevTools](https://github.com/vadimdemedes/ink#using-react-de
    ```bash
    npx pen dev
    ```
-   `DEV=true` is already set for you - unlike Ink's own generic instructions, you don't need to set it yourself.
+   `DEV=true` is already set for you when running `dev` command.
 
 Your component tree shows up in the DevTools window, updating live as you navigate.
-
-## Why pen
-
-<!--
-PLACEHOLDER - fill this in yourself. What problem does this solve, why did
-you build it instead of using something else, and what makes it worth using
-over doing the same thing by hand? This is the one section nobody else can
-write for you.
--->
 
 ## Requirements
 
@@ -308,4 +299,4 @@ write for you.
 
 ## License
 
-MIT
+[MIT](./LICENSE) © Nash Luis Maramag
