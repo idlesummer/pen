@@ -46,6 +46,7 @@ first impression than a static block, but not worth blocking the draft on.
 - [CLI reference](#cli-reference)
 - [Configuration](#configuration)
 - [Examples](#examples)
+- [Debugging with React DevTools](#debugging-with-react-devtools)
 - [Why pen](#why-pen)
 - [Requirements](#requirements)
 
@@ -261,6 +262,34 @@ Use polling instead of native filesystem events for the dev server's file watche
 ## Examples
 
 [`packages/pen/examples/basic-app`](packages/pen/examples/basic-app) in this repo - nested layouts, dynamic and catch-all segments, a parallel route, and loading/error boundaries, all in one app.
+
+## Debugging with React DevTools
+
+Ink supports [React DevTools](https://github.com/vadimdemedes/ink#using-react-devtools) out of the box, and since pen is built on Ink, the same workflow works here.
+
+1. Install the optional dependency:
+   ```bash
+   npm install -D react-devtools-core
+   ```
+2. **On Node 24.16+ or 26.1+**, you'll also need to override `electron`'s version in your own `package.json` - `react-devtools`'s own pinned electron version has a known install bug on newer Node ([electron/electron#51619](https://github.com/electron/electron/issues/51619)):
+   ```json
+   "overrides": {
+     "react-devtools": {
+       "electron": "^42.11.3"
+     }
+   }
+   ```
+3. Start the standalone app in one terminal:
+   ```bash
+   npx react-devtools
+   ```
+4. Run your dev server in another:
+   ```bash
+   npx pen dev
+   ```
+   `DEV=true` is already set for you - unlike Ink's own generic instructions, you don't need to set it yourself.
+
+Your component tree shows up in the DevTools window, updating live as you navigate.
 
 ## Why pen
 
