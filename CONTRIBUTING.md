@@ -1,6 +1,6 @@
 # Contributing
 
-## Notes on Dependencies
+## Dependency overrides
 
 ### react-devtools electron override
 
