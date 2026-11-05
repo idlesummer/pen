@@ -11,7 +11,7 @@ export type {
   LayoutComponent,
   LoadingComponent,
   ErrorComponent,
-  DefaultComponent,
+  FallbackComponent,
 } from './pen-react/modules/components'
 export { createModuleRegistry } from './pen-react/modules/module-registry'
 

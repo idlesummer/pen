@@ -2,9 +2,8 @@
 
 export type {
   MatchParams,
-  ErrorFallbackProps,
   ErrorComponent,
-  DefaultComponent,
+  FallbackComponent,
   LoadingComponent,
   PageComponent,
   LayoutComponent,
@@ -17,9 +16,9 @@ export {
   useNavigate,
   useRoute,
   useRouter,
-  DefaultBoundary,
-  DefaultSignal,
-  notFound,
+  FallbackBoundary,
+  FallbackSignal,
+  showFallback,
   ErrorBoundary,
   LoadingBoundary,
 } from './pen-react'
