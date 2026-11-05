@@ -280,7 +280,7 @@ Use polling instead of native filesystem events for the dev server's file watche
 
 ## Examples
 
-[`packages/pen/examples/basic-app`](packages/pen/examples/basic-app) in this repo - nested layouts, dynamic and catch-all segments, a parallel route, and loading/error boundaries, all in one app.
+[`examples/basic-app`](examples/basic-app) in this repo - nested layouts, dynamic and catch-all segments, a parallel route, and loading/error boundaries, all in one app.
 
 ## Debugging with React DevTools
 

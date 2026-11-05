@@ -22,7 +22,7 @@ export const createCommand = defineCommand({
     const isCurrentDir = targetDir === process.cwd()
     const projectName = basename(targetDir)
 
-    if (isCurrentDir ? readdirSync(targetDir).length > 0 : existsSync(targetDir)) {
+    if (existsSync(targetDir) && readdirSync(targetDir).length > 0) {
       log.error(`'${projectName}' already exists.`)
       process.exit(1)
     }
