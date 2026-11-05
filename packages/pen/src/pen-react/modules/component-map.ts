@@ -4,7 +4,9 @@ import type { LoadingComponent } from './components/LoadingBoundary'
 import type { ErrorComponent } from './components/ErrorBoundary'
 import type { FallbackComponent } from './components/FallbackBoundary'
 import type { ModuleRegistry } from './module-registry'
+import { GLOBAL_FALLBACK } from '@/pen-core'
 import { hasFunctionDefaultExport } from '@/lib/module'
+import { DefaultFallback } from './components/FallbackBoundary'
 
 /** Components grouped by route module role, keyed by module path. */
 export type ComponentMap = {
@@ -30,13 +32,19 @@ function createFunctionMap<T>(moduleMap: Record<string, unknown>): Record<string
  *  @param moduleRegistry - Each role's raw glob'd modules, keyed by role.
  *  @returns The component map and paths with function default exports. */
 export function createComponentMap(moduleRegistry: ModuleRegistry): [componentMap: ComponentMap, componentPaths: string[]] {
-  const componentMap: ComponentMap = {
+  const roleMaps = {
     page: createFunctionMap<PageComponent>(moduleRegistry.page),
     layout: createFunctionMap<LayoutComponent>(moduleRegistry.layout),
     loading: createFunctionMap<LoadingComponent>(moduleRegistry.loading),
     error: createFunctionMap<ErrorComponent>(moduleRegistry.error),
     fallback: createFunctionMap<FallbackComponent>(moduleRegistry.fallback),
   }
-  const componentPaths = Object.values(componentMap).flatMap(Object.keys)
+  // Collected before the sentinel is added below - it's not a real module path.
+  const componentPaths = Object.values(roleMaps).flatMap(Object.keys)
+
+  const componentMap: ComponentMap = {
+    ...roleMaps,
+    fallback: { ...roleMaps.fallback, [GLOBAL_FALLBACK]: DefaultFallback },
+  }
   return [componentMap, componentPaths]
 }

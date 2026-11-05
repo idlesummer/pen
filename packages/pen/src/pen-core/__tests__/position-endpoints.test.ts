@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { createRouteTree } from '../compiler/route/route-tree'
-import { GLOBAL_DEFAULT } from '../compiler/route/route-module'
+import { GLOBAL_FALLBACK } from '../compiler/route/route-module'
 import { createPositionEndpoints, type FrameContext } from '../compiler/position/position-endpoints'
 import type { PositionNode } from '../compiler/position/position-tree'
 
@@ -12,7 +12,7 @@ describe('createPositionEndpoints', () => {
   test('falls back to the sentinel when nothing has an explicit fallback.tsx', () => {
     const tree = createRouteTree(['page.tsx'])
     const [fallback, endpoint] = createPositionEndpoints({ page: tree, fallback: tree }, createContext())
-    expect(fallback.contentPath).toBe(GLOBAL_DEFAULT)
+    expect(fallback.contentPath).toBe(GLOBAL_FALLBACK)
     expect(endpoint?.contentPath).toBe('page.tsx')
   })
 

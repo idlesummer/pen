@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { createRouteTree } from '../compiler/route/route-tree'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '../compiler/route/route-module'
+import { GLOBAL_FALLBACK, GLOBAL_ERROR } from '../compiler/route/route-module'
 import { createPositionTree } from '../compiler/position/position-tree'
 
 describe('createPositionTree', () => {
@@ -9,17 +9,17 @@ describe('createPositionTree', () => {
     const [positionTree, , modulePaths, pageEndpoints] = createPositionTree(tree)
 
     expect(positionTree.endpoint?.contentPath).toBe('page.tsx')
-    expect(positionTree.fallback.contentPath).toBe(GLOBAL_DEFAULT)
+    expect(positionTree.fallback.contentPath).toBe(GLOBAL_FALLBACK)
     // The root is a boundary, so its own frame always carries the error/fallback
     // sentinels too - they wrap the root's content, not just the fallback endpoint.
-    expect(modulePaths).toEqual([GLOBAL_DEFAULT, GLOBAL_ERROR, 'page.tsx'])
+    expect(modulePaths).toEqual([GLOBAL_ERROR, GLOBAL_FALLBACK, 'page.tsx'])
     expect(pageEndpoints).toHaveLength(1)
   })
 
   test('collects every distinct module path used by frames and content, sorted', () => {
     const tree = createRouteTree(['layout.tsx', 'blog/loading.tsx', 'blog/page.tsx'])
     const [, , modulePaths] = createPositionTree(tree)
-    expect(modulePaths).toEqual([GLOBAL_DEFAULT, GLOBAL_ERROR, 'blog/loading.tsx', 'blog/page.tsx', 'layout.tsx'])
+    expect(modulePaths).toEqual([GLOBAL_ERROR, GLOBAL_FALLBACK, 'blog/loading.tsx', 'blog/page.tsx', 'layout.tsx'])
   })
 
   test('a position with no page.tsx gets no page endpoint, only a fallback', () => {

@@ -3,7 +3,7 @@ import type { SegmentType } from './route-segment'
 import { basename } from 'node:path'
 import { treeify } from '@/lib/treeify'
 import { traverse } from '@/lib/traverse'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from './route-module'
+import { GLOBAL_FALLBACK, GLOBAL_ERROR, MODULE_ROLES } from './route-module'
 import { createSegment, isBoundary, isDynamicOrCatchall, isPrivate } from './route-segment'
 
 /** The parse tree, with one node per folder in the app directory. */
@@ -23,7 +23,7 @@ export type RouteNode = {
 
 /** The role a module path or a sentinel belongs to. */
 export function getModuleRole(fileName: string): ModuleRole {
-  if (fileName === GLOBAL_DEFAULT) return 'fallback'
+  if (fileName === GLOBAL_FALLBACK) return 'fallback'
   if (fileName === GLOBAL_ERROR) return 'error'
   return basename(fileName, '.tsx') as ModuleRole
 }

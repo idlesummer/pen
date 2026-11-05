@@ -1,7 +1,7 @@
 import type { RouteNode } from '@/pen-core/compiler/route'
 import type { Ownership } from './position-ownership'
 import type { PartialPositionNode } from './position-partial-tree'
-import { isBoundary, GLOBAL_DEFAULT, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'
+import { isBoundary, GLOBAL_FALLBACK, GLOBAL_ERROR, compactMapAncestors } from '@/pen-core/compiler/route'
 
 /** Folder modules wrapping a page endpoint. `P` is the slot position type. */
 export type Frame<TSlot, TParams=string[]> = {
@@ -37,7 +37,7 @@ function createFrame<P>(routeNode: RouteNode, context: FrameContext<P>): Frame<P
 
   const { layout, error: errorPath, loading, fallback: fallbackPath } = routeNode.modules
   const error = errorPath ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)  // Only the root needs a global error fallback
-  const fallback = fallbackPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  const fallback = fallbackPath ?? (isBoundary(routeNode.type) ? GLOBAL_FALLBACK : undefined)
   const slots = context.slotsOf.get(routeNode) as Record<string, P> | undefined
 
   if (layout || error || loading || fallback || slots) {
@@ -64,8 +64,8 @@ function createEndpoint<P>(pageOwner: RouteNode, contentPath: string, context: F
 }
 
 /** Creates a fallback endpoint, removing the innermost frame's fallback. Drops the frame if it doesn't contribute. */
-function createFallback<P>(defaultOwner: RouteNode, contentPath: string, context: FrameContext<P>): Endpoint<P> {
-  const endpoint = createEndpoint(defaultOwner, contentPath, context)
+function createFallback<P>(fallbackOwner: RouteNode, contentPath: string, context: FrameContext<P>): Endpoint<P> {
+  const endpoint = createEndpoint(fallbackOwner, contentPath, context)
   const lastFrame = endpoint.frames.pop() // pop on empty array returns undefined
 
   if (lastFrame && (lastFrame.layout || lastFrame.loading || lastFrame.error || lastFrame.slots)) {
@@ -77,9 +77,9 @@ function createFallback<P>(defaultOwner: RouteNode, contentPath: string, context
 
 /** Creates a position's page endpoint, if any, and its fallback. */
 export function createPositionEndpoints<P>(ownership: Ownership, context: FrameContext<P>) {
-  const defaultOwner = ownership.fallback!  // always set; worst case, a boundary
-  const defaultContent = defaultOwner.modules.fallback ?? GLOBAL_DEFAULT
-  const fallback = createFallback(defaultOwner, defaultContent, context)
+  const fallbackOwner = ownership.fallback!  // always set; worst case, a boundary
+  const fallbackContent = fallbackOwner.modules.fallback ?? GLOBAL_FALLBACK
+  const fallback = createFallback(fallbackOwner, fallbackContent, context)
 
   const pageOwner = ownership.page
   const pageContent = pageOwner?.modules.page

@@ -26,13 +26,13 @@ type FallbackBoundaryProps = PropsWithChildren<{
 }>
 
 /** Built-in fallback when no root fallback.tsx is defined. */
-function _Fallback({ }: ComponentProps<FallbackComponent>) { // eslint-disable-line no-empty-pattern
+export function DefaultFallback({ }: ComponentProps<FallbackComponent>) { // eslint-disable-line no-empty-pattern
   return <Text>Page Not Found</Text>
 }
 
 /** Catches notFound() and renders this position's fallback component.
  *  Other errors are re-thrown for the nearest error boundary. */
-export function FallbackBoundary({ Fallback=_Fallback, route, params, children }: FallbackBoundaryProps) {
+export function FallbackBoundary({ Fallback=DefaultFallback, route, params, children }: FallbackBoundaryProps) {
   return (
     <ReactErrorBoundary
       resetKeys={[route]}
