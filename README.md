@@ -8,10 +8,18 @@ Pen renders React components to the terminal via [Ink](https://github.com/vadimd
 
 ```tsx
 // src/app/page.tsx
+import { useState, useEffect } from 'react'
 import { Text } from 'ink'
 
 export default function RootPage() {
-  return <Text color="green">Hello world from pen!</Text>
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => setCount(c => c + 1), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return <Text color="green">Count: {count}</Text>
 }
 ```
 
@@ -22,11 +30,11 @@ pen v0.3.1
 
 ✓ ready in 81ms
 
-╭──────────────────────────╮
-│                          │
-│   Hello world from pen!  │
-│                          │
-╰──────────────────────────╯
+╭──────────────╮
+│              │
+│   Count: 3   │
+│              │
+╰──────────────╯
 ```
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
