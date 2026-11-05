@@ -31,7 +31,7 @@ export default function RootPage() {
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
 
-Pen has built-in support for Fast Refresh. It isn't part of Ink itself ([vadimdemedes/ink#159](https://github.com/vadimdemedes/ink/issues/159)).
+Fast Refresh is native to pen.
 
 <!--
 Consider swapping the terminal block above for an actual recording
