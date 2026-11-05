@@ -15,6 +15,7 @@ export default defineConfig([
             'pen.config.ts',
           ],
         },
+        tsconfigRootDir: import.meta.dirname,
       },
     },
   },
