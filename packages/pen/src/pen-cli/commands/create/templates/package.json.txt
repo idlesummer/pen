@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@idlesummer/pen": "^__PEN_VERSION__",
-    "@types/node": "__TYPES_NODE_VERSION__",
-    "@types/react": "__TYPES_REACT_VERSION__",
     "ink": "__INK_VERSION__",
     "react": "__REACT_VERSION__"
   },
   "devDependencies": {
+    "@types/node": "__TYPES_NODE_VERSION__",
+    "@types/react": "__TYPES_REACT_VERSION__",
     "eslint": "__ESLINT_VERSION__",
     "typescript": "__TYPESCRIPT_VERSION__"
   },
