@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Box, Text, useAnimation, useApp, useInput } from 'ink'
 
-export default function Page() {
+export default function RootPage() {
   const { exit } = useApp()
   const { time } = useAnimation({ interval: 1000 })
   const [count, setCount] = useState(0)
