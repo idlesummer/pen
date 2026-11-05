@@ -14,7 +14,7 @@ export type RouteNode = {
   path: string
   modules: ModulePaths
   // Derived
-  defaultFallback: RouteNode  // this folder's own nearest real default fallback
+  fallback: RouteNode  // this folder's own nearest real fallback fallback
   params: string[]           // dynamic/catchall param names from root to here, inclusive, in bind order
   // Tree
   parent?: RouteNode
@@ -23,7 +23,7 @@ export type RouteNode = {
 
 /** The role a module path or a sentinel belongs to. */
 export function getModuleRole(fileName: string): ModuleRole {
-  if (fileName === GLOBAL_DEFAULT) return 'default'
+  if (fileName === GLOBAL_DEFAULT) return 'fallback'
   if (fileName === GLOBAL_ERROR) return 'error'
   return basename(fileName, '.tsx') as ModuleRole
 }
@@ -37,8 +37,8 @@ function isModuleFilePath(path: string): boolean {
 
 function createRouteNode(name: string, path: string): RouteNode {
   const segment = createSegment(name)
-  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], defaultFallback: undefined as never, params: [] }
-  route.defaultFallback = route
+  const route: RouteNode = { name, ...segment, path, modules: {}, children: [], fallback: undefined as never, params: [] }
+  route.fallback = route
   return route
 }
 
@@ -65,8 +65,8 @@ export function createRouteTree(filePaths: string[]): RouteNode {
   })
   // Compute route properties derived from the tree
   forEach(routeTree, (route) => {
-    if (!route.modules.default && !isBoundary(route.type))
-      route.defaultFallback = route.parent!.defaultFallback
+    if (!route.modules.fallback && !isBoundary(route.type))
+      route.fallback = route.parent!.fallback
 
     route.params = isDynamicOrCatchall(route.type)
       ? [...(route.parent?.params ?? []), route.segment]
@@ -90,7 +90,7 @@ export function getRouteSource(routeNode: RouteNode): string {
 /** Compact maps a route node and its ancestors using a function. */
 export function compactMapAncestors<T>(route: RouteNode, fn: (node: RouteNode) => T | undefined): T[] {
   const values: T[] = []
-  // No condition needed since we always stop at a default or boundary
+  // No condition needed since we always stop at a fallback or boundary
   for (let node = route; ; node = node.parent!) {
     const value = fn(node)
     if (value !== undefined) values.push(value)
