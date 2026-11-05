@@ -31,7 +31,7 @@ pen v0.3.1
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
 
-Fast Refresh isn't part of Ink itself ([vadimdemedes/ink#159](https://github.com/vadimdemedes/ink/issues/159)). Pen builds it into the dev server.
+Pen has built-in support for Fast Refresh. It isn't part of Ink itself ([vadimdemedes/ink#159](https://github.com/vadimdemedes/ink/issues/159)).
 
 <!--
 Consider swapping the terminal block above for an actual recording
