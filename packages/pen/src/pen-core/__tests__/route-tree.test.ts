@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR } from '../compiler/route/route-module'
+import { GLOBAL_FALLBACK, GLOBAL_ERROR } from '../compiler/route/route-module'
 import {
   createRouteTree,
   getModuleRole,
@@ -19,7 +19,7 @@ describe('getModuleRole', () => {
   })
 
   test('resolves the global sentinels to their role', () => {
-    expect(getModuleRole(GLOBAL_DEFAULT)).toBe('fallback')
+    expect(getModuleRole(GLOBAL_FALLBACK)).toBe('fallback')
     expect(getModuleRole(GLOBAL_ERROR)).toBe('error')
   })
 })

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { GLOBAL_DEFAULT, GLOBAL_ERROR, MODULE_ROLES } from '../compiler/route/route-module'
+import { GLOBAL_FALLBACK, GLOBAL_ERROR, MODULE_ROLES } from '../compiler/route/route-module'
 
 describe('MODULE_ROLES', () => {
   test('contains exactly the known route module roles', () => {
@@ -8,13 +8,13 @@ describe('MODULE_ROLES', () => {
 })
 
 describe('sentinels', () => {
-  test('GLOBAL_DEFAULT and GLOBAL_ERROR are distinct', () => {
-    expect(GLOBAL_DEFAULT).not.toBe(GLOBAL_ERROR)
+  test('GLOBAL_FALLBACK and GLOBAL_ERROR are distinct', () => {
+    expect(GLOBAL_FALLBACK).not.toBe(GLOBAL_ERROR)
   })
 
   test('sentinels cannot collide with a real file path', () => {
     // Both start with a NUL byte, which can never appear in a real file path
-    expect(GLOBAL_DEFAULT.startsWith('\0')).toBe(true)
+    expect(GLOBAL_FALLBACK.startsWith('\0')).toBe(true)
     expect(GLOBAL_ERROR.startsWith('\0')).toBe(true)
   })
 })
