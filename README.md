@@ -27,7 +27,7 @@ export default function RootPage() {
 }
 ```
 
-![pen dev running a live counter](media/demo.gif)
+![pen dev running a live counter](media/demo.gif?v=2)
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
 
