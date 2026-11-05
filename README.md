@@ -1,6 +1,6 @@
 # @idlesummer/pen
 
-> A React framework for building terminal UIs, with file-based routing based on Next.js's App Router.
+> A React framework for building simple terminal UIs, built on Vite and Ink, with file-based routing modeled after Next.js’s App Router.
 
 Pen renders React components to the terminal via [Ink](https://github.com/vadimdemedes/ink), and adds its own: file-based routing, a dev server with Fast Refresh, and a production build through Vite.
 
