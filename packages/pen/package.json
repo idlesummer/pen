@@ -68,7 +68,6 @@
     "react-devtools-core": "^8.0.0",
     "tsdown": "^0.22.14",
     "typescript": "^6.0.3",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^5.1.0"
   },
   "peerDependencies": {
