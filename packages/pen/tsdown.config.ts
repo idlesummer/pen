@@ -6,7 +6,7 @@ export default defineConfig({
     index: 'src/index.ts',                    // Library API
     internal: 'src/internal.ts',              // Framework-internal API
     bin: 'src/pen-cli/bin.ts',                // CLI executable entry
-    'eslint-config': 'src/pen-cli/eslint-config.ts',  // Shared lint config for scaffolded apps
+    'eslint-config': 'src/eslint-config.ts',  // Shared lint config for scaffolded apps
   },
   // Output options
   dts: true,        // Generate typescript declaration files
