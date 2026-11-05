@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Generated pen app output
+.pen/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Caches
+.npm
+.eslintcache
+.vite/
+vite.config.*.timestamp-*
+
+# TypeScript cache
+*.tsbuildinfo
+
+# npm pack output
+*.tgz
+
+# OS/editor cruft
+.DS_Store
