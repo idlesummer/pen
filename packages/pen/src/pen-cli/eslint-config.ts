@@ -27,6 +27,11 @@ export default defineConfig(
       '@eslint-react/no-missing-key': 'warn',
       // bans <Foo>x casts in favor of x as Foo, which doesn't collide with JSX
       '@typescript-eslint/consistent-type-assertions': 'error',
+      'comma-dangle': ['warn', 'always-multiline'],
+      'eol-last': ['warn', 'always'],
+      'object-curly-spacing': ['warn', 'always'],
+      'quotes': ['warn', 'single', { avoidEscape: true }],
+      'semi': ['warn', 'never'],
     },
   },
 )
