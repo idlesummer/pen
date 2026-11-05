@@ -114,14 +114,14 @@ export default function Error({ error, reset }: ErrorFallbackProps) {
 }
 ```
 
-### default.tsx
+### fallback.tsx
 
-Rendered when [`notFound()`](#notfound) is called from this position, or from a parallel slot with no matching route.
+Rendered when [`showFallback()`](#showFallback) is called from this position, or from a parallel slot with no matching route.
 
 Type: `FunctionComponent<{ params: MatchParams }>`
 
 ```tsx
-export default function Default() {
+export default function Fallback() {
   return <Text>Not found</Text>
 }
 ```
@@ -195,9 +195,9 @@ function BackOnEscape() {
 
 ## Functions
 
-### notFound()
+### showFallback()
 
-Call from anywhere in a route's render to replace its content with the nearest [`default.tsx`](#defaulttsx) - the same idea as Next.js's own `notFound()`.
+Call from anywhere in a route's render to replace its content with the nearest [`fallback.tsx`](#fallbacktsx) - similar idea as Next.js's own `notFound()`.
 
 ```tsx
 import { notFound } from '@idlesummer/pen'
