@@ -24,7 +24,7 @@ export default function RootPage() {
 ```
 
 ```
-$ npx pen dev
+$ npx @idlesummer/pen dev
 
 pen v0.3.1
 
@@ -63,13 +63,13 @@ first impression than a static block, but not worth blocking the draft on.
 ## Getting started
 
 ```bash
-npx pen create my-app
+npx @idlesummer/pen create my-app
 cd my-app
 npm install
 npx pen dev
 ```
 
-Omit the name to scaffold into the current directory instead: `npx pen create`.
+Omit the name to scaffold into the current directory instead: `npx @idlesummer/pen create`.
 
 ## Routing conventions
 
