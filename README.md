@@ -200,10 +200,11 @@ function BackOnEscape() {
 Call from anywhere in a route's render to replace its content with the nearest [`fallback.tsx`](#fallbacktsx) - similar idea as Next.js's own `notFound()`.
 
 ```tsx
-import { notFound } from '@idlesummer/pen'
+import { showFallback } from '@idlesummer/pen'
 
 export default function UserPage({ params }: { params: MatchParams }) {
-  if (!userExists(params.id)) notFound()
+  if (!userExists(params.id))
+    showFallback()
   return <Text>...</Text>
 }
 ```
