@@ -11,4 +11,4 @@ export type ModuleRole = typeof MODULE_ROLES extends Set<infer T> ? T : never
 export type ModulePaths = Partial<Record<ModuleRole, string>>
 
 /** For testing whether a base name is a route module. */
-export const MODULE_ROLES = new Set(['page', 'layout', 'loading', 'error', 'default'] as const)
+export const MODULE_ROLES = new Set(['page', 'layout', 'loading', 'error', 'fallback'] as const)

@@ -38,7 +38,7 @@ export function validateAsyncPages(pageEndpoints: Endpoint<PositionNode>[], comp
   for (const endpoint of pageEndpoints) {
     // Mirrors render.tsx's renderChain: a page endpoint's content is its own
     // page.tsx, or the nearest default.tsx when there's no page.tsx at all.
-    const Content = componentMap.page[endpoint.contentPath] ?? componentMap.default[endpoint.contentPath]
+    const Content = componentMap.page[endpoint.contentPath] ?? componentMap.fallback[endpoint.contentPath]
     if (Content?.constructor.name === 'AsyncFunction' && !endpoint.frames.some(frame => frame.loading)) {
       diagnostics.push(createDiagnostic({
         rule: 'async-page-missing-loading',

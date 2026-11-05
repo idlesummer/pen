@@ -4,7 +4,7 @@ import type {
   LayoutComponent,
   LoadingComponent,
   ErrorComponent,
-  DefaultComponent,
+  FallbackComponent,
   ComponentMap,
 } from '@/pen-react/modules'
 
@@ -14,14 +14,14 @@ export type ComponentFrame = {
   Layout?: LayoutComponent
   Loading?: LoadingComponent
   Error?: ErrorComponent
-  Default?: DefaultComponent
+  Fallback?: FallbackComponent
   slots?: Record<string, ComponentTree>
   params: MatchParams
 }
 
 /** An endpoint with its content and frames converted to components. */
 export type ComponentEndpoint = {
-  Content: PageComponent | DefaultComponent
+  Content: PageComponent | FallbackComponent
   frames: ComponentFrame[]
   params: MatchParams
 }
@@ -37,7 +37,7 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
     Layout: frame.layout ? componentMap.layout[frame.layout] : undefined,
     Loading: frame.loading ? componentMap.loading[frame.loading] : undefined,
     Error: frame.error ? componentMap.error[frame.error] : undefined,
-    Default: frame.default ? componentMap.default[frame.default] : undefined,
+    Fallback: frame.fallback ? componentMap.fallback[frame.fallback] : undefined,
     params: frame.params,
   }
 }
@@ -46,7 +46,7 @@ function createFrameComponents(frame: MatchFrame, componentMap: ComponentMap): O
 function createComponentSlot(slotMatch: Match, componentMap: ComponentMap): ComponentTree {
   const slotEndpoint = slotMatch.endpoint
   const frames = slotEndpoint.frames.map(frame => createFrameComponents(frame, componentMap))
-  const Content = (componentMap.page[slotEndpoint.contentPath] ?? componentMap.default[slotEndpoint.contentPath])!
+  const Content = (componentMap.page[slotEndpoint.contentPath] ?? componentMap.fallback[slotEndpoint.contentPath])!
   const endpoint = { Content, frames, params: slotEndpoint.params }
   return { endpoint }
 }
@@ -63,7 +63,7 @@ export function createComponentTree(matchTree: Match, componentMap: ComponentMap
     }
     return { ...createFrameComponents(frame, componentMap), slots }
   })
-  const Content = (componentMap.page[mainEndpoint.contentPath] ?? componentMap.default[mainEndpoint.contentPath])!
+  const Content = (componentMap.page[mainEndpoint.contentPath] ?? componentMap.fallback[mainEndpoint.contentPath])!
   const endpoint = { Content, frames, params: mainEndpoint.params }
   return { endpoint }
 }

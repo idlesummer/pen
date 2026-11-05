@@ -24,11 +24,11 @@ function getModulePaths(positions: PositionNode[]): string[] {
       if (!endpoint) continue
 
       modules.add(endpoint.contentPath)
-      for (const { layout, loading, error, default: default_ } of endpoint.frames) {
+      for (const { layout, loading, error, fallback } of endpoint.frames) {
         if (layout)   modules.add(layout)
         if (loading)  modules.add(loading)
         if (error)    modules.add(error)
-        if (default_) modules.add(default_)
+        if (fallback) modules.add(fallback)
       }
     }
   }

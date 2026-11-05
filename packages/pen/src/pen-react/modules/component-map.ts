@@ -2,7 +2,7 @@ import type { PageComponent } from './components/PageComponent'
 import type { LayoutComponent } from './components/LayoutComponent'
 import type { LoadingComponent } from './components/LoadingBoundary'
 import type { ErrorComponent } from './components/ErrorBoundary'
-import type { DefaultComponent } from './components/DefaultBoundary'
+import type { FallbackComponent } from './components/FallbackBoundary'
 import type { ModuleRegistry } from './module-registry'
 import { hasFunctionDefaultExport } from '@/lib/module'
 
@@ -12,7 +12,7 @@ export type ComponentMap = {
   layout:   Record<string, LayoutComponent>
   loading:  Record<string, LoadingComponent>
   error:    Record<string, ErrorComponent>
-  default:  Record<string, DefaultComponent>
+  fallback:  Record<string, FallbackComponent>
 }
 
 /** Extracts function default exports into a map keyed by paths without a leading `./`. */
@@ -35,7 +35,7 @@ export function createComponentMap(moduleRegistry: ModuleRegistry): [componentMa
     layout: createFunctionMap<LayoutComponent>(moduleRegistry.layout),
     loading: createFunctionMap<LoadingComponent>(moduleRegistry.loading),
     error: createFunctionMap<ErrorComponent>(moduleRegistry.error),
-    default: createFunctionMap<DefaultComponent>(moduleRegistry.default),
+    fallback: createFunctionMap<FallbackComponent>(moduleRegistry.fallback),
   }
   const componentPaths = Object.values(componentMap).flatMap(Object.keys)
   return [componentMap, componentPaths]

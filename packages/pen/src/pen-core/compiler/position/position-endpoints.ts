@@ -8,14 +8,14 @@ export type Frame<TSlot, TParams=string[]> = {
   layout?: string
   loading?: string
   error?: string
-  default?: string
+  fallback?: string
   slots?: Record<string, TSlot> // this folder's own declared slots
   params: TParams // the dynamic param names bound before this frame (if string)
 }
 
 /** Renderable route endpoint containing all the data needed for rendering. */
 export type Endpoint<TSlot, TParams=string[]> = {
-  contentPath: string // either page or default
+  contentPath: string // either page or fallback
   frames: Frame<TSlot, TParams>[]  // last frame is the endpoint's parent
   params: TParams     // the dynamic param names bound up to the content itself
 }
@@ -35,20 +35,20 @@ function createFrame<P>(routeNode: RouteNode, context: FrameContext<P>): Frame<P
   if (frameOf.has(routeNode))
     return frameOf.get(routeNode)
 
-  const { layout, error: errorPath, loading, default: defaultPath } = routeNode.modules
+  const { layout, error: errorPath, loading, fallback: fallbackPath } = routeNode.modules
   const error = errorPath ?? (routeNode.type === 'root' ? GLOBAL_ERROR : undefined)  // Only the root needs a global error fallback
-  const default_ = defaultPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
+  const fallback = fallbackPath ?? (isBoundary(routeNode.type) ? GLOBAL_DEFAULT : undefined)
   const slots = context.slotsOf.get(routeNode) as Record<string, P> | undefined
 
-  if (layout || error || loading || default_ || slots) {
+  if (layout || error || loading || fallback || slots) {
     const params = routeNode.params
-    const frame = { layout, loading, error, default: default_, slots, params }
+    const frame = { layout, loading, error, fallback, slots, params }
     frameOf.set(routeNode, frame)
     return frame
   }
 }
 
-/** The same frame without its own `default` for an endpoint whose content is that default */
+/** The same frame without its own `fallback` for an endpoint whose content is that fallback */
 function createFallbackFrame<P>(frame: Frame<P>): Frame<P> {
   const { layout, loading, error, slots, params } = frame
   return { layout, loading, error, slots, params }
@@ -63,7 +63,7 @@ function createEndpoint<P>(pageOwner: RouteNode, contentPath: string, context: F
   return { frames, contentPath, params }
 }
 
-/** Creates a fallback endpoint, removing the innermost frame's default. Drops the frame if it doesn't contribute. */
+/** Creates a fallback endpoint, removing the innermost frame's fallback. Drops the frame if it doesn't contribute. */
 function createFallback<P>(defaultOwner: RouteNode, contentPath: string, context: FrameContext<P>): Endpoint<P> {
   const endpoint = createEndpoint(defaultOwner, contentPath, context)
   const lastFrame = endpoint.frames.pop() // pop on empty array returns undefined
@@ -77,8 +77,8 @@ function createFallback<P>(defaultOwner: RouteNode, contentPath: string, context
 
 /** Creates a position's page endpoint, if any, and its fallback. */
 export function createPositionEndpoints<P>(ownership: Ownership, context: FrameContext<P>) {
-  const defaultOwner = ownership.default!  // always set; worst case, a boundary
-  const defaultContent = defaultOwner.modules.default ?? GLOBAL_DEFAULT
+  const defaultOwner = ownership.fallback!  // always set; worst case, a boundary
+  const defaultContent = defaultOwner.modules.fallback ?? GLOBAL_DEFAULT
   const fallback = createFallback(defaultOwner, defaultContent, context)
 
   const pageOwner = ownership.page

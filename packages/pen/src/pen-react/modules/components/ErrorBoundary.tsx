@@ -1,17 +1,13 @@
-import type { FunctionComponent, PropsWithChildren } from 'react'
+import type { ComponentProps, FunctionComponent, PropsWithChildren } from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Text } from 'ink'
 import { normalizeError } from '@/lib/normalize-error'
-import { DefaultSignal } from './DefaultBoundary'
+import { FallbackSignal } from './FallbackBoundary'
 
-/** Props passed to an error component. */
-export type ErrorFallbackProps = {
+export type ErrorComponent = FunctionComponent<{
   error: Error
   reset: () => void
-}
-
-export type ErrorComponent =
-  FunctionComponent<ErrorFallbackProps>
+}>
 
 type ErrorBoundaryProps = PropsWithChildren<{
   Fallback?: ErrorComponent
@@ -19,7 +15,7 @@ type ErrorBoundaryProps = PropsWithChildren<{
 }>
 
 /** Built-in fallback rendered when an app defines no root `error.tsx`. */
-function ErrorFallback({ error }: ErrorFallbackProps) {
+function ErrorFallback({ error }: ComponentProps<ErrorComponent>) {
   return <Text>Something went wrong: {`${error.message}\n\n${error.stack}`}</Text>
 }
 
@@ -32,7 +28,7 @@ export function ErrorBoundary({ Fallback=ErrorFallback, route, children }: Error
         <Fallback error={normalizeError(error)} reset={resetErrorBoundary} />
       )}
       onError={(error) => {
-        if (error instanceof DefaultSignal)
+        if (error instanceof FallbackSignal)
           throw error
       }}
     >

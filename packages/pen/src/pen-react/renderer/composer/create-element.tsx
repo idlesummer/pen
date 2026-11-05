@@ -3,7 +3,7 @@ import type { RouteMatcher } from '@/pen-core'
 import type { ComponentMap } from '@/pen-react/modules'
 import type { ComponentEndpoint, ComponentFrame } from './component-tree'
 import { AwaitComponent } from '@/lib/await-component'
-import { DefaultBoundary, ErrorBoundary, LoadingBoundary } from '@/pen-react/modules'
+import { FallbackBoundary, ErrorBoundary, LoadingBoundary } from '@/pen-react/modules'
 import { createComponentTree } from './component-tree'
 
 /** Renders endpoint content, awaiting async components when necessary. */
@@ -17,8 +17,8 @@ function renderContent(endpoint: ComponentEndpoint): ReactNode {
 
 /** Wraps child with a frame's boundaries and layout. */
 function wrapFrame(route: string, frame: ComponentFrame, child: ReactNode, slots?: Record<string, ReactNode>): ReactNode {
-  if (frame.Default)
-    child = <DefaultBoundary Fallback={frame.Default} route={route} params={frame.params}>{child}</DefaultBoundary>
+  if (frame.Fallback)
+    child = <FallbackBoundary Fallback={frame.Fallback} route={route} params={frame.params}>{child}</FallbackBoundary>
   if (frame.Loading)
     child = <LoadingBoundary Fallback={frame.Loading}>{child}</LoadingBoundary>
   if (frame.Error)
