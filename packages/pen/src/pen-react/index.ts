@@ -3,17 +3,16 @@ export type { MatchParams } from '@/pen-core'
 
 // pen-react/modules
 export type {
-  ErrorFallbackProps,
   ErrorComponent,
-  DefaultComponent,
+  FallbackComponent,
   LoadingComponent,
   PageComponent,
   LayoutComponent,
 } from './modules'
 export {
-  DefaultBoundary,
-  DefaultSignal,
-  notFound,
+  FallbackBoundary,
+  FallbackSignal,
+  showFallback,
   ErrorBoundary,
   LoadingBoundary,
 } from './modules'

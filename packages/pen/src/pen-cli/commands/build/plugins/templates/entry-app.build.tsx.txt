@@ -17,7 +17,7 @@ const moduleRegistry: ModuleRegistry = {  // `import.meta.glob` needs literal ar
   layout:   import.meta.glob('./**/layout.tsx',  { base: './__PEN_APP_DIR__', eager: true }),
   loading:  import.meta.glob('./**/loading.tsx', { base: './__PEN_APP_DIR__', eager: true }),
   error:    import.meta.glob('./**/error.tsx',   { base: './__PEN_APP_DIR__', eager: true }),
-  default:  import.meta.glob('./**/default.tsx', { base: './__PEN_APP_DIR__', eager: true }),
+  fallback: import.meta.glob('./**/fallback.tsx', { base: './__PEN_APP_DIR__', eager: true }),
 }
 
 // Step 2: Start the app and wait for it to exit
