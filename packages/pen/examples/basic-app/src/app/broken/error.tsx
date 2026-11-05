@@ -1,7 +1,8 @@
+import type { ComponentProps } from 'react'
 import { Box, Text } from 'ink'
-import type { ErrorFallbackProps } from '@idlesummer/pen'
+import type { ErrorComponent } from '@idlesummer/pen'
 
-export default function BrokenError({ error }: ErrorFallbackProps) {
+export default function BrokenError({ error }: ComponentProps<ErrorComponent>) {
   return (
     <Box flexDirection="column">
       <Box>
