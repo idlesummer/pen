@@ -6,7 +6,7 @@ export default function RootPage() {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
-    const interval = setInterval(() => setCount(c => c + 1), 500)
+    const interval = setInterval(() => setCount(c => c + 1), 100)
     return () => clearInterval(interval)
   }, [])
 
