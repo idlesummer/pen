@@ -27,17 +27,7 @@ export default function RootPage() {
 }
 ```
 
-```
-$ npx @idlesummer/pen dev
-
-pen v0.3.1
-
-✓ ready in 81ms
-
-╭──────────╮
-│ Count: 3 │
-╰──────────╯
-```
+![pen dev running a live counter](media/demo.gif)
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
 
