@@ -1,4 +1,4 @@
-// Public package API - what an app's own code is meant to import.
+// Public package API
 
 export type {
   MatchParams,

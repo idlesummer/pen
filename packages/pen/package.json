@@ -42,6 +42,7 @@
     "build": "tsdown",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "test": "vitest run",
     "prepare": "npm run build"
   },
   "dependencies": {
@@ -66,7 +67,9 @@
     "react-devtools": "^8.0.0",
     "react-devtools-core": "^8.0.0",
     "tsdown": "^0.22.14",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
     "eslint": "^10.8.1",
