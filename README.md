@@ -9,7 +9,7 @@ Pen renders React components to the terminal via [Ink](https://github.com/vadimd
 ```tsx
 // src/app/page.tsx
 import { useState, useEffect } from 'react'
-import { Text } from 'ink'
+import { Box, Text } from 'ink'
 
 export default function RootPage() {
   const [count, setCount] = useState(0)
@@ -19,7 +19,11 @@ export default function RootPage() {
     return () => clearInterval(interval)
   }, [])
 
-  return <Text color="green">Count: {count}</Text>
+  return (
+    <Box borderStyle="round" paddingX={1} alignSelf="flex-start">
+      <Text color="green">Count: {count}</Text>
+    </Box>
+  )
 }
 ```
 
@@ -30,11 +34,9 @@ pen v0.3.1
 
 ✓ ready in 81ms
 
-╭──────────────╮
-│              │
-│   Count: 3   │
-│              │
-╰──────────────╯
+╭──────────╮
+│ Count: 3 │
+╰──────────╯
 ```
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.

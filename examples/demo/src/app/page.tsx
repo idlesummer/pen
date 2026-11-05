@@ -1,6 +1,6 @@
 // src/app/page.tsx
 import { useState, useEffect } from 'react'
-import { Text } from 'ink'
+import { Box, Text } from 'ink'
 
 export default function RootPage() {
   const [count, setCount] = useState(0)
@@ -10,5 +10,9 @@ export default function RootPage() {
     return () => clearInterval(interval)
   }, [])
 
-  return <Text color="green">Count: {count}</Text>
+  return (
+    <Box borderStyle="round" paddingX={1} alignSelf="flex-start">
+      <Text color="green">Count: {count}</Text>
+    </Box>
+  )
 }
