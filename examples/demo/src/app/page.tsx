@@ -6,13 +6,15 @@ export default function RootPage() {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
-    const interval = setInterval(() => setCount(c => c + 1), 1000)
+    const interval = setInterval(() => setCount(c => c + 1), 500)
     return () => clearInterval(interval)
   }, [])
 
   return (
-    <Box borderStyle="round" paddingX={1} alignSelf="flex-start">
-      <Text color="green">Count: {count}</Text>
-    </Box>
+    <>
+      <Box alignSelf="flex-start" justifyContent='center' alignItems='center'>
+        <Text color="cyan">Count: {count}</Text>
+      </Box>
+    </>
   )
 }

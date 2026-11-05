@@ -17,7 +17,7 @@ Show
 
 Type "npm run dev"
 Enter
-Sleep 6s
+Sleep 15s
 
 Ctrl+C
 Sleep 1s
