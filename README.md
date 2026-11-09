@@ -5,7 +5,7 @@
 > [!NOTE]
 > Early-stage — API may still change.
 
-Pen renders React components to the terminal via [Ink](https://github.com/vadimdemedes/ink), and adds its own: file-based routing, a dev server with Fast Refresh, and a production build through Vite.
+Pen renders React components to the terminal via [Ink](https://github.com/vadimdemedes/ink), and adds its own: file-based routing, a dev server with Fast Refresh, and a production build through [Vite](https://github.com/vitejs/vite).
 
 ## Usage
 
@@ -30,7 +30,7 @@ export default function RootPage() {
 }
 ```
 
-![pen dev running a live counter](media/demo.gif?v=2)
+![pen dev running a live counter](media/demo.gif?v=3)
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
 
