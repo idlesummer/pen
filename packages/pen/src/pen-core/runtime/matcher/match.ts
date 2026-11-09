@@ -1,6 +1,6 @@
-import { pickRecord } from '@/lib/record'
-import type { Endpoint, Frame, PositionNode } from '../../compiler'
+import type { Endpoint, Frame, PositionNode } from '@/pen-core/compiler'
 import type { MatchParams } from './find'
+import { pickRecord } from '@/lib/record'
 import { findPositionEndpoint } from './find'
 
 /** A matched endpoint and its params, with every declared slot already resolved. */
