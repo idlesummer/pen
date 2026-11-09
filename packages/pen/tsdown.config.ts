@@ -12,5 +12,9 @@ export default defineConfig({
   dts: true,        // Generate typescript declaration files
   sourcemap: true,  // Source maps for debugging
   clean: true,      // Remove dist/ before build
-  minify: true,     // Minify the emitted JavaScript
+  minify: {         // Minify the emitted JavaScript
+    mangle: {       // Mangling breaks validateComponentExports's capital-letter component name check
+      reserved: ['DefaultFallback', 'ErrorFallback'],
+    },
+  },
 })
