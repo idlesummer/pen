@@ -1,6 +1,6 @@
+import type { ModuleRegistry } from '../modules/module-registry'
 import { describe, expect, test } from 'vitest'
 import { createComponentMap } from '../modules/component-map'
-import type { ModuleRegistry } from '../modules/module-registry'
 
 function Page() {}
 function Layout() {}

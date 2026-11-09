@@ -1,11 +1,11 @@
 import type { ReactElement, ReactNode } from 'react'
+import type { ComponentMap } from '../modules/component-map'
 import { describe, expect, test } from 'vitest'
 import { render } from 'ink-testing-library'
 import { Text } from 'ink'
 import { createRouter } from '@/pen-core'
 import { createRouteElement } from '../renderer/composer/create-element'
 import { showFallback } from '../modules/components/FallbackBoundary'
-import type { ComponentMap } from '../modules/component-map'
 
 function createTestRouteMatcher(filePaths: string[]) {
   return createRouter(filePaths).routeMatcher

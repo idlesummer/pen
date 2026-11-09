@@ -1,7 +1,7 @@
+import type { Match } from '@/pen-core'
+import type { ComponentMap } from '../modules/component-map'
 import { describe, expect, test } from 'vitest'
 import { createComponentTree } from '../renderer/composer/component-tree'
-import type { ComponentMap } from '../modules/component-map'
-import type { Match } from '@/pen-core'
 
 function Page() {}
 function Layout() {}

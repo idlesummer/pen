@@ -1,6 +1,6 @@
+import type { ModuleRegistry } from '../modules/module-registry'
 import { describe, expect, test } from 'vitest'
 import { createDiagnosticReport } from '../diagnostics/diagnose-routes'
-import type { ModuleRegistry } from '../modules/module-registry'
 
 describe('createDiagnosticReport', () => {
   test('a clean app has no warnings or error', () => {

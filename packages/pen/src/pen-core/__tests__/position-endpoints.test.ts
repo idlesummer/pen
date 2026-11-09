@@ -1,8 +1,8 @@
+import type { PositionNode } from '../compiler/position/position-tree'
 import { describe, expect, test } from 'vitest'
 import { createRouteTree } from '../compiler/route/route-tree'
 import { GLOBAL_FALLBACK } from '../compiler/route/route-module'
 import { createPositionEndpoints, type FrameContext } from '../compiler/position/position-endpoints'
-import type { PositionNode } from '../compiler/position/position-tree'
 
 function createContext(): FrameContext<PositionNode> {
   return { slotsOf: new Map(), frameOf: new Map(), fallbackFrameOf: new Map() }

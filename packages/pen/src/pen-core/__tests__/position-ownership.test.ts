@@ -1,6 +1,7 @@
+import type { Ownership } from '../compiler/position/position-ownership'
 import { describe, expect, test } from 'vitest'
 import { createRouteTree } from '../compiler/route/route-tree'
-import { addOwnership, type Ownership } from '../compiler/position/position-ownership'
+import { addOwnership } from '../compiler/position/position-ownership'
 
 describe('addOwnership', () => {
   test('sets fallback ownership on first call, even without an explicit fallback.tsx', () => {

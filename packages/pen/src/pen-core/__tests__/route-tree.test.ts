@@ -1,3 +1,4 @@
+import type { RouteNode } from '../compiler/route/route-tree'
 import { describe, expect, test } from 'vitest'
 import { GLOBAL_FALLBACK, GLOBAL_ERROR } from '../compiler/route/route-module'
 import {
@@ -6,7 +7,6 @@ import {
   forEach,
   getRouteSource,
   compactMapAncestors,
-  type RouteNode,
 } from '../compiler/route/route-tree'
 
 describe('getModuleRole', () => {

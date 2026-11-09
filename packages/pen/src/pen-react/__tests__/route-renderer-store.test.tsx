@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
+import type { ModuleRegistry } from '../modules/module-registry'
 import { describe, expect, test } from 'vitest'
 import { render } from 'ink-testing-library'
 import { Text } from 'ink'
 import { createRouteRendererStore } from '../renderer/route-renderer-store'
 import { createRouteRenderer } from '../renderer/route-renderer'
-import type { ModuleRegistry } from '../modules/module-registry'
 
 function moduleRegistryWith(text: string): ModuleRegistry {
   return {

@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
+import type { ModuleRegistry } from '../modules/module-registry'
 import { describe, expect, test } from 'vitest'
 import { render } from 'ink-testing-library'
 import { Text } from 'ink'
 import { createRouteRenderer } from '../renderer/route-renderer'
-import type { ModuleRegistry } from '../modules/module-registry'
 
 describe('createRouteRenderer', () => {
   test('resolves a raw module registry straight to rendered output', () => {
