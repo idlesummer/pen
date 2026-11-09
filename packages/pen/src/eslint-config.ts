@@ -1,1 +1,1 @@
-export { default } from './pen-cli'
+export { default } from './pen-eslint'
