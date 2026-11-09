@@ -1,5 +1,5 @@
-import { Fragment, useMemo } from 'react'
 import type { RouteRenderer } from '@/pen-react/renderer'
+import { Fragment, useMemo } from 'react'
 import { useNavigate } from './navigation'
 
 export type RouterProps = {

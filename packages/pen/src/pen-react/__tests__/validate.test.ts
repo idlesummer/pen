@@ -1,7 +1,7 @@
+import type { Endpoint, PositionNode } from '@/pen-core'
+import type { ComponentMap } from '../modules/component-map'
 import { describe, expect, test } from 'vitest'
 import { validateComponentExports, validateAsyncPages } from '../diagnostics/validate'
-import type { ComponentMap } from '../modules/component-map'
-import type { Endpoint, PositionNode } from '@/pen-core'
 
 function emptyComponentMap(): ComponentMap {
   return { page: {}, layout: {}, loading: {}, error: {}, fallback: {} }
