@@ -53,7 +53,7 @@ export function findPositionEndpoint(position: PositionNode, url: string[]) {
       const position = candidate.position
       const isExhausted = !url[position.urlDepth]
       const isAccepting = isExhausted || candidate.isCatchall // url is exhausted or position is catchall
-      if (isAccepting && position.endpoint)
+      if (isAccepting && position.pageEndpoint)
         return (winner = candidate, true)
 
       const isBetterStatic = !bestStatic || position.dynamicCount < bestStatic.position.dynamicCount
@@ -61,7 +61,7 @@ export function findPositionEndpoint(position: PositionNode, url: string[]) {
         bestStatic = candidate
     },
   })
-  const endpoint = winner ? winner.position.endpoint! : bestStatic!.position.fallback
+  const endpoint = winner ? winner.position.pageEndpoint! : bestStatic!.position.fallbackEndpoint
   const params = (winner ?? bestStatic!).params // guaranteed: the url or the tree always exhausts eventually
   return [endpoint, params] as const
 }

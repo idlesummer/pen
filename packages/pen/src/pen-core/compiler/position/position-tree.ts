@@ -10,8 +10,8 @@ export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'ca
   dynamic?: PositionNode
   catchall?: PositionNode
   // Rendering
-  endpoint?: Endpoint<PositionNode>
-  fallback: Endpoint<PositionNode>
+  pageEndpoint?: Endpoint<PositionNode>
+  fallbackEndpoint: Endpoint<PositionNode>
 }
 
 // ── build ────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ export type PositionNode = Omit<PartialPositionNode, 'statics' | 'dynamic' | 'ca
 function getModulePaths(positions: PositionNode[]): string[] {
   const modules = new Set<string>()
   for (const position of positions) {
-    for (const endpoint of [position.endpoint, position.fallback]) {
+    for (const endpoint of [position.pageEndpoint, position.fallbackEndpoint]) {
       if (!endpoint) continue
 
       modules.add(endpoint.contentPath)
@@ -39,8 +39,8 @@ function getModulePaths(positions: PositionNode[]): string[] {
 function getPageEndpoints(positions: PositionNode[]): Endpoint<PositionNode>[] {
   const endpoints: Endpoint<PositionNode>[] = []
   for (const position of positions)
-    if (position.endpoint)
-      endpoints.push(position.endpoint)
+    if (position.pageEndpoint)
+      endpoints.push(position.pageEndpoint)
   return endpoints
 }
 
@@ -53,9 +53,9 @@ export function createPositionTree(routeTree: RouteNode) {
     fallbackFrameOf: new Map(),
   }
   for (const position of positionNodes) {
-    const [fallback, endpoint] = createPositionEndpoints(ownershipOf.get(position)!, context)
-    position.fallback = fallback
-    position.endpoint = endpoint
+    const [fallbackEndpoint, pageEndpoint] = createPositionEndpoints(ownershipOf.get(position)!, context)
+    position.fallbackEndpoint = fallbackEndpoint
+    position.pageEndpoint = pageEndpoint
   }
   const modulePaths = getModulePaths(positionNodes)
   const pageEndpoints = getPageEndpoints(positionNodes)

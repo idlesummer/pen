@@ -9,7 +9,7 @@ describe('compileApp', () => {
     // The root boundary's own frame always carries the error/fallback sentinels.
     expect(output.modulePaths).toEqual([GLOBAL_ERROR, GLOBAL_FALLBACK, 'page.tsx'])
     expect(output.pageEndpoints).toHaveLength(1)
-    expect(output.positionTree.endpoint?.contentPath).toBe('page.tsx')
+    expect(output.positionTree.pageEndpoint?.contentPath).toBe('page.tsx')
   })
 
   test('surfaces route-tree diagnostics', () => {

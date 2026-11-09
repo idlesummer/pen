@@ -8,8 +8,8 @@ describe('createPositionTree', () => {
     const tree = createRouteTree(['page.tsx'])
     const [positionTree, , modulePaths, pageEndpoints] = createPositionTree(tree)
 
-    expect(positionTree.endpoint?.contentPath).toBe('page.tsx')
-    expect(positionTree.fallback.contentPath).toBe(GLOBAL_FALLBACK)
+    expect(positionTree.pageEndpoint?.contentPath).toBe('page.tsx')
+    expect(positionTree.fallbackEndpoint.contentPath).toBe(GLOBAL_FALLBACK)
     // The root is a boundary, so its own frame always carries the error/fallback
     // sentinels too - they wrap the root's content, not just the fallback endpoint.
     expect(modulePaths).toEqual([GLOBAL_ERROR, GLOBAL_FALLBACK, 'page.tsx'])
@@ -26,8 +26,8 @@ describe('createPositionTree', () => {
     const tree = createRouteTree(['blog/layout.tsx'])
     const [positionTree] = createPositionTree(tree)
     const blog = positionTree.statics!['blog']!
-    expect(blog.endpoint).toBeUndefined()
-    expect(blog.fallback).toBeDefined()
+    expect(blog.pageEndpoint).toBeUndefined()
+    expect(blog.fallbackEndpoint).toBeDefined()
   })
 
   test('pageEndpoints only collects positions that actually have a page', () => {

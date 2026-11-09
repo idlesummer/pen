@@ -39,12 +39,12 @@ describe('findPositionEndpoint', () => {
   test('falls back to the nearest fallback when nothing matches', () => {
     const positionTree = compile(['page.tsx'])
     const [endpoint] = findPositionEndpoint(positionTree, ['nowhere'])
-    expect(endpoint).toBe(positionTree.fallback)
+    expect(endpoint).toBe(positionTree.fallbackEndpoint)
   })
 
   test('an exhausted url with no page at this position still returns a fallback', () => {
     const positionTree = compile(['blog/layout.tsx'])
     const [endpoint] = findPositionEndpoint(positionTree, ['blog'])
-    expect(endpoint).toBe(positionTree.statics!['blog']!.fallback)
+    expect(endpoint).toBe(positionTree.statics!['blog']!.fallbackEndpoint)
   })
 })
