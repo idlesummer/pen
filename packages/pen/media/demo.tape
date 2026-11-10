@@ -9,13 +9,7 @@ Set Padding 20
 Set Theme "Dracula"
 Set WindowBar Colorful
 
-Hide
-Type "cd examples\demo"
-Enter
-Sleep 500ms
-Show
-
-Type "npm run dev"
+Type "npm run dev -w demo"
 Enter
 Sleep 20s
 
