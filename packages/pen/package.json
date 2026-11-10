@@ -42,7 +42,6 @@
     "build": "tsdown",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "prepack": "node scripts/prepack.ts",
     "prepare": "npm run build",
     "test": "vitest run"
   },
