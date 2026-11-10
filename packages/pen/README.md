@@ -30,7 +30,7 @@ export default function RootPage() {
 }
 ```
 
-![pen dev running a live counter](./media/demo.gif?v=3)
+![pen dev running a live counter](https://raw.githubusercontent.com/idlesummer/pen/main/packages/pen/media/demo.gif?v=3)
 
 Edit the file and the terminal updates in place via Fast Refresh. No restart, no re-render flash.
 
